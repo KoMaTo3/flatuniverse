@@ -1,21 +1,24 @@
 #include <windows.h>
 #include "core/core.h"
 #include "core/imageloader.h"
-#include "worldgrid.h"
+#include "worldgridmgr.h"
 
 Core *core = NULL;
+WorldGridManager *world = NULL;
 
 File __log;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
+  bool isDebug = true;
+
   core = new Core();
   core->Init( 320, 200, false, "FlatGL" );
 
   Object *obj;
   RenderableQuad *quad;
   Collision *col;
-  float worldAlpha = 0.1f;
+  float worldAlpha = ( isDebug ? 0.1f : 1.0f );
 
   
   core->CreateObject( "gui" );
@@ -25,6 +28,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //__log.PrintInfo( Filelevel_DEBUG, "test: %s", core->GetObject( "gui" )->GetNameFull().c_str() );
   core->CreateObject( "bottom-block", core->GetObject( "gui" ) )->SetPosition( Vec3( 50.0f, 85.0f, 2.0f ) )->EnableRenderableGUI( 2.0f )->SetSize( Vec2( 100.0f, 30.0f ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 0.7f ) )
     ->SetTexture( "data/temp/ui-bg-0.png" );
+
+  world = new WorldGridManager( core->CreateObject( "gridcore" ) );
 
   obj = core->CreateObject( "player" );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD, 0.0f );
@@ -191,6 +196,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   while( core->Update() )
   {
     core->Redraw();
+    world->Update();
 
     t += sTimer.GetDeltaF();
     rot += sTimer.GetDeltaF();
@@ -309,6 +315,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //MessageBox( NULL, "Ok", "Debug", MB_OK );
 
   core->Destroy();
+  DEF_DELETE( world );
   DEF_DELETE( core );
 
   return 0;

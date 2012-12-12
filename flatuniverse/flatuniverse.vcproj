@@ -389,6 +389,14 @@
 				RelativePath="..\src\game\worldgrid.h"
 				>
 			</File>
+			<File
+				RelativePath="..\src\game\worldgridmgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\worldgridmgr.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="zlib"
