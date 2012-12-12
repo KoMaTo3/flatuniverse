@@ -67,7 +67,7 @@ public:
   RenderableQuad* SetColor        ( const Vec4& newColor );
   RenderableQuad* SetScale        ( const Vec2& newScale );
   RenderableQuad* SetRotation     ( const float newAngle );
-  bool            SetTexture      ( const std::string& textureFileName, const Vec2& texCoordsLeftTop = Vec2( 0.0f, 0.0f ), const Vec2& texCoordsRightBottom = Vec2( 1.0f, 1.0f ) );
+  RenderableQuad* SetTexture      ( const std::string& textureFileName, const Vec2& texCoordsLeftTop = Vec2( 0.0f, 0.0f ), const Vec2& texCoordsRightBottom = Vec2( 1.0f, 1.0f ) );
   const Vec3&     GetPosition     ();
 
   inline void* GetPointerToVertex () { return &this->position.x; }

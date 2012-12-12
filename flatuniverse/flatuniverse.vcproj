@@ -378,6 +378,10 @@
 			Name="game"
 			>
 			<File
+				RelativePath="..\src\game\game.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\game\main.cpp"
 				>
 			</File>

@@ -3,15 +3,15 @@
 
 uniform mat4 matProj, matModel;
 
-//layout(location = 0) in vec4 position;
-//layout(location = 1) in vec4 color;
-//layout(location = 2) in vec4 size_local2;
-//layout(location = 3) in vec4 texcoordLocal2;
+layout(location = 0) in vec4 position;
+layout(location = 1) in vec4 color;
+layout(location = 2) in vec4 size_local2;
+layout(location = 3) in vec4 texcoordLocal2;
 
-in vec4 position;
-in vec4 color;
-in vec4 size_local2;
-in vec4 texcoordLocal2;
+//in vec4 position;
+//in vec4 color;
+//in vec4 size_local2;
+//in vec4 texcoordLocal2;
 
 /*
 out vec4 pos;

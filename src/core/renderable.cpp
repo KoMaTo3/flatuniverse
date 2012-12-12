@@ -155,10 +155,10 @@ bool RenderableQuad::Render()
   SetTexture
 =============
 */
-bool RenderableQuad::SetTexture( const std::string& textureFileName, const Vec2& texCoordsLeftTop, const Vec2& texCoordsRightBottom )
+RenderableQuad* RenderableQuad::SetTexture( const std::string& textureFileName, const Vec2& texCoordsLeftTop, const Vec2& texCoordsRightBottom )
 {
   this->texCoords = __textureAtlas->GetTextureCoords( textureFileName, Vec4( texCoordsLeftTop.x, texCoordsLeftTop.y, texCoordsRightBottom.x, texCoordsRightBottom.y ) );
-  return true;
+  return this;
 }//SetTexture
 
 
