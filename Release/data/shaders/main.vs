@@ -2,15 +2,15 @@
 
 uniform mat4 matProj, matModel;
 
-layout(location = 0) in vec4 position;
-layout(location = 1) in vec4 color;
-layout(location = 2) in vec4 size_local2;
-layout(location = 3) in vec4 texcoordLocal2;
+//layout(location = 0) in vec4 position;
+//layout(location = 1) in vec4 color;
+//layout(location = 2) in vec4 size_local2;
+//layout(location = 3) in vec4 texcoordLocal2;
 
-in vec4 vertexPosition_local;
-//in vec4 colorLocal;
-//in vec4 size_local;
-//in vec4 texcoordLocal;
+in vec4 position;
+in vec4 color;
+in vec4 size_local2;
+in vec4 texcoordLocal2;
 
 /*
 out vec4 pos;
@@ -37,7 +37,7 @@ out VertexData
 
 void main( void )
 {
-  vec3 v = vertexPosition_local.xyz;
+  //vec3 v = vertexPosition_local.xyz;
   //gl_Position = vec4( vertexPosition_local.xyz / 50 - 1, 1 );
   outData.pos = vec4( position.xyz, 1 );
   gl_Position = vec4(0,0,0,1);//vec4( position.xyz, 1 ) /* * matrProj * matrModel */ ;
