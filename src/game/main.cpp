@@ -11,7 +11,7 @@ File __log;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
-  bool isDebug = true;
+  bool isDebug = false;
 
   game = new Game();
   game->core->Init( 320, 200, false, "FlatGL" );
@@ -216,31 +216,31 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     if( game->core->keyboard.IsPressed( VK_ESCAPE ) )
       game->core->SetState( CORE_STATE_EXIT );
 
-    if( game->core->keyboard.IsPressed( VK_LEFT ) )
+    if( game->core->keyboard.IsPressed( VK_LEFT ) || game->core->keyboard.IsPressed( VK_LETTER_A ) )
     {
       obj = game->core->GetObject( "player" );
-      obj->SetForce( 4, Vec3( -100.0f, 0.0f, 0.0f ) );
+      obj->SetForce( 4, Vec3( -150.0f, 0.0f, 0.0f ) );
     }
 
-    if( game->core->keyboard.IsReleased( VK_LEFT ) )
+    if( game->core->keyboard.IsReleased( VK_LEFT ) || game->core->keyboard.IsReleased( VK_LETTER_A ) )
     {
       obj = game->core->GetObject( "player" );
       obj->RemoveForce( 4 );
     }
 
-    if( game->core->keyboard.IsPressed( VK_RIGHT ) )
+    if( game->core->keyboard.IsPressed( VK_RIGHT ) || game->core->keyboard.IsPressed( VK_LETTER_D ) )
     {
       obj = game->core->GetObject( "player" );
-      obj->SetForce( 2, Vec3( 100.0f, 0.0f, 0.0f ) );
+      obj->SetForce( 2, Vec3( 150.0f, 0.0f, 0.0f ) );
     }
 
-    if( game->core->keyboard.IsReleased( VK_RIGHT ) )
+    if( game->core->keyboard.IsReleased( VK_RIGHT ) || game->core->keyboard.IsReleased( VK_LETTER_D ) )
     {
       obj = game->core->GetObject( "player" );
       obj->RemoveForce( 2 );
     }
 
-    if( game->core->keyboard.IsPressed( VK_UP ) )
+    if( game->core->keyboard.IsPressed( VK_UP ) || game->core->keyboard.IsPressed( VK_LETTER_W ) )
     {
       obj = game->core->GetObject( "player" );
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, -250.0f, 0.0f ) );

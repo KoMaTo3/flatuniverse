@@ -1084,3 +1084,8 @@ KM_INLINE Vec3 Polar3::ToVec3( Void ) const {
   Math::SinCos( theta, st, ct );
    return Vec3( cp * radius * ct, cp * radius * st, radius * sp );
 }
+
+
+extern Vec2 Vec2Null;
+extern Vec3 Vec3Null;
+extern Vec4 Vec4Null;

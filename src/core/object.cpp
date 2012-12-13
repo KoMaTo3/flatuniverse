@@ -4,8 +4,10 @@
 
 extern CoreRenderableList *__coreRenderableList;
 extern CoreRenderableListIndicies *__coreRenderableListIndicies;
+extern CoreRenderableListIndicies *__coreRenderableListFreeIndicies;
 extern CoreRenderableList *__coreGUI;
 extern CoreRenderableListIndicies *__coreGUIIndicies;
+extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
 
 
 
@@ -248,6 +250,7 @@ Renderable* Object::EnableRenderable( RenderableType renderType, float zIndex )
 
   this->_renderableList = __coreRenderableList;
   this->_renderableIndicies = __coreRenderableListIndicies;
+  this->_renderableFreeIndicies = __coreRenderableListFreeIndicies;
 
   Renderable *result = NULL;
   switch( renderType )
@@ -301,6 +304,7 @@ RenderableQuad* Object::EnableRenderableGUI( float zIndex )
 
   this->_renderableList = __coreGUI;
   this->_renderableIndicies = __coreGUIIndicies;
+  this->_renderableFreeIndicies = __coreGUIFreeIndicies;
 
   RenderableQuad *result = NULL;
   this->renderable.type = RENDERABLE_TYPE_QUAD;
@@ -348,6 +352,7 @@ bool Object::DisableRenderable()
   for( iter = this->_renderableIndicies->begin(); iter != iterEnd; ++iter )
     if( *iter == this->renderable.num )
     {
+      this->_renderableFreeIndicies->push_back( *iter );
       this->_renderableIndicies->erase( iter );
       break;
     }

@@ -1,8 +1,11 @@
 /*
   Структура хранения грида:
-  :rootGridObject
-   - gridr#   <= где # - номер строки грида
-    - gridc#  <= где # - номер столбца грида
+  |НЕТ| :rootGridObject
+  |НЕТ|  - gridr#   <= где # - номер строки грида
+  |НЕТ|   - gridc#  <= где # - номер столбца грида
+  новая структура:
+  грид сам по себе
+  у грида есть deque-список объектов
 
   Усовия выгрузки грида:
     - отсутствие активных объектов (activeObjects)
@@ -16,6 +19,7 @@
 
 class WorldGrid;
 typedef std::deque< WorldGrid* > WorldGridList;
+typedef std::deque< Object* > WorldGridObjectList;
 extern WorldGridList *__worldGridList;
 
 #define WORLD_GRID_BLOCK_SIZE ( 16 )
@@ -35,11 +39,10 @@ public:
     WorldGridCoordinate pos;
     long longPos;
   };
-  typedef std::deque< Object* > WorldGridObjectList;
 
 private:
   WorldGridPosition         position;   //координаты мира
-  WorldGridObjectList       objects;    //объекты грида
+  WorldGridObjectList       objects;    //все объекты грида
   //WorldGridObjectList activeObjects;    //список активных объектов, запрещающих гриду выгрузиться. грид должен сам следить за этим списком при добавлении/удалении объектов
 
 public:

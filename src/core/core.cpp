@@ -9,11 +9,13 @@
 
 
 //
-CoreRenderableList *__coreRenderableList = NULL;                  //список рендерейблов, отправляемых на рендер
-CoreRenderableListIndicies  *__coreRenderableListIndicies = NULL; //индексы рендерейблов
+CoreRenderableList *__coreRenderableList = NULL;                      //список рендерейблов, отправляемых на рендер
+CoreRenderableListIndicies  *__coreRenderableListIndicies = NULL;     //индексы рендерейблов
+CoreRenderableListIndicies  *__coreRenderableListFreeIndicies = NULL; //свободные индексы рендерейблов
 
-CoreRenderableList *__coreGUI = NULL;                             //список рендерейблов GUI
-CoreRenderableListIndicies  *__coreGUIIndicies = NULL;            //индексы рендерейблов GUI
+CoreRenderableList *__coreGUI = NULL;                                 //список рендерейблов GUI
+CoreRenderableListIndicies  *__coreGUIIndicies = NULL;                //индексы рендерейблов GUI
+CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободные индексы рендерейблов GUI
 //
 
 
@@ -53,8 +55,10 @@ bool Core::Destroy()
   DEF_DELETE( this->collisionManager );
   DEF_DELETE( __coreRenderableList );
   DEF_DELETE( __coreRenderableListIndicies );
+  DEF_DELETE( __coreRenderableListFreeIndicies );
   DEF_DELETE( __coreGUI );
   DEF_DELETE( __coreGUIIndicies );
+  DEF_DELETE( __coreGUIFreeIndicies );
   DEF_DELETE( __fileManager );
   DEF_DELETE( __textureAtlas );
 
@@ -180,8 +184,10 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   //
   __coreRenderableList    = new CoreRenderableList();
   __coreRenderableListIndicies = new CoreRenderableListIndicies();
+  __coreRenderableListFreeIndicies = new CoreRenderableListIndicies();
   __coreGUI               = new CoreRenderableList();
   __coreGUIIndicies       = new CoreRenderableListIndicies();
+  __coreGUIFreeIndicies   = new CoreRenderableListIndicies();
   __textureAtlas          = new TextureAtlas();
   this->collisionManager  = new CollisionManager();
   //
@@ -354,7 +360,13 @@ bool Core::_CheckShaderError( const std::string& text, GLuint shader )
   glGetShaderInfoLog( shader, maxLength, &logLength, log );
   if( log[ 0 ] )
   {
-    __log.PrintInfo( Filelevel_CRITICALERROR, "Core::_CheckShaderError => %s: %s", text.c_str(), log );
+    std::string tmpLog = log;
+    BYTE errorType = Filelevel_INFO;
+    if( tmpLog.find_first_of( "warning" ) >= 0 )
+      errorType = Filelevel_WARNING;
+    else
+      errorType = Filelevel_CRITICALERROR;
+    __log.PrintInfo( errorType, "Core::_CheckShaderError => %s: %s", text.c_str(), log );
     //MessageBox(0,log,text.c_str(),0);
     result = true;
   }

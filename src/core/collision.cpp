@@ -32,7 +32,7 @@ bool Collision::Update( float dt )
     return false;
 
   //__log.PrintInfo( Filelevel_DEBUG, "Collision::Update => dt[%3.3f] pos[%3.3f;%3.3f] vel[%3.3f;%3.3f] acc[%3.3f;%3.3f]", dt, this->position->x, this->position->y, this->velocity.x, this->velocity.y, this->acceleration.x, this->acceleration.y );
-  this->velocity += this->acceleration * dt;
+  this->velocity += this->acceleration * dt * COLLISION_FRICTION_FORCE;
   *this->position += ( this->velocity + this->force ) * dt;
 
   //пересчет характеристик

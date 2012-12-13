@@ -35,6 +35,7 @@ private:
 
   CoreRenderableList  *_renderableList; //ссылка на список рендерейблов, в котором находится объект
   CoreRenderableListIndicies  *_renderableIndicies; //ссылка на список индексов рендерейблов
+  CoreRenderableListIndicies  *_renderableFreeIndicies; //ссылка на список свободных индексов рендерейблов
 
   struct ObjectRenderableInfo
   {
