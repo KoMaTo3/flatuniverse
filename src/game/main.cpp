@@ -15,7 +15,7 @@ File __log;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
-  bool isDebug = false;
+  bool isDebug = true;
 
   game = new Game();
   game->core->Init( 320, 200, false, "FlatGL" );
@@ -289,29 +289,21 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
     if( game->core->keyboard.IsPressed( VK_TAB ) )
     {
-      CoreRenderableListIndicies::iterator iterEnd = __coreGUIIndicies->end(), iter;
-      RenderableQuad *quad;
-      for( iter = __coreGUIIndicies->begin(); iter != iterEnd; ++iter )
-      {
-        quad = &( *( __coreGUI->begin() + *iter ) );
-        __log.PrintInfo( Filelevel_DEBUG, "GUI render pipeline: pos[ %3.1f; %3.1f; %3.1f ]", quad->GetPosition().x, quad->GetPosition().y, quad->GetPosition().z );
-      }
-      /*
       static long num = 0;
       static char t[ 1024 ];
       for( int q = 0; q < 500; ++q )
       {
         ++num;
         sprintf_s( t, 1024, "grid0_0/%d", num );
-        Object *obj = game->core->CreateObject( t );
-        RenderableQuad *quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD, 0 );
+        Object *obj = game->core->CreateObject( t )->SetPosition( Vec3( 0, 0, 0 ) );
+        RenderableQuad *quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
         quad->SetColor( Vec4( ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, 0.1f ) );
         quad->SetRotation( ( rand() % 3600 ) / 10.0f );
         quad->SetPosition( Vec3( ( rand() % 1000 ) / 10.0f, ( rand() % 1000 ) / 10.0f, 0.0f ) );
         quad->SetSize( Vec2( ( rand() % 500 ) / 10.0f, ( rand() % 500 ) / 10.0f ) );
+        quad->SetTexture( "data/temp/null.png" );
         //obj->EnableCollision();
       }
-      */
       //game->core->RemoveObject( "/gui/button-exit" );
     }
 
