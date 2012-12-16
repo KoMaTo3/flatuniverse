@@ -2,9 +2,6 @@
 #include "../gl/gl.h"
 
 
-extern CoreRenderableList *__coreRenderableList;
-
-
 Renderable::Renderable()
 //:isChanged( false )
 {

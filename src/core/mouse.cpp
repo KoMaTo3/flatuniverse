@@ -54,7 +54,8 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object )
   this->cursor.size.Set( float( image.GetImageSize()->width ) , float( image.GetImageSize()->height ) );
   this->cursor.spriteOffset.Set( this->cursor.size.x * 0.5f * this->cursor.pixelsToTexels.x, this->cursor.size.y * 0.5f * this->cursor.pixelsToTexels.y, 0.0f );
 
-  RenderableQuad *render = object->EnableRenderableGUI( 9.0f );
+  this->cursor.sprite->SetPosition( Vec3( 0.0f, 0.0f, 9.0f ) );
+  RenderableQuad *render = this->cursor.sprite->EnableRenderableGUI();
   render->SetSize( Vec2( this->cursor.size.x * this->cursor.pixelsToTexels.x, this->cursor.size.y * this->cursor.pixelsToTexels.y ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
   render->SetTexture( imageFileName, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
 

@@ -243,7 +243,7 @@ Object* Object::GetChild( const std::string& name )
   Добавляет объект в рендер, при этом необходимо указать как он будет рендериться - квад, спрайт, текст, точка, линия, меш и т.д.
 =============
 */
-Renderable* Object::EnableRenderable( RenderableType renderType, float zIndex )
+Renderable* Object::EnableRenderable( RenderableType renderType )
 {
   if( this->renderable.num != RENDERABLE_INDEX_UNDEFINED )
     return &( *( this->_renderableList->begin() + this->renderable.num ) );
@@ -252,18 +252,39 @@ Renderable* Object::EnableRenderable( RenderableType renderType, float zIndex )
   this->_renderableIndicies = __coreRenderableListIndicies;
   this->_renderableFreeIndicies = __coreRenderableListFreeIndicies;
 
+  this->_RecalculatePosition();
+  float zIndex = this->position.z;
   Renderable *result = NULL;
   switch( renderType )
   {
   case RENDERABLE_TYPE_QUAD:
     {
       this->renderable.type = renderType;
-      this->_renderableList->push_back( RenderableQuad() );
-      result = &( *this->_renderableList->rbegin() );
+
+      GLshort index = -1;
+      __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%X = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
+      if( this->_renderableFreeIndicies->size() )
+      {
+        index = *this->_renderableFreeIndicies->rbegin();
+        this->_renderableFreeIndicies->pop_back();
+        result = &( *( this->_renderableList->begin() + index ) );
+        *result = RenderableQuad();
+        __log.PrintInfo( Filelevel_DEBUG, "Use free indicies: %d", index );
+      }
+      else
+      {
+        this->_renderableList->push_back( RenderableQuad() );
+        result = &( *this->_renderableList->rbegin() );
+        index = this->_renderableList->size() - 1;
+      }
+
+      //this->_renderableList->push_back( RenderableQuad() );
+      //result = &( *this->_renderableList->rbegin() );
+
       RenderableQuad *quad = ( RenderableQuad* ) result;
       quad->SetPosition( Vec3( 0.0f, 0.0f, zIndex ) );
       float z = quad->GetPosition().z;
-      this->renderable.num = this->_renderableList->size() - 1;
+      this->renderable.num = index;
 
       //this->_renderableIndicies->push_back( this->renderable.num );
       CoreRenderableListIndicies::iterator iter, iterEnd = this->_renderableIndicies->end(), iterBegin = this->_renderableIndicies->begin();
@@ -297,7 +318,7 @@ Renderable* Object::EnableRenderable( RenderableType renderType, float zIndex )
   Добавляет объект в рендер GUI
 =============
 */
-RenderableQuad* Object::EnableRenderableGUI( float zIndex )
+RenderableQuad* Object::EnableRenderableGUI()
 {
   if( this->renderable.num != RENDERABLE_INDEX_UNDEFINED )
     return &( *( this->_renderableList->begin() + this->renderable.num ) );
@@ -308,11 +329,30 @@ RenderableQuad* Object::EnableRenderableGUI( float zIndex )
 
   RenderableQuad *result = NULL;
   this->renderable.type = RENDERABLE_TYPE_QUAD;
-  this->_renderableList->push_back( RenderableQuad() );
-  result = &( *this->_renderableList->rbegin() );
+
+  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderableGUI => current position[ %3.3f; %3.3f; %3.3f ]", this->position.x, this->position.y, this->position.z );
+  this->_RecalculatePosition();
+  float zIndex = this->position.z;
+  GLshort index = -1;
+  __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%X = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
+  if( this->_renderableFreeIndicies->size() )
+  {
+    index = *this->_renderableFreeIndicies->rbegin();
+    this->_renderableFreeIndicies->pop_back();
+    result = &( *( this->_renderableList->begin() + index ) );
+    *result = RenderableQuad();
+    __log.PrintInfo( Filelevel_DEBUG, "Use free indicies: %d", index );
+  }
+  else
+  {
+    this->_renderableList->push_back( RenderableQuad() );
+    result = &( *this->_renderableList->rbegin() );
+    index = this->_renderableList->size() - 1;
+  }
   RenderableQuad *quad = ( RenderableQuad* ) result;
   quad->SetPosition( Vec3( 0.0f, 0.0f, zIndex ) );
-  this->renderable.num = this->_renderableList->size() - 1;
+
+  this->renderable.num = index;
 
   //this->_renderableIndicies->push_back( this->renderable.num );
   CoreRenderableListIndicies::iterator iter, iterEnd = this->_renderableIndicies->end(), iterBegin = this->_renderableIndicies->begin();
@@ -320,12 +360,16 @@ RenderableQuad* Object::EnableRenderableGUI( float zIndex )
   for( iter = iterBegin; iter != iterEnd; ++iter )
     if( zIndex < ( *( this->_renderableList->begin() + *iter ) ).GetPosition().z )
     {
+      __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderableGUI => index[%d] z[%3.3f]", this->renderable.num, zIndex );
       this->_renderableIndicies->insert( iter, this->renderable.num );
       added = true;
       break;
     }
   if( !added )
+  {
+    __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderableGUI => last index[%d] z[%3.3f]", this->renderable.num, zIndex );
     this->_renderableIndicies->push_back( this->renderable.num );
+  }
 
   return result;
 }//EnableRenderableGUI
@@ -352,6 +396,7 @@ bool Object::DisableRenderable()
   for( iter = this->_renderableIndicies->begin(); iter != iterEnd; ++iter )
     if( *iter == this->renderable.num )
     {
+      __log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%X", *iter, this->_renderableFreeIndicies );
       this->_renderableFreeIndicies->push_back( *iter );
       this->_renderableIndicies->erase( iter );
       break;
@@ -465,13 +510,12 @@ const Mat4& Object::GetMatrixTransform()
 
 
 
-
 /*
 =============
-  Update
+  _RecalculatePosition
 =============
 */
-void Object::Update( float dt )
+void Object::_RecalculatePosition()
 {
   //объект всегда позиционируется относительно родителя
   if( this->_parent )
@@ -502,6 +546,20 @@ void Object::Update( float dt )
     */
     this->position = this->positionSrc;
   }
+}//_RecalculatePosition
+
+
+
+
+
+/*
+=============
+  Update
+=============
+*/
+void Object::Update( float dt )
+{
+  this->_RecalculatePosition();
 
   //обновляем спрайт
   switch( this->renderable.type )

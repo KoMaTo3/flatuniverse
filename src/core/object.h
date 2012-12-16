@@ -49,6 +49,9 @@ private:
 
   Collision       *collision;
 
+private:
+  void                _RecalculatePosition();
+
 public:
   Object( const std::string &objectName, Object* parentObject );
   virtual ~Object();
@@ -68,11 +71,11 @@ public:
   void                RemoveForce         ( long forceId );
   const Mat4&         GetMatrixTransform  ();
 
-  Renderable*         EnableRenderable    ( RenderableType renderType, float zIndex );
+  Renderable*         EnableRenderable    ( RenderableType renderType );
   bool                DisableRenderable   ();
   Renderable*         GetRenderable       ();
   inline bool         IsRenderable        () { return this->renderable.num >= 0; }
-  RenderableQuad*     EnableRenderableGUI ( float zIndex );
+  RenderableQuad*     EnableRenderableGUI ();
 
   Collision*          EnableCollision     ();
   void                DisableCollision    ();
