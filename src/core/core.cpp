@@ -156,8 +156,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     className.c_str(),
     windowName.c_str(),
     style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-    900,
-    700,
+    500,
+    300,
     windowRect.right - windowRect.left,
     windowRect.bottom - windowRect.top,
     0,
@@ -880,8 +880,8 @@ bool Core::Redraw()
         float right = this->_window.windowCenter.x * 2.0f;
         float top = 0.0f;
         float bottom = this->_window.windowCenter.y * 2.0f;
-        float nearZ = -10.0f;
-        float farZ = 10.0f;
+        float nearZ = 10.0f;
+        float farZ = -10.0f;
 	      float r_l = right - left;
 	      float t_b = top - bottom;
 	      float f_n = farZ - nearZ;
@@ -1128,7 +1128,7 @@ bool Core::Update()
   this->mouse.Update();
 
   MSG msg;
-  if( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
+  while( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
   if( GetMessage( &msg, NULL, 0, 0 ) == TRUE )
   {
     TranslateMessage( &msg );
