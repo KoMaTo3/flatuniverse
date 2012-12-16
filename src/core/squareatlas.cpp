@@ -101,6 +101,7 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
       Rect< Dword > iterRect = iter->second;
       this->items.erase( iter );
 
+      /*
       if( placeTo.top > iterRect.top )  //нужна€ площадь ниже этой => добавл€етс€ площадь сверху
       {
         rect = Rect< Dword >( iterRect.left, iterRect.top, iterRect.right, placeTo.top - 1 );
@@ -134,6 +135,16 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
         this->items.insert( std::make_pair< _MapKey, Rect< Dword > >( _MapKey( rect ), rect ) );
         __log.PrintInfo( Filelevel_DEBUG, "added right block: (%d, %d)-(%d, %d)", rect.left, rect.top, rect.right, rect.bottom );
       }
+      */
+
+      //Ќужна€ площадь всегда в левом-верхнем углу
+      rect = Rect< Dword >( placeTo.left, placeTo.bottom + 1, iterRect.right, iterRect.bottom );
+      this->items.insert( std::make_pair< _MapKey, Rect< Dword > >( _MapKey( rect ), rect ) );
+      __log.PrintInfo( Filelevel_DEBUG, "added right block: (%d, %d)-(%d, %d)", rect.left, rect.top, rect.right, rect.bottom );
+
+      rect = Rect< Dword >( placeTo.right + 1, placeTo.top, iterRect.right, placeTo.bottom );
+      this->items.insert( std::make_pair< _MapKey, Rect< Dword > >( _MapKey( rect ), rect ) );
+      __log.PrintInfo( Filelevel_DEBUG, "added right block: (%d, %d)-(%d, %d)", rect.left, rect.top, rect.right, rect.bottom );
 
       __log.PrintInfo( Filelevel_DEBUG, "deleted block: (%d, %d)-(%d, %d)", iterRect.left, iterRect.top, iterRect.right, iterRect.bottom );
       break;
