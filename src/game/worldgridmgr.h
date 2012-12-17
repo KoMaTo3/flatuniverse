@@ -22,14 +22,17 @@
 class WorldGridManager
 {
 private:
-  Object              *rootObject;    //корневой объект. в нём хранятся gridc#/gridr#...
+  const Object        *rootObject;    //корневой объект. в нём хранятся gridc#/gridr#...
   float               currentTime;    //время, прошедшее с момента последнего обновления
   WorldGridObjectList activeObjects;  //перечень активных объектов
 
 public:
-  WorldGridManager( Object *newRootObject );
+  WorldGridManager( const Object *newRootObject );
   virtual ~WorldGridManager();
 
-  void Update();
-  void AddActiveObject( Object *obj );
+  void        Update            ();
+  void        AddActiveObject   ( Object *obj );
+  void        AttachObjectToGrid( const WorldGrid::WorldGridPosition& gridPos, Object *obj );
+  WorldGrid*  LoadGrid          ( const WorldGrid::WorldGridPosition& gridPos );
+  bool        UnloadGrid        ( const WorldGrid::WorldGridPosition& gridPos );
 };

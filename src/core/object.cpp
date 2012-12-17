@@ -43,7 +43,6 @@ Object::Object( const std::string &objectName, Object* parentObject )
 :name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%X] parent[x%X]", this, this->_parent );
   if( this->_parent )
   {
     this->nameFull = this->_parent->GetNameFull() + "/" + this->name;
@@ -51,6 +50,7 @@ Object::Object( const std::string &objectName, Object* parentObject )
   }
   else
     this->nameFull = "/" + this->name;
+  __log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%X] parent[x%X] name['%s']", this, this->_parent, this->nameFull.c_str() );
 }//constructor
 
 

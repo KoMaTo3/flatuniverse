@@ -177,6 +177,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 20.0f, 20.0f ) );
 
+  game->world->AttachObjectToGrid( WorldGrid::WorldGridPosition( 0, 0 ), game->core->GetObject( "wall-left" ) );
+
   //фоновая картинка
 
   /*
@@ -305,6 +307,11 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         //obj->EnableCollision();
       }
       //game->core->RemoveObject( "/gui/button-exit" );
+    }
+
+    if( game->core->keyboard.IsPressed( VK_F1 ) )
+    {
+      game->world->UnloadGrid( WorldGrid::WorldGridPosition( 0, 0 ) );
     }
 
     //mouse tooltips

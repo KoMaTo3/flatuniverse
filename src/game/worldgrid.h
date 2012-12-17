@@ -28,16 +28,18 @@ extern WorldGridList *__worldGridList;
 class WorldGrid
 {
 public:
-  struct WorldGridCoordinate
+  struct WorldGridPosition
   {
     Short
         x,  //колонка
         y;  //строка
-  };
-  union WorldGridPosition
-  {
-    WorldGridCoordinate pos;
-    long longPos;
+    bool operator==( const WorldGridPosition& item ) const
+    {
+      return this->x == item.x && this->y == item.y;
+    }
+    WorldGridPosition( Short newX, Short newY )
+      :x( newX ), y( newY )
+    { }
   };
 
 private:
@@ -46,7 +48,12 @@ private:
   //WorldGridObjectList activeObjects;    //список активных объектов, запрещающих гриду выгрузиться. грид должен сам следить за этим списком при добавлении/удалении объектов
 
 public:
-  WorldGrid( const Pos< short >& newPosition );
+  WorldGrid( const WorldGrid::WorldGridPosition& newPosition );
   virtual ~WorldGrid();
 
+  void  AttachObject( Object *object );
+  void  DetachObject( Object *object );
+  bool  IsThisObject( Object *object );
+  const WorldGridPosition&
+        GetPosition () { return this->position; }
 };

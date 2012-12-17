@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/object.h"
+#include "worldgridmgr.h"
 
 class Game
 {
@@ -13,17 +14,22 @@ public:
 
   Core *core;
 
+  WorldGridManager *world;
+
+public:
   Game()
   {
     this->gridTooltipUnderMouse.show = false;
     memset( this->gridTooltipUnderMouse.obj, 0, sizeof( this->gridTooltipUnderMouse.obj ) );
     this->core = new Core();
+    this->world = new WorldGridManager( core->GetRootObject() );
   }//Game
 
   ~Game()
   {
     core->Destroy();
-    delete this->core;
+    DEF_DELETE( this->world );
+    DEF_DELETE( this->core );
   }
 
   Vec3 GetGridPosUnderCamera( float scale = 1.0f )
