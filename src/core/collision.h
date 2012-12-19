@@ -1,6 +1,7 @@
 #pragma once
 
 #include "klib.h"
+#include "memorywriter.h"
 
 #define COLLISION_FRICTION_FORCE   ( 0.95f )
 
@@ -42,8 +43,20 @@ public:
   float       GetRadius2      () const { return this->_rect.radius2; }
   const Vec3& GetPosition     () const;
   inline
+  const Vec3& GetVelocity     () const { return this->velocity; }
+  inline
+  const Vec3& GetAcceleration () const { return this->acceleration; }
+  inline
+  const Vec3& GetSize         () const { return this->size; }
+  inline
+  float       GetMass         () const { return this->mass; }
+  inline
+  const Vec3& GetForce        () const { return this->force; }
+  inline
   bool        IsStatic        () const { return this->isStatic; }
   bool        TestIntersect   ( Collision& item );
 
   bool        Update          ( float dt );
+
+  void        SaveToBuffer    ( MemoryWriter &writer );
 };

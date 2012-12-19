@@ -56,4 +56,5 @@ public:
   bool  IsThisObject( Object *object );
   const WorldGridPosition&
         GetPosition () { return this->position; }
+  bool  GetGridDump ( FU_OUT memory& dump );
 };

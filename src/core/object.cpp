@@ -118,6 +118,24 @@ const std::string& Object::GetNameFull()
 
 /*
 =============
+  GetParentNameFull
+=============
+*/
+const std::string& Object::GetParentNameFull()
+{
+  if( !this->_parent )
+  {
+    __log.PrintInfo( Filelevel_WARNING, "Object::GetParentNameFull => parent is NULL" );
+    static std::string badResult = "<NULL>";
+    return badResult;
+  }
+  return this->_parent->GetNameFull();
+}//GetParentNameFull
+
+
+
+/*
+=============
   AttachChildObject
 =============
 */
@@ -672,3 +690,41 @@ void Object::RemoveForce( long forceId )
       }
   }
 }//RemoveForce
+
+
+
+
+/*
+=============
+  SaveToBuffer
+=============
+*/
+void Object::SaveToBuffer( MemoryWriter &writer )
+{
+  bool isRenderable, isCollision;
+
+  isRenderable = this->IsRenderable();
+  writer << isRenderable;  //renderable true/false
+
+  isCollision = this->IsCollision();
+  writer << isCollision;  //collision true/false
+
+  writer << this->GetName();
+  writer << this->GetParentNameFull();
+  writer << this->GetPosition();
+
+  if( isRenderable )
+    ( ( RenderableQuad* ) this->GetRenderable() )->SaveToBuffer( writer );
+
+  if( isCollision )
+    this->GetCollision()->SaveToBuffer( writer );
+
+  Dword childsCount = ( this->_childs ? this->_childs->size() : 0 );
+
+  if( childsCount )
+  {
+    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+    for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
+      ( *iter )->SaveToBuffer( writer );
+  }
+}//SaveToBuffer

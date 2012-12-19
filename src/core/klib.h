@@ -6,6 +6,9 @@
 #define assert(a) if( !( a ) ) printf( "Fatal error: file[%s] line[%d]\n", __FILE__, __LINE__ );
 #endif
 
+#define FU_OUT
+#define FU_IN
+
 #include "kmath.h"
 #include "kvector.h"
 #include "kmatrix.h"

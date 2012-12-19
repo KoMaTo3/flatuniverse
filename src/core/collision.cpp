@@ -313,3 +313,21 @@ bool Collision::TestIntersect( Collision& item )
 
   return true;
 }//TestIntersect
+
+
+
+
+/*
+=============
+  SaveToBuffer
+=============
+*/
+void Collision::SaveToBuffer( MemoryWriter &writer )
+{
+  writer << this->GetVelocity();
+  writer << this->GetAcceleration();
+  writer << this->GetSize();
+  writer << this->IsStatic();
+  writer << this->GetMass();
+  writer << this->GetForce();
+}//SaveToBuffer

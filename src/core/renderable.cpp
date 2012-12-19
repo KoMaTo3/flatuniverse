@@ -160,13 +160,32 @@ RenderableQuad* RenderableQuad::SetTexture( const std::string& textureFileName, 
 
 
 
+/*
+=============
+  GetMiddleTextureCoords
+=============
+*/
+Vec2 RenderableQuad::GetMiddleTextureCoords()
+{
+  return Vec2( ( this->texCoords.x + this->texCoords.z ) * 0.5f, ( this->texCoords.y + this->texCoords.w ) * 0.5f );
+}//GetMiddleTextureCoords
+
+
+
 
 /*
 =============
-  GetPosition
+  SaveToBuffer
 =============
 */
-const Vec3& RenderableQuad::GetPosition()
+void RenderableQuad::SaveToBuffer( MemoryWriter &writer )
 {
-  return this->position;
-}//GetPosition
+  const std::string textureName = __textureAtlas->GetTextureNameByCoords( this->GetMiddleTextureCoords() );
+  writer << textureName;
+  writer << this->GetPosition();
+  writer << this->GetRotation();
+  writer << this->GetColor();
+  writer << this->GetSize();
+  writer << this->GetScale();
+  writer << __textureAtlas->GetInvTextureCoords( textureName, this->GetTexCoords() );
+}//SaveToBuffer

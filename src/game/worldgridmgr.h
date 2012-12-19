@@ -22,17 +22,23 @@
 class WorldGridManager
 {
 private:
-  const Object        *rootObject;    //корневой объект. в нём хранятся gridc#/gridr#...
-  float               currentTime;    //время, прошедшее с момента последнего обновления
-  WorldGridObjectList activeObjects;  //перечень активных объектов
+  float               currentTime;        //время, прошедшее с момента последнего обновления
+  WorldGridObjectList activeObjects;      //перечень активных объектов
+  Pos< Short>         blocksPerGrid;      //число блоков в одном гриде
+  float               blockSize;          //размер одного блока в гриде
+  Short               gridsAroundObject;  //число гридов, которые должны быть активны, в каждую сторону от объекта
 
 public:
-  WorldGridManager( const Object *newRootObject );
+  WorldGridManager();
   virtual ~WorldGridManager();
 
-  void        Update            ();
-  void        AddActiveObject   ( Object *obj );
-  void        AttachObjectToGrid( const WorldGrid::WorldGridPosition& gridPos, Object *obj );
-  WorldGrid*  LoadGrid          ( const WorldGrid::WorldGridPosition& gridPos );
-  bool        UnloadGrid        ( const WorldGrid::WorldGridPosition& gridPos );
+  void        Update                  ();
+  void        AddActiveObject         ( Object *obj );
+  void        AttachObjectToGrid      ( const WorldGrid::WorldGridPosition& gridPos, Object *obj );
+  void        AttachObjectToGrid      ( Short gridX, Short gridY, Object *obj );
+  WorldGrid*  IsGridLoaded            ( const WorldGrid::WorldGridPosition& gridPos );
+  WorldGrid*  LoadGrid                ( const WorldGrid::WorldGridPosition& gridPos );
+  bool        UnloadGrid              ( const WorldGrid::WorldGridPosition& gridPos );
+  WorldGrid::WorldGridPosition
+              GetGridPositionByObject ( const Object& obj );
 };

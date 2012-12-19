@@ -7,6 +7,7 @@
 #include "renderable.h"
 #include "collisionmgr.h"
 #include "textureatlas.h"
+#include "memorywriter.h"
 
 
 
@@ -58,6 +59,7 @@ public:
 
   const std::string&  GetName             ();
   const std::string&  GetNameFull         ();
+  const std::string&  GetParentNameFull   ();
   bool                IsChild             ( const Object* obj );
   void                AttachChildObject   ( Object* newChild );
   void                UnAttachChildObject ( Object* child );
@@ -65,7 +67,7 @@ public:
   void                ClearChilds         ();
   Object*             SetPosition         ( const Vec3& newPosition );
   Object*             SetPosition2D       ( const Vec2& newPosition );
-  inline const Vec3&  GetPosition         () { return this->position; }
+  inline const Vec3&  GetPosition         () const { return this->position; }
   Object*             GetChild            ( const std::string& name );
   void                SetForce            ( long forceId, const Vec3& vec );
   void                RemoveForce         ( long forceId );
@@ -84,4 +86,6 @@ public:
     bool              IsCollision         () { return this->collision != NULL; }
 
   void                Update              ( float dt );
+
+  void                SaveToBuffer        ( MemoryWriter &writer );
 };

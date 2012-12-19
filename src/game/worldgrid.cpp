@@ -1,6 +1,7 @@
 #include "worldgrid.h"
 #include "core/tools.h"
 #include "core/file.h"
+#include "core/memorywriter.h"
 
 
 WorldGridList *__worldGridList = NULL;
@@ -122,3 +123,30 @@ bool WorldGrid::IsThisObject( Object *object )
 
   return false;
 }//IsThisObject
+
+
+
+/*
+=============
+  GetGridDump
+=============
+*/
+bool WorldGrid::GetGridDump( FU_OUT memory& dump )
+{
+  dump.free();
+  MemoryWriter writer( dump );
+
+  //кол-во объектов
+  writer << ( Dword ) this->objects.size();
+
+  //объекты
+  WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
+  //Object *obj;
+  ////RenderableQuad *quad;
+  //Collision *collision;
+  //std::string textureName;
+  for( iter = this->objects.begin(); iter != iterEnd; ++iter )
+    ( *iter )->SaveToBuffer( writer );
+
+  return true;
+}//GetGridDump

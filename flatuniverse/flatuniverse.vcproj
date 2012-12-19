@@ -246,6 +246,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\core\memorywriter.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\memorywriter.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\core\mouse.cpp"
 				>
 			</File>
@@ -307,6 +315,14 @@
 			</File>
 			<File
 				RelativePath="..\src\core\tools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\worldsaver.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\worldsaver.h"
 				>
 			</File>
 			<Filter

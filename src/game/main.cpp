@@ -4,7 +4,6 @@
 #include "worldgridmgr.h"
 #include "game.h"
 
-WorldGridManager *world = NULL;
 Game *game = NULL;
 
 extern CoreRenderableListIndicies  *__coreRenderableListIndicies;
@@ -15,10 +14,10 @@ File __log;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
-  bool isDebug = true;
+  bool isDebug = false;
 
   game = new Game();
-  game->core->Init( 320, 200, false, "FlatGL" );
+  game->core->Init( 640, 400, false, "FlatGL" );
 
   Object *obj;
   RenderableQuad *quad;
@@ -44,8 +43,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetSize( Vec2( 100.0f, 100.0f ) );
 
 
-  world = new WorldGridManager( game->core->CreateObject( "gridcore" ) );
-
   obj = game->core->CreateObject( "player" );
   col = obj->EnableCollision();
   col->SetSize( Vec3( 17.0f, 20.0f, 0.0f ) );
@@ -61,22 +58,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //quad->scale.Set( 0.5f, 1.0f );
   game->core->SetCamera( obj );
 
-  obj = game->core->CreateObject( "player-halo", obj );
-  obj->SetPosition( Vec3( 0.0f, 0.0f, 0.1f ) );
-  //obj->AttachPoisitionToParent();
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 0.7f ) );
-  quad->SetSize( Vec2( 15.0f, 15.0f ) );
-  quad->SetTexture( "data/temp/T_VFX_FLOWER.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  //game->core->SetCamera( obj );
-
-  obj = game->core->CreateObject( "halo", game->core->GetObject( "/gui/mouse-cursor" ) );
-  obj->SetPosition( Vec3( 0.0f, 0.0f, 5.0f ) );
-  quad = ( RenderableQuad* ) obj->EnableRenderableGUI();
-  quad->SetColor( Vec4( 1.0f, 0.0f, 0.0f, 1.0f ) );
-  quad->SetSize( Vec2( 2.0f, 2.0f ) );
-  quad->SetTexture( "data/temp/GENERICGLOW64.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-
   obj = game->core->CreateObject( "wall-top" );
   obj->SetPosition( Vec3( 53.0f, 0.0f, 0.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
@@ -86,6 +67,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   col->SetIsStatic( true );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 50.0f, 10.0f ) );
+  game->world->AttachObjectToGrid( 0, 0, obj );
 
   obj = game->core->CreateObject( "wall-bottom" );
   obj->SetPosition( Vec3( 103.0f, 100.0f, 0.0f ) );
@@ -96,6 +78,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   col->SetIsStatic( true );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 150.0f, 10.0f ) );
+  game->world->AttachObjectToGrid( 0, 0, obj );
 
   obj = game->core->CreateObject( "wall-left" );
   obj->SetPosition( Vec3( 15.0f, 50.0f, 0.0f ) );
@@ -106,6 +89,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   col->SetIsStatic( true );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 10.0f, 55.0f ) );
+  game->world->AttachObjectToGrid( 0, 0, obj );
 
   obj = game->core->CreateObject( "wall-right" );
   obj->SetPosition( Vec3( 185.0f, 50.0f, 0.0f ) );
@@ -116,6 +100,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   col->SetIsStatic( true );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 10.0f, 50.0f ) );
+  game->world->AttachObjectToGrid( 0, 0, obj );
 
   obj = game->core->CreateObject( "enemy" );
   col = obj->EnableCollision();
@@ -177,7 +162,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 20.0f, 20.0f ) );
 
-  game->world->AttachObjectToGrid( WorldGrid::WorldGridPosition( 0, 0 ), game->core->GetObject( "wall-left" ) );
+  //game->world->AttachObjectToGrid( WorldGrid::WorldGridPosition( 0, 0 ), game->core->GetObject( "wall-left" ) );
+  game->world->AddActiveObject( game->core->GetObject( "player" ) );
 
   //фоновая картинка
 
@@ -212,7 +198,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   while( game->core->Update() )
   {
     game->core->Redraw();
-    world->Update();
+    game->world->Update();
 
     t += sTimer.GetDeltaF();
     rot += sTimer.GetDeltaF();
@@ -287,6 +273,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       quad->SetColor( Vec4( ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, worldAlpha ) );
       quad->SetSize( Vec2( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE ) );
       quad->SetTexture( "data/temp/brick0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+
+      game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
     }
 
     if( game->core->keyboard.IsPressed( VK_TAB ) )
@@ -372,19 +360,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, Math::Sin16( rot * 5.0f ) * 300.0f, 0.0f ) );
     if( obj = game->core->GetObject( "/lifts/lift-2" ) )
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, Math::Sin16( rot * 3.0f ) * 100.0f, 0.0f ) );
-    if( obj = game->core->GetObject( "/player/player-halo" ) )
-    {
-      obj->SetPosition( Vec3( Math::Sin16( rot * 3.0f ) * 20.0f, -Math::Cos16( rot * 3.0f ) * 20.0f , 0.0f ) );
-      ( ( RenderableQuad* ) obj->GetRenderable() )->SetColor( Vec4( Math::Sin16( rot * 5.0f ) * 0.3f + 0.7f, -Math::Sin16( rot * 3.0f ) * 0.3f + 0.7f, 1.0f, 0.5f ) )
-        ->SetRotation( -rot * 3.0f );
-
-      if( obj = game->core->GetObject( "/gui/mouse-cursor/halo" ) )
-      {
-        Vec3 cursorPos = game->core->PixelToTexel( Vec2( 9.0f, 0 ) );
-        obj->SetPosition( Vec3( Math::Sin16( rot * 15.0f ) - cursorPos.x, Math::Cos16( rot * 15.0f ) - cursorPos.y, 0.0f ) );
-        //( ( RenderableQuad* ) obj->GetRenderable() )->SetColor( Vec4( Math::Sin16( rot * 5.0f ) * 0.3f + 0.7f, -Math::Sin16( rot * 3.0f ) * 0.3f + 0.7f, 1.0f, 0.99f ) );
-      }
-    }
 
     if( obj = game->core->GetObject( "test-bg-2" ) )
     {
@@ -402,7 +377,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //MessageBox( NULL, "Ok", "Debug", MB_OK );
 
   DEF_DELETE( game );
-  DEF_DELETE( world );
 
   return 0;
 }

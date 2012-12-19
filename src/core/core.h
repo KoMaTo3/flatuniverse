@@ -121,7 +121,7 @@ public:
   void    SetWindowTitle    ( const std::string &title );
   inline const Vec2& GetWindowHalfSize () { return this->_window.windowCenter; }
   bool    Destroy           ();
-  const Object* GetRootObject() { return this->_rootObject; }
+  //const Object* GetRootObject() { return this->_rootObject; }
 
   void    SetState          ( CoreStates newState );
   bool    Update            ();
