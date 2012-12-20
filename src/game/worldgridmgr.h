@@ -13,6 +13,7 @@
 #pragma once
 
 #include "worldgrid.h"
+#include "worldsaver.h"
 
 
 #define WORLD_GRID_UPDATE_INTERVAL    ( 1.0f / 10.0f )    //период обновления состояния гридов
@@ -27,6 +28,7 @@ private:
   Pos< Short>         blocksPerGrid;      //число блоков в одном гриде
   float               blockSize;          //размер одного блока в гриде
   Short               gridsAroundObject;  //число гридов, которые должны быть активны, в каждую сторону от объекта
+  WorldSaver          worldSaver;         //хранилище мира
 
 public:
   WorldGridManager();
@@ -38,7 +40,7 @@ public:
   void        AttachObjectToGrid      ( Short gridX, Short gridY, Object *obj );
   WorldGrid*  IsGridLoaded            ( const WorldGrid::WorldGridPosition& gridPos );
   WorldGrid*  LoadGrid                ( const WorldGrid::WorldGridPosition& gridPos );
-  bool        UnloadGrid              ( const WorldGrid::WorldGridPosition& gridPos );
+  bool        UnloadGrid              ( const WorldGrid::WorldGridPosition gridPos );
   WorldGrid::WorldGridPosition
               GetGridPositionByObject ( const Object& obj );
 };

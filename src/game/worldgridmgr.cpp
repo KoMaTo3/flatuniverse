@@ -226,6 +226,13 @@ WorldGrid* WorldGridManager::LoadGrid( const WorldGrid::WorldGridPosition& gridP
   }
 
   grid = new WorldGrid( gridPos );
+
+  memory gridData;
+  if( this->worldSaver.LoadGrid( gridPos.x, gridPos.y, gridData ) )
+  {
+    //TODO: здесь надо разбирать дамп и грузить объекты
+  }
+
   __worldGridList->push_back( grid );
   __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::LoadGrid => grid[%d; %d] loaded", gridPos.x, gridPos.y );
 
@@ -239,7 +246,7 @@ WorldGrid* WorldGridManager::LoadGrid( const WorldGrid::WorldGridPosition& gridP
   UnloadGrid
 =============
 */
-bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition& gridPos )
+bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition gridPos )
 {
   WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
   for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
@@ -255,6 +262,9 @@ bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition& gridPos )
 
       delete *iterGrid;
       __worldGridList->erase( iterGrid );
+
+      this->worldSaver.SaveGrid( gridPos.x, gridPos.y, gridDump );
+
       return true;
     }
   }
