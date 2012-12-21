@@ -317,14 +317,6 @@
 				RelativePath="..\src\core\tools.h"
 				>
 			</File>
-			<File
-				RelativePath="..\src\game\worldsaver.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\game\worldsaver.h"
-				>
-			</File>
 			<Filter
 				Name="math"
 				>
@@ -415,6 +407,14 @@
 			</File>
 			<File
 				RelativePath="..\src\game\worldgridmgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\worldsaver.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\worldsaver.h"
 				>
 			</File>
 		</Filter>

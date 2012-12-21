@@ -38,6 +38,13 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 
 
 
+Object::Object()
+:name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
+,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL )
+{
+  __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%X]", this );
+}//constructor
+
 
 Object::Object( const std::string &objectName, Object* parentObject )
 :name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
@@ -45,7 +52,7 @@ Object::Object( const std::string &objectName, Object* parentObject )
 {
   if( this->_parent )
   {
-    this->nameFull = this->_parent->GetNameFull() + "/" + this->name;
+    this->nameFull = ( this->_parent->_parent ? this->_parent->GetNameFull() + "/" : "" ) + this->name;
     this->_parent->AttachChildObject( this );
   }
   else
@@ -721,6 +728,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 
   Dword childsCount = ( this->_childs ? this->_childs->size() : 0 );
 
+  writer << childsCount;
   if( childsCount )
   {
     ObjectChilds::iterator iter, iterEnd = this->_childs->end();
@@ -728,3 +736,99 @@ void Object::SaveToBuffer( MemoryWriter &writer )
       ( *iter )->SaveToBuffer( writer );
   }
 }//SaveToBuffer
+
+
+
+
+/*
+=============
+  LoadFromBuffer
+=============
+*/
+void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
+{
+  bool isRenderable, isCollision;
+  std::string tmpName, parentName;
+  Vec3 position;
+
+  reader >> isRenderable;
+  reader >> isCollision;
+  reader >> tmpName;
+  reader >> parentName;
+  reader >> position;
+  __log.PrintInfo( Filelevel_DEBUG, ". rend[%d] coll[%d] name['%s'] parent['%s']", isRenderable, isCollision, tmpName.c_str(), parentName.c_str() );
+
+  this->name = tmpName;
+  this->_parent = ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName ) );
+
+  if( this->_parent )
+  {
+    this->nameFull = ( this->_parent->_parent ? this->_parent->GetNameFull() + "/" : "" ) + this->name;
+    this->_parent->AttachChildObject( this );
+  }
+  else
+    this->nameFull = "/" + this->name;
+
+  this->SetPosition( position );
+
+  if( isRenderable )
+    ( ( RenderableQuad* ) this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->LoadFromBuffer( reader );
+
+  if( isCollision )
+    this->EnableCollision()->LoadFromBuffer( reader );
+
+  Dword childsCount;
+  reader >> childsCount;
+}//LoadFromBuffer
+
+
+
+
+/*
+=============
+  GetObject
+=============
+*/
+Object* Object::GetObject( const std::string& name, Object *parent )
+{
+  if( !name.length() )
+  {
+    __log.PrintInfo( Filelevel_WARNING, "Object::GetObject => name is NULL" );
+    return NULL;
+  }
+
+  if( !parent )
+  {
+    parent = this->_parent;
+    while( parent->_parent )
+      parent = parent->_parent;
+  }
+
+  long slashPos = name.find_first_of( "/" );
+  if( slashPos == 0 ) //начинается со слеша => 1 или 3
+    return this->GetObject( &name[ 1 ], parent );
+  else
+  {
+    if( slashPos < 0 )  //нет слешей => 2 или 4
+    {
+      return parent->GetChild( name );
+    }
+    else  //слеши есть => 1 или 3
+    {
+      std::string nextLevel = &name[ slashPos ];
+      std::string currentLevel = name.substr( 0, slashPos );
+      if( !parent )
+      {
+        parent = this->_parent;
+        while( parent->_parent )
+          parent = parent->_parent;
+      }
+      Object *obj = parent->GetChild( currentLevel );
+      if( !obj )
+        return NULL;
+      return this->GetObject( nextLevel, obj );
+    }
+  }
+
+  return NULL;
+}//GetObject

@@ -32,6 +32,9 @@ Core::Core()
 
   this->_build.time = __TIME__;
   this->_build.date = __DATE__;
+
+  this->_rootObject = new Object( "root", NULL );
+  this->SetCamera( this->_rootObject );
 }//constructor
 
 
@@ -156,8 +159,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     className.c_str(),
     windowName.c_str(),
     style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-    500,
-    300,
+    900,
+    700,
     windowRect.right - windowRect.left,
     windowRect.bottom - windowRect.top,
     0,
@@ -172,11 +175,6 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   ShowWindow  ( this->_window.hwnd, SW_NORMAL );
   UpdateWindow( this->_window.hwnd );
 
-  if( !this->_rootObject )
-  {
-    this->_rootObject = new Object( "root", NULL );
-    this->SetCamera( this->_rootObject );
-  }
   //if( !this->_rootGUIObject )
   //  this->_rootGUIObject = new Object( "rootGUI", NULL );
   this->mouse.Init( Size( screenWidth, screenHeight ) );

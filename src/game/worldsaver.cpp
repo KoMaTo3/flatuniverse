@@ -79,7 +79,7 @@ bool WorldSaver::LoadGrid( Short x, Short y, FU_OUT memory& data )
   if( !grid )
   {
     __log.PrintInfo( Filelevel_DEBUG, ". grid not found in worldData" );
-    false;
+    return false;
   }
 
   Dword blocksNum = grid->blocksNums.size();

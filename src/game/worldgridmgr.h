@@ -23,6 +23,7 @@
 class WorldGridManager
 {
 private:
+  Object*             rootGridObject;     //корневой _для_всех_гридов_ объект
   float               currentTime;        //время, прошедшее с момента последнего обновления
   WorldGridObjectList activeObjects;      //перечень активных объектов
   Pos< Short>         blocksPerGrid;      //число блоков в одном гриде
@@ -31,7 +32,7 @@ private:
   WorldSaver          worldSaver;         //хранилище мира
 
 public:
-  WorldGridManager();
+  WorldGridManager( Object* newRootGridObject );
   virtual ~WorldGridManager();
 
   void        Update                  ();

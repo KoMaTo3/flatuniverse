@@ -8,6 +8,7 @@
 #include "klib.h"
 #include "textureatlas.h"
 #include "memorywriter.h"
+#include "memoryreader.h"
 
 /*
   Храним не указатели на квады, а сами квады + храним в vector, чтобы все элементы шли один за другим
@@ -87,7 +88,8 @@ public:
 
   bool  Render();
 
-  void SaveToBuffer( MemoryWriter &writer );
+  void SaveToBuffer               ( MemoryWriter &writer );
+  void LoadFromBuffer             ( MemoryReader &reader );
 };
 
 #pragma pack( pop )

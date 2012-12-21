@@ -14,10 +14,10 @@ File __log;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
-  bool isDebug = false;
+  bool isDebug = true;
 
   game = new Game();
-  game->core->Init( 640, 400, false, "FlatGL" );
+  game->core->Init( 320, 200, false, "FlatGL" );
 
   Object *obj;
   RenderableQuad *quad;

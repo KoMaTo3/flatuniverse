@@ -5,8 +5,8 @@
 
 
 
-WorldGridManager::WorldGridManager()
-:currentTime( 0.0f ), blocksPerGrid( 8, 8 ), blockSize( WORLD_GRID_BLOCK_SIZE ), gridsAroundObject( 1 )
+WorldGridManager::WorldGridManager( Object* newRootGridObject )
+:currentTime( 0.0f ), blocksPerGrid( 8, 8 ), blockSize( WORLD_GRID_BLOCK_SIZE ), gridsAroundObject( 0 ), rootGridObject( newRootGridObject )
 {
   if( !__worldGridList )
     __worldGridList = new WorldGridList();
@@ -229,9 +229,7 @@ WorldGrid* WorldGridManager::LoadGrid( const WorldGrid::WorldGridPosition& gridP
 
   memory gridData;
   if( this->worldSaver.LoadGrid( gridPos.x, gridPos.y, gridData ) )
-  {
-    //TODO: здесь надо разбирать дамп и грузить объекты
-  }
+    grid->LoadFromDump( gridData, this->rootGridObject );
 
   __worldGridList->push_back( grid );
   __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::LoadGrid => grid[%d; %d] loaded", gridPos.x, gridPos.y );

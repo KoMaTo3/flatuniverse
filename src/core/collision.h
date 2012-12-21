@@ -2,6 +2,7 @@
 
 #include "klib.h"
 #include "memorywriter.h"
+#include "memoryreader.h"
 
 #define COLLISION_FRICTION_FORCE   ( 0.95f )
 
@@ -59,4 +60,5 @@ public:
   bool        Update          ( float dt );
 
   void        SaveToBuffer    ( MemoryWriter &writer );
+  void        LoadFromBuffer  ( MemoryReader &reader );
 };

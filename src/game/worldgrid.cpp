@@ -2,6 +2,7 @@
 #include "core/tools.h"
 #include "core/file.h"
 #include "core/memorywriter.h"
+#include "core/memoryreader.h"
 
 
 WorldGridList *__worldGridList = NULL;
@@ -150,3 +151,30 @@ bool WorldGrid::GetGridDump( FU_OUT memory& dump )
 
   return true;
 }//GetGridDump
+
+
+
+/*
+=============
+  LoadFromDump
+=============
+*/
+bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject )
+{
+  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::LoadFromDump => dump length %d byte(s) rootObject[x%X]", dump.getLength(), rootObject );
+  MemoryReader reader( dump );
+  Dword q = 0, objectsNum;
+  reader >> objectsNum;
+  __log.PrintInfo( Filelevel_DEBUG, ". %d objects in dump", objectsNum );
+
+  Object *object;
+  for( ; q < objectsNum; ++q )
+  {
+    //object = new Object( name, ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName.c_str() ) ) );
+    object = new Object();
+    object->LoadFromBuffer( reader, rootObject );
+    this->AttachObject( object );
+  }//for q
+
+  return true;
+}//LoadFromDump

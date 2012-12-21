@@ -57,4 +57,5 @@ public:
   const WorldGridPosition&
         GetPosition () { return this->position; }
   bool  GetGridDump ( FU_OUT memory& dump );
+  bool  LoadFromDump( FU_IN memory& dump, Object *rootObject );
 };

@@ -189,3 +189,37 @@ void RenderableQuad::SaveToBuffer( MemoryWriter &writer )
   writer << this->GetScale();
   writer << __textureAtlas->GetInvTextureCoords( textureName, this->GetTexCoords() );
 }//SaveToBuffer
+
+
+
+
+/*
+=============
+  LoadFromBuffer
+=============
+*/
+void RenderableQuad::LoadFromBuffer( MemoryReader &reader )
+{
+  /*
+  const std::string textureName = __textureAtlas->GetTextureNameByCoords( this->GetMiddleTextureCoords() );
+  writer << textureName;
+  writer << this->GetPosition();
+  writer << this->GetRotation();
+  writer << this->GetColor();
+  writer << this->GetSize();
+  writer << this->GetScale();
+  writer << __textureAtlas->GetInvTextureCoords( textureName, this->GetTexCoords() );
+  */
+  std::string textureName;
+  Vec4 tex;
+
+  reader >> textureName;
+  reader >> this->position;
+  reader >> this->rotation;
+  reader >> this->color;
+  reader >> this->size;
+  reader >> this->scale;
+  reader >> tex;
+
+  this->SetTexture( textureName, Vec2( tex.x, tex.y ), Vec2( tex.z, tex.w ) );
+}//LoadFromBuffer

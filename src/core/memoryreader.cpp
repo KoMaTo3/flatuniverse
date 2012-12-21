@@ -7,6 +7,15 @@ MemoryReader::MemoryReader()
 }//constructor
 
 
+MemoryReader::MemoryReader( memory &source )
+:curPos( 0 )
+{
+  this->curData = source.getData();
+  this->curLength = source.getLength();
+  this->curPos = 0;
+}//constructor
+
+
 MemoryReader::~MemoryReader()
 {
 }//destructor
@@ -18,9 +27,9 @@ MemoryReader::~MemoryReader()
   Чтение блока
 ----------
 */
-int MemoryReader::Read( void *dest, int length )
+int MemoryReader::Read( void *dest, Dword length )
 {
-  int realLen = min( length, this->curLength - this->curPos );
+  Dword realLen = min( length, this->curLength - this->curPos );
 
   memcpy( dest, this->curData + this->curPos, realLen );
   this->curPos += realLen;
@@ -35,9 +44,9 @@ int MemoryReader::Read( void *dest, int length )
   Чтение нескольких блоков
 ----------
 */
-size_t MemoryReader::Read( void *dest, int length, int numBlocks )
+size_t MemoryReader::Read( void *dest, Dword length, Dword numBlocks )
 {
-  int realLen = min( length * numBlocks, this->curLength - this->curPos );
+  Dword realLen = min( length * numBlocks, this->curLength - this->curPos );
   size_t ret;
   if( realLen < length * numBlocks )
     ret = size_t( realLen / length );
@@ -57,7 +66,7 @@ size_t MemoryReader::Read( void *dest, int length, int numBlocks )
   Установка источника данных
 ----------
 */
-void MemoryReader::SetSource( void *srcData, int length )
+void MemoryReader::SetSource( void *srcData, Dword length )
 {
   this->curData = (char*) srcData;
   this->curLength = length;
@@ -70,7 +79,7 @@ void MemoryReader::SetSource( void *srcData, int length )
   CopyFromSource
 ----------
 */
-void MemoryReader::CopyFromSource( void *srcData, int length )
+void MemoryReader::CopyFromSource( void *srcData, Dword length )
 {
   if( !srcData )
     return;
@@ -100,7 +109,7 @@ void MemoryReader::Free()
   SeekFromStart
 ----------
 */
-void MemoryReader::SeekFromStart( int pos )
+void MemoryReader::SeekFromStart( Dword pos )
 {
   if( pos > this->curLength )
     return;
@@ -114,10 +123,48 @@ void MemoryReader::SeekFromStart( int pos )
   SeekFromCur
 ----------
 */
-void MemoryReader::SeekFromCur( int pos )
+void MemoryReader::SeekFromCur( Dword pos )
 {
   if( this->curPos + pos > this->curLength )
     return;
 
   this->curPos += pos;
 }//SeekFromCur
+
+
+
+
+/*
+=============
+  CheckSizeToRead
+=============
+*/
+bool MemoryReader::CheckSizeToRead( Dword sizeToWrite )
+{
+  return ( this->curPos + sizeToWrite <= this->curLength );
+}//CheckSizeToRead
+
+
+
+/*
+=============
+  operator>>
+=============
+*/
+void MemoryReader::operator>>( std::string &str )
+{
+  Dword strLen;
+  this->operator >>( strLen );
+  if( !this->CheckDataSizeToRead( strLen ) )
+  {
+    str = "";
+    return;
+  }
+
+  memory tmp( strLen + 1 );
+  memcpy( tmp.getData(), this->curData + this->curPos, strLen );
+  tmp[ tmp.getLength() - 1 ] = 0;
+  str = tmp.getData();
+
+  this->curPos += strLen;
+}//operator>>

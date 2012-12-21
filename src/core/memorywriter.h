@@ -20,19 +20,29 @@ public:
   MemoryWriter& operator<<( const std::string &str );
 
   template< class T >
-  MemoryWriter& operator<<( T data )
-  {
-    this->CheckDataSizeToWrite( data );
-    memcpy( this->buffer.getData() + this->pos, &data, sizeof( data ) );
-    this->pos += sizeof( data );
-    return *this;
-  }
+  MemoryWriter& operator<<( T data );
 
   void CheckSizeToWrite( Dword sizeToWrite );
 
   template< class T >
-  void CheckDataSizeToWrite( T dataToWrite )
-  {
-    this->CheckSizeToWrite( sizeof( dataToWrite ) );
-  }//CheckDataSizeToWrite
+  void CheckDataSizeToWrite( T dataToWrite );
 };
+
+
+
+
+
+template< class T >
+MemoryWriter& MemoryWriter::operator<<( T data )
+{
+  this->CheckDataSizeToWrite( data );
+  memcpy( this->buffer.getData() + this->pos, &data, sizeof( data ) );
+  this->pos += sizeof( data );
+  return *this;
+}//operator<<
+
+template< class T >
+void MemoryWriter::CheckDataSizeToWrite( T dataToWrite )
+{
+  this->CheckSizeToWrite( sizeof( dataToWrite ) );
+}//CheckDataSizeToWrite

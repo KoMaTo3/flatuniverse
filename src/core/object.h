@@ -8,6 +8,7 @@
 #include "collisionmgr.h"
 #include "textureatlas.h"
 #include "memorywriter.h"
+#include "memoryreader.h"
 
 
 
@@ -54,6 +55,7 @@ private:
   void                _RecalculatePosition();
 
 public:
+  Object();
   Object( const std::string &objectName, Object* parentObject );
   virtual ~Object();
 
@@ -88,4 +90,7 @@ public:
   void                Update              ( float dt );
 
   void                SaveToBuffer        ( MemoryWriter &writer );
+  void                LoadFromBuffer      ( MemoryReader &reader, Object *rootObject );
+
+  Object*             GetObject           ( const std::string& name, Object *parent = NULL );
 };

@@ -331,3 +331,35 @@ void Collision::SaveToBuffer( MemoryWriter &writer )
   writer << this->GetMass();
   writer << this->GetForce();
 }//SaveToBuffer
+
+
+
+/*
+=============
+  LoadFromBuffer
+=============
+*/
+void Collision::LoadFromBuffer( MemoryReader &reader )
+{
+  Vec3 v3;
+  bool b;
+  float f;
+
+  reader >> v3;
+  this->SetVelocity( v3 );
+
+  reader >> v3;
+  this->SetAcceleration( v3 );
+
+  reader >> v3;
+  this->SetSize( v3 );
+
+  reader >> b;
+  this->SetIsStatic( b );
+
+  reader >> f;
+  this->SetMass( f );
+
+  reader >> v3;
+  this->SetForce( v3 );
+}//LoadFromBuffer
