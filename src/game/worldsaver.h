@@ -25,8 +25,9 @@ private:
 public:
   WorldSaver();
 
-  bool  LoadGrid    ( Short x, Short y, FU_OUT memory& data );
-  void  SaveGrid    ( Short x, Short y, FU_IN memory& data );
-  Grid* GridExists  ( Short x, Short y );
-  void  FreeGrid    ( Short x, Short y );
+  bool  LoadGrid        ( Short x, Short y, FU_OUT memory& data );
+  void  SaveGrid        ( Short x, Short y, FU_IN memory& data );
+  Grid* GridExists      ( Short x, Short y );
+  void  FreeGrid        ( Short x, Short y );
+  void AllocFreeBlocks  ( Dword blocksCount );
 };

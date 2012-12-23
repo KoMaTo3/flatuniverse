@@ -6,7 +6,7 @@
 
 
 WorldGridManager::WorldGridManager( Object* newRootGridObject )
-:currentTime( 0.0f ), blocksPerGrid( 8, 8 ), blockSize( WORLD_GRID_BLOCK_SIZE ), gridsAroundObject( 0 ), rootGridObject( newRootGridObject )
+:currentTime( 0.0f ), blocksPerGrid( 8, 8 ), blockSize( WORLD_GRID_BLOCK_SIZE ), gridsAroundObject( 1 ), rootGridObject( newRootGridObject )
 {
   if( !__worldGridList )
     __worldGridList = new WorldGridList();

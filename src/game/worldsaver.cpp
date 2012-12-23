@@ -31,22 +31,29 @@ void WorldSaver::SaveGrid( Short x, Short y, memory& data )
 
   Dword needBlocksCount = data.getLength() / this->blockSize;
   if( this->freeBlocks.size() < needBlocksCount )
+    this->AllocFreeBlocks( needBlocksCount - this->freeBlocks.size() );
+  /*
+  if( this->freeBlocks.size() < needBlocksCount )
   {
     memory tmpData( this->worldData );
     this->worldData.realloc( tmpData.getLength() + ( needBlocksCount - this->freeBlocks.size() ) * this->blockSize );
     __log.PrintInfo( Filelevel_DEBUG, ". realloc grid data by %d bytes", this->worldData.getLength() - tmpData.getLength() );
     memcpy( this->worldData.getData(), tmpData.getData(), tmpData.getLength() );
   }
+  */
+  /*
+  Dword newIndex;
   while( this->freeBlocks.size() < needBlocksCount )
   {
-    __log.PrintInfo( Filelevel_DEBUG, ". added new free block %d", this->freeBlocks.size() );
-    this->freeBlocks.push_back( this->freeBlocks.size() );
+    newIndex = this->freeBlocks.size() + this->worldData.getLength() / this->blockSize;
+    __log.PrintInfo( Filelevel_DEBUG, ". added new free block index[%d]", newIndex );
+    this->freeBlocks.push_back( newIndex );
   }
+  */
 
   Dword blockNum;
   Dword bufferPos = 0;
   char *bufferSrc = data.getData();
-  void *bufferDest;
   Grid *grid = new Grid();
   grid->x = x;
   grid->y = y;
@@ -54,14 +61,46 @@ void WorldSaver::SaveGrid( Short x, Short y, memory& data )
   for( Dword q = 0; q < needBlocksCount; ++q )
   {
     blockNum = *this->freeBlocks.rbegin();
-    bufferDest = this->worldData.getData() + blockNum * this->blockSize;
     this->freeBlocks.pop_back();
 
     grid->blocksNums.push_back( blockNum );
-    memcpy( bufferDest, bufferSrc, this->blockSize );
+    memcpy( this->worldData.getData() + blockNum * this->blockSize, bufferSrc, this->blockSize );
     bufferSrc += this->blockSize;
   }
 }//SaveGrid
+
+
+
+
+/*
+=============
+  AllocFreeBlocks
+=============
+*/
+void WorldSaver::AllocFreeBlocks( Dword blocksCount )
+{
+  if( this->worldData.getLength() )
+  {
+    Dword startIndex = this->worldData.getLength() / this->blockSize;
+    memory tmp( this->worldData );
+    this->worldData.realloc( tmp.getLength() + blocksCount * this->blockSize );
+    memcpy( this->worldData.getData(), tmp.getData(), tmp.getLength() );
+    for( Dword q = 0; q < blocksCount; ++q )
+    {
+      this->freeBlocks.push_back( startIndex + q );
+      __log.PrintInfo( Filelevel_DEBUG, "WorldSaver::AllocFreeBlocks => index[%d]", startIndex + q );
+    }
+  }
+  else
+  {
+    this->worldData.realloc( blocksCount * this->blockSize );
+    for( Dword q = 0; q < blocksCount; ++q )
+    {
+      this->freeBlocks.push_back( q );
+      __log.PrintInfo( Filelevel_DEBUG, "WorldSaver::AllocFreeBlocks => index[%d]", q );
+    }
+  }
+}//AllocFreeBlocks
 
 
 
@@ -89,9 +128,13 @@ bool WorldSaver::LoadGrid( Short x, Short y, FU_OUT memory& data )
   char *bufferSrc = this->worldData.getData();
   for( Dword q = 0; q < blocksNum; ++q )
   {
+    __log.PrintInfo( Filelevel_DEBUG, ". index[%d]", grid->blocksNums[ q ] );
     memcpy( bufferDest, bufferSrc + grid->blocksNums[ q ] * this->blockSize, this->blockSize );
     bufferDest += this->blockSize;
   }
+  __log.PrintInfo( Filelevel_DEBUG, ". loaded" );
+
+  this->FreeGrid( x, y );
 
   return true;
 }//LoadGrid
@@ -139,7 +182,7 @@ void WorldSaver::FreeGrid( Short x, Short y )
   GridNumList::iterator iter, iterEnd = grid->blocksNums.end();
   for( iter = grid->blocksNums.begin(); iter != iterEnd; ++iter )
   {
-    __log.PrintInfo( Filelevel_DEBUG, "WorldSaver::FreeGrid => added free greed %d", *iter );
+    __log.PrintInfo( Filelevel_DEBUG, "WorldSaver::FreeGrid => added free grid %d", *iter );
     this->freeBlocks.push_back( *iter );
   }
 
