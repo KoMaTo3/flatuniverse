@@ -2,9 +2,6 @@
 #include "../gl/gl.h"
 
 
-extern CoreRenderableList *__coreRenderableList;
-
-
 Renderable::Renderable()
 //:isChanged( false )
 {
@@ -99,12 +96,39 @@ RenderableQuad* RenderableQuad::SetRotation( const float newAngle )
 RenderableQuad::RenderableQuad()
 :position( 0.0f, 0.0f, 0.0f ), size( 1.0f, 1.0f ), color( 1.0f, 1.0f, 1.0f, 1.0f ), scale( 1.0f, 1.0f ), rotation( 0.0f ), texCoords( 0.0f, 0.0f, 0.0f, 0.0f )
 {
+  this->info = new RenderableQuadInfo();
+  this->info->textureName = "";
 }//constructor
+
+
+
+RenderableQuad::RenderableQuad( const RenderableQuad &src )
+:position( src.position ), size( src.size ), color( src.color ), scale( src.scale ), rotation( src.rotation ), texCoords( src.texCoords )
+{
+  this->info = new RenderableQuadInfo();
+  this->info->textureName = src.info->textureName;
+}//constructor
+
+
+void RenderableQuad::operator=( const RenderableQuad &src )
+{
+  this->position = src.position;
+  this->size = src.size;
+  this->color = src.color;
+  this->scale = src.scale;
+  this->rotation = src.rotation;
+  this->texCoords = src.texCoords;
+
+  this->info->textureName = src.info->textureName;
+}//operator=
+
+
 
 
 
 RenderableQuad::~RenderableQuad()
 {
+  delete this->info;
 }//destructor
 
 
@@ -155,21 +179,95 @@ bool RenderableQuad::Render()
   SetTexture
 =============
 */
-bool RenderableQuad::SetTexture( const std::string& textureFileName, const Vec2& texCoordsLeftTop, const Vec2& texCoordsRightBottom )
+RenderableQuad* RenderableQuad::SetTexture( const std::string& textureFileName, const Vec2& texCoordsLeftTop, const Vec2& texCoordsRightBottom )
 {
   this->texCoords = __textureAtlas->GetTextureCoords( textureFileName, Vec4( texCoordsLeftTop.x, texCoordsLeftTop.y, texCoordsRightBottom.x, texCoordsRightBottom.y ) );
-  return true;
+  this->info->textureName = textureFileName;
+  return this;
 }//SetTexture
+
+
+
+/*
+=============
+  GetMiddleTextureCoords
+=============
+*/
+Vec2 RenderableQuad::GetMiddleTextureCoords()
+{
+  return Vec2( ( this->texCoords.x + this->texCoords.z ) * 0.5f, ( this->texCoords.y + this->texCoords.w ) * 0.5f );
+}//GetMiddleTextureCoords
 
 
 
 
 /*
 =============
-  GetPosition
+  SaveToBuffer
 =============
 */
-const Vec3& RenderableQuad::GetPosition()
+void RenderableQuad::SaveToBuffer( MemoryWriter &writer )
 {
-  return this->position;
-}//GetPosition
+  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SaveToBuffer => texture['%s']", this->info->textureName.c_str() );
+  writer << this->info->textureName;
+  __log.PrintInfo( Filelevel_DEBUG, ". pos: sizeof[%d]", sizeof( this->GetPosition() ) );
+  writer << this->GetPosition();
+  __log.PrintInfo( Filelevel_DEBUG, ". rot" );
+  writer << this->GetRotation();
+  writer << this->GetColor();
+  writer << this->GetSize();
+  writer << this->GetScale();
+  __log.PrintInfo( Filelevel_DEBUG, ". atlas..." );
+  writer << __textureAtlas->GetInvTextureCoords( this->info->textureName, this->GetTexCoords() );
+}//SaveToBuffer
+
+
+
+
+/*
+=============
+  LoadFromBuffer
+=============
+*/
+void RenderableQuad::LoadFromBuffer( MemoryReader &reader )
+{
+  std::string textureName;
+  Vec4 tex;
+
+  reader >> textureName;
+  reader >> this->position;
+  reader >> this->rotation;
+  reader >> this->color;
+  reader >> this->size;
+  reader >> this->scale;
+  reader >> tex;
+
+  this->SetTexture( textureName, Vec2( tex.x, tex.y ), Vec2( tex.z, tex.w ) );
+}//LoadFromBuffer
+
+
+
+/*
+=============
+  IsHasPoint
+=============
+*/
+bool RenderableQuad::IsHasPoint( const Vec2& pos )
+{
+  Vec4 resRect;
+  Vec2 halfSize;
+  halfSize = this->size * 0.5f;
+  halfSize.x *= this->scale.x;
+  halfSize.y *= this->scale.y;
+  resRect.x = this->position.x - halfSize.x;
+  resRect.y = this->position.y - halfSize.y;
+  resRect.z = this->position.x + halfSize.x;
+  resRect.w = this->position.y + halfSize.y;
+
+  return !(
+    resRect.z < pos.x ||
+    resRect.x > pos.x ||
+    resRect.y > pos.y ||
+    resRect.w < pos.y
+    );
+}

@@ -121,19 +121,19 @@ public:
   void    SetWindowTitle    ( const std::string &title );
   inline const Vec2& GetWindowHalfSize () { return this->_window.windowCenter; }
   bool    Destroy           ();
+  inline
+  Object* GetRootObject     () { return this->_rootObject; }
 
   void    SetState          ( CoreStates newState );
   bool    Update            ();
   bool    Redraw            ();
 
   Object* CreateObject      ( const std::string& name, Object *parent = NULL );
-  //Object* CreateGUIObject   ( const std::string& name, Object *parent = NULL );
   Object* GetObject         ( const std::string& name, Object *parent = NULL );
-  //Object* GetGUIObject      ( const std::string& name, Object *parent = NULL );
   void    RemoveObject      ( const std::string& name );
-  //void    RemoveGUIObject   ( const std::string& name );
   Object* SetCamera         ( Object* newCamera );
   inline Object* GetCamera  () { return this->camera; }
+  Object* getObjectInPoint  ( const Vec2& pos );
 
   bool    LoadExtension     ( const std::string &name, void** function );
   bool    IsExtensionExist  ( const std::string extensionName );

@@ -7,6 +7,8 @@
 #include "renderable.h"
 #include "collisionmgr.h"
 #include "textureatlas.h"
+#include "memorywriter.h"
+#include "memoryreader.h"
 
 
 
@@ -35,6 +37,7 @@ private:
 
   CoreRenderableList  *_renderableList; //ссылка на список рендерейблов, в котором находится объект
   CoreRenderableListIndicies  *_renderableIndicies; //ссылка на список индексов рендерейблов
+  CoreRenderableListIndicies  *_renderableFreeIndicies; //ссылка на список свободных индексов рендерейблов
 
   struct ObjectRenderableInfo
   {
@@ -48,12 +51,17 @@ private:
 
   Collision       *collision;
 
+private:
+  void                _RecalculatePosition();
+
 public:
+  Object();
   Object( const std::string &objectName, Object* parentObject );
   virtual ~Object();
 
   const std::string&  GetName             ();
   const std::string&  GetNameFull         ();
+  const std::string&  GetParentNameFull   ();
   bool                IsChild             ( const Object* obj );
   void                AttachChildObject   ( Object* newChild );
   void                UnAttachChildObject ( Object* child );
@@ -61,17 +69,18 @@ public:
   void                ClearChilds         ();
   Object*             SetPosition         ( const Vec3& newPosition );
   Object*             SetPosition2D       ( const Vec2& newPosition );
-  inline const Vec3&  GetPosition         () { return this->position; }
+  inline const Vec3&  GetPosition         () const { return this->position; }
   Object*             GetChild            ( const std::string& name );
   void                SetForce            ( long forceId, const Vec3& vec );
   void                RemoveForce         ( long forceId );
   const Mat4&         GetMatrixTransform  ();
+  Object*             GetObjectInPoint    ( const Vec2& pos );
 
-  Renderable*         EnableRenderable    ( RenderableType renderType, float zIndex );
+  Renderable*         EnableRenderable    ( RenderableType renderType );
   bool                DisableRenderable   ();
   Renderable*         GetRenderable       ();
-  inline bool         IsRenderable        () { return this->renderable.num >= 0; }
-  RenderableQuad*     EnableRenderableGUI ( float zIndex );
+  inline bool         IsRenderable        () { return this->renderable.type != RENDERABLE_TYPE_UNKNOWN; }
+  RenderableQuad*     EnableRenderableGUI ();
 
   Collision*          EnableCollision     ();
   void                DisableCollision    ();
@@ -80,4 +89,9 @@ public:
     bool              IsCollision         () { return this->collision != NULL; }
 
   void                Update              ( float dt );
+
+  void                SaveToBuffer        ( MemoryWriter &writer );
+  void                LoadFromBuffer      ( MemoryReader &reader, Object *rootObject );
+
+  Object*             GetObject           ( const std::string& name, Object *parent = NULL );
 };

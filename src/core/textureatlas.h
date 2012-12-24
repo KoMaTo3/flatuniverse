@@ -26,6 +26,7 @@ private:
   {
     std::string   textureFileName;  //файл текстуры
     Mat4          matTransform;     //матрица преобразования текстурных координат в координаты в атласе
+    Mat4          matInvTransform;  //матрица преобразования координат в атласе в текстурные координаты
     Rect< Dword>  rect;             //координаты блока в атласе
   };
   typedef std::deque< TextureAtlasItem* > TextureAtlasItemsList;
@@ -35,11 +36,13 @@ public:
   TextureAtlas();
   virtual ~TextureAtlas();
 
-  bool              Init  ( const Size& maxTextureSize, Byte borderSize = 0 );
-  void              Bind  ();
-  void              Unbind();
-  Vec4              GetTextureCoords( const std::string& textureFileName, const Vec4& textureCoords );
-  TextureAtlasItem* IsTextureLoaded ( const std::string& textureFileName );
+  bool                Init                  ( const Size& maxTextureSize, Byte borderSize = 0 );
+  void                Bind                  ();
+  void                Unbind                ();
+  Vec4                GetTextureCoords      ( const std::string& textureFileName, const Vec4& textureCoords );
+  Vec4                GetInvTextureCoords   ( const std::string& textureFileName, const Vec4& textureCoords );
+  const std::string&  GetTextureNameByCoords( Vec2 texCoords );
+  TextureAtlasItem*   IsTextureLoaded       ( const std::string& textureFileName );
 
   //debug
   void              __Dump( const std::string& fileName );

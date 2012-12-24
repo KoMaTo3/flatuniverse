@@ -32,7 +32,7 @@ bool Collision::Update( float dt )
     return false;
 
   //__log.PrintInfo( Filelevel_DEBUG, "Collision::Update => dt[%3.3f] pos[%3.3f;%3.3f] vel[%3.3f;%3.3f] acc[%3.3f;%3.3f]", dt, this->position->x, this->position->y, this->velocity.x, this->velocity.y, this->acceleration.x, this->acceleration.y );
-  this->velocity += this->acceleration * dt;
+  this->velocity += this->acceleration * dt * COLLISION_FRICTION_FORCE;
   *this->position += ( this->velocity + this->force ) * dt;
 
   //пересчет характеристик
@@ -313,3 +313,53 @@ bool Collision::TestIntersect( Collision& item )
 
   return true;
 }//TestIntersect
+
+
+
+
+/*
+=============
+  SaveToBuffer
+=============
+*/
+void Collision::SaveToBuffer( MemoryWriter &writer )
+{
+  writer << this->GetVelocity();
+  writer << this->GetAcceleration();
+  writer << this->GetSize();
+  writer << this->IsStatic();
+  writer << this->GetMass();
+  writer << this->GetForce();
+}//SaveToBuffer
+
+
+
+/*
+=============
+  LoadFromBuffer
+=============
+*/
+void Collision::LoadFromBuffer( MemoryReader &reader )
+{
+  Vec3 v3;
+  bool b;
+  float f;
+
+  reader >> v3;
+  this->SetVelocity( v3 );
+
+  reader >> v3;
+  this->SetAcceleration( v3 );
+
+  reader >> v3;
+  this->SetSize( v3 );
+
+  reader >> b;
+  this->SetIsStatic( b );
+
+  reader >> f;
+  this->SetMass( f );
+
+  reader >> v3;
+  this->SetForce( v3 );
+}//LoadFromBuffer

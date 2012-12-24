@@ -246,6 +246,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\core\memorywriter.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\memorywriter.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\core\mouse.cpp"
 				>
 			</File>
@@ -378,6 +386,10 @@
 			Name="game"
 			>
 			<File
+				RelativePath="..\src\game\game.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\game\main.cpp"
 				>
 			</File>
@@ -387,6 +399,22 @@
 			</File>
 			<File
 				RelativePath="..\src\game\worldgrid.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\worldgridmgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\worldgridmgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\worldsaver.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\worldsaver.h"
 				>
 			</File>
 		</Filter>

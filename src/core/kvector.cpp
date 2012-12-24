@@ -1,6 +1,11 @@
 #include "kvector.h"
 #include "kangles.h"
 
+
+Vec2 Vec2Null( 0.0f, 0.0f );
+Vec3 Vec3Null( 0.0f, 0.0f, 0.0f );
+Vec4 Vec4Null( 0.0f, 0.0f, 0.0f, 0.0f );
+
 /*
 =============
 Lerp

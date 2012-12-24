@@ -4,8 +4,10 @@
 
 extern CoreRenderableList *__coreRenderableList;
 extern CoreRenderableListIndicies *__coreRenderableListIndicies;
+extern CoreRenderableListIndicies *__coreRenderableListFreeIndicies;
 extern CoreRenderableList *__coreGUI;
 extern CoreRenderableListIndicies *__coreGUIIndicies;
+extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
 
 
 
@@ -36,19 +38,26 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 
 
 
+Object::Object()
+:name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
+,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL )
+{
+  __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%X]", this );
+}//constructor
+
 
 Object::Object( const std::string &objectName, Object* parentObject )
 :name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%X] parent[x%X]", this, this->_parent );
   if( this->_parent )
   {
-    this->nameFull = this->_parent->GetNameFull() + "/" + this->name;
+    this->nameFull = ( this->_parent->_parent ? this->_parent->GetNameFull() + "/" : "" ) + this->name;
     this->_parent->AttachChildObject( this );
   }
   else
     this->nameFull = "/" + this->name;
+  __log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%X] parent[x%X] name['%s']", this, this->_parent, this->nameFull.c_str() );
 }//constructor
 
 
@@ -111,6 +120,24 @@ const std::string& Object::GetNameFull()
 {
   return this->nameFull;
 }//GetNameFull
+
+
+
+/*
+=============
+  GetParentNameFull
+=============
+*/
+const std::string& Object::GetParentNameFull()
+{
+  if( !this->_parent )
+  {
+    __log.PrintInfo( Filelevel_WARNING, "Object::GetParentNameFull => parent is NULL" );
+    static std::string badResult = "<NULL>";
+    return badResult;
+  }
+  return this->_parent->GetNameFull();
+}//GetParentNameFull
 
 
 
@@ -241,26 +268,48 @@ Object* Object::GetChild( const std::string& name )
   Добавляет объект в рендер, при этом необходимо указать как он будет рендериться - квад, спрайт, текст, точка, линия, меш и т.д.
 =============
 */
-Renderable* Object::EnableRenderable( RenderableType renderType, float zIndex )
+Renderable* Object::EnableRenderable( RenderableType renderType )
 {
   if( this->renderable.num != RENDERABLE_INDEX_UNDEFINED )
     return &( *( this->_renderableList->begin() + this->renderable.num ) );
 
   this->_renderableList = __coreRenderableList;
   this->_renderableIndicies = __coreRenderableListIndicies;
+  this->_renderableFreeIndicies = __coreRenderableListFreeIndicies;
 
+  this->_RecalculatePosition();
+  float zIndex = this->position.z;
   Renderable *result = NULL;
   switch( renderType )
   {
   case RENDERABLE_TYPE_QUAD:
     {
       this->renderable.type = renderType;
-      this->_renderableList->push_back( RenderableQuad() );
-      result = &( *this->_renderableList->rbegin() );
+
+      GLshort index = -1;
+      __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%X = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
+      if( this->_renderableFreeIndicies->size() )
+      {
+        index = *this->_renderableFreeIndicies->rbegin();
+        this->_renderableFreeIndicies->pop_back();
+        result = &( *( this->_renderableList->begin() + index ) );
+        *result = RenderableQuad();
+        __log.PrintInfo( Filelevel_DEBUG, "Use free indicies: %d", index );
+      }
+      else
+      {
+        this->_renderableList->push_back( RenderableQuad() );
+        result = &( *this->_renderableList->rbegin() );
+        index = this->_renderableList->size() - 1;
+      }
+
+      //this->_renderableList->push_back( RenderableQuad() );
+      //result = &( *this->_renderableList->rbegin() );
+
       RenderableQuad *quad = ( RenderableQuad* ) result;
       quad->SetPosition( Vec3( 0.0f, 0.0f, zIndex ) );
       float z = quad->GetPosition().z;
-      this->renderable.num = this->_renderableList->size() - 1;
+      this->renderable.num = index;
 
       //this->_renderableIndicies->push_back( this->renderable.num );
       CoreRenderableListIndicies::iterator iter, iterEnd = this->_renderableIndicies->end(), iterBegin = this->_renderableIndicies->begin();
@@ -294,21 +343,41 @@ Renderable* Object::EnableRenderable( RenderableType renderType, float zIndex )
   Добавляет объект в рендер GUI
 =============
 */
-RenderableQuad* Object::EnableRenderableGUI( float zIndex )
+RenderableQuad* Object::EnableRenderableGUI()
 {
   if( this->renderable.num != RENDERABLE_INDEX_UNDEFINED )
     return &( *( this->_renderableList->begin() + this->renderable.num ) );
 
   this->_renderableList = __coreGUI;
   this->_renderableIndicies = __coreGUIIndicies;
+  this->_renderableFreeIndicies = __coreGUIFreeIndicies;
 
   RenderableQuad *result = NULL;
   this->renderable.type = RENDERABLE_TYPE_QUAD;
-  this->_renderableList->push_back( RenderableQuad() );
-  result = &( *this->_renderableList->rbegin() );
+
+  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderableGUI => current position[ %3.3f; %3.3f; %3.3f ]", this->position.x, this->position.y, this->position.z );
+  this->_RecalculatePosition();
+  float zIndex = this->position.z;
+  GLshort index = -1;
+  __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%X = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
+  if( this->_renderableFreeIndicies->size() )
+  {
+    index = *this->_renderableFreeIndicies->rbegin();
+    this->_renderableFreeIndicies->pop_back();
+    result = &( *( this->_renderableList->begin() + index ) );
+    *result = RenderableQuad();
+    __log.PrintInfo( Filelevel_DEBUG, "Use free indicies: %d", index );
+  }
+  else
+  {
+    this->_renderableList->push_back( RenderableQuad() );
+    result = &( *this->_renderableList->rbegin() );
+    index = this->_renderableList->size() - 1;
+  }
   RenderableQuad *quad = ( RenderableQuad* ) result;
   quad->SetPosition( Vec3( 0.0f, 0.0f, zIndex ) );
-  this->renderable.num = this->_renderableList->size() - 1;
+
+  this->renderable.num = index;
 
   //this->_renderableIndicies->push_back( this->renderable.num );
   CoreRenderableListIndicies::iterator iter, iterEnd = this->_renderableIndicies->end(), iterBegin = this->_renderableIndicies->begin();
@@ -316,12 +385,16 @@ RenderableQuad* Object::EnableRenderableGUI( float zIndex )
   for( iter = iterBegin; iter != iterEnd; ++iter )
     if( zIndex < ( *( this->_renderableList->begin() + *iter ) ).GetPosition().z )
     {
+      __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderableGUI => index[%d] z[%3.3f]", this->renderable.num, zIndex );
       this->_renderableIndicies->insert( iter, this->renderable.num );
       added = true;
       break;
     }
   if( !added )
+  {
+    __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderableGUI => last index[%d] z[%3.3f]", this->renderable.num, zIndex );
     this->_renderableIndicies->push_back( this->renderable.num );
+  }
 
   return result;
 }//EnableRenderableGUI
@@ -348,6 +421,8 @@ bool Object::DisableRenderable()
   for( iter = this->_renderableIndicies->begin(); iter != iterEnd; ++iter )
     if( *iter == this->renderable.num )
     {
+      __log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%X", *iter, this->_renderableFreeIndicies );
+      this->_renderableFreeIndicies->push_back( *iter );
       this->_renderableIndicies->erase( iter );
       break;
     }
@@ -460,13 +535,12 @@ const Mat4& Object::GetMatrixTransform()
 
 
 
-
 /*
 =============
-  Update
+  _RecalculatePosition
 =============
 */
-void Object::Update( float dt )
+void Object::_RecalculatePosition()
 {
   //объект всегда позиционируется относительно родителя
   if( this->_parent )
@@ -497,6 +571,20 @@ void Object::Update( float dt )
     */
     this->position = this->positionSrc;
   }
+}//_RecalculatePosition
+
+
+
+
+
+/*
+=============
+  Update
+=============
+*/
+void Object::Update( float dt )
+{
+  this->_RecalculatePosition();
 
   //обновляем спрайт
   switch( this->renderable.type )
@@ -609,3 +697,169 @@ void Object::RemoveForce( long forceId )
       }
   }
 }//RemoveForce
+
+
+
+
+/*
+=============
+  SaveToBuffer
+=============
+*/
+void Object::SaveToBuffer( MemoryWriter &writer )
+{
+  bool isRenderable, isCollision;
+
+  isRenderable = this->IsRenderable();
+  writer << isRenderable;  //renderable true/false
+
+  isCollision = this->IsCollision();
+  writer << isCollision;  //collision true/false
+
+  writer << this->GetName();
+  writer << this->GetParentNameFull();
+  writer << this->GetPosition();
+
+  if( isRenderable )
+    ( ( RenderableQuad* ) this->GetRenderable() )->SaveToBuffer( writer );
+
+  if( isCollision )
+    this->GetCollision()->SaveToBuffer( writer );
+
+  Dword childsCount = ( this->_childs ? this->_childs->size() : 0 );
+
+  writer << childsCount;
+  if( childsCount )
+  {
+    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+    for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
+      ( *iter )->SaveToBuffer( writer );
+  }
+}//SaveToBuffer
+
+
+
+
+/*
+=============
+  LoadFromBuffer
+=============
+*/
+void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
+{
+  bool isRenderable, isCollision;
+  std::string tmpName, parentName;
+  Vec3 position;
+
+  reader >> isRenderable;
+  reader >> isCollision;
+  reader >> tmpName;
+  reader >> parentName;
+  reader >> position;
+  //__log.PrintInfo( Filelevel_DEBUG, ". rend[%d] coll[%d] name['%s'] parent['%s']", isRenderable, isCollision, tmpName.c_str(), parentName.c_str() );
+
+  this->name = tmpName;
+  this->_parent = ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName ) );
+
+  if( this->_parent )
+  {
+    this->nameFull = ( this->_parent->_parent ? this->_parent->GetNameFull() + "/" : "" ) + this->name;
+    this->_parent->AttachChildObject( this );
+  }
+  else
+    this->nameFull = "/" + this->name;
+
+  this->SetPosition( position );
+
+  if( isRenderable )
+    ( ( RenderableQuad* ) this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->LoadFromBuffer( reader );
+
+  if( isCollision )
+    this->EnableCollision()->LoadFromBuffer( reader );
+
+  Dword childsCount;
+  reader >> childsCount;
+  if( childsCount )
+  {
+    __log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
+  }
+}//LoadFromBuffer
+
+
+
+
+/*
+=============
+  GetObject
+=============
+*/
+Object* Object::GetObject( const std::string& name, Object *parent )
+{
+  if( !name.length() )
+  {
+    __log.PrintInfo( Filelevel_WARNING, "Object::GetObject => name is NULL" );
+    return NULL;
+  }
+
+  if( !parent )
+  {
+    parent = this->_parent;
+    while( parent->_parent )
+      parent = parent->_parent;
+  }
+
+  long slashPos = name.find_first_of( "/" );
+  if( slashPos == 0 ) //начинается со слеша => 1 или 3
+    return this->GetObject( &name[ 1 ], parent );
+  else
+  {
+    if( slashPos < 0 )  //нет слешей => 2 или 4
+    {
+      return parent->GetChild( name );
+    }
+    else  //слеши есть => 1 или 3
+    {
+      std::string nextLevel = &name[ slashPos ];
+      std::string currentLevel = name.substr( 0, slashPos );
+      if( !parent )
+      {
+        parent = this->_parent;
+        while( parent->_parent )
+          parent = parent->_parent;
+      }
+      Object *obj = parent->GetChild( currentLevel );
+      if( !obj )
+        return NULL;
+      return this->GetObject( nextLevel, obj );
+    }
+  }
+
+  return NULL;
+}//GetObject
+
+
+
+/*
+=============
+  GetObjectInPoint
+=============
+*/
+Object* Object::GetObjectInPoint( const Vec2& pos )
+{
+  if( this->IsRenderable() && this->GetRenderable()->IsHasPoint( pos ) )
+    return this;
+
+  if( this->_childs )
+  {
+    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+    Object *obj;
+    for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
+    {
+      obj = ( *iter )->GetObjectInPoint( pos );
+      if( obj )
+        return obj;
+    }
+  }
+
+  return NULL;
+}//GetObjectInPoint

@@ -132,20 +132,27 @@ Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const V
     Vec2 translate( float( item->rect.left ) / float( this->size.width ), float( item->rect.top ) / float( this->size.height ) );
 
     item->matTransform.Identity();
-    Mat4 matTranslate, matScale;
+    Mat4 matTranslate, matScale, matInvTranslate, matInvScale;
     matTranslate.Identity();
+    matInvTranslate.Identity();
     matScale.Identity();
+    matInvScale.Identity();
 
     matScale[ 0 ][ 0 ] = scale.x;
     matScale[ 1 ][ 1 ] = scale.y;
+    matInvScale[ 0 ][ 0 ] = 1.0f / scale.x;
+    matInvScale[ 1 ][ 1 ] = 1.0f / scale.y;
 
     matTranslate[ 0 ][ 3 ] = translate.x;
     matTranslate[ 1 ][ 3 ] = translate.y;
+    matInvTranslate[ 0 ][ 3 ] = -translate.x;
+    matInvTranslate[ 1 ][ 3 ] = -translate.y;
 
     __log.PrintInfo( Filelevel_DEBUG, "matrix translate: [ %3.3f; %3.3f ]", translate.x, translate.y );
     __log.PrintInfo( Filelevel_DEBUG, "matrix scale: [ %3.3f; %3.3f ]", scale.x, scale.y );
 
     item->matTransform = matTranslate * matScale;
+    item->matInvTransform = matInvScale * matInvTranslate;
 
     //размещение картинки в текстуре
     this->Bind();
@@ -163,6 +170,61 @@ Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const V
     return Vec4( tex0.x, tex0.y, tex1.x, tex1.y );
   }
 }//GetTextureCoords
+
+
+
+
+/*
+=============
+  GetInvTextureCoords
+=============
+*/
+Vec4 TextureAtlas::GetInvTextureCoords( const std::string& textureFileName, const Vec4& textureCoords )
+{
+  TextureAtlasItem *item = this->IsTextureLoaded( textureFileName );
+  if( item )
+  {
+    Vec3 leftTop, rightBottom;
+    leftTop = Vec3( textureCoords.x, textureCoords.y, 0.0f ) * item->matInvTransform;
+    rightBottom = Vec3( textureCoords.z, textureCoords.w, 0.0f ) * item->matInvTransform;
+    return Vec4( leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
+  }
+  else
+  {
+    __log.PrintInfo( Filelevel_WARNING, "TextureAtlas::GetInvTextureCoords => texture '%s' not loaded", textureFileName.c_str() );
+    return Vec4( 0.0f, 0.0f, 1.0f, 1.0f );
+  }
+}//GetInvTextureCoords
+
+
+
+
+/*
+=============
+  GetTextureNameByCoords
+=============
+*/
+const std::string& TextureAtlas::GetTextureNameByCoords( Vec2 texCoords )
+{
+  //Pos< Dword > = 
+  TextureAtlasItemsList::iterator iter, iterEnd = this->textures.end();
+  Vec4 atlasPos( texCoords.x * float( this->size.width ), texCoords.y * float( this->size.height ), 0.0f, 0.0f );
+  TextureAtlasItem *item;
+  for( iter = this->textures.begin(); iter != iterEnd; ++iter )
+  {
+    item = *iter;
+    if(  atlasPos.x >= item->rect.right
+      || atlasPos.x < item->rect.left
+      || atlasPos.y >= item->rect.bottom
+      || atlasPos.y < item->rect.top
+      )
+      continue;
+    return item->textureFileName;
+  }
+  static const std::string badResult = "<NULL>";
+  return badResult;
+}//GetTextureNameByCoords
+
 
 
 

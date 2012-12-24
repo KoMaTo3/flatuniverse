@@ -9,11 +9,13 @@
 
 
 //
-CoreRenderableList *__coreRenderableList = NULL;                  //список рендерейблов, отправляемых на рендер
-CoreRenderableListIndicies  *__coreRenderableListIndicies = NULL; //индексы рендерейблов
+CoreRenderableList *__coreRenderableList = NULL;                      //список рендерейблов, отправляемых на рендер
+CoreRenderableListIndicies  *__coreRenderableListIndicies = NULL;     //индексы рендерейблов
+CoreRenderableListIndicies  *__coreRenderableListFreeIndicies = NULL; //свободные индексы рендерейблов
 
-CoreRenderableList *__coreGUI = NULL;                             //список рендерейблов GUI
-CoreRenderableListIndicies  *__coreGUIIndicies = NULL;            //индексы рендерейблов GUI
+CoreRenderableList *__coreGUI = NULL;                                 //список рендерейблов GUI
+CoreRenderableListIndicies  *__coreGUIIndicies = NULL;                //индексы рендерейблов GUI
+CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободные индексы рендерейблов GUI
 //
 
 
@@ -30,6 +32,9 @@ Core::Core()
 
   this->_build.time = __TIME__;
   this->_build.date = __DATE__;
+
+  this->_rootObject = new Object( "root", NULL );
+  this->SetCamera( this->_rootObject );
 }//constructor
 
 
@@ -53,8 +58,10 @@ bool Core::Destroy()
   DEF_DELETE( this->collisionManager );
   DEF_DELETE( __coreRenderableList );
   DEF_DELETE( __coreRenderableListIndicies );
+  DEF_DELETE( __coreRenderableListFreeIndicies );
   DEF_DELETE( __coreGUI );
   DEF_DELETE( __coreGUIIndicies );
+  DEF_DELETE( __coreGUIFreeIndicies );
   DEF_DELETE( __fileManager );
   DEF_DELETE( __textureAtlas );
 
@@ -168,11 +175,6 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   ShowWindow  ( this->_window.hwnd, SW_NORMAL );
   UpdateWindow( this->_window.hwnd );
 
-  if( !this->_rootObject )
-  {
-    this->_rootObject = new Object( "root", NULL );
-    this->SetCamera( this->_rootObject );
-  }
   //if( !this->_rootGUIObject )
   //  this->_rootGUIObject = new Object( "rootGUI", NULL );
   this->mouse.Init( Size( screenWidth, screenHeight ) );
@@ -180,8 +182,10 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   //
   __coreRenderableList    = new CoreRenderableList();
   __coreRenderableListIndicies = new CoreRenderableListIndicies();
+  __coreRenderableListFreeIndicies = new CoreRenderableListIndicies();
   __coreGUI               = new CoreRenderableList();
   __coreGUIIndicies       = new CoreRenderableListIndicies();
+  __coreGUIFreeIndicies   = new CoreRenderableListIndicies();
   __textureAtlas          = new TextureAtlas();
   this->collisionManager  = new CollisionManager();
   //
@@ -354,7 +358,13 @@ bool Core::_CheckShaderError( const std::string& text, GLuint shader )
   glGetShaderInfoLog( shader, maxLength, &logLength, log );
   if( log[ 0 ] )
   {
-    __log.PrintInfo( Filelevel_CRITICALERROR, "Core::_CheckShaderError => %s: %s", text.c_str(), log );
+    std::string tmpLog = log;
+    BYTE errorType = Filelevel_INFO;
+    if( tmpLog.find_first_of( "warning" ) >= 0 )
+      errorType = Filelevel_WARNING;
+    else
+      errorType = Filelevel_CRITICALERROR;
+    __log.PrintInfo( errorType, "Core::_CheckShaderError => %s: %s", text.c_str(), log );
     //MessageBox(0,log,text.c_str(),0);
     result = true;
   }
@@ -868,8 +878,8 @@ bool Core::Redraw()
         float right = this->_window.windowCenter.x * 2.0f;
         float top = 0.0f;
         float bottom = this->_window.windowCenter.y * 2.0f;
-        float nearZ = -10.0f;
-        float farZ = 10.0f;
+        float nearZ = 10.0f;
+        float farZ = -10.0f;
 	      float r_l = right - left;
 	      float t_b = top - bottom;
 	      float f_n = farZ - nearZ;
@@ -901,7 +911,7 @@ bool Core::Redraw()
       glBindVertexArray( this->_buffers.vao );
       GL_CHECK_ERROR;
 
-      __log.PrintInfo( Filelevel_DEBUG, "glBindBuffer:GL_ARRAY_BUFFER => %d", this->_buffers.vbo );
+      //__log.PrintInfo( Filelevel_DEBUG, "glBindBuffer:GL_ARRAY_BUFFER => %d", this->_buffers.vbo );
       glBindBuffer( GL_ARRAY_BUFFER, this->_buffers.vbo );
       GL_CHECK_ERROR;
       glBufferData( GL_ARRAY_BUFFER, sizeof( RenderableQuad ) * __coreRenderableList->size(), ( *__coreRenderableList->begin() ).GetPointerToVertex(), GL_DYNAMIC_DRAW );
@@ -1110,13 +1120,13 @@ LRESULT Core::Signal( DWORD code, LPARAM lParam, WPARAM wParam, void *pointer )
 */
 bool Core::Update()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
+  //__log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
   sTimer.Update();
   this->keyboard.Update();
   this->mouse.Update();
 
   MSG msg;
-  if( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
+  while( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
   if( GetMessage( &msg, NULL, 0, 0 ) == TRUE )
   {
     TranslateMessage( &msg );
@@ -1133,7 +1143,7 @@ bool Core::Update()
   this->_rootObject->Update( sTimer.GetDeltaF() );
   //this->_rootGUIObject->Update( sTimer.GetDeltaF() );
 
-  __log.PrintInfo( Filelevel_DEBUG, "============" );
+  //__log.PrintInfo( Filelevel_DEBUG, "============" );
   return true;
 }//Update
 
@@ -1291,6 +1301,20 @@ bool Core::CheckGLError( int line, const std::string& fileName )
   }
   return false;
 }//CheckGLError
+
+
+
+
+/*
+=============
+  getObjectInPoint
+=============
+*/
+Object* Core::getObjectInPoint( const Vec2& pos )
+{
+  return this->_rootObject->GetObjectInPoint( pos );
+}//getObjectInPoint
+
 
 
 
