@@ -155,8 +155,9 @@ void MemoryReader::operator>>( std::string &str )
 {
   Dword strLen;
   this->operator >>( strLen );
-  if( !this->CheckDataSizeToRead( strLen ) )
+  if( !this->CheckSizeToRead( strLen ) )
   {
+    __log.PrintInfo( Filelevel_WARNING, "MemoryReader::operator>> => out of bounds" );
     str = "";
     return;
   }

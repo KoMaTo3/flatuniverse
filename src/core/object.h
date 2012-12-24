@@ -74,11 +74,12 @@ public:
   void                SetForce            ( long forceId, const Vec3& vec );
   void                RemoveForce         ( long forceId );
   const Mat4&         GetMatrixTransform  ();
+  Object*             GetObjectInPoint    ( const Vec2& pos );
 
   Renderable*         EnableRenderable    ( RenderableType renderType );
   bool                DisableRenderable   ();
   Renderable*         GetRenderable       ();
-  inline bool         IsRenderable        () { return this->renderable.num >= 0; }
+  inline bool         IsRenderable        () { return this->renderable.type != RENDERABLE_TYPE_UNKNOWN; }
   RenderableQuad*     EnableRenderableGUI ();
 
   Collision*          EnableCollision     ();

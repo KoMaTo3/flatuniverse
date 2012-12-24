@@ -138,7 +138,9 @@ bool WorldGrid::GetGridDump( FU_OUT memory& dump )
   MemoryWriter writer( dump );
 
   //кол-во объектов
-  writer << ( Dword ) this->objects.size();
+  Dword objectsCount = this->objects.size();
+  writer << objectsCount;
+  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::GetGridDump => objects %d", objectsCount );
 
   //объекты
   WorldGridObjectList::iterator iter, iterEnd = this->objects.end();

@@ -16,7 +16,7 @@
 #include "worldsaver.h"
 
 
-#define WORLD_GRID_UPDATE_INTERVAL    ( 1.0f / 10.0f )    //период обновления состояния гридов
+#define WORLD_GRID_UPDATE_INTERVAL    ( 1.0f / 60.0f )    //период обновления состояния гридов
 
 
 
@@ -44,4 +44,6 @@ public:
   bool        UnloadGrid              ( const WorldGrid::WorldGridPosition gridPos );
   WorldGrid::WorldGridPosition
               GetGridPositionByObject ( const Object& obj );
+  void        LoadFromFile            ( const std::string& fileName );
+  void        SaveToFile              ( const std::string& fileName );
 };

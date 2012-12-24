@@ -24,13 +24,15 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   Collision *col;
   float worldAlpha = ( isDebug ? 0.1f : 1.0f );
 
-  
   game->core->CreateObject( "gui" );
+
+  game->world->LoadFromFile( "data/temp/testworld.fu" );
+
   game->core->CreateObject( "lifts" );
 
   game->core->mouse.SetCursor( "data/temp/cursor_hw.png", game->core->CreateObject( "mouse-cursor", game->core->GetObject( "gui" ) ) );
   //__log.PrintInfo( Filelevel_DEBUG, "test: %s", core->GetObject( "gui" )->GetNameFull().c_str() );
-  game->core->CreateObject( "bottom-block", game->core->GetObject( "gui" ) )->SetPosition( Vec3( 50.0f, 85.0f, 2.0f ) )->EnableRenderableGUI()->SetSize( Vec2( 100.0f, 30.0f ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 0.7f ) )
+  game->core->CreateObject( "bottom-block", game->core->GetObject( "gui" ) )->SetPosition( Vec3( 50.0f, 85.0f, 2.0f ) )->EnableRenderableGUI()->SetSize( Vec2( 100.0f, 30.0f ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) )
     ->SetTexture( "data/temp/ui-bg-0.png" );
   game->core->CreateObject( "tooltips" );
   game->core->CreateObject( "mouse-grid", game->core->GetObject( "tooltips" ) );
@@ -102,6 +104,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetSize( Vec2( 10.0f, 50.0f ) );
   game->world->AttachObjectToGrid( 0, 0, obj );
 
+  /*
   obj = game->core->CreateObject( "enemy" );
   col = obj->EnableCollision();
   col->SetSize( Vec3( 10.0f, 10.0f, 0.0f ) );
@@ -115,6 +118,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetSize( Vec2( 10.0f, 10.0f ) );
   quad->SetTexture( "data/temp/enemy0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
   //quad->scale.Set( 0.5f, 1.0f );
+  game->world->AttachObjectToGrid( 0, 0, obj );
 
   obj = game->core->CreateObject( "enemy-2" );
   col = obj->EnableCollision();
@@ -127,6 +131,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 20.0f, 20.0f ) );
   quad->SetTexture( "data/temp/enemy0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+  */
 
   obj = game->core->CreateObject( "lift", game->core->GetObject( "lifts" ) );
   obj->SetPosition( Vec3( -5.0f, 40.0f, 0.0f ) );
@@ -256,7 +261,15 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       Vec3 pos( game->core->mouse.GetCursorPosition().x, game->core->mouse.GetCursorPosition().y, 0.0f );
       pos += game->core->GetCamera()->GetPosition() - Vec3( game->core->GetWindowHalfSize().x, game->core->GetWindowHalfSize().y, 0.0f );
       game->core->GetObject( "player" )->SetPosition( pos );
-      //game->core->SetState( CORE_STATE_EXIT );
+      /*
+      Vec2 pos( game->core->mouse.GetCursorPosition() );
+      pos += Vec2( game->core->GetCamera()->GetPosition().x, game->core->GetCamera()->GetPosition().y ) - game->core->GetWindowHalfSize();
+      Object *obj = game->core->getObjectInPoint( pos );
+      if( obj )
+        __log.PrintInfo( Filelevel_DEBUG, "in cursor: '%s'", obj->GetNameFull().c_str() );
+      else
+        __log.PrintInfo( Filelevel_DEBUG, "in cursor: NULL" );
+        */
     }
 
     if( game->core->mouse.IsPressed( VK_LBUTTON ) )
@@ -376,6 +389,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   }
   //MessageBox( NULL, "Ok", "Debug", MB_OK );
 
+  game->world->SaveToFile( "data/temp/testworld.fu" );
   DEF_DELETE( game );
 
   return 0;

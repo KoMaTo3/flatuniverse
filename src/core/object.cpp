@@ -756,7 +756,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
   reader >> tmpName;
   reader >> parentName;
   reader >> position;
-  __log.PrintInfo( Filelevel_DEBUG, ". rend[%d] coll[%d] name['%s'] parent['%s']", isRenderable, isCollision, tmpName.c_str(), parentName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, ". rend[%d] coll[%d] name['%s'] parent['%s']", isRenderable, isCollision, tmpName.c_str(), parentName.c_str() );
 
   this->name = tmpName;
   this->_parent = ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName ) );
@@ -779,6 +779,10 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
 
   Dword childsCount;
   reader >> childsCount;
+  if( childsCount )
+  {
+    __log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
+  }
 }//LoadFromBuffer
 
 
@@ -832,3 +836,30 @@ Object* Object::GetObject( const std::string& name, Object *parent )
 
   return NULL;
 }//GetObject
+
+
+
+/*
+=============
+  GetObjectInPoint
+=============
+*/
+Object* Object::GetObjectInPoint( const Vec2& pos )
+{
+  if( this->IsRenderable() && this->GetRenderable()->IsHasPoint( pos ) )
+    return this;
+
+  if( this->_childs )
+  {
+    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+    Object *obj;
+    for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
+    {
+      obj = ( *iter )->GetObjectInPoint( pos );
+      if( obj )
+        return obj;
+    }
+  }
+
+  return NULL;
+}//GetObjectInPoint

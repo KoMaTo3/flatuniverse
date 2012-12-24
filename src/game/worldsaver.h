@@ -29,5 +29,8 @@ public:
   void  SaveGrid        ( Short x, Short y, FU_IN memory& data );
   Grid* GridExists      ( Short x, Short y );
   void  FreeGrid        ( Short x, Short y );
-  void AllocFreeBlocks  ( Dword blocksCount );
+  void  AllocFreeBlocks ( Dword blocksCount );
+
+  void  LoadFromFile    ( const std::string& fileName );
+  void  SaveToFile      ( const std::string& fileName );
 };

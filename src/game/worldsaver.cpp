@@ -1,5 +1,8 @@
 #include "worldsaver.h"
 #include "core/file.h"
+#include "core/filemanager.h"
+#include "core/memorywriter.h"
+#include "core/memoryreader.h"
 
 
 
@@ -67,6 +70,8 @@ void WorldSaver::SaveGrid( Short x, Short y, memory& data )
     memcpy( this->worldData.getData() + blockNum * this->blockSize, bufferSrc, this->blockSize );
     bufferSrc += this->blockSize;
   }
+
+  __log.PrintInfo( Filelevel_DEBUG, "WorldSaver::SaveGrid => done" );
 }//SaveGrid
 
 
@@ -83,7 +88,7 @@ void WorldSaver::AllocFreeBlocks( Dword blocksCount )
   {
     Dword startIndex = this->worldData.getLength() / this->blockSize;
     memory tmp( this->worldData );
-    this->worldData.realloc( tmp.getLength() + blocksCount * this->blockSize );
+    this->worldData.alloc( tmp.getLength() + blocksCount * this->blockSize );
     memcpy( this->worldData.getData(), tmp.getData(), tmp.getLength() );
     for( Dword q = 0; q < blocksCount; ++q )
     {
@@ -93,7 +98,7 @@ void WorldSaver::AllocFreeBlocks( Dword blocksCount )
   }
   else
   {
-    this->worldData.realloc( blocksCount * this->blockSize );
+    this->worldData.alloc( blocksCount * this->blockSize );
     for( Dword q = 0; q < blocksCount; ++q )
     {
       this->freeBlocks.push_back( q );
@@ -190,3 +195,112 @@ void WorldSaver::FreeGrid( Short x, Short y )
   delete grid;
   this->grids.erase( gridIter );
 }//FreeGrid
+
+
+
+/*
+=============
+  SaveToFile
+=============
+*/
+void WorldSaver::SaveToFile( const std::string& fileName )
+{
+  File f;
+  if( f.Open( fileName, File_mode_WRITE ) )
+    return;
+
+  f.Write( this->worldData.getData(), this->worldData.getLength() );
+
+  memory header;
+  MemoryWriter headerWriter( header, 1 );
+
+  //свободные блоки
+  Dword freeBlocksCount = this->freeBlocks.size();
+  headerWriter << freeBlocksCount;
+  GridNumList::iterator iterFree, iterFreeEnd = this->freeBlocks.end();
+  for( iterFree = this->freeBlocks.begin(); iterFree != iterFreeEnd; ++iterFree )
+    headerWriter << *iterFree;
+
+  //гриды
+  Dword gridsCount = this->grids.size();
+  headerWriter << gridsCount;
+  GridsList::iterator iter, iterEnd = this->grids.end();
+  for( iter = this->grids.begin(); iter != iterEnd; ++iter )
+  {
+    headerWriter << ( *iter )->x;
+    headerWriter << ( *iter )->y;
+    Dword blocksCount = ( *iter )->blocksNums.size();
+    headerWriter << blocksCount;
+    for( Dword blockNum = 0; blockNum < blocksCount; ++blockNum )
+      headerWriter << ( *iter )->blocksNums[ blockNum ];
+  }
+
+  //заголовок и его длина
+  Dword headerLength = header.getLength();
+  f.Write( header.getData(), headerLength );
+  f.Write( &headerLength, sizeof( headerLength ) );
+
+  f.Close();
+}//SaveToFile
+
+
+
+/*
+=============
+  LoadFromFile
+=============
+*/
+void WorldSaver::LoadFromFile( const std::string& fileName )
+{
+  memory data;
+  if( !__fileManager->GetFile( fileName, data ) )
+    return;
+  __log.PrintInfo( Filelevel_DEBUG, "WorldSaver::LoadFromFile => '%s'", fileName.c_str() );
+
+  Dword headerLength, worldDataLength;
+  MemoryReader headerReader( data );
+  headerReader.SeekFromStart( data.getLength() - sizeof( headerLength ) );
+  headerReader >> headerLength;
+  __log.PrintInfo( Filelevel_DEBUG, ". headerLength[%d]", headerLength );
+  worldDataLength = data.getLength() - sizeof( headerLength ) - headerLength;
+  headerReader.SeekFromStart( worldDataLength );
+  __log.PrintInfo( Filelevel_DEBUG, ". worldDataLength[%d]", worldDataLength );
+
+  this->worldData.alloc( worldDataLength );
+  memcpy( this->worldData.getData(), data.getData(), worldDataLength );
+
+  //свободные блоки
+  this->freeBlocks.clear();
+  Dword freeBlocksCount;
+  headerReader >> freeBlocksCount;
+  __log.PrintInfo( Filelevel_DEBUG, ". freeBlocksCount[%d]", freeBlocksCount );
+  Dword blockNum;
+  for( Dword q = 0; q < freeBlocksCount; ++q )
+  {
+    headerReader >> blockNum;
+    this->freeBlocks.push_back( blockNum );
+  }
+
+  //гриды
+  this->grids.clear();
+  Dword gridsCount;
+  headerReader >> gridsCount;
+  __log.PrintInfo( Filelevel_DEBUG, ". gridsCount[%d]", gridsCount );
+  for( Dword q = 0; q < gridsCount; ++q )
+  {
+    Grid *grid = new Grid();
+    headerReader >> grid->x;
+    headerReader >> grid->y;
+    Dword blocksCount;
+    headerReader >> blocksCount;
+  __log.PrintInfo( Filelevel_DEBUG, ". grid[%d; %d] blocks[%d]", grid->x, grid->y, blocksCount );
+    Dword blockNum;
+    for( Dword w = 0; w < blocksCount; ++w )
+    {
+      headerReader >> blockNum;
+      __log.PrintInfo( Filelevel_DEBUG, ". block[%d]", blockNum );
+      grid->blocksNums.push_back( blockNum );
+    }
+    this->grids.push_back( grid );
+  }
+}//LoadFromFile

@@ -7,6 +7,7 @@
 
 #include "memory.h"
 #include "klib.h"
+#include "file.h"
 #include <string>
 
 class MemoryReader
@@ -48,7 +49,10 @@ template< class T >
 void MemoryReader::operator>>( T &data )
 {
   if( !this->CheckDataSizeToRead( data ) )
+  {
+    __log.PrintInfo( Filelevel_WARNING, "MemoryReader::operator>> => out of bounds" );
     return;
+  }
   memcpy( &data, this->curData + this->curPos, sizeof( data ) );
   this->curPos += sizeof( data );
 }//operator>>

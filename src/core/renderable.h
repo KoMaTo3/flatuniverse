@@ -41,6 +41,7 @@ public:
   virtual ~Renderable();
 
   virtual bool Render() = NULL;
+  virtual bool IsHasPoint( const Vec2& pos ) = NULL;
 };
 
 #pragma pack( push, 4 )
@@ -49,6 +50,12 @@ public:
 //Квад заданного цвета. Без текстуры
 class RenderableQuad: public Renderable
 {
+public:
+  struct RenderableQuadInfo
+  {
+    std::string textureName;
+  };
+
 private:
   Vec3  position; //4 floats
   float rotation;
@@ -60,9 +67,13 @@ private:
 
   Vec4  texCoords;  //4 floats
 
+  RenderableQuadInfo *info; //дополнительные данные квада
+
 public:
   RenderableQuad();
+  RenderableQuad( const RenderableQuad &src );
   virtual ~RenderableQuad();
+  void operator=( const RenderableQuad &src );
 
   RenderableQuad* SetPosition     ( const Vec3& newPosition );
   RenderableQuad* SetSize         ( const Vec2& newSize );
@@ -85,6 +96,7 @@ public:
 
   inline void* GetPointerToVertex () { return &this->position.x; }
   inline void* GetPointerToColor  () { return &this->color.x; }
+  virtual bool            IsHasPoint      ( const Vec2& pos );
 
   bool  Render();
 

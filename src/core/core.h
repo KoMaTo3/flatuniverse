@@ -129,13 +129,11 @@ public:
   bool    Redraw            ();
 
   Object* CreateObject      ( const std::string& name, Object *parent = NULL );
-  //Object* CreateGUIObject   ( const std::string& name, Object *parent = NULL );
   Object* GetObject         ( const std::string& name, Object *parent = NULL );
-  //Object* GetGUIObject      ( const std::string& name, Object *parent = NULL );
   void    RemoveObject      ( const std::string& name );
-  //void    RemoveGUIObject   ( const std::string& name );
   Object* SetCamera         ( Object* newCamera );
   inline Object* GetCamera  () { return this->camera; }
+  Object* getObjectInPoint  ( const Vec2& pos );
 
   bool    LoadExtension     ( const std::string &name, void** function );
   bool    IsExtensionExist  ( const std::string extensionName );

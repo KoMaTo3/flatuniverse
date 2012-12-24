@@ -2,6 +2,7 @@
 
 #include "memory.h"
 #include "klib.h"
+#include "file.h"
 #include <string>
 
 class MemoryWriter
@@ -35,9 +36,11 @@ public:
 template< class T >
 MemoryWriter& MemoryWriter::operator<<( T data )
 {
+  //__log.PrintInfo( Filelevel_DEBUG, "MemoryWriter::operator<< => sizeof(data) = %d, pos[%d] length[%d]", sizeof( T ), this->pos, this->buffer.getLength() );
   this->CheckDataSizeToWrite( data );
   memcpy( this->buffer.getData() + this->pos, &data, sizeof( data ) );
   this->pos += sizeof( data );
+  //__log.PrintInfo( Filelevel_DEBUG, "MemoryWriter::operator<< => done. pos[%d] length[%d]", this->pos, this->buffer.getLength() );
   return *this;
 }//operator<<
 

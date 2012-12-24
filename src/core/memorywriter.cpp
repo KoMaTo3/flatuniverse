@@ -1,4 +1,5 @@
 #include "memorywriter.h"
+#include "file.h"
 
 
 
@@ -18,13 +19,15 @@ MemoryWriter::~MemoryWriter()
 MemoryWriter& MemoryWriter::operator<<( const std::string &str )
 {
   Dword strLen = str.size();
-  this->CheckDataSizeToWrite( sizeof( strLen ) + strLen );
+  //__log.PrintInfo( Filelevel_DEBUG, "MemoryWriter::operator<<(string) => sizeof(data:'%s') = %d, pos[%d] length[%d]", str.c_str(), sizeof( strLen ) + strLen, this->pos, this->buffer.getLength() );
+  this->CheckSizeToWrite( sizeof( strLen ) + strLen );
 
   this->operator<<( strLen );
   memcpy( this->buffer.getData() + this->pos, &str[ 0 ], strLen );
 
   this->pos += strLen;
 
+  //__log.PrintInfo( Filelevel_DEBUG, "MemoryWriter::operator<<(string) => done. pos[%d] length[%d]", this->pos, this->buffer.getLength() );
   return *this;
 }
 

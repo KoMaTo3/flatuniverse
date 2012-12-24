@@ -911,7 +911,7 @@ bool Core::Redraw()
       glBindVertexArray( this->_buffers.vao );
       GL_CHECK_ERROR;
 
-      __log.PrintInfo( Filelevel_DEBUG, "glBindBuffer:GL_ARRAY_BUFFER => %d", this->_buffers.vbo );
+      //__log.PrintInfo( Filelevel_DEBUG, "glBindBuffer:GL_ARRAY_BUFFER => %d", this->_buffers.vbo );
       glBindBuffer( GL_ARRAY_BUFFER, this->_buffers.vbo );
       GL_CHECK_ERROR;
       glBufferData( GL_ARRAY_BUFFER, sizeof( RenderableQuad ) * __coreRenderableList->size(), ( *__coreRenderableList->begin() ).GetPointerToVertex(), GL_DYNAMIC_DRAW );
@@ -1120,7 +1120,7 @@ LRESULT Core::Signal( DWORD code, LPARAM lParam, WPARAM wParam, void *pointer )
 */
 bool Core::Update()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
+  //__log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
   sTimer.Update();
   this->keyboard.Update();
   this->mouse.Update();
@@ -1143,7 +1143,7 @@ bool Core::Update()
   this->_rootObject->Update( sTimer.GetDeltaF() );
   //this->_rootGUIObject->Update( sTimer.GetDeltaF() );
 
-  __log.PrintInfo( Filelevel_DEBUG, "============" );
+  //__log.PrintInfo( Filelevel_DEBUG, "============" );
   return true;
 }//Update
 
@@ -1301,6 +1301,20 @@ bool Core::CheckGLError( int line, const std::string& fileName )
   }
   return false;
 }//CheckGLError
+
+
+
+
+/*
+=============
+  getObjectInPoint
+=============
+*/
+Object* Core::getObjectInPoint( const Vec2& pos )
+{
+  return this->_rootObject->GetObjectInPoint( pos );
+}//getObjectInPoint
+
 
 
 

@@ -6,7 +6,7 @@
 
 
 WorldGridManager::WorldGridManager( Object* newRootGridObject )
-:currentTime( 0.0f ), blocksPerGrid( 8, 8 ), blockSize( WORLD_GRID_BLOCK_SIZE ), gridsAroundObject( 1 ), rootGridObject( newRootGridObject )
+:currentTime( 0.0f ), blocksPerGrid( 8, 8 ), blockSize( WORLD_GRID_BLOCK_SIZE ), gridsAroundObject( 2 ), rootGridObject( newRootGridObject )
 {
   if( !__worldGridList )
     __worldGridList = new WorldGridList();
@@ -251,21 +251,48 @@ bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition gridPos )
   {
     if( ( *iterGrid )->GetPosition() == gridPos )
     {
-      __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::UnloadGrid => grid[%d; %d] unloaded", gridPos.x, gridPos.y );
-
+      __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::UnloadGrid => grid[%d; %d] unloading...", gridPos.x, gridPos.y );
       memory gridDump;
       ( *iterGrid )->GetGridDump( gridDump );
       __log.PrintInfo( Filelevel_DEBUG, "grid dump size %d", gridDump.getLength() );
-      tools::Dump( gridDump.getData(), gridDump.getLength(), "gridDump" );
+      //tools::Dump( gridDump.getData(), gridDump.getLength(), "gridDump" );
 
       delete *iterGrid;
       __worldGridList->erase( iterGrid );
 
       this->worldSaver.SaveGrid( gridPos.x, gridPos.y, gridDump );
 
+      __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::UnloadGrid => grid[%d; %d] unloaded", gridPos.x, gridPos.y );
       return true;
     }
   }
   __log.PrintInfo( Filelevel_WARNING, "WorldGridManager::UnloadGrid => grid[%d; %d] not found", gridPos.x, gridPos.y );
   return false;
 }//UnloadGrid
+
+
+
+/*
+=============
+  SaveToFile
+=============
+*/
+void WorldGridManager::SaveToFile( const std::string& fileName )
+{
+  while( __worldGridList->size() )
+    this->UnloadGrid( (  *__worldGridList->begin() )->GetPosition() );
+  this->worldSaver.SaveToFile( fileName );
+}//SaveToFile
+
+
+
+/*
+=============
+  LoadFromFile
+=============
+*/
+void WorldGridManager::LoadFromFile( const std::string& fileName )
+{
+  this->worldSaver.LoadFromFile( fileName );
+  this->LoadGrid( WorldGrid::WorldGridPosition( 0, 0 ) );
+}//LoadFromFile
