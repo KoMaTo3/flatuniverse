@@ -1,6 +1,8 @@
 README.md
 Debug/logs/
 Release/logs/
+Release/flatuniverse.exp
+Release/flatuniverse.lib
 flatuniverse/Debug/
 flatuniverse/Release/
 flatuniverse.ncb

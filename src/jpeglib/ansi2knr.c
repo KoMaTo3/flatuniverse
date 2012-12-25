@@ -230,7 +230,7 @@ BY ANY OTHER PARTY.
 /* or without the GNU configure machinery. */
 
 #if HAVE_CONFIG_H
-# include <config.h>
+# include <pcre/config.h>
 #endif
 
 #include <stdio.h>

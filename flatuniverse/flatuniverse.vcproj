@@ -111,7 +111,7 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="$(SolutionDir)src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;HAVE_CONFIG_H"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -179,6 +179,14 @@
 			</File>
 			<File
 				RelativePath="..\src\core\collisionmgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\config.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\config.h"
 				>
 			</File>
 			<File
@@ -847,6 +855,50 @@
 			</File>
 			<File
 				RelativePath="..\src\pnglib\pngwutil.c"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="pcre"
+			>
+			<File
+				RelativePath="..\src\pcre\config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\pcre\pcre.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\pcre\pcre_chartables.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\pcre\pcre_compile.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\pcre\pcre_globals.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\pcre\pcre_internal.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\pcre\pcre_maketables.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\pcre\pcre_newline.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\pcre\pcre_tables.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\pcre\ucp.h"
 				>
 			</File>
 		</Filter>

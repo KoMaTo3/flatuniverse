@@ -133,6 +133,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetTexture( "data/temp/enemy0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
   */
 
+  /*
   obj = game->core->CreateObject( "lift", game->core->GetObject( "lifts" ) );
   obj->SetPosition( Vec3( -5.0f, 40.0f, 0.0f ) );
   col = obj->EnableCollision();
@@ -152,6 +153,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetTexture( "data/temp/brick3.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
   quad->SetColor( Vec4( 0.0f, 0.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 30.0f, 10.0f ) );
+  */
 
   obj = game->core->CreateObject( "test-bg-0" );
   obj->SetPosition( Vec3( 90.0f, 85.0f, -1.0f ) );
@@ -369,10 +371,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       }
     }
 
+    /*
     if( obj = game->core->GetObject( "/lifts/lift" ) )
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, Math::Sin16( rot * 5.0f ) * 300.0f, 0.0f ) );
     if( obj = game->core->GetObject( "/lifts/lift-2" ) )
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, Math::Sin16( rot * 3.0f ) * 100.0f, 0.0f ) );
+      */
 
     if( obj = game->core->GetObject( "test-bg-2" ) )
     {
