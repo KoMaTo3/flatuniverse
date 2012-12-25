@@ -4,9 +4,9 @@
 #include <vector>
 #include "interngl.h"
 #include "file.h"
+#include "config.h"
 
 #pragma comment( lib, "opengl32.lib" )
-
 
 //
 CoreRenderableList *__coreRenderableList = NULL;                      //список рендерейблов, отправляемых на рендер
@@ -17,6 +17,8 @@ CoreRenderableList *__coreGUI = NULL;                                 //список р
 CoreRenderableListIndicies  *__coreGUIIndicies = NULL;                //индексы рендерейблов GUI
 CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободные индексы рендерейблов GUI
 //
+
+ConfigFile* __config = NULL;
 
 
 Core::Core()
@@ -115,6 +117,9 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
 
   __fileManager = new FileManager();
   __fileManager->ScanAll();
+
+  __config = new ConfigFile();
+  __config->LoadFromFile( "data/default.cfg" );
 
   sTimer.UpdateFreq();
   sTimer.UpdateCounter();

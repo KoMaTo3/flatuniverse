@@ -2,6 +2,9 @@
 
 #include <map>
 
+class ConfigFile;
+extern ConfigFile* __config;
+
 
 
 class ConfigFile
@@ -14,7 +17,7 @@ private:
     bool b;
   };
   typedef std::map< std::string, ConfigFileValue* > ConfigFileValuesList;
-  ConfigFileValuesList values;
+  //ConfigFileValuesList values;
 public:
   ConfigFile();
   virtual ~ConfigFile();

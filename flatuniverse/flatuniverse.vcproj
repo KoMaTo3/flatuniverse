@@ -878,6 +878,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\pcre\pcre_exec.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\pcre\pcre_globals.c"
 				>
 			</File>
