@@ -120,6 +120,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
 
   __config = new ConfigFile();
   __config->LoadFromFile( "data/default.cfg" );
+  __config->Dump();
 
   sTimer.UpdateFreq();
   sTimer.UpdateCounter();
@@ -148,6 +149,12 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   {
     this->SetState( CORE_STATE_EXIT );
     return false;
+  }
+
+  if( !screenWidth )
+  {
+    screenWidth   = ( WORD ) __config->GetNumber( "gl_screen_width" );
+    screenHeight  = ( WORD ) __config->GetNumber( "gl_screen_height" );
   }
 
   DWORD style   = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;  //WS_POPUP for fullscreen

@@ -4,6 +4,7 @@
 #include "ktypes.h"
 #include "time.h"
 #include <deque>
+#include <algorithm>
 
 
 namespace tools
@@ -294,6 +295,33 @@ void Dump( void *mem, Dword size, const std::string& comment )
   }
   __log.Print( "============\nEnd of dump\n============\n" );
 }//Dump
+
+
+
+/*
+----------
+  StrToLowerCase
+  Перевод строки в нижний регистр
+----------
+*/
+std::string StrToLowerCase( std::string str )
+{
+  transform( str.begin(), str.end(), str.begin(), ::tolower );
+  return str;
+}//StrToLowerCase
+
+
+/*
+----------
+  StrToUpperCase
+  Перевод строки в нижний регистр
+----------
+*/
+std::string StrToUpperCase( std::string str )
+{
+  transform( str.begin(), str.end(), str.begin(), ::toupper );
+  return str;
+}//StrToUpperCase
 
 
 }//namespace tools

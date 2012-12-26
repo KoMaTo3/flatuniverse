@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "core/core.h"
 #include "core/imageloader.h"
+#include "core/config.h"
 #include "worldgridmgr.h"
 #include "game.h"
 
@@ -14,11 +15,10 @@ File __log;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
-  bool isDebug = false;
-
   game = new Game();
-  game->core->Init( 640, 400, false, "FlatGL" );
+  game->core->Init( 0, 0, false, "FlatGL" );
 
+  bool isDebug = __config->GetBoolean( "dbg_low_alpha" );
   Object *obj;
   RenderableQuad *quad;
   Collision *col;
@@ -196,7 +196,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   */
 
   float t = 0.0f, rot = 0.0f;
-  wglSwapIntervalEXT( false );
+  wglSwapIntervalEXT( __config->GetBoolean( "gl_vsync" ) );
   char tempChar[ 1024 ];
   DWORD fps = 0, currentFps = 0;
   //__textureAtlas->__Dump( "data/temp/__atlas.tga" );

@@ -361,9 +361,10 @@ void FileManager::SaveAll( const std::string& fileName, bool useCompression )
 /*
 ----------
   GetFile
+  addLastNull - добавить ли завершающий 0 после файла (например, если файл текстовый и нам необходимо его представить как C-строку)
 ----------
 */
-bool FileManager::GetFile( const std::string& fileName, memory& dest )
+bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLastNull )
 {
   __log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile ( '%s' )", fileName.c_str() );
   if( this->_items.find( fileName ) == this->_items.end() )
@@ -382,9 +383,11 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest )
       File f;
       if( f.Open( file.fullPath.c_str(), File_mode_READ ) != aOK )
         return false;
-      dest.alloc( f.GetLength() );
-      f.Read( dest.getData(), dest.getLength() );
+      dest.alloc( f.GetLength() + ( addLastNull ? 1 : 0 ) );
+      f.Read( dest.getData(), f.GetLength() );
       f.Close();
+      if( addLastNull )
+        dest.getData()[ dest.getLength() - 1 ] = 0;
     }
   break;
 
@@ -396,9 +399,11 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest )
         return false;
 
       f.SeekFromStart( file.start );
-      dest.alloc( file.size );
-      f.Read( dest.getData(), dest.getLength() );
+      dest.alloc( file.size + ( addLastNull ? 1 : 0 ) );
+      f.Read( dest.getData(), file.size );
       f.Close();
+      if( addLastNull )
+        dest.getData()[ dest.getLength() - 1 ] = 0;
     }
   break;
 
@@ -415,8 +420,8 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest )
       f.Read( tmp.getData(), tmp.getLength() );
       f.Close();
 
-      dest.alloc( file.size );
-      uLongf destSize = dest.getLength();
+      dest.alloc( file.size + ( addLastNull ? 1 : 0 ) );
+      uLongf destSize = file.size;
       int res;
       if( Z_OK != ( res = uncompress( ( Byte* ) dest.getData(), &destSize, ( Byte* ) tmp.getData(), tmp.getLength() ) ) )
       {
@@ -424,6 +429,8 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest )
         dest.free();
         return false;
       }
+      if( addLastNull )
+        dest.getData()[ dest.getLength() - 1 ] = 0;
     }
   break;
   }//switch type

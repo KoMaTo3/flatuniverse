@@ -76,7 +76,7 @@ public:
   void  ScanAll   ( const std::string& subDir = FileManager_DATADIRECTORY );
   void  SaveAll   ( const std::string& fileName, bool useCompression = true );
 
-  bool  GetFile   ( const std::string& fileName, memory& dest );
+  bool  GetFile   ( const std::string& fileName, memory& dest, bool addLastNull = false );
   void  FindFiles ( const std::string& extension, std::vector< std::string >& result );
 
   void  Dump      (); //!!!DEBUG!!!

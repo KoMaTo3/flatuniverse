@@ -35,6 +35,8 @@ std::string ModifyPathToMine    ( const std::string& path );
 std::string ModifyPathToTheir   ( const std::string& path );
 Int64       GetFileWriteTime    ( const std::string& file );
 void        Dump                ( void *mem, Dword size, const std::string& comment );
+std::string StrToLowerCase      ( std::string str );
+std::string StrToUpperCase      ( std::string str );
 
 
 }//namespace tools
