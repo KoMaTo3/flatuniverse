@@ -372,10 +372,10 @@ void ConfigFile::Dump()
   GetNumber
 =============
 */
-float ConfigFile::GetNumber( const std::string &name )
+float ConfigFile::GetNumber( const std::string &name, float defaultValue )
 {
   ConfigFileValue *val = this->_GetValue( name );
-  return ( val ? val->f : 0.0f );
+  return ( val ? val->f : defaultValue );
 }//GetNumber
 
 
@@ -385,10 +385,10 @@ float ConfigFile::GetNumber( const std::string &name )
   GetBoolean
 =============
 */
-bool ConfigFile::GetBoolean( const std::string &name )
+bool ConfigFile::GetBoolean( const std::string &name, bool defaultValue )
 {
   ConfigFileValue *val = this->_GetValue( name );
-  return ( val ? val->b : false );
+  return ( val ? val->b : defaultValue );
 }//GetBoolean
 
 
@@ -398,8 +398,8 @@ bool ConfigFile::GetBoolean( const std::string &name )
   GetString
 =============
 */
-const std::string& ConfigFile::GetString( const std::string &name )
+const std::string& ConfigFile::GetString( const std::string &name, const std::string &defaultValue )
 {
   ConfigFileValue *val = this->_GetValue( name );
-  return ( val ? val->s : "" );
+  return ( val ? val->s : defaultValue );
 }//GetString
