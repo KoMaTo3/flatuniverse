@@ -227,6 +227,8 @@ void ConfigFile::RemoveComments( std::string &str )
       {
         posEnd = str.find( "\n", pos );
         posEnd = min( posEnd, maxPos );
+        if( posEnd <= 0 )
+          posEnd = maxPos - 1;
         for( int q = pos; q <= posEnd; ++q )
           str[ q ] = ' ';
       }
@@ -235,6 +237,8 @@ void ConfigFile::RemoveComments( std::string &str )
       {
         posEnd = str.find( "*/", pos );
         posEnd = min( posEnd + 1, maxPos );
+        if( posEnd <= 0 )
+          posEnd = maxPos - 1;
         for( int q = pos; q <= posEnd; ++q )
           str[ q ] = ' ';
       }
@@ -242,12 +246,16 @@ void ConfigFile::RemoveComments( std::string &str )
     case ConfigFile_BLOCK_QUOTEDOUBLE:
       {
         posEnd = str.find( "\"", pos + 1 );
+        if( posEnd <= 0 )
+          posEnd = maxPos - 1;
         pos = min( posEnd + 1, maxPos );
       }
     break;  //ConfigFile_BLOCK_COMMENTBLOCK
     case ConfigFile_BLOCK_QUOTESINGLE:
       {
         posEnd = str.find( "'", pos + 1 );
+        if( posEnd <= 0 )
+          posEnd = maxPos - 1;
         pos = min( posEnd + 1, maxPos );
       }
     break;  //ConfigFile_BLOCK_COMMENTBLOCK

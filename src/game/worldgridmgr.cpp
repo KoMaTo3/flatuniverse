@@ -5,8 +5,8 @@
 
 
 
-WorldGridManager::WorldGridManager( Object* newRootGridObject )
-:currentTime( 0.0f ), blocksPerGrid( 8, 8 ), blockSize( WORLD_GRID_BLOCK_SIZE ), gridsAroundObject( 2 ), rootGridObject( newRootGridObject )
+WorldGridManager::WorldGridManager( Object* newRootGridObject, Short setGridsAroundObject, Pos< Short> setBlocksPerGrid )
+:currentTime( 0.0f ), blocksPerGrid( setBlocksPerGrid ), blockSize( WORLD_GRID_BLOCK_SIZE ), gridsAroundObject( setGridsAroundObject ), rootGridObject( newRootGridObject )
 {
   if( !__worldGridList )
     __worldGridList = new WorldGridList();
@@ -27,7 +27,7 @@ WorldGridManager::~WorldGridManager()
   Update
 =============
 */
-void WorldGridManager::Update()
+void WorldGridManager::Update( bool forceLoadGrids )
 {
   this->currentTime += sTimer.GetDeltaF();
   while( this->currentTime > WORLD_GRID_UPDATE_INTERVAL )
@@ -55,7 +55,7 @@ void WorldGridManager::Update()
         if( !grid )
         {
           //подгружаем новый грид
-          if( !oneGridLoaded )
+          if( !oneGridLoaded || forceLoadGrids )
           {
             this->LoadGrid( newPos );
             oneGridLoaded = true;

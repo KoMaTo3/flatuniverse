@@ -16,7 +16,13 @@ File __log;
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
   game = new Game();
+  Pos< Short> blocksPerGrid( 8, 8 );
   game->core->Init( 0, 0, false, "FlatGL" );
+  Short gridsAroundObject = ( Short )  __config->GetNumber( "grids_preload_range", 0.0f );
+  if( !gridsAroundObject )
+    gridsAroundObject = Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
+  __log.PrintInfo( Filelevel_DEBUG, "gridsAroundObject: %d", gridsAroundObject );
+  game->world = new WorldGridManager( game->core->GetRootObject(), gridsAroundObject );
 
   bool isDebug = __config->GetBoolean( "dbg_low_alpha" );
   Object *obj;
@@ -202,6 +208,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //__textureAtlas->__Dump( "data/temp/__atlas.tga" );
 
   sTimer.Update();
+  game->world->Update( true );
   while( game->core->Update() )
   {
     game->core->Redraw();
@@ -388,7 +395,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
     ++currentFps;
 
-    sprintf_s( tempChar, 1024, "FPS[%d], quads[%d/%d], cursor[%3.0f; %3.0f]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), game->core->mouse.GetCursorPosition().x, game->core->mouse.GetCursorPosition().y );
+    sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), __worldGridList->size() );
     game->core->SetWindowTitle( tempChar );
   }
   //MessageBox( NULL, "Ok", "Debug", MB_OK );

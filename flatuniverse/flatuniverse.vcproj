@@ -478,10 +478,6 @@
 			Name="jpeglib"
 			>
 			<File
-				RelativePath="..\src\jpeglib\ansi2knr.c"
-				>
-			</File>
-			<File
 				RelativePath="..\src\jpeglib\cderror.h"
 				>
 			</File>

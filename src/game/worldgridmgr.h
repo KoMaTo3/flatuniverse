@@ -32,10 +32,10 @@ private:
   WorldSaver          worldSaver;         //хранилище мира
 
 public:
-  WorldGridManager( Object* newRootGridObject );
+  WorldGridManager( Object* newRootGridObject, Short setGridsAroundObject = 2, Pos< Short> setBlocksPerGrid = Pos< Short>( 8, 8 ) );
   virtual ~WorldGridManager();
 
-  void        Update                  ();
+  void        Update                  ( bool forceLoadGrids = false );
   void        AddActiveObject         ( Object *obj );
   void        AttachObjectToGrid      ( const WorldGrid::WorldGridPosition& gridPos, Object *obj );
   void        AttachObjectToGrid      ( Short gridX, Short gridY, Object *obj );

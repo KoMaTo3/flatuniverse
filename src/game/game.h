@@ -22,7 +22,6 @@ public:
     this->gridTooltipUnderMouse.show = false;
     memset( this->gridTooltipUnderMouse.obj, 0, sizeof( this->gridTooltipUnderMouse.obj ) );
     this->core = new Core();
-    this->world = new WorldGridManager( this->core->GetRootObject() );
   }//Game
 
   ~Game()
