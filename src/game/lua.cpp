@@ -6,8 +6,13 @@
 
 Lua *__LuaCurrentContext = NULL;
 
-LUAFUNCPROC_RemoveObject *LUAFUNC_RemoveObject = NULL;
-LUAFUNCPROC_GetObjectPos *LUAFUNC_GetObjectPos = NULL;
+LUAFUNCPROC_RemoveObject  *LUAFUNC_RemoveObject         = NULL;
+LUAFUNCPROC_GetObjectPos  *LUAFUNC_GetObjectPos         = NULL;
+LUAFUNCPROC_SetObjectPos  *LUAFUNC_SetObjectPos         = NULL;
+LUAFUNCPROC_SetTimer      *LUAFUNC_SetTimer             = NULL;
+LUAFUNCPROC_LogWrite      *LUAFUNC_LogWrite             = NULL;
+
+//LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
 
 
@@ -44,9 +49,12 @@ bool Lua::Init()
   this->luaState = lua_open();
   //luaL_openlibs( this->luaState );
 
-  lua_register( this->luaState, "Alert", LUA_Alert );
-  lua_register( this->luaState, "ObjectRemove", LUA_ObjectRemove );
-  lua_register( this->luaState, "ObjectGetPos", LUA_GetObjectPos );
+  lua_register( this->luaState, "Alert", Lua::LUA_Alert );
+  lua_register( this->luaState, "ObjectRemove", Lua::LUA_ObjectRemove );
+  lua_register( this->luaState, "ObjectGetPos", Lua::LUA_GetObjectPos );
+  lua_register( this->luaState, "ObjectSetPos", Lua::LUA_SetObjectPos );
+  lua_register( this->luaState, "SetTimer",     Lua::LUA_SetTimer );
+  lua_register( this->luaState, "LogWrite",     Lua::LUA_LogWrite );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -173,13 +181,92 @@ int Lua::LUA_GetObjectPos( lua_State *lua )
 {
   std::string objectName = lua_tostring( lua, 1 );
   Vec2 pos = LUAFUNC_GetObjectPos( objectName );
-  char t[ 1024 ];
-
-  sprintf_s( t, 1024, "%3.3f", pos.x );
-  lua_pushstring( lua, t );
-
-  sprintf_s( t, 1024, "%3.3f", pos.y );
-  lua_pushstring( lua, t );
+  lua_pushnumber( lua, pos.x );
+  lua_pushnumber( lua, pos.y );
 
   return 2;
 }//LUA_ObjectRemove
+
+
+
+/*
+=============
+  LUA_SetObjectPos
+=============
+*/
+int Lua::LUA_SetObjectPos( lua_State *lua )
+{
+  std::string objectName = lua_tostring( lua, 1 );
+  LUAFUNC_SetObjectPos( objectName, Vec2( ( float ) lua_tonumber( lua, 2 ), ( float ) lua_tonumber( lua, 3 ) ) );
+  return 0;
+}//LUA_SetObjectPos
+
+
+
+/*
+=============
+  LUA_LogWrite
+=============
+*/
+int Lua::LUA_LogWrite( lua_State *lua )
+{
+  std::string text = lua_tostring( lua, 1 );
+
+  __log.PrintInfo( Filelevel_DEBUG, "Lua: %s", text.c_str() );
+
+  return 0;
+}//LUA_LogWrite
+
+
+
+/*
+=============
+  LUA_SetTimer
+=============
+*/
+int Lua::LUA_SetTimer( lua_State *lua )
+{
+  float period          = ( float ) lua_tonumber( lua, 1 );
+  std::string funcName  = lua_tostring( lua, 2 );
+
+  int id = LUAFUNC_SetTimer( period, funcName );
+  lua_pushinteger( lua, id );
+
+  return 1;
+}//LUA_SetTimer
+
+
+
+/*
+=============
+  LUACALLBACK_Timer
+=============
+*/
+void Lua::LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
+{
+  lua_getglobal( lua->luaState, funcName.c_str() );
+  if( !lua_isfunction( lua->luaState, -1 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => '%s' is not a function", funcName.c_str() );
+    lua_pop( lua->luaState, 1 );
+  }
+
+  lua_pushinteger( lua->luaState, id );
+  if( lua_pcall( lua->luaState, 1, 0, 0 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => error by calling function '%s'", funcName.c_str() );
+    return;
+  }
+}//LUACALLBACK_Timer
+
+
+
+/*
+=============
+  LUACALLBACK_Timer
+=============
+*/
+void LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
+{
+  Lua::LUACALLBACK_Timer( lua, id, funcName );
+}//LUACALLBACK_Timer

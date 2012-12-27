@@ -221,6 +221,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   {
     game->core->Redraw();
     game->world->Update();
+    game->Update();
 
     t += sTimer.GetDeltaF();
     rot += sTimer.GetDeltaF();
@@ -428,8 +429,10 @@ Game::Game()
   this->core = new Core();
   this->lua = new Lua();
 
-  LUAFUNC_RemoveObject = Game::LUA_RemoveObject;
-  LUAFUNC_GetObjectPos = Game::LUA_GetObjectPos;
+  LUAFUNC_RemoveObject  = Game::LUA_RemoveObject;
+  LUAFUNC_GetObjectPos  = Game::LUA_GetObjectPos;
+  LUAFUNC_SetObjectPos  = Game::LUA_SetObjectPos;
+  LUAFUNC_SetTimer      = Game::LUA_SetTimer;
 }//constructor
 
 Game::~Game()
@@ -440,6 +443,34 @@ Game::~Game()
   DEF_DELETE( this->core );
 }//destructor
 
+
+void Game::Update()
+{
+  this->UpdateLuaTimers();
+}//Update
+
+void Game::UpdateLuaTimers()
+{
+  Dword q, count = this->luaTimers.size();
+  GameLuaTimer *timer;
+  for( q = 0; q < count; ++q )
+  {
+    timer = &this->luaTimers[ q ];
+    if( timer->active )
+    {
+      timer->time -= sTimer.GetDeltaF();
+      if( timer->time <= 0.0f )
+      {
+        timer->active = false;
+        if( timer->funcName.length() )
+          LUACALLBACK_Timer( this->lua, q, timer->funcName );
+      }
+    }
+  }//for q
+}//UpdateLuaTimers
+
+
+
 void Game::LUA_RemoveObject( const std::string &name )
 {
   game->core->RemoveObject( name );
@@ -448,5 +479,37 @@ void Game::LUA_RemoveObject( const std::string &name )
 Vec2 Game::LUA_GetObjectPos( const std::string &name )
 {
   Vec2 res;
+  Object *obj = game->core->GetObject( name );
+  if( obj )
+    res.Set( obj->GetPosition().x, obj->GetPosition().y );
   return res;
 }//LUA_GetObjectPos
+
+void Game::LUA_SetObjectPos( const std::string &name, const Vec2 &pos )
+{
+  Object *obj = game->core->GetObject( name );
+  if( obj )
+    obj->SetPosition2D( pos );
+}//LUA_SetObjectPos
+
+Dword Game::LUA_SetTimer( float time, const std::string &funcName )
+{
+  Dword id, count = game->luaTimers.size();
+  bool setted = false;
+  for( Dword q = 0; q < count; ++q )
+    if( !game->luaTimers[ q ].active )
+    {
+      id = q;
+      setted = true;
+      break;
+    }
+  if( !setted )
+  {
+    game->luaTimers.push_back( GameLuaTimer() );
+    id = game->luaTimers.size() - 1;
+  }
+  game->luaTimers[ id ].active    = 1;
+  game->luaTimers[ id ].time      = time;
+  game->luaTimers[ id ].funcName  = funcName;
+  return id;
+}//LUA_SetObjectPos

@@ -4,6 +4,7 @@
 #include "core/object.h"
 #include "worldgridmgr.h"
 #include "lua.h"
+#include <vector>
 
 class Lua;
 
@@ -20,11 +21,25 @@ public:
   WorldGridManager  *world;
   Lua               *lua;
 
+  //lua-таймеры
+  struct GameLuaTimer
+  {
+    bool active;
+    float time;
+    std::string funcName;
+  };
+  std::vector< GameLuaTimer > luaTimers;
+
 public:
   Game();
   ~Game();
-  static void LUA_RemoveObject( const std::string &name );
-  static Vec2 LUA_GetObjectPos( const std::string &name );
+  static void   LUA_RemoveObject  ( const std::string &name );
+  static Vec2   LUA_GetObjectPos  ( const std::string &name );
+  static void   LUA_SetObjectPos  ( const std::string &name, const Vec2 &pos );
+  static Dword  LUA_SetTimer      ( float time, const std::string &funcName );
+
+  void Update();
+  void UpdateLuaTimers();
 
   Vec3 GetGridPosUnderCamera( float scale = 1.0f )
   {
