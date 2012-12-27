@@ -1,7 +1,11 @@
 #pragma once
 
+#include "core/core.h"
 #include "core/object.h"
 #include "worldgridmgr.h"
+#include "lua.h"
+
+class Lua;
 
 class Game
 {
@@ -12,24 +16,15 @@ public:
     Object *obj[ 40 ];
   } gridTooltipUnderMouse;
 
-  Core *core;
-
-  WorldGridManager *world;
+  Core              *core;
+  WorldGridManager  *world;
+  Lua               *lua;
 
 public:
-  Game()
-  {
-    this->gridTooltipUnderMouse.show = false;
-    memset( this->gridTooltipUnderMouse.obj, 0, sizeof( this->gridTooltipUnderMouse.obj ) );
-    this->core = new Core();
-  }//Game
-
-  ~Game()
-  {
-    core->Destroy();
-    DEF_DELETE( this->world );
-    DEF_DELETE( this->core );
-  }
+  Game();
+  ~Game();
+  static void LUA_RemoveObject( const std::string &name );
+  static Vec2 LUA_GetObjectPos( const std::string &name );
 
   Vec3 GetGridPosUnderCamera( float scale = 1.0f )
   {

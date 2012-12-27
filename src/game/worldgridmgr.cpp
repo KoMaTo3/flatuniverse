@@ -34,6 +34,11 @@ void WorldGridManager::Update( bool forceLoadGrids )
   {
     __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update" );
 
+    //Update grids
+    WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
+    for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
+      ( *iterGrid )->Update();
+
     WorldGridObjectList::iterator iter, iterEnd = this->activeObjects.end();
     Short x, y;
     WorldGridList greedsToUnload = *__worldGridList;  //список гридов, которые можно выгрузить
@@ -45,7 +50,9 @@ void WorldGridManager::Update( bool forceLoadGrids )
 
     for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter )
     {
-      WorldGrid::WorldGridPosition pos = this->GetGridPositionByObject( **iter );
+      //__log.PrintInfo( Filelevel_DEBUG, ". object: x%X", iter->GetObject() );
+      //__log.PrintInfo( Filelevel_DEBUG, ". valid: %d", iter->GetValid() );
+      WorldGrid::WorldGridPosition pos = this->GetGridPositionByObject( *iter->GetObject() );
 
       for( y = pos.y - this->gridsAroundObject; y <= pos.y + this->gridsAroundObject; ++y )
       for( x = pos.x - this->gridsAroundObject; x <= pos.x + this->gridsAroundObject; ++x )
@@ -77,7 +84,7 @@ void WorldGridManager::Update( bool forceLoadGrids )
     }//iter
 
     __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => grids to unload %d", greedsToUnload.size() );
-    WorldGridList::iterator iterGrid = greedsToUnload.begin();
+    iterGrid = greedsToUnload.begin();
 
     while( iterGrid != greedsToUnload.end() )
     {
@@ -151,13 +158,13 @@ void WorldGridManager::AddActiveObject( Object *obj )
   WorldGridObjectList::iterator iter, iterEnd = this->activeObjects.end();
 
   for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter )
-    if( ( *iter ) == obj )
+    if( iter->GetObject() == obj )
     {
       __log.PrintInfo( Filelevel_WARNING, "WorldGridManager::AddActiveObject => object '%s' already in list", obj->GetNameFull().c_str() );
       return;
     }
 
-  this->activeObjects.push_back( obj );
+  this->activeObjects.push_back( WorldGridObjectList::value_type( obj ) );
   __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::AddActiveObject => object '%s' added to list", obj->GetNameFull().c_str() );
 }//AddActiveObject
 

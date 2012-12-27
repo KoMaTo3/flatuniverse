@@ -9,6 +9,8 @@
 #include "textureatlas.h"
 #include "memorywriter.h"
 #include "memoryreader.h"
+#include "objectpointer.h"
+
 
 
 
@@ -16,6 +18,7 @@ class Object
 {
 public:
   typedef std::list< Object* > ObjectChilds;
+  typedef std::list< ObjectPointer< Object >* > ObjectPointers;
   struct ObjectForce  //вектор силы
   {
     long  id;
@@ -50,6 +53,7 @@ private:
   } renderable;
 
   Collision       *collision;
+  ObjectPointers  pointers;   //перечень указателей на этот объект. объект обязан делать их невалидными беред своим уничтожением
 
 private:
   void                _RecalculatePosition();
@@ -94,4 +98,6 @@ public:
   void                LoadFromBuffer      ( MemoryReader &reader, Object *rootObject );
 
   Object*             GetObject           ( const std::string& name, Object *parent = NULL );
+
+  void                PointerAdd          ( ObjectPointer< Object > *pointer );
 };

@@ -14,12 +14,14 @@
 #pragma once
 
 #include "core/object.h"
+#include "core/objectpointer.h"
 #include <deque>
 
 
 class WorldGrid;
+typedef ObjectPointer< Object > ObjectPointerType;
 typedef std::deque< WorldGrid* > WorldGridList;
-typedef std::deque< Object* > WorldGridObjectList;
+typedef std::deque< ObjectPointerType > WorldGridObjectList;
 extern WorldGridList *__worldGridList;
 
 #define WORLD_GRID_BLOCK_SIZE ( 16 )
@@ -58,4 +60,6 @@ public:
         GetPosition () { return this->position; }
   bool  GetGridDump ( FU_OUT memory& dump );
   bool  LoadFromDump( FU_IN memory& dump, Object *rootObject );
+
+  void  Update();
 };

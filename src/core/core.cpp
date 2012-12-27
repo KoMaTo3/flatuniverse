@@ -274,9 +274,9 @@ bool Core::_InitGraphics()
     lengthShaderVertex,
     lengthShaderGeometry,
     lengthShaderFragment;
-  __fileManager->GetFile( "data/shaders/main.vs", memShaderVertex );
-  __fileManager->GetFile( "data/shaders/main.gs", memShaderGeometry );
-  __fileManager->GetFile( "data/shaders/main.fs", memShaderFragment );
+  __fileManager->GetFile( __config->GetString( "gl_shader_vertex", "data/shaders/main.vs" ), memShaderVertex );
+  __fileManager->GetFile( __config->GetString( "gl_shader_geometry", "data/shaders/main.gs" ), memShaderGeometry );
+  __fileManager->GetFile( __config->GetString( "gl_shader_fragment", "data/shaders/main.fs" ), memShaderFragment );
   lengthShaderVertex    = memShaderVertex.getLength();
   lengthShaderGeometry  = memShaderGeometry.getLength();
   lengthShaderFragment  = memShaderFragment.getLength();

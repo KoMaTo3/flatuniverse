@@ -65,7 +65,7 @@ Object::Object( const std::string &objectName, Object* parentObject )
 
 Object::~Object()
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%X]", this );
+  __log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%X]", this );
   //if( !this->_parent )
   //  __log.PrintInfo( Filelevel_DEBUG, "is a root object" );
 
@@ -73,6 +73,17 @@ Object::~Object()
   this->DisableCollision();
   this->ClearChilds();
   this->UnAttachThisFromParent();
+
+  if( this->pointers.size() )
+  {
+    __log.PrintInfo( Filelevel_DEBUG, ". object[x%X] pointers[%d]", this, this->pointers.size() );
+    ObjectPointers::iterator iter, iterEnd = this->pointers.end();
+    for( iter = this->pointers.begin(); iter != iterEnd; ++iter )
+    {
+      __log.PrintInfo( Filelevel_DEBUG, ". pointer[x%X]", *iter );
+      ( *iter )->SetValid( false );
+    }
+  }
 
   //__log.PrintInfo( Filelevel_DEBUG, "Object x%X deleted", this );
 }//destructor
@@ -863,3 +874,17 @@ Object* Object::GetObjectInPoint( const Vec2& pos )
 
   return NULL;
 }//GetObjectInPoint
+
+
+
+
+/*
+=============
+  PointerAdd
+=============
+*/
+void Object::PointerAdd( ObjectPointer< Object > *pointer )
+{
+  __log.PrintInfo( Filelevel_DEBUG, "Object::PointerAdd => this[x%X] pointer[x%X]", this, pointer );
+  this->pointers.push_back( pointer );
+}//PointerAdd

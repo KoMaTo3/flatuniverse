@@ -20,7 +20,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->core->Init( 0, 0, false, "FlatGL" );
   Short gridsAroundObject = ( Short )  __config->GetNumber( "grids_preload_range", 0.0f );
   if( !gridsAroundObject )
-    gridsAroundObject = Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
+    gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
   __log.PrintInfo( Filelevel_DEBUG, "gridsAroundObject: %d", gridsAroundObject );
   game->world = new WorldGridManager( game->core->GetRootObject(), gridsAroundObject );
 
@@ -29,6 +29,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   RenderableQuad *quad;
   Collision *col;
   float worldAlpha = ( isDebug ? 0.1f : 1.0f );
+
+  game->lua->Init();
 
   game->core->CreateObject( "gui" );
 
@@ -66,6 +68,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //quad->scale.Set( 0.5f, 1.0f );
   game->core->SetCamera( obj );
 
+  /*
   obj = game->core->CreateObject( "wall-top" );
   obj->SetPosition( Vec3( 53.0f, 0.0f, 0.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
@@ -76,7 +79,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 50.0f, 10.0f ) );
   game->world->AttachObjectToGrid( 0, 0, obj );
+  */
 
+  /*
   obj = game->core->CreateObject( "wall-bottom" );
   obj->SetPosition( Vec3( 103.0f, 100.0f, 0.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
@@ -87,7 +92,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 150.0f, 10.0f ) );
   game->world->AttachObjectToGrid( 0, 0, obj );
+  */
 
+  /*
   obj = game->core->CreateObject( "wall-left" );
   obj->SetPosition( Vec3( 15.0f, 50.0f, 0.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
@@ -109,6 +116,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 10.0f, 50.0f ) );
   game->world->AttachObjectToGrid( 0, 0, obj );
+  */
 
   /*
   obj = game->core->CreateObject( "enemy" );
@@ -159,7 +167,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetTexture( "data/temp/brick3.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
   quad->SetColor( Vec4( 0.0f, 0.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 30.0f, 10.0f ) );
-  */
 
   obj = game->core->CreateObject( "test-bg-0" );
   obj->SetPosition( Vec3( 90.0f, 85.0f, -1.0f ) );
@@ -174,6 +181,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetTexture( "data/temp/brick2.png" );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 20.0f, 20.0f ) );
+  */
 
   //game->world->AttachObjectToGrid( WorldGrid::WorldGridPosition( 0, 0 ), game->core->GetObject( "wall-left" ) );
   game->world->AddActiveObject( game->core->GetObject( "player" ) );
@@ -263,6 +271,11 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     {
       obj = game->core->GetObject( "player" );
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, 100.0f, 0.0f ) );
+    }
+
+    if( game->core->keyboard.IsPressed( VK_SPACE ) )
+    {
+      game->lua->RunFile( "data/scripts/test.lua" );
     }
 
     if( game->core->mouse.IsPressed( VK_RBUTTON ) )
@@ -405,3 +418,35 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   return 0;
 }
+
+
+
+Game::Game()
+{
+  this->gridTooltipUnderMouse.show = false;
+  memset( this->gridTooltipUnderMouse.obj, 0, sizeof( this->gridTooltipUnderMouse.obj ) );
+  this->core = new Core();
+  this->lua = new Lua();
+
+  LUAFUNC_RemoveObject = Game::LUA_RemoveObject;
+  LUAFUNC_GetObjectPos = Game::LUA_GetObjectPos;
+}//constructor
+
+Game::~Game()
+{
+  this->core->Destroy();
+  DEF_DELETE( this->lua );
+  DEF_DELETE( this->world );
+  DEF_DELETE( this->core );
+}//destructor
+
+void Game::LUA_RemoveObject( const std::string &name )
+{
+  game->core->RemoveObject( name );
+}//LUA_RemoveObject
+
+Vec2 Game::LUA_GetObjectPos( const std::string &name )
+{
+  Vec2 res;
+  return res;
+}//LUA_GetObjectPos
