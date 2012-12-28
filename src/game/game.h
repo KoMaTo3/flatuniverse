@@ -33,10 +33,11 @@ public:
 public:
   Game();
   ~Game();
-  static void   LUA_RemoveObject  ( const std::string &name );
+  static bool   LUA_RemoveObject  ( const std::string &name );
   static Vec2   LUA_GetObjectPos  ( const std::string &name );
   static void   LUA_SetObjectPos  ( const std::string &name, const Vec2 &pos );
   static Dword  LUA_SetTimer      ( float time, const std::string &funcName );
+  static void   LUA_CreateObject  ( const std::string &name, const std::string &parentName, const Vec3 &pos, const Vec2 &size, const std::string &textureName, const Vec4 &color );
 
   void Update();
   void UpdateLuaTimers();

@@ -767,7 +767,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
   reader >> tmpName;
   reader >> parentName;
   reader >> position;
-  //__log.PrintInfo( Filelevel_DEBUG, ". rend[%d] coll[%d] name['%s'] parent['%s']", isRenderable, isCollision, tmpName.c_str(), parentName.c_str() );
+  __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => name['%s'] parent['%s']", tmpName.c_str(), parentName.c_str() );
 
   this->name = tmpName;
   this->_parent = ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName ) );

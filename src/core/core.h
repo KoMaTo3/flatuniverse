@@ -130,7 +130,7 @@ public:
 
   Object* CreateObject      ( const std::string& name, Object *parent = NULL );
   Object* GetObject         ( const std::string& name, Object *parent = NULL );
-  void    RemoveObject      ( const std::string& name );
+  bool    RemoveObject      ( const std::string& name );
   Object* SetCamera         ( Object* newCamera );
   inline Object* GetCamera  () { return this->camera; }
   Object* getObjectInPoint  ( const Vec2& pos );

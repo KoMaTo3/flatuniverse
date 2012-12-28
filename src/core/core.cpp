@@ -1281,11 +1281,11 @@ Object* Core::GetGUIObject( const std::string& name, Object *parent )
   RemoveObject
 =============
 */
-void Core::RemoveObject( const std::string& name )
+bool Core::RemoveObject( const std::string& name )
 {
   Object *obj = this->GetObject( name );
   if( !obj )
-    return;
+    return false;
 
   //всё это делается в деструкторе Object
   //obj->ClearChilds();
@@ -1293,6 +1293,7 @@ void Core::RemoveObject( const std::string& name )
   //obj->DisableCollision();
 
   delete obj; //анаттач происходит здесь
+  return true;
 }//RemoveObject
 
 

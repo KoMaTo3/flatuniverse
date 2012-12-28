@@ -133,8 +133,10 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetTexture( "data/temp/enemy0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
   //quad->scale.Set( 0.5f, 1.0f );
   game->world->AttachObjectToGrid( 0, 0, obj );
+  */
 
-  obj = game->core->CreateObject( "enemy-2" );
+  /*
+  obj = game->core->CreateObject( "enemy" );
   col = obj->EnableCollision();
   col->SetSize( Vec3( 20.0f, 20.0f, 0.0f ) );
   col->SetPosition( Vec3( 40.0f, 0.0f, 0.0f ) );
@@ -145,6 +147,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 20.0f, 20.0f ) );
   quad->SetTexture( "data/temp/enemy0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+  game->world->AttachObjectToGrid( 0, 0, obj );
   */
 
   /*
@@ -186,6 +189,24 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //game->world->AttachObjectToGrid( WorldGrid::WorldGridPosition( 0, 0 ), game->core->GetObject( "wall-left" ) );
   game->world->AddActiveObject( game->core->GetObject( "player" ) );
 
+
+  /*
+  for( int q = 0; q < 10; ++q )
+  {
+    char t[ 1024 ];
+    sprintf_s( t, sizeof( t ), "block%d", q );
+    Vec3 pos = Vec3( float( q ), -2.0f, 0.0f ) * float( WORLD_GRID_BLOCK_SIZE );
+    obj = game->core->CreateObject( t );
+    col = obj->EnableCollision();
+    col->SetPosition( pos )->SetIsStatic( true )->SetSize( Vec3( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE, 0.0f ) );
+    quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
+    quad->SetColor( Vec4( ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, 1.0f ) );
+    quad->SetSize( Vec2( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE ) );
+    quad->SetTexture( "data/temp/brick0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+    game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
+  }
+  */
+
   //фоновая картинка
 
   /*
@@ -217,6 +238,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   sTimer.Update();
   game->world->Update( true );
+  game->lua->RunFile( "data/scripts/test.lua" );
+
   while( game->core->Update() )
   {
     game->core->Redraw();
@@ -276,7 +299,10 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
     if( game->core->keyboard.IsPressed( VK_SPACE ) )
     {
-      game->lua->RunFile( "data/scripts/test.lua" );
+      if( game->core->keyboard.IsHold( VK_SHIFT ) )
+        game->lua->RunFile( "data/scripts/test.lua" );
+      else
+        game->lua->CallFunction( "SpacePressed" );
     }
 
     if( game->core->mouse.IsPressed( VK_RBUTTON ) )
@@ -433,6 +459,7 @@ Game::Game()
   LUAFUNC_GetObjectPos  = Game::LUA_GetObjectPos;
   LUAFUNC_SetObjectPos  = Game::LUA_SetObjectPos;
   LUAFUNC_SetTimer      = Game::LUA_SetTimer;
+  LUAFUNC_CreateObject  = Game::LUA_CreateObject;
 }//constructor
 
 Game::~Game()
@@ -471,9 +498,9 @@ void Game::UpdateLuaTimers()
 
 
 
-void Game::LUA_RemoveObject( const std::string &name )
+bool Game::LUA_RemoveObject( const std::string &name )
 {
-  game->core->RemoveObject( name );
+  return game->core->RemoveObject( name );
 }//LUA_RemoveObject
 
 Vec2 Game::LUA_GetObjectPos( const std::string &name )
@@ -513,3 +540,17 @@ Dword Game::LUA_SetTimer( float time, const std::string &funcName )
   game->luaTimers[ id ].funcName  = funcName;
   return id;
 }//LUA_SetObjectPos
+
+void Game::LUA_CreateObject( const std::string &name, const std::string &parentName, const Vec3 &pos, const Vec2 &size, const std::string &textureName, const Vec4 &color )
+{
+  Object *parentObj = ( parentName.length() ? game->core->GetObject( parentName ) : NULL );
+  Object *obj = game->core->CreateObject( name, parentObj );
+  Collision *col = obj->EnableCollision();
+  col->SetPosition( pos )->SetIsStatic( true )->SetSize( Vec3( size.x, size.y, 0.0f ) );
+  RenderableQuad *quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
+  quad->SetColor( color );
+  quad->SetSize( Vec2( size.x, size.y ) );
+  quad->SetTexture( textureName, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+
+  game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
+}

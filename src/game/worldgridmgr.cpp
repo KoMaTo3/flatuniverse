@@ -32,7 +32,7 @@ void WorldGridManager::Update( bool forceLoadGrids )
   this->currentTime += sTimer.GetDeltaF();
   while( this->currentTime > WORLD_GRID_UPDATE_INTERVAL )
   {
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update" );
+    //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update" );
 
     //Update grids
     WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
@@ -45,8 +45,8 @@ void WorldGridManager::Update( bool forceLoadGrids )
     WorldGrid *grid;
     bool oneGridLoaded = false;
 
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => grids to unload %d", greedsToUnload.size() );
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => active objects %d", this->activeObjects.size() );
+    //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => grids to unload %d", greedsToUnload.size() );
+    //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => active objects %d", this->activeObjects.size() );
 
     for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter )
     {
@@ -83,7 +83,7 @@ void WorldGridManager::Update( bool forceLoadGrids )
       //for( int q =  )
     }//iter
 
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => grids to unload %d", greedsToUnload.size() );
+    //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => grids to unload %d", greedsToUnload.size() );
     iterGrid = greedsToUnload.begin();
 
     while( iterGrid != greedsToUnload.end() )

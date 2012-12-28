@@ -38,7 +38,7 @@ template<class T> KM_INLINE T  Min3( T x, T y, T z ) { return ( x < y ) ? ( ( x 
 template<class T> KM_INLINE Int  Max3Index( T x, T y, T z ) { return ( x > y ) ? ( ( x > z ) ? 0 : 2 ) : ( ( y > z ) ? 1 : 2 ); }
 template<class T> KM_INLINE Int  Min3Index( T x, T y, T z ) { return ( x < y ) ? ( ( x < z ) ? 0 : 2 ) : ( ( y < z ) ? 1 : 2 ); }
 
-template<class T> KM_INLINE T  Sign( T f ) { return ( f > 0 ) ? 1 : ( ( f < 0 ) ? -1 : 0 ); }
+template<class T> KM_INLINE T  Sign( T f ) { return ( f > 0 ) ? ( T ) 1 : ( ( f < 0 ) ? ( T ) -1 : 0 ); }
 template<class T> KM_INLINE T  Square( T x ) { return x * x; }
 template<class T> KM_INLINE T  Cube( T x ) { return x * x * x; }
 
