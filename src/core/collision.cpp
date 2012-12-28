@@ -42,6 +42,8 @@ bool Collision::Update( float dt )
   //this->_rect.radius2     = halfSize.x * halfSize.x + halfSize.y * halfSize.y;
   this->_rect.radius2     = this->size.x * this->size.x + this->size.y * this->size.y;
 
+  this->resolver.clear();
+
   return true;
 }//Update
 
@@ -200,14 +202,18 @@ bool Collision::TestIntersect( Collision& item )
       Math::Fabs( max( this->_rect.leftTop.y, item._rect.leftTop.y ) - min( this->_rect.rightBottom.y, item._rect.rightBottom.y ) ),
       0.0f
     );
+  Vec3 halfIntersectPower = intersectPower * 0.5f;
 
+  /*
   if( intersectPower.y < intersectPower.x )
     intersectPower.x  = 0.0f;
   else
     intersectPower.y  = 0.0f;
+    */
 
   Collision *item0, *item1;
   bool collisionSolved = false;
+  CollisionResolver itemResolver0, itemResolver1;
 
   if( this->IsStatic() )  //static + dynamic
   {
@@ -224,6 +230,34 @@ bool Collision::TestIntersect( Collision& item )
     item0 = this;
     item1 = &item;
     collisionSolved = true;
+
+    itemResolver0.power = itemResolver1.power = halfIntersectPower;
+    //item0
+    itemResolver0.resolveVector = itemResolver1.resolveVector = Vec3Null;
+    if( item0->_rect.leftTop.x < item1->_rect.leftTop.x ) //двигаем item0 - влево, item1 - вправо
+    {
+      itemResolver0.resolveVector.x = -halfIntersectPower.x;
+      itemResolver1.resolveVector.x = halfIntersectPower.x;
+    }
+    else
+    {
+      itemResolver0.resolveVector.x = halfIntersectPower.x;
+      itemResolver1.resolveVector.x = -halfIntersectPower.x;
+    }
+    if( item0->_rect.leftTop.y < item1->_rect.leftTop.y ) //двигаем item0 - вверх, item1 - вниз
+    {
+      itemResolver0.resolveVector.y = -halfIntersectPower.y;
+      itemResolver1.resolveVector.y = halfIntersectPower.y;
+    }
+    else
+    {
+      itemResolver0.resolveVector.y = halfIntersectPower.y;
+      itemResolver1.resolveVector.y = -halfIntersectPower.y;
+    }
+    item0->resolver.push_back( itemResolver0 );
+    item1->resolver.push_back( itemResolver1 );
+
+    /*
     if( intersectPower.x )
     {
       if( item0->_rect.leftTop.x < item1->_rect.leftTop.x ) //двигаем item0 - влево, item1 - вправо
@@ -272,10 +306,23 @@ bool Collision::TestIntersect( Collision& item )
     //пересчитываем позицию объектов
     item0->Update( 0.0f );
     item1->Update( 0.0f );
+    */
   }
 
   if( !collisionSolved )  //dynamic[item0] + static[item1]
   {
+    itemResolver0.power = intersectPower;
+    itemResolver0.resolveVector = Vec3Null;
+    if( item0->_rect.leftTop.x < item1->_rect.leftTop.x ) //двигаем влево
+      itemResolver0.resolveVector.x = -intersectPower.x;
+    else
+      itemResolver0.resolveVector.x = intersectPower.x;
+    if( item0->_rect.leftTop.y < item1->_rect.leftTop.y ) //поднимаем
+      itemResolver0.resolveVector.y = -intersectPower.y;
+    else
+      itemResolver0.resolveVector.y = intersectPower.y;
+    item0->resolver.push_back( itemResolver0 );
+    /*
     if( intersectPower.x )
     {
       if( item0->_rect.leftTop.x < item1->_rect.leftTop.x ) //двигаем влево
@@ -309,10 +356,57 @@ bool Collision::TestIntersect( Collision& item )
     //__log.PrintInfo( Filelevel_DEBUG, "%d", __LINE__ );
     //пересчитываем позицию объекта
     item0->Update( 0.0f );
+    */
   }
 
   return true;
 }//TestIntersect
+
+
+
+
+/*
+=============
+  ResolveCollision
+=============
+*/
+void Collision::ResolveCollision()
+{
+  //__log.PrintInfo( Filelevel_DEBUG, "Collision::ResolveCollision => %d", this->resolver.size() );
+  if( !this->resolver.size() )
+    return;
+
+  CollisionResolver *result = &( *this->resolver.begin() );
+  float resultSquare = result->power.x * result->power.y, square;
+  CollisionResolverList::iterator iter = this->resolver.begin(), iterEnd = this->resolver.end();
+  for( ++iter; iter != iterEnd; ++iter )
+  {
+    square = iter->power.x * iter->power.y;
+    if( square > resultSquare )
+    {
+      resultSquare = square;
+      result = &( *iter );
+    }
+  }
+  //__log.PrintInfo( Filelevel_DEBUG, ". power[%3.3f; %3.3f] vector[%3.3f; %3.3f]", result->power.x, result->power.y, result->resolveVector.x, result->resolveVector.y );
+
+  if( result->power.x < result->power.y ) //смещаем по x
+    result->resolveVector.y = 0.0f;
+  else  //смещаем по y
+  {
+    result->resolveVector.x = 0.0f;
+    if( result->resolveVector.y < 0.0f && this->velocity.y > 0.0f )
+      this->velocity.y = 0.0f;
+    else
+    if( result->resolveVector.y > 0.0f && this->velocity.y < 0.0f )
+      this->velocity.y = 0.0f;
+  }
+  this->SetPositionBy( result->resolveVector );
+
+  this->Update( 0.0f );
+}//ResolveCollision
+
+
 
 
 

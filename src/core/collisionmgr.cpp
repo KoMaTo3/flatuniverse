@@ -38,7 +38,7 @@ bool CollisionManager::Update( float dt )
 
   while( this->time > COLLISION_UPDATE_FREQUENCY )
   {
-    //Обновляем позиции
+    //Обновляем позиции, сбрасываем решения коллизий
     for( iter0 = __collisionList->begin(); iter0 != iterEnd; ++iter0 )
       ( *iter0 )->Update( COLLISION_UPDATE_FREQUENCY );
 
@@ -46,36 +46,45 @@ bool CollisionManager::Update( float dt )
     //не проверяем статика+статика или статика+динамика, т.к. при дальнейшем проходе эта динамика будет проверяться со всей статикой
 
     //оптимизация: динамика проверяется со всеми статиками, и с той частью динамики, что идёт после себя в списке __collisionList
-    bool allowTestWidthDynamic;
-    for( iter0 = __collisionList->begin(); iter0 != iterEnd; ++iter0 )
+    for( int q = 0; q < 2; ++q )
     {
-      if( ( *iter0 )->IsStatic() )
-        continue;
-      allowTestWidthDynamic = false;
-      for( iter1 = __collisionList->begin(); iter1 != iterEnd; ++iter1 )
+      bool allowTestWidthDynamic;
+      for( iter0 = __collisionList->begin(); iter0 != iterEnd; ++iter0 )
       {
-        //iter0 тут всегда динамика
-        //iter1 тут что угодно
-        if( iter0 == iter1 )  //сам с собой не пересекается
-        {
-          allowTestWidthDynamic = true; //разрешаем проверять всю динамику, что дальше по списку
+        if( ( *iter0 )->IsStatic() )
           continue;
-        }
-
-        if( !( *iter1 )->IsStatic() && !allowTestWidthDynamic ) //пропускаем динамику, которая предшествует iter0
-          continue;
-
-        //Проверка дистанции (расстояние между центрами должно быть меньше, чем суммы радиусов)
-        if( this->CheckDistance( **iter0, **iter1 ) )
+        allowTestWidthDynamic = false;
+        for( iter1 = __collisionList->begin(); iter1 != iterEnd; ++iter1 )
         {
-          //__log.PrintInfo( Filelevel_DEBUG, "test" );
-          if( ( *iter0 )->TestIntersect( **iter1 ) )
+          //iter0 тут всегда динамика
+          //iter1 тут что угодно
+          if( iter0 == iter1 )  //сам с собой не пересекается
           {
-            //__log.PrintInfo( Filelevel_DEBUG, "intersect" );
+            allowTestWidthDynamic = true; //разрешаем проверять всю динамику, что дальше по списку
+            continue;
           }
-        }//CheckDistance
+
+          if( !( *iter1 )->IsStatic() && !allowTestWidthDynamic ) //пропускаем динамику, которая предшествует iter0
+            continue;
+
+          //Проверка дистанции (расстояние между центрами должно быть меньше, чем суммы радиусов)
+          if( this->CheckDistance( **iter0, **iter1 ) )
+          {
+            //__log.PrintInfo( Filelevel_DEBUG, "test" );
+            if( ( *iter0 )->TestIntersect( **iter1 ) )
+            {
+              //__log.PrintInfo( Filelevel_DEBUG, "intersect" );
+            }
+          }//CheckDistance
+        }
       }
+
+      //по полученным решениям делаем вывод, как правильнее смещать объект
+      for( iter0 = __collisionList->begin(); iter0 != iterEnd; ++iter0 )
+        if( !( *iter0 )->IsStatic() )
+          ( *iter0 )->ResolveCollision();
     }
+
     this->time -= COLLISION_UPDATE_FREQUENCY;
   }//while
 

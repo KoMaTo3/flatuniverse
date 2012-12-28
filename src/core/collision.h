@@ -3,6 +3,7 @@
 #include "klib.h"
 #include "memorywriter.h"
 #include "memoryreader.h"
+#include <deque>
 
 #define COLLISION_FRICTION_FORCE   ( 0.95f )
 
@@ -26,6 +27,13 @@ private:
     float radius2;    //квадрат радиуса объекта
   } _rect;            //рассчитанный контур объекта (квадрат)
 
+  struct CollisionResolver
+  {
+    Vec3 power;
+    Vec3 resolveVector;
+  };
+  typedef std::deque< CollisionResolver > CollisionResolverList;
+  CollisionResolverList resolver;
 
 public:
   Collision( Vec3* objectPosition );
@@ -58,6 +66,7 @@ public:
   bool        TestIntersect   ( Collision& item );
 
   bool        Update          ( float dt );
+  void        ResolveCollision();
 
   void        SaveToBuffer    ( MemoryWriter &writer );
   void        LoadFromBuffer  ( MemoryReader &reader );
