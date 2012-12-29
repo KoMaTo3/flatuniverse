@@ -1,6 +1,7 @@
 #include "lua.h"
 #include "core/filemanager.h"
 #include "windows.h"
+#include "luastatecheck.h"
 
 
 File Lua::log;
@@ -138,6 +139,7 @@ bool Lua::RunFile( const std::string &fileName )
 */
 bool Lua::CallFunction( const std::string &funcName )
 {
+  LuaStateCheck state( this->luaState );
   lua_getglobal( this->luaState, funcName.c_str() );  //stack: funcName
   if( !lua_isfunction( this->luaState, -1 ) )
   {
@@ -284,6 +286,7 @@ int Lua::LUA_SetTimer( lua_State *lua )
 */
 void Lua::LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
 {
+  LuaStateCheck state( lua->luaState );
   lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
   if( !lua_isfunction( lua->luaState, -1 ) )
   {

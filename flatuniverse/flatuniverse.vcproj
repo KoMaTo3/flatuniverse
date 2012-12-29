@@ -414,6 +414,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\game\luastatecheck.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\game\luastatecheck.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\game\main.cpp"
 				>
 			</File>
