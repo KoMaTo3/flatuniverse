@@ -49,7 +49,11 @@ bool Lua::Init()
 
   this->luaState = lua_open();
   //luaL_openlibs( this->luaState );
-  luaopen_math( this->luaState );
+  //luaopen_math( this->luaState );
+  lua_pushcfunction( this->luaState, luaopen_math );
+  lua_pcall( this->luaState, 0, 0, 0 );
+  lua_pushcfunction( this->luaState, luaopen_string );
+  lua_pcall( this->luaState, 0, 0, 0 );
 
   lua_register( this->luaState, "Alert", Lua::LUA_Alert );
   lua_register( this->luaState, "ObjectRemove", Lua::LUA_ObjectRemove );
@@ -116,7 +120,7 @@ bool Lua::RunFile( const std::string &fileName )
 
   if( luaL_dostring( this->luaState, data.getData() ) )
   {
-    __log.PrintInfo( Filelevel_ERROR, "Lua::RunFile( '%s' ) => luaL_dostring failed", fileName.c_str() );
+    __log.PrintInfo( Filelevel_ERROR, "Lua::RunFile( '%s' ) => luaL_dostring failed:\n%s", fileName.c_str(), lua_tostring( this->luaState, -1 ) );
     return false;
   }
 
@@ -144,7 +148,7 @@ bool Lua::CallFunction( const std::string &funcName )
 
   if( lua_pcall( this->luaState, 0, 0, 0 ) )
   {
-    __log.PrintInfo( Filelevel_ERROR, "Lua::CallFunction => error by calling function '%s'", funcName.c_str() );
+    __log.PrintInfo( Filelevel_ERROR, "Lua::CallFunction => error by calling function '%s': \n%s", funcName.c_str(), lua_tostring( this->luaState, -1 ) );
     return false;
   }
 
