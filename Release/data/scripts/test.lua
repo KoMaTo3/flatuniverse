@@ -25,7 +25,7 @@ function SpacePressed()
 end
 
 function doAnimation( id )
-  time = time + 0.05
+  time = time + 0.1
   for q = 0,maxBlocksInAnim0-1,1 do
     x, y = ObjectGetPos( 'wall-test-'..q )
     ObjectSetPos( 'wall-test-'..q, x, math.sin( time + q ) * 5 )

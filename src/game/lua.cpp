@@ -138,11 +138,11 @@ bool Lua::RunFile( const std::string &fileName )
 */
 bool Lua::CallFunction( const std::string &funcName )
 {
-  lua_getglobal( this->luaState, funcName.c_str() );
+  lua_getglobal( this->luaState, funcName.c_str() );  //stack: funcName
   if( !lua_isfunction( this->luaState, -1 ) )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::CallFunction => '%s' is not a function", funcName.c_str() );
-    lua_pop( this->luaState, 1 );
+    lua_pop( this->luaState, 1 ); //stack:
     return false;
   }
 
@@ -284,14 +284,14 @@ int Lua::LUA_SetTimer( lua_State *lua )
 */
 void Lua::LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
 {
-  lua_getglobal( lua->luaState, funcName.c_str() );
+  lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
   if( !lua_isfunction( lua->luaState, -1 ) )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => '%s' is not a function", funcName.c_str() );
-    lua_pop( lua->luaState, 1 );
+    lua_pop( lua->luaState, 1 );  //stack:
   }
 
-  lua_pushinteger( lua->luaState, id );
+  lua_pushinteger( lua->luaState, id ); //stack: funcName id
   if( lua_pcall( lua->luaState, 1, 0, 0 ) )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => error by calling function '%s'", funcName.c_str() );
