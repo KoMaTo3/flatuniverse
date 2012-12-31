@@ -13,6 +13,12 @@ LUAFUNCPROC_SetObjectPos  *LUAFUNC_SetObjectPos         = NULL;
 LUAFUNCPROC_SetTimer      *LUAFUNC_SetTimer             = NULL;
 LUAFUNCPROC_LogWrite      *LUAFUNC_LogWrite             = NULL;
 LUAFUNCPROC_CreateObject  *LUAFUNC_CreateObject         = NULL;
+LUAFUNCPROC_ListenKeyboard*LUAFUNC_ListenKeyboard       = NULL;
+LUAFUNCPROC_ListenMouseKey*LUAFUNC_ListenMouseKey       = NULL;
+LUAFUNCPROC_GameExit      *LUAFUNC_GameExit             = NULL;
+LUAFUNCPROC_GetMousePos   *LUAFUNC_GetMousePos          = NULL;
+LUAFUNCPROC_GetCameraPos  *LUAFUNC_GetCameraPos         = NULL;
+LUAFUNCPROC_GetWindowSize *LUAFUNC_GetWindowSize        = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -56,13 +62,19 @@ bool Lua::Init()
   lua_pushcfunction( this->luaState, luaopen_string );
   lua_pcall( this->luaState, 0, 0, 0 );
 
-  lua_register( this->luaState, "Alert", Lua::LUA_Alert );
-  lua_register( this->luaState, "ObjectRemove", Lua::LUA_ObjectRemove );
-  lua_register( this->luaState, "ObjectGetPos", Lua::LUA_GetObjectPos );
-  lua_register( this->luaState, "ObjectSetPos", Lua::LUA_SetObjectPos );
-  lua_register( this->luaState, "SetTimer",     Lua::LUA_SetTimer );
-  lua_register( this->luaState, "LogWrite",     Lua::LUA_LogWrite );
-  lua_register( this->luaState, "ObjectCreate", Lua::LUA_CreateObject );
+  lua_register( this->luaState, "Alert",          Lua::LUA_Alert );
+  lua_register( this->luaState, "ObjectRemove",   Lua::LUA_ObjectRemove );
+  lua_register( this->luaState, "ObjectGetPos",   Lua::LUA_GetObjectPos );
+  lua_register( this->luaState, "ObjectSetPos",   Lua::LUA_SetObjectPos );
+  lua_register( this->luaState, "SetTimer",       Lua::LUA_SetTimer );
+  lua_register( this->luaState, "LogWrite",       Lua::LUA_LogWrite );
+  lua_register( this->luaState, "ObjectCreate",   Lua::LUA_CreateObject );
+  lua_register( this->luaState, "ListenKeyboard", Lua::LUA_ListenKeyboard );
+  lua_register( this->luaState, "ListenMouseKey", Lua::LUA_ListenMouseKey );
+  lua_register( this->luaState, "GameExit",       Lua::LUA_GameExit );
+  lua_register( this->luaState, "GetMousePos",    Lua::LUA_GetMousePos );
+  lua_register( this->luaState, "GetCameraPos",   Lua::LUA_GetCameraPos );
+  lua_register( this->luaState, "GetWindowSize",  Lua::LUA_GetWindowSize );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -306,6 +318,84 @@ void Lua::LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
 
 /*
 =============
+  LUACALLBACK_ListenKeyboard
+=============
+*/
+void LUACALLBACK_ListenKeyboard( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed )
+{
+  Lua::LUACALLBACK_ListenKeyboard( lua, funcName, keyId, isPressed );
+}//LUACALLBACK_ListenKeyboard
+
+
+
+/*
+=============
+  LUACALLBACK_ListenMouseKey
+=============
+*/
+void LUACALLBACK_ListenMouseKey( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed )
+{
+  Lua::LUACALLBACK_ListenMouseKey( lua, funcName, keyId, isPressed );
+}//LUACALLBACK_ListenMouseKey
+
+
+
+/*
+=============
+  LUACALLBACK_ListenKeyboard
+=============
+*/
+void Lua::LUACALLBACK_ListenKeyboard( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed )
+{
+  LuaStateCheck state( lua->luaState );
+  lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
+  if( !lua_isfunction( lua->luaState, -1 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenKeyboard => '%s' is not a function", funcName.c_str() );
+    lua_pop( lua->luaState, 1 );  //stack:
+  }
+
+  lua_pushinteger( lua->luaState, keyId ); //stack: funcName keyId
+  lua_pushboolean( lua->luaState, isPressed ); //stack: funcName keyId isPressed
+  if( lua_pcall( lua->luaState, 2, 0, 0 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenKeyboard => error by calling function '%s'", funcName.c_str() );
+    return;
+  }
+}//LUACALLBACK_ListenKeyboard
+
+
+
+/*
+=============
+  LUACALLBACK_ListenMouseKey
+=============
+*/
+void Lua::LUACALLBACK_ListenMouseKey( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed )
+{
+  LuaStateCheck state( lua->luaState );
+  lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
+  if( !lua_isfunction( lua->luaState, -1 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenMouseKey => '%s' is not a function", funcName.c_str() );
+    lua_pop( lua->luaState, 1 );  //stack:
+  }
+
+  lua_pushinteger( lua->luaState, keyId ); //stack: funcName keyId
+  lua_pushboolean( lua->luaState, isPressed ); //stack: funcName keyId isPressed
+  if( lua_pcall( lua->luaState, 2, 0, 0 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenMouseKey => error by calling function '%s'", funcName.c_str() );
+    return;
+  }
+}//LUACALLBACK_ListenMouseKey
+
+
+
+
+
+/*
+=============
   LUACALLBACK_Timer
 =============
 */
@@ -339,3 +429,104 @@ int Lua::LUA_CreateObject( lua_State *lua )
   LUAFUNC_CreateObject( objectName, parentName, pos, size, textureName, Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
   return 0;
 }//LUA_CreateObject
+
+
+
+/*
+=============
+  LUA_ListenKeyboard
+=============
+*/
+int Lua::LUA_ListenKeyboard( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenKeyboard => not enough parameters" );
+    return 0;
+  }
+  std::string funcName = lua_tostring( lua, 1 );
+  LUAFUNC_ListenKeyboard( funcName );
+  return 0;
+}//LUA_ListenKeyboard
+
+
+
+/*
+=============
+  LUA_ListenMouseKey
+=============
+*/
+int Lua::LUA_ListenMouseKey( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenMouseKey => not enough parameters" );
+    return 0;
+  }
+  std::string funcName = lua_tostring( lua, 1 );
+  LUAFUNC_ListenMouseKey( funcName );
+  return 0;
+}//LUA_ListenMouseKey
+
+
+
+/*
+=============
+  LUA_GameExit
+=============
+*/
+int Lua::LUA_GameExit( lua_State *lua )
+{
+  LUAFUNC_GameExit();
+  return 0;
+}//LUA_GameExit
+
+
+
+/*
+=============
+  LUA_GetMousePos
+=============
+*/
+int Lua::LUA_GetMousePos( lua_State *lua )
+{
+  Vec2 pos = LUAFUNC_GetMousePos();
+  lua_pushinteger( lua, ( int ) pos.x );
+  lua_pushinteger( lua, ( int ) pos.y );
+
+  return 2;
+}//LUA_GetMousePos
+
+
+
+/*
+=============
+  LUA_GetCameraPos
+=============
+*/
+int Lua::LUA_GetCameraPos( lua_State *lua )
+{
+  Vec2 pos = LUAFUNC_GetCameraPos();
+  lua_pushnumber( lua, pos.x );
+  lua_pushnumber( lua, pos.y );
+
+  return 2;
+}//LUA_GetCameraPos
+
+
+
+/*
+=============
+  LUA_GetWindowSize
+=============
+*/
+int Lua::LUA_GetWindowSize( lua_State *lua )
+{
+  Size size = LUAFUNC_GetWindowSize();
+  lua_pushinteger( lua, size.width );
+  lua_pushinteger( lua, size.height );
+
+  return 2;
+}//LUA_GetWindowSize

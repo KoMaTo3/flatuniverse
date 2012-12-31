@@ -166,6 +166,9 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   windowRect.bottom = screenHeight;
   AdjustWindowRectEx( &windowRect, style, false, styleEx );
 
+  this->_window.windowSize.width  = screenWidth;
+  this->_window.windowSize.height = screenHeight;
+
   this->_window.hwnd = CreateWindowEx(
     styleEx,
     className.c_str(),

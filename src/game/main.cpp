@@ -18,6 +18,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game = new Game();
   Pos< Short> blocksPerGrid( 8, 8 );
   game->core->Init( 0, 0, false, "FlatGL" );
+  game->core->keyboard.AddListener( Game::KeyboardProc );
+  game->core->mouse.AddListener( Game::MouseKeyProc );
   Short gridsAroundObject = ( Short )  __config->GetNumber( "grids_preload_range", 0.0f );
   if( !gridsAroundObject )
     gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
@@ -258,9 +260,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     if( game->core->keyboard.IsPressed( VK_RETURN ) )
       game->core->RemoveObject( "wall-right" );
 
-    if( game->core->keyboard.IsPressed( VK_ESCAPE ) )
-      game->core->SetState( CORE_STATE_EXIT );
-
     if( game->core->keyboard.IsPressed( VK_LEFT ) || game->core->keyboard.IsPressed( VK_LETTER_A ) )
     {
       obj = game->core->GetObject( "player" );
@@ -297,6 +296,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, 100.0f, 0.0f ) );
     }
 
+    /*
     if( game->core->keyboard.IsPressed( VK_SPACE ) )
     {
       if( game->core->keyboard.IsHold( VK_SHIFT ) )
@@ -304,21 +304,14 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       else
         game->lua->CallFunction( "SpacePressed" );
     }
+    */
 
+    /*
     if( game->core->mouse.IsPressed( VK_RBUTTON ) )
     {
       Vec3 pos( game->core->mouse.GetCursorPosition().x, game->core->mouse.GetCursorPosition().y, 0.0f );
       pos += game->core->GetCamera()->GetPosition() - Vec3( game->core->GetWindowHalfSize().x, game->core->GetWindowHalfSize().y, 0.0f );
       game->core->GetObject( "player" )->SetPosition( pos );
-      /*
-      Vec2 pos( game->core->mouse.GetCursorPosition() );
-      pos += Vec2( game->core->GetCamera()->GetPosition().x, game->core->GetCamera()->GetPosition().y ) - game->core->GetWindowHalfSize();
-      Object *obj = game->core->getObjectInPoint( pos );
-      if( obj )
-        __log.PrintInfo( Filelevel_DEBUG, "in cursor: '%s'", obj->GetNameFull().c_str() );
-      else
-        __log.PrintInfo( Filelevel_DEBUG, "in cursor: NULL" );
-        */
     }
 
     if( game->core->mouse.IsPressed( VK_LBUTTON ) )
@@ -338,6 +331,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
       game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
     }
+    */
 
     if( game->core->keyboard.IsPressed( VK_TAB ) )
     {
@@ -460,6 +454,12 @@ Game::Game()
   LUAFUNC_SetObjectPos  = Game::LUA_SetObjectPos;
   LUAFUNC_SetTimer      = Game::LUA_SetTimer;
   LUAFUNC_CreateObject  = Game::LUA_CreateObject;
+  LUAFUNC_ListenKeyboard= Game::LUA_ListenKeyboard;
+  LUAFUNC_ListenMouseKey= Game::LUA_ListenMouseKey;
+  LUAFUNC_GameExit      = Game::LUA_GameExit;
+  LUAFUNC_GetMousePos   = Game::LUA_GetMousePos;
+  LUAFUNC_GetCameraPos  = Game::LUA_GetCameraPos;
+  LUAFUNC_GetWindowSize = Game::LUA_GetWindowSize;
 }//constructor
 
 Game::~Game()
@@ -471,11 +471,23 @@ Game::~Game()
 }//destructor
 
 
+
+/*
+=============
+  Update
+=============
+*/
 void Game::Update()
 {
   this->UpdateLuaTimers();
 }//Update
 
+
+/*
+=============
+  UpdateLuaTimers
+=============
+*/
 void Game::UpdateLuaTimers()
 {
   Dword q, count = this->luaTimers.size();
@@ -498,11 +510,22 @@ void Game::UpdateLuaTimers()
 
 
 
+/*
+=============
+  LUA_RemoveObject
+=============
+*/
 bool Game::LUA_RemoveObject( const std::string &name )
 {
   return game->core->RemoveObject( name );
 }//LUA_RemoveObject
 
+
+/*
+=============
+  LUA_GetObjectPos
+=============
+*/
 Vec2 Game::LUA_GetObjectPos( const std::string &name )
 {
   Vec2 res;
@@ -512,6 +535,12 @@ Vec2 Game::LUA_GetObjectPos( const std::string &name )
   return res;
 }//LUA_GetObjectPos
 
+
+/*
+=============
+  LUA_SetObjectPos
+=============
+*/
 void Game::LUA_SetObjectPos( const std::string &name, const Vec2 &pos )
 {
   Object *obj = game->core->GetObject( name );
@@ -519,6 +548,12 @@ void Game::LUA_SetObjectPos( const std::string &name, const Vec2 &pos )
     obj->SetPosition2D( pos );
 }//LUA_SetObjectPos
 
+
+/*
+=============
+  LUA_SetTimer
+=============
+*/
 Dword Game::LUA_SetTimer( float time, const std::string &funcName )
 {
   Dword id, count = game->luaTimers.size();
@@ -539,8 +574,14 @@ Dword Game::LUA_SetTimer( float time, const std::string &funcName )
   game->luaTimers[ id ].time      = time;
   game->luaTimers[ id ].funcName  = funcName;
   return id;
-}//LUA_SetObjectPos
+}//LUA_SetTimer
 
+
+/*
+=============
+  LUA_CreateObject
+=============
+*/
 void Game::LUA_CreateObject( const std::string &name, const std::string &parentName, const Vec3 &pos, const Vec2 &size, const std::string &textureName, const Vec4 &color )
 {
   Object *parentObj = ( parentName.length() ? game->core->GetObject( parentName ) : NULL );
@@ -553,4 +594,142 @@ void Game::LUA_CreateObject( const std::string &name, const std::string &parentN
   quad->SetTexture( textureName, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
 
   game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
-}
+}//LUA_CreateObject
+
+
+/*
+=============
+  LUA_ListenKeyboard
+=============
+*/
+void Game::LUA_ListenKeyboard( const std::string &funcName )
+{
+  luaKeyboardListenersList::iterator iter, iterEnd = game->luaKeyboardListeners.end();
+  for( iter = game->luaKeyboardListeners.begin(); iter != iterEnd; ++iter )
+    if( *iter == funcName )
+      return;
+  game->luaKeyboardListeners.push_back( funcName );
+}//LUA_ListenKeyboard
+
+
+/*
+=============
+  LUA_ListenMouseKey
+=============
+*/
+void Game::LUA_ListenMouseKey( const std::string &funcName )
+{
+  luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseKeyListeners.end();
+  for( iter = game->luaMouseKeyListeners.begin(); iter != iterEnd; ++iter )
+    if( *iter == funcName )
+      return;
+  game->luaMouseKeyListeners.push_back( funcName );
+}//LUA_ListenMouseKey
+
+
+
+/*
+=============
+  GetGridPosUnderCamera
+=============
+*/
+Vec3 Game::GetGridPosUnderCamera( float scale )
+{
+  Vec3 pos( this->core->GetCamera()->GetPosition() );
+  pos += Vec3( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE, 0 ) * scale * 0.5f;
+  pos /= float( WORLD_GRID_BLOCK_SIZE ) * scale;
+  pos = Vec3( Math::Floor( pos.x ), Math::Floor( pos.y ), 0.0f );
+  return pos;
+}//GetGridPosUnderCamera
+
+
+/*
+=============
+  GetGridPosUnderCursor
+=============
+*/
+Vec3 Game::GetGridPosUnderCursor()
+{
+  Vec3 pos( this->core->mouse.GetCursorPosition().x, this->core->mouse.GetCursorPosition().y, 0.0f );
+  pos += ( this->core->GetCamera()->GetPosition() - Vec3( this->core->GetWindowHalfSize().x, this->core->GetWindowHalfSize().y, 0.0f ) ) + Vec3( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE, 0 ) * 0.5f;
+  pos /= float( WORLD_GRID_BLOCK_SIZE );
+  pos = Vec3( Math::Floor( pos.x ), Math::Floor( pos.y ), 0.0f );
+  return pos;
+}//GetGridPosUnderCursor
+
+
+/*
+=============
+  KeyboardProc
+=============
+*/
+void Game::KeyboardProc( Dword keyId, bool isPressed )
+{
+  if( !game->luaKeyboardListeners.size() )
+    return;
+  luaKeyboardListenersList::iterator iter, iterEnd = game->luaKeyboardListeners.end();
+  for( iter = game->luaKeyboardListeners.begin(); iter != iterEnd; ++iter )
+    LUACALLBACK_ListenKeyboard( game->lua, *iter, keyId, isPressed );
+}//KeyboardProc
+
+
+/*
+=============
+  MouseKeyProc
+=============
+*/
+void Game::MouseKeyProc( Dword keyId, bool isPressed )
+{
+  if( !game->luaMouseKeyListeners.size() )
+    return;
+  luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseKeyListeners.end();
+  for( iter = game->luaMouseKeyListeners.begin(); iter != iterEnd; ++iter )
+    LUACALLBACK_ListenMouseKey( game->lua, *iter, keyId, isPressed );
+}//MouseKeyProc
+
+
+/*
+=============
+  LUA_GameExit
+=============
+*/
+void Game::LUA_GameExit()
+{
+  game->core->SetState( CORE_STATE_EXIT );
+}//LUA_GameExit
+
+
+/*
+=============
+  LUA_GetMousePos
+=============
+*/
+Vec2 Game::LUA_GetMousePos()
+{
+  return game->core->mouse.GetCursorPosition();
+}//LUA_GetMousePos
+
+
+/*
+=============
+  LUA_GetCameraPos
+=============
+*/
+Vec2 Game::LUA_GetCameraPos()
+{
+  Object *camera = game->core->GetCamera();
+  if( camera )
+    return Vec2( camera->GetPosition().x, camera->GetPosition().y );
+  return Vec2Null;
+}//LUA_GetCameraPos
+
+
+/*
+=============
+  LUA_GetWindowSize
+=============
+*/
+Size Game::LUA_GetWindowSize()
+{
+  return game->core->GetWindowSize();
+}//LUA_GetWindowSize

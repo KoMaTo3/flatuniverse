@@ -2,14 +2,20 @@
 
 #include "ktypes.h"
 #include "memory.h"
+#include <vector>
 
 class Keyboard
 {
+public:
+  typedef void Listener( Dword keyId, bool isPressed );
+  typedef std::vector< Listener* > ListenerList;
+
 private:
   memory  keys,
           keysOld,
           keysPressed,
           keysReleased;
+  ListenerList  listeners;
 
 private:
   void  _ReallocBuffers( Dword newKeysCount );
@@ -20,12 +26,15 @@ public:
 
   void  Update();
 
-  void  DoPress   ( Dword keyId );
-  void  DoRelease ( Dword keyId );
-  bool  IsHold    ( Dword keyId );
-  bool  IsFree    ( Dword keyId );
-  bool  IsPressed ( Dword keyId );
-  bool  IsReleased( Dword keyId );
+  void  DoPress     ( Dword keyId );
+  void  DoRelease   ( Dword keyId );
+  bool  IsHold      ( Dword keyId );
+  bool  IsFree      ( Dword keyId );
+  bool  IsPressed   ( Dword keyId );
+  bool  IsReleased  ( Dword keyId );
+
+  void  AddListener     ( Listener *listenerProc );
+  void  RemoveListener  ( Listener *listenerProc );
 };
 
 /*

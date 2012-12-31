@@ -68,6 +68,13 @@ void Keyboard::DoPress( Dword keyId )
   if( !this->keysOld.getData()[ keyId ] )
     this->keysPressed.getData()[ keyId ] = true;
   __log.PrintInfo( Filelevel_DEBUG, "Keyboard::DoPress => x%X", keyId );
+
+  if( this->listeners.size() )
+  {
+    ListenerList::iterator iter, iterEnd = this->listeners.end();
+    for( iter = this->listeners.begin(); iter != iterEnd; ++iter )
+      ( *iter )( keyId, true );
+  }
 }//DoPress
 
 
@@ -86,6 +93,13 @@ void Keyboard::DoRelease( Dword keyId )
 
   if( this->keysOld.getData()[ keyId ] )
     this->keysReleased.getData()[ keyId ] = true;
+
+  if( this->listeners.size() )
+  {
+    ListenerList::iterator iter, iterEnd = this->listeners.end();
+    for( iter = this->listeners.begin(); iter != iterEnd; ++iter )
+      ( *iter )( keyId, false );
+  }
 }//DoPress
 
 
@@ -160,3 +174,36 @@ void Keyboard::Update()
     memset( this->keysReleased.getData(), 0, this->keysReleased.getLength() );
   }
 }//Update
+
+
+
+/*
+=============
+  AddListener
+=============
+*/
+void Keyboard::AddListener( Listener *listenerProc )
+{
+  if( listenerProc )
+    this->listeners.push_back( listenerProc );
+  else
+    __log.PrintInfo( Filelevel_WARNING, "Keyboard::AddListener => function is NULL" );
+}//AddListener
+
+
+
+/*
+=============
+  RemoveListener
+=============
+*/
+void Keyboard::RemoveListener( Listener *listenerProc )
+{
+  ListenerList::iterator iter, iterEnd = this->listeners.end();
+  for( iter = this->listeners.begin(); iter != iterEnd; ++iter )
+    if( *iter == listenerProc )
+    {
+      this->listeners.erase( iter );
+      return;
+    }
+}//RemoveListener

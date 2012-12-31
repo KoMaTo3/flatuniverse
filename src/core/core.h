@@ -59,6 +59,7 @@ private:
     bool                      isActive;   //активность окна
     Vec3                      windowToWorld;  //коэффициенты пересчета оконных координат (0-100) в мировые (пиксельные)
     Vec2                      windowCenter; //центр окна, в пикселях
+    Size                      windowSize;   //размеры окна
   } _window;                //всё, что относится к окну
 
   struct                    //время и дата билда
@@ -120,6 +121,7 @@ public:
   bool    Init              ( WORD screenWidth, WORD screenHeight, bool isFullScreen, const std::string &windowName );
   void    SetWindowTitle    ( const std::string &title );
   inline const Vec2& GetWindowHalfSize () { return this->_window.windowCenter; }
+  inline const Size& GetWindowSize() { return this->_window.windowSize; }
   bool    Destroy           ();
   inline
   Object* GetRootObject     () { return this->_rootObject; }

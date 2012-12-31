@@ -30,6 +30,12 @@ public:
   };
   std::vector< GameLuaTimer > luaTimers;
 
+  //lua-слушатели клавиатуры
+  typedef std::vector< std::string > luaKeyboardListenersList;
+  luaKeyboardListenersList
+      luaKeyboardListeners,
+      luaMouseKeyListeners;
+
 public:
   Game();
   ~Game();
@@ -38,25 +44,19 @@ public:
   static void   LUA_SetObjectPos  ( const std::string &name, const Vec2 &pos );
   static Dword  LUA_SetTimer      ( float time, const std::string &funcName );
   static void   LUA_CreateObject  ( const std::string &name, const std::string &parentName, const Vec3 &pos, const Vec2 &size, const std::string &textureName, const Vec4 &color );
+  static void   LUA_ListenKeyboard( const std::string &funcName );
+  static void   LUA_ListenMouseKey( const std::string &funcName );
+  static void   LUA_GameExit      ();
+  static Vec2   LUA_GetMousePos   ();
+  static Vec2   LUA_GetCameraPos  ();
+  static Size   LUA_GetWindowSize ();
 
   void Update();
   void UpdateLuaTimers();
 
-  Vec3 GetGridPosUnderCamera( float scale = 1.0f )
-  {
-    Vec3 pos( this->core->GetCamera()->GetPosition() );
-    pos += Vec3( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE, 0 ) * scale * 0.5f;
-    pos /= float( WORLD_GRID_BLOCK_SIZE ) * scale;
-    pos = Vec3( Math::Floor( pos.x ), Math::Floor( pos.y ), 0.0f );
-    return pos;
-  }
+  static void   KeyboardProc      ( Dword keyId, bool isPressed );
+  static void   MouseKeyProc      ( Dword keyId, bool isPressed );
 
-  Vec3 GetGridPosUnderCursor()
-  {
-    Vec3 pos( this->core->mouse.GetCursorPosition().x, this->core->mouse.GetCursorPosition().y, 0.0f );
-    pos += ( this->core->GetCamera()->GetPosition() - Vec3( this->core->GetWindowHalfSize().x, this->core->GetWindowHalfSize().y, 0.0f ) ) + Vec3( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE, 0 ) * 0.5f;
-    pos /= float( WORLD_GRID_BLOCK_SIZE );
-    pos = Vec3( Math::Floor( pos.x ), Math::Floor( pos.y ), 0.0f );
-    return pos;
-  }
+  Vec3 GetGridPosUnderCamera( float scale = 1.0f );
+  Vec3 GetGridPosUnderCursor();
 };
