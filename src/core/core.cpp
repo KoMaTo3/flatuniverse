@@ -22,7 +22,7 @@ ConfigFile* __config = NULL;
 
 
 Core::Core()
-:_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), camera( NULL )
+:_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL )
 {
   this->_window.isActive  = true;
   this->_window.dc        = NULL;
@@ -58,6 +58,7 @@ bool Core::Destroy()
   DEF_DELETE( this->_rootObject );
   //DEF_DELETE( this->_rootGUIObject );
   DEF_DELETE( this->collisionManager );
+  DEF_DELETE( this->triggerManager );
   DEF_DELETE( __coreRenderableList );
   DEF_DELETE( __coreRenderableListIndicies );
   DEF_DELETE( __coreRenderableListFreeIndicies );
@@ -66,6 +67,8 @@ bool Core::Destroy()
   DEF_DELETE( __coreGUIFreeIndicies );
   DEF_DELETE( __fileManager );
   DEF_DELETE( __textureAtlas );
+  DEF_DELETE( __triggerList );
+  DEF_DELETE( __objectByCollision );
 
   return true;
 }//Destroy
@@ -202,7 +205,10 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   __coreGUIIndicies       = new CoreRenderableListIndicies();
   __coreGUIFreeIndicies   = new CoreRenderableListIndicies();
   __textureAtlas          = new TextureAtlas();
+  __triggerList           = new ObjectTriggerList();
   this->collisionManager  = new CollisionManager();
+  this->triggerManager    = new ObjectTriggerManager();
+  __objectByCollision     = new ObjectByCollisionList();
   //
 
   this->_window.windowToWorld.Set( 100.0f / float( screenWidth ), 100.0f / float( screenHeight ), 1.0f );
@@ -1153,6 +1159,10 @@ bool Core::Update()
   //обновл€ем физ-объекты. они обновл€ют положени€ объектов
   if( this->collisionManager )
     this->collisionManager->Update( sTimer.GetDeltaF() );
+
+  //триггеры
+  if( this->triggerManager )
+    this->triggerManager->Update();
 
   //обновл€ем объекты. они обновл€ют положени€ спрайтов
   this->_rootObject->Update( sTimer.GetDeltaF() );

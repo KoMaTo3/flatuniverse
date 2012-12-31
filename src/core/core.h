@@ -97,8 +97,9 @@ private:
     GLuint  iboGUI;
   } _buffers;
 
-  CollisionManager  *collisionManager;
-  Object            *camera;  //текущая камера
+  CollisionManager      *collisionManager;
+  ObjectTriggerManager  *triggerManager;
+  Object                *camera;  //текущая камера
 
 public:
   Keyboard  keyboard;

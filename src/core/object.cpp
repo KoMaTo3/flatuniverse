@@ -9,6 +9,7 @@ extern CoreRenderableList *__coreGUI;
 extern CoreRenderableListIndicies *__coreGUIIndicies;
 extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
 
+ObjectByCollisionList *__objectByCollision = NULL;
 
 
 Object::ObjectRenderableInfo::ObjectRenderableInfo()
@@ -40,7 +41,7 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 
 Object::Object()
 :name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
-,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL )
+,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL )
 {
   __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%X]", this );
 }//constructor
@@ -48,7 +49,7 @@ Object::Object()
 
 Object::Object( const std::string &objectName, Object* parentObject )
 :name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
-,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL )
+,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL )
 {
   if( this->_parent )
   {
@@ -71,6 +72,7 @@ Object::~Object()
 
   this->DisableRenderable();
   this->DisableCollision();
+  this->DisableTrigger();
   this->ClearChilds();
   this->UnAttachThisFromParent();
 
@@ -490,6 +492,7 @@ Collision* Object::EnableCollision()
 
   this->collision = new Collision( &this->positionSrc );
   __collisionList->push_back( this->collision );
+  __objectByCollision->push_back( ObjectByCollision( this, this->collision ) );
 
   return this->collision;
 }//EnableCollision
@@ -517,6 +520,15 @@ void Object::DisableCollision()
       this->collision = NULL;
       break;
     }
+
+  ObjectByCollisionList::iterator iter, iterEnd = __objectByCollision->end();
+  for( iter = __objectByCollision->begin(); iter != iterEnd; ++iter )
+    if( iter->object == this )
+    {
+      __objectByCollision->erase( iter );
+      break;
+    }
+  //__objectByCollision->push_back( ObjectByCollision( this, this->collision ) );
 }//DisableCollision
 
 
@@ -888,3 +900,63 @@ void Object::PointerAdd( ObjectPointer< Object > *pointer )
   __log.PrintInfo( Filelevel_DEBUG, "Object::PointerAdd => this[x%X] pointer[x%X]", this, pointer );
   this->pointers.push_back( pointer );
 }//PointerAdd
+
+
+
+/*
+=============
+  EnableTrigger
+=============
+*/
+ObjectTrigger* Object::EnableTrigger()
+{
+  if( this->trigger )
+    return this->trigger;
+
+  if( !__triggerList )
+    return NULL;
+
+  this->trigger = new ObjectTrigger( &this->position );
+  __triggerList->push_back( this->trigger );
+  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableTrigger => x%X", this->trigger );
+
+  return this->trigger;
+}//EnableTrigger
+
+
+
+
+/*
+=============
+  DisableTrigger
+=============
+*/
+void Object::DisableTrigger()
+{
+  if( !this->trigger )
+    return;
+
+  if( !__triggerList )
+    return;
+
+  ObjectTriggerList::iterator iterEnd = __triggerList->end();
+  for( ObjectTriggerList::iterator iter = __triggerList->begin(); iter != iterEnd; ++iter )
+    if( *iter == this->trigger )
+    {
+      __triggerList->erase( iter );
+      this->trigger = NULL;
+      break;
+    }
+}//DisableTrigger
+
+
+
+/*
+=============
+  GetTrigger
+=============
+*/
+ObjectTrigger* Object::GetTrigger()
+{
+  return this->trigger;
+}//GetTrigger

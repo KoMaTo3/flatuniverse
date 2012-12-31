@@ -64,6 +64,7 @@ public:
   inline
   bool        IsStatic        () const { return this->isStatic; }
   bool        TestIntersect   ( Collision& item );
+  bool        TestIntersect   ( const Vec3 &leftTopPoint, const Vec3 &rightBottomPoint );
 
   bool        Update          ( float dt );
   void        ResolveCollision();

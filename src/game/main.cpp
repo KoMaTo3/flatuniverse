@@ -96,7 +96,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->world->AttachObjectToGrid( 0, 0, obj );
   */
 
-  /*
   obj = game->core->CreateObject( "wall-left" );
   obj->SetPosition( Vec3( 15.0f, 50.0f, 0.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
@@ -106,8 +105,10 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   col->SetIsStatic( true );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 10.0f, 55.0f ) );
-  game->world->AttachObjectToGrid( 0, 0, obj );
+  obj->EnableTrigger()->SetSize( Vec3( 10.0f, 55.0f, 0.0f ) + Vec3( 2.0f, 2.0f, 0.0f ) );
+  //game->world->AttachObjectToGrid( 0, 0, obj );
 
+  /*
   obj = game->core->CreateObject( "wall-right" );
   obj->SetPosition( Vec3( 185.0f, 50.0f, 0.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );

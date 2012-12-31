@@ -364,6 +364,25 @@ bool Collision::TestIntersect( Collision& item )
 
 
 
+/*
+=============
+  TestIntersect
+  Тест пересечения коллизии с прямоугольной областью
+=============
+*/
+bool Collision::TestIntersect( const Vec3 &leftTopPoint, const Vec3 &rightBottomPoint )
+{
+  return
+    !( this->_rect.rightBottom.x <= leftTopPoint.x ||
+     this->_rect.leftTop.x       >= rightBottomPoint.x ||
+     this->_rect.rightBottom.y   <= leftTopPoint.y ||
+     this->_rect.leftTop.y       >= rightBottomPoint.y
+    );
+}//TestIntersect
+
+
+
+
 
 /*
 =============
