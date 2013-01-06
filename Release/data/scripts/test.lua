@@ -39,8 +39,14 @@ function Init()
     ObjectCreate( 'wall-test-b-'..q, '', ( q - 5 ) * 16, 0, 0, 16, 16, 'data/temp/brick0.png' )
   end
   animTimer0 = SetTimer( 0, 'doAnimation' )
+  ObjectAddTrigger( 'wall-left', 'testTrigger' )
 end
 Init()
+
+function testTrigger( triggerName, objectName, isInTrigger )
+  LogWrite( 'triggerName: '..triggerName..'; objectName: '..objectName..'; isInTrigger: '..( isInTrigger and "false" or "true" ) )
+  ObjectSetPos( 'player', 70, 50 )
+end
 
 function SpacePressed()
   -- while ObjectRemove( 'test' ) do end

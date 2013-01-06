@@ -9,7 +9,8 @@ extern CoreRenderableList *__coreGUI;
 extern CoreRenderableListIndicies *__coreGUIIndicies;
 extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
 
-ObjectByCollisionList *__objectByCollision = NULL;
+ObjectByCollisionList *__objectByCollision  = NULL;
+ObjectByTriggerList   *__objectByTrigger    = NULL;
 
 
 Object::ObjectRenderableInfo::ObjectRenderableInfo()
@@ -528,7 +529,6 @@ void Object::DisableCollision()
       __objectByCollision->erase( iter );
       break;
     }
-  //__objectByCollision->push_back( ObjectByCollision( this, this->collision ) );
 }//DisableCollision
 
 
@@ -918,6 +918,7 @@ ObjectTrigger* Object::EnableTrigger()
 
   this->trigger = new ObjectTrigger( &this->position );
   __triggerList->push_back( this->trigger );
+  __objectByTrigger->push_back( ObjectByTrigger( this, this->trigger ) );
   __log.PrintInfo( Filelevel_DEBUG, "Object::EnableTrigger => x%X", this->trigger );
 
   return this->trigger;
@@ -944,7 +945,17 @@ void Object::DisableTrigger()
     if( *iter == this->trigger )
     {
       __triggerList->erase( iter );
-      this->trigger = NULL;
+      //this->trigger = NULL;
+      break;
+    }
+
+  DEF_DELETE( this->trigger );
+
+  ObjectByTriggerList::iterator iterTrigger, iterEndTrigger = __objectByTrigger->end();
+  for( iterTrigger = __objectByTrigger->begin(); iterTrigger != iterEndTrigger; ++iterTrigger )
+    if( iterTrigger->object == this )
+    {
+      __objectByTrigger->erase( iterTrigger );
       break;
     }
 }//DisableTrigger

@@ -15,6 +15,8 @@
 
 
 class Object;
+
+//object by collision
 struct ObjectByCollision
 {
   Object    *object;
@@ -25,7 +27,21 @@ struct ObjectByCollision
   {}
 };
 typedef std::deque< ObjectByCollision > ObjectByCollisionList;
-extern ObjectByCollisionList *__objectByCollision;  //список асоциаций объект <=> коллизия
+extern ObjectByCollisionList *__objectByCollision;
+
+//object by object trigger
+struct ObjectByTrigger
+{
+  Object        *object;
+  ObjectTrigger *trigger;
+
+  ObjectByTrigger( Object *setObject, ObjectTrigger *setTrigger )
+    :object( setObject ), trigger( setTrigger )
+  {}
+};
+typedef std::deque< ObjectByTrigger > ObjectByTriggerList;
+extern ObjectByTriggerList *__objectByTrigger;
+
 
 
 

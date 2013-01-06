@@ -119,32 +119,34 @@ public:
   Core();
   virtual ~Core();
 
-  bool    Init              ( WORD screenWidth, WORD screenHeight, bool isFullScreen, const std::string &windowName );
-  void    SetWindowTitle    ( const std::string &title );
+  bool    Init                ( WORD screenWidth, WORD screenHeight, bool isFullScreen, const std::string &windowName );
+  void    SetWindowTitle      ( const std::string &title );
   inline const Vec2& GetWindowHalfSize () { return this->_window.windowCenter; }
   inline const Size& GetWindowSize() { return this->_window.windowSize; }
-  bool    Destroy           ();
+  bool    Destroy             ();
   inline
-  Object* GetRootObject     () { return this->_rootObject; }
+  Object* GetRootObject       () { return this->_rootObject; }
 
-  void    SetState          ( CoreStates newState );
-  bool    Update            ();
-  bool    Redraw            ();
+  void    SetState            ( CoreStates newState );
+  bool    Update              ();
+  bool    Redraw              ();
 
-  Object* CreateObject      ( const std::string& name, Object *parent = NULL );
-  Object* GetObject         ( const std::string& name, Object *parent = NULL );
-  bool    RemoveObject      ( const std::string& name );
-  Object* SetCamera         ( Object* newCamera );
-  inline Object* GetCamera  () { return this->camera; }
-  Object* getObjectInPoint  ( const Vec2& pos );
+  Object* CreateObject        ( const std::string& name, Object *parent = NULL );
+  Object* GetObject           ( const std::string& name, Object *parent = NULL );
+  bool    RemoveObject        ( const std::string& name );
+  Object* SetCamera           ( Object* newCamera );
+  inline Object* GetCamera    () { return this->camera; }
+  Object* getObjectInPoint    ( const Vec2& pos );
+  Object* GetObjectByTrigger  ( ObjectTrigger *trigger );
+  Object* GetObjectByCollision( Collision *collision );
 
-  bool    LoadExtension     ( const std::string &name, void** function );
-  bool    IsExtensionExist  ( const std::string extensionName );
-  Vec3    PixelToTexel      ( const Vec2& pos ) { return Vec3( pos.x * this->_window.windowToWorld.x, pos.y * this->_window.windowToWorld.y, 0.0f ); }
+  bool    LoadExtension       ( const std::string &name, void** function );
+  bool    IsExtensionExist    ( const std::string extensionName );
+  Vec3    PixelToTexel        ( const Vec2& pos ) { return Vec3( pos.x * this->_window.windowToWorld.x, pos.y * this->_window.windowToWorld.y, 0.0f ); }
 
-  LRESULT Signal            ( DWORD code, LPARAM lParam = 0, WPARAM wParam = 0, void *pointer = NULL ); //Don't use this function!
+  LRESULT Signal              ( DWORD code, LPARAM lParam = 0, WPARAM wParam = 0, void *pointer = NULL ); //Don't use this function!
 
-  bool    CheckGLError      ( int line = -1, const std::string& fileName = "" );
+  bool    CheckGLError        ( int line = -1, const std::string& fileName = "" );
 };
 
 

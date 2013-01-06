@@ -69,6 +69,7 @@ bool Core::Destroy()
   DEF_DELETE( __textureAtlas );
   DEF_DELETE( __triggerList );
   DEF_DELETE( __objectByCollision );
+  DEF_DELETE( __objectByTrigger );
 
   return true;
 }//Destroy
@@ -209,6 +210,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   this->collisionManager  = new CollisionManager();
   this->triggerManager    = new ObjectTriggerManager();
   __objectByCollision     = new ObjectByCollisionList();
+  __objectByTrigger       = new ObjectByTriggerList();
   //
 
   this->_window.windowToWorld.Set( 100.0f / float( screenWidth ), 100.0f / float( screenHeight ), 1.0f );
@@ -1340,6 +1342,39 @@ Object* Core::getObjectInPoint( const Vec2& pos )
 {
   return this->_rootObject->GetObjectInPoint( pos );
 }//getObjectInPoint
+
+
+
+/*
+=============
+  GetObjectByTrigger
+=============
+*/
+Object* Core::GetObjectByTrigger( ObjectTrigger *trigger )
+{
+  ObjectByTriggerList::iterator iterTrigger, iterEndTrigger = __objectByTrigger->end();
+  for( iterTrigger = __objectByTrigger->begin(); iterTrigger != iterEndTrigger; ++iterTrigger )
+    if( iterTrigger->trigger == trigger )
+      return iterTrigger->object;
+  return NULL;
+}//GetObjectByTrigger
+
+
+
+/*
+=============
+  GetObjectByCollision
+=============
+*/
+Object* Core::GetObjectByCollision( Collision *collision )
+{
+  ObjectByCollisionList::iterator iterCollision, iterEndCollision = __objectByCollision->end();
+  for( iterCollision = __objectByCollision->begin(); iterCollision != iterEndCollision; ++iterCollision )
+    if( iterCollision->collision == collision )
+      return iterCollision->object;
+  return NULL;
+}//GetObjectByCollision
+
 
 
 

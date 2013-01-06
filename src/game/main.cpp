@@ -105,7 +105,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   col->SetIsStatic( true );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 10.0f, 55.0f ) );
-  obj->EnableTrigger()->SetSize( Vec3( 10.0f, 55.0f, 0.0f ) + Vec3( 2.0f, 2.0f, 0.0f ) );
+  ObjectTrigger* trig = obj->EnableTrigger()->SetSize( Vec3( 10.0f, 55.0f, 0.0f ) + Vec3( 2.0f, 2.0f, 0.0f ) );
+  //trig->AddHandler( Game::TestTrigger );
   //game->world->AttachObjectToGrid( 0, 0, obj );
 
   /*
@@ -450,17 +451,20 @@ Game::Game()
   this->core = new Core();
   this->lua = new Lua();
 
-  LUAFUNC_RemoveObject  = Game::LUA_RemoveObject;
-  LUAFUNC_GetObjectPos  = Game::LUA_GetObjectPos;
-  LUAFUNC_SetObjectPos  = Game::LUA_SetObjectPos;
-  LUAFUNC_SetTimer      = Game::LUA_SetTimer;
-  LUAFUNC_CreateObject  = Game::LUA_CreateObject;
-  LUAFUNC_ListenKeyboard= Game::LUA_ListenKeyboard;
-  LUAFUNC_ListenMouseKey= Game::LUA_ListenMouseKey;
-  LUAFUNC_GameExit      = Game::LUA_GameExit;
-  LUAFUNC_GetMousePos   = Game::LUA_GetMousePos;
-  LUAFUNC_GetCameraPos  = Game::LUA_GetCameraPos;
-  LUAFUNC_GetWindowSize = Game::LUA_GetWindowSize;
+  LUAFUNC_RemoveObject      = Game::LUA_RemoveObject;
+  LUAFUNC_GetObjectPos      = Game::LUA_GetObjectPos;
+  LUAFUNC_SetObjectPos      = Game::LUA_SetObjectPos;
+  LUAFUNC_SetTimer          = Game::LUA_SetTimer;
+  LUAFUNC_CreateObject      = Game::LUA_CreateObject;
+  LUAFUNC_ListenKeyboard    = Game::LUA_ListenKeyboard;
+  LUAFUNC_ListenMouseKey    = Game::LUA_ListenMouseKey;
+  LUAFUNC_GameExit          = Game::LUA_GameExit;
+  LUAFUNC_GetMousePos       = Game::LUA_GetMousePos;
+  LUAFUNC_GetCameraPos      = Game::LUA_GetCameraPos;
+  LUAFUNC_GetWindowSize     = Game::LUA_GetWindowSize;
+  LUAFUNC_ObjectAddTrigger  = Game::LUA_ObjectAddTrigger;
+
+  __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
 
 Game::~Game()
@@ -734,3 +738,75 @@ Size Game::LUA_GetWindowSize()
 {
   return game->core->GetWindowSize();
 }//LUA_GetWindowSize
+
+
+
+/*
+=============
+  LUA_ObjectTrigger_Handler
+  ObjectTrigger call this (ObjectTriggerHandler)
+=============
+*/
+void Game::LUA_ObjectTrigger_Handler( ObjectTrigger *trigger, Collision *collision, bool isInTrigger )
+{
+  GameObjectTriggerList::iterator iter, iterEnd = game->objectTriggers.end();
+  for( iter = game->objectTriggers.begin(); iter != iterEnd; ++iter )
+    if( iter->trigger == trigger )
+      LUACALLBACK_ObjectTrigger( game->lua, iter->funcName, game->core->GetObjectByTrigger( iter->trigger )->GetNameFull(), game->core->GetObjectByCollision( collision )->GetNameFull(), isInTrigger );
+}
+
+
+/*
+=============
+  LUA_ObjectAddTrigger
+=============
+*/
+void Game::LUA_ObjectAddTrigger( const std::string &triggerName, const std::string &funcName )
+{
+  Object *triggerObject = game->core->GetObject( triggerName );
+  if( !triggerObject )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAddTrigger => trigger '%s' not found", triggerName.c_str() );
+    return;
+  }
+
+  ObjectTrigger *trigger = triggerObject->GetTrigger();
+  if( !trigger )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAddTrigger => object '%s' don't have trigger", triggerName.c_str() );
+    return;
+  }
+
+  trigger->AddHandler( Game::LUA_ObjectTrigger_Handler );
+
+  //GameObjectTrigger objectTrigger;
+  //objectTrigger.funcName = funcName;
+  //objectTrigger.trigger = game->core->GetObject( triggerName );
+  //game->objectTriggers.push_back( objectTrigger );
+  //game->core->SetState( CORE_STATE_EXIT );
+  game->objectTriggers.push_back( GameObjectTrigger() );
+  GameObjectTrigger *objectTrigger = &( *game->objectTriggers.rbegin() );
+  objectTrigger->funcName = funcName;
+  objectTrigger->trigger  = trigger;
+
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectAddTrigger => triggerName[%s] funcName[%s]", triggerName.c_str(), funcName.c_str() );
+}//LUA_ObjectAddTrigger
+
+
+
+/*
+=============
+  OnRemoveTrigger
+  Подчищаем в игре всё, что связано с триггерами
+=============
+*/
+void Game::OnRemoveTrigger( ObjectTrigger *trigger )
+{
+  GameObjectTriggerList::iterator iter, iterEnd = game->objectTriggers.end();
+  for( iter = game->objectTriggers.begin(); iter != iterEnd; ++iter )
+    if( ( *iter ).trigger == trigger )
+    {
+      game->objectTriggers.erase( iter );
+      break;
+    }
+}//OnRemoveTrigger
