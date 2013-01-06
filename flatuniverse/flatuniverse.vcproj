@@ -286,6 +286,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\core\objecttrigger.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\objecttrigger.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\objecttriggermgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\objecttriggermgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\core\renderable.cpp"
 				>
 			</File>

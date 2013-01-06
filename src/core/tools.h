@@ -19,7 +19,7 @@ std::deque< std::string >  Explode ( const std::string& source, const std::strin
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-#define DEF_DELETE(a) ((a) ? delete (a), (a) = NULL : false )
+#define DEF_DELETE(a) { if( (a) ) { delete (a); (a) = NULL; } }
 #define DEF_DELETEARRAY(a) ((a) ? delete[] (a), (a) = NULL : false )
 //#define DEF_RELEAS(a) ((a) ? (a)->Release(), (a) = 0 : 0)
 

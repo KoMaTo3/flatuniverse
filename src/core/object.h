@@ -10,6 +10,38 @@
 #include "memorywriter.h"
 #include "memoryreader.h"
 #include "objectpointer.h"
+#include "objecttriggermgr.h"
+
+
+
+class Object;
+
+//object by collision
+struct ObjectByCollision
+{
+  Object    *object;
+  Collision *collision;
+
+  ObjectByCollision( Object *setObject, Collision *setCollision )
+    :object( setObject ), collision( setCollision )
+  {}
+};
+typedef std::deque< ObjectByCollision > ObjectByCollisionList;
+extern ObjectByCollisionList *__objectByCollision;
+
+//object by object trigger
+struct ObjectByTrigger
+{
+  Object        *object;
+  ObjectTrigger *trigger;
+
+  ObjectByTrigger( Object *setObject, ObjectTrigger *setTrigger )
+    :object( setObject ), trigger( setTrigger )
+  {}
+};
+typedef std::deque< ObjectByTrigger > ObjectByTriggerList;
+extern ObjectByTriggerList *__objectByTrigger;
+
 
 
 
@@ -54,6 +86,7 @@ private:
 
   Collision       *collision;
   ObjectPointers  pointers;   //перечень указателей на этот объект. объект обязан делать их невалидными беред своим уничтожением
+  ObjectTrigger   *trigger;
 
 private:
   void                _RecalculatePosition();
@@ -91,6 +124,12 @@ public:
   Collision*          GetCollision        ();
   inline
     bool              IsCollision         () { return this->collision != NULL; }
+
+  ObjectTrigger*      EnableTrigger       ();
+  void                DisableTrigger      ();
+  ObjectTrigger*      GetTrigger          ();
+  inline
+    bool              IsTrigger           () { return this->trigger != NULL; }
 
   void                Update              ( float dt );
 

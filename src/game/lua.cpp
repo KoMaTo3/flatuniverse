@@ -7,18 +7,19 @@
 File Lua::log;
 Lua *__LuaCurrentContext = NULL;
 
-LUAFUNCPROC_RemoveObject  *LUAFUNC_RemoveObject         = NULL;
-LUAFUNCPROC_GetObjectPos  *LUAFUNC_GetObjectPos         = NULL;
-LUAFUNCPROC_SetObjectPos  *LUAFUNC_SetObjectPos         = NULL;
-LUAFUNCPROC_SetTimer      *LUAFUNC_SetTimer             = NULL;
-LUAFUNCPROC_LogWrite      *LUAFUNC_LogWrite             = NULL;
-LUAFUNCPROC_CreateObject  *LUAFUNC_CreateObject         = NULL;
-LUAFUNCPROC_ListenKeyboard*LUAFUNC_ListenKeyboard       = NULL;
-LUAFUNCPROC_ListenMouseKey*LUAFUNC_ListenMouseKey       = NULL;
-LUAFUNCPROC_GameExit      *LUAFUNC_GameExit             = NULL;
-LUAFUNCPROC_GetMousePos   *LUAFUNC_GetMousePos          = NULL;
-LUAFUNCPROC_GetCameraPos  *LUAFUNC_GetCameraPos         = NULL;
-LUAFUNCPROC_GetWindowSize *LUAFUNC_GetWindowSize        = NULL;
+LUAFUNCPROC_RemoveObject      *LUAFUNC_RemoveObject         = NULL;
+LUAFUNCPROC_GetObjectPos      *LUAFUNC_GetObjectPos         = NULL;
+LUAFUNCPROC_SetObjectPos      *LUAFUNC_SetObjectPos         = NULL;
+LUAFUNCPROC_SetTimer          *LUAFUNC_SetTimer             = NULL;
+LUAFUNCPROC_LogWrite          *LUAFUNC_LogWrite             = NULL;
+LUAFUNCPROC_CreateObject      *LUAFUNC_CreateObject         = NULL;
+LUAFUNCPROC_ListenKeyboard    *LUAFUNC_ListenKeyboard       = NULL;
+LUAFUNCPROC_ListenMouseKey    *LUAFUNC_ListenMouseKey       = NULL;
+LUAFUNCPROC_GameExit          *LUAFUNC_GameExit             = NULL;
+LUAFUNCPROC_GetMousePos       *LUAFUNC_GetMousePos          = NULL;
+LUAFUNCPROC_GetCameraPos      *LUAFUNC_GetCameraPos         = NULL;
+LUAFUNCPROC_GetWindowSize     *LUAFUNC_GetWindowSize        = NULL;
+LUAFUNCPROC_ObjectAddTrigger  *LUAFUNC_ObjectAddTrigger     = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -62,19 +63,20 @@ bool Lua::Init()
   lua_pushcfunction( this->luaState, luaopen_string );
   lua_pcall( this->luaState, 0, 0, 0 );
 
-  lua_register( this->luaState, "Alert",          Lua::LUA_Alert );
-  lua_register( this->luaState, "ObjectRemove",   Lua::LUA_ObjectRemove );
-  lua_register( this->luaState, "ObjectGetPos",   Lua::LUA_GetObjectPos );
-  lua_register( this->luaState, "ObjectSetPos",   Lua::LUA_SetObjectPos );
-  lua_register( this->luaState, "SetTimer",       Lua::LUA_SetTimer );
-  lua_register( this->luaState, "LogWrite",       Lua::LUA_LogWrite );
-  lua_register( this->luaState, "ObjectCreate",   Lua::LUA_CreateObject );
-  lua_register( this->luaState, "ListenKeyboard", Lua::LUA_ListenKeyboard );
-  lua_register( this->luaState, "ListenMouseKey", Lua::LUA_ListenMouseKey );
-  lua_register( this->luaState, "GameExit",       Lua::LUA_GameExit );
-  lua_register( this->luaState, "GetMousePos",    Lua::LUA_GetMousePos );
-  lua_register( this->luaState, "GetCameraPos",   Lua::LUA_GetCameraPos );
-  lua_register( this->luaState, "GetWindowSize",  Lua::LUA_GetWindowSize );
+  lua_register( this->luaState, "Alert",            Lua::LUA_Alert );
+  lua_register( this->luaState, "ObjectRemove",     Lua::LUA_ObjectRemove );
+  lua_register( this->luaState, "ObjectGetPos",     Lua::LUA_GetObjectPos );
+  lua_register( this->luaState, "ObjectSetPos",     Lua::LUA_SetObjectPos );
+  lua_register( this->luaState, "SetTimer",         Lua::LUA_SetTimer );
+  lua_register( this->luaState, "LogWrite",         Lua::LUA_LogWrite );
+  lua_register( this->luaState, "ObjectCreate",     Lua::LUA_CreateObject );
+  lua_register( this->luaState, "ListenKeyboard",   Lua::LUA_ListenKeyboard );
+  lua_register( this->luaState, "ListenMouseKey",   Lua::LUA_ListenMouseKey );
+  lua_register( this->luaState, "GameExit",         Lua::LUA_GameExit );
+  lua_register( this->luaState, "GetMousePos",      Lua::LUA_GetMousePos );
+  lua_register( this->luaState, "GetCameraPos",     Lua::LUA_GetCameraPos );
+  lua_register( this->luaState, "GetWindowSize",    Lua::LUA_GetWindowSize );
+  lua_register( this->luaState, "ObjectAddTrigger", Lua::LUA_ObjectAddTrigger );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -530,3 +532,67 @@ int Lua::LUA_GetWindowSize( lua_State *lua )
 
   return 2;
 }//LUA_GetWindowSize
+
+
+
+/*
+=============
+  LUA_ObjectAddTrigger
+=============
+*/
+int Lua::LUA_ObjectAddTrigger( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAddTrigger => not enough parameters" );
+    return 0;
+  }
+  std::string triggerName = lua_tostring( lua, 1 );
+  std::string funcName    = lua_tostring( lua, 2 );
+  LUAFUNC_ObjectAddTrigger( triggerName, funcName );
+  return 0;
+}//LUA_ObjectAddTrigger
+
+
+
+/*
+=============
+  LUACALLBACK_ObjectTrigger
+=============
+*/
+void Lua::LUACALLBACK_ObjectTrigger( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger )
+{
+  LuaStateCheck state( lua->luaState );
+  lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
+  if( !lua_isfunction( lua->luaState, -1 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ObjectTrigger => '%s' is not a function", funcName.c_str() );
+    lua_pop( lua->luaState, 1 );  //stack:
+  }
+
+  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_ObjectTrigger => funcName[%s] triggerName[%s] objectName[%s] isInTrigger[%d]", funcName.c_str(), triggerName.c_str(), objectName.c_str(), isInTrigger );
+
+  lua_pushstring  ( lua->luaState, triggerName.c_str() ); //stack: funcName triggerName
+  lua_pushstring  ( lua->luaState, objectName.c_str() );  //stack: funcName triggerName objectName
+  lua_pushboolean ( lua->luaState, isInTrigger );         //stack: funcName triggerName objectName isInTrigger
+
+  if( lua_pcall( lua->luaState, 3, 0, 0 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ObjectTrigger => error by calling function '%s'", funcName.c_str() );
+    return;
+  }
+}//LUACALLBACK_ObjectTrigger
+
+
+
+
+/*
+=============
+  LUACALLBACK_ObjectTrigger
+=============
+*/
+void LUACALLBACK_ObjectTrigger( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger )
+{
+  Lua::LUACALLBACK_ObjectTrigger( lua, funcName, triggerName, objectName, isInTrigger );
+}//LUACALLBACK_Timer

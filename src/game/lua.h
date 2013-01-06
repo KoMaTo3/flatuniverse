@@ -26,25 +26,28 @@ typedef void  LUAFUNCPROC_GameExit          ();
 typedef Vec2  LUAFUNCPROC_GetMousePos       ();
 typedef Vec2  LUAFUNCPROC_GetCameraPos      ();
 typedef Size  LUAFUNCPROC_GetWindowSize     ();
+typedef void  LUAFUNCPROC_ObjectAddTrigger  ( const std::string &triggerName, const std::string &funcName );
 
-extern LUAFUNCPROC_RemoveObject   *LUAFUNC_RemoveObject;
-extern LUAFUNCPROC_GetObjectPos   *LUAFUNC_GetObjectPos;
-extern LUAFUNCPROC_SetObjectPos   *LUAFUNC_SetObjectPos;
-extern LUAFUNCPROC_SetTimer       *LUAFUNC_SetTimer;
-extern LUAFUNCPROC_LogWrite       *LUAFUNC_LogWrite;
-extern LUAFUNCPROC_CreateObject   *LUAFUNC_CreateObject;
-extern LUAFUNCPROC_ListenKeyboard *LUAFUNC_ListenKeyboard;
-extern LUAFUNCPROC_ListenMouseKey *LUAFUNC_ListenMouseKey;
-extern LUAFUNCPROC_GameExit       *LUAFUNC_GameExit;
-extern LUAFUNCPROC_GetMousePos    *LUAFUNC_GetMousePos;
-extern LUAFUNCPROC_GetCameraPos   *LUAFUNC_GetCameraPos;
-extern LUAFUNCPROC_GetWindowSize  *LUAFUNC_GetWindowSize;
+extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
+extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
+extern LUAFUNCPROC_SetObjectPos     *LUAFUNC_SetObjectPos;
+extern LUAFUNCPROC_SetTimer         *LUAFUNC_SetTimer;
+extern LUAFUNCPROC_LogWrite         *LUAFUNC_LogWrite;
+extern LUAFUNCPROC_CreateObject     *LUAFUNC_CreateObject;
+extern LUAFUNCPROC_ListenKeyboard   *LUAFUNC_ListenKeyboard;
+extern LUAFUNCPROC_ListenMouseKey   *LUAFUNC_ListenMouseKey;
+extern LUAFUNCPROC_GameExit         *LUAFUNC_GameExit;
+extern LUAFUNCPROC_GetMousePos      *LUAFUNC_GetMousePos;
+extern LUAFUNCPROC_GetCameraPos     *LUAFUNC_GetCameraPos;
+extern LUAFUNCPROC_GetWindowSize    *LUAFUNC_GetWindowSize;
+extern LUAFUNCPROC_ObjectAddTrigger *LUAFUNC_ObjectAddTrigger;
 
 
 //callbacks
-void LUACALLBACK_Timer          ( Lua *lua, Dword id, const std::string &funcName );
-void LUACALLBACK_ListenKeyboard ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
-void LUACALLBACK_ListenMouseKey ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
+void LUACALLBACK_Timer            ( Lua *lua, Dword id, const std::string &funcName );
+void LUACALLBACK_ListenKeyboard   ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
+void LUACALLBACK_ListenMouseKey   ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
+void LUACALLBACK_ObjectTrigger    ( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger );
 
 
 
@@ -68,21 +71,23 @@ public:
   static int ErrorHandler       ( lua_State *lua );
 
   //Lua-функции
-  static int LUA_Alert          ( lua_State *lua );
-  static int LUA_ObjectRemove   ( lua_State *lua );
-  static int LUA_GetObjectPos   ( lua_State *lua );
-  static int LUA_SetObjectPos   ( lua_State *lua );
-  static int LUA_SetTimer       ( lua_State *lua );
-  static int LUA_LogWrite       ( lua_State *lua );
-  static int LUA_CreateObject   ( lua_State *lua );
-  static int LUA_ListenKeyboard ( lua_State *lua );
-  static int LUA_ListenMouseKey ( lua_State *lua );
-  static int LUA_GameExit       ( lua_State *lua );
-  static int LUA_GetMousePos    ( lua_State *lua );
-  static int LUA_GetCameraPos   ( lua_State *lua );
-  static int LUA_GetWindowSize  ( lua_State *lua );
+  static int LUA_Alert            ( lua_State *lua );
+  static int LUA_ObjectRemove     ( lua_State *lua );
+  static int LUA_GetObjectPos     ( lua_State *lua );
+  static int LUA_SetObjectPos     ( lua_State *lua );
+  static int LUA_SetTimer         ( lua_State *lua );
+  static int LUA_LogWrite         ( lua_State *lua );
+  static int LUA_CreateObject     ( lua_State *lua );
+  static int LUA_ListenKeyboard   ( lua_State *lua );
+  static int LUA_ListenMouseKey   ( lua_State *lua );
+  static int LUA_GameExit         ( lua_State *lua );
+  static int LUA_GetMousePos      ( lua_State *lua );
+  static int LUA_GetCameraPos     ( lua_State *lua );
+  static int LUA_GetWindowSize    ( lua_State *lua );
+  static int LUA_ObjectAddTrigger ( lua_State *lua );
 
-  static void LUACALLBACK_Timer         ( Lua *lua, Dword id, const std::string &funcName );
-  static void LUACALLBACK_ListenKeyboard( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
-  static void LUACALLBACK_ListenMouseKey( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
+  static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );
+  static void LUACALLBACK_ListenKeyboard  ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
+  static void LUACALLBACK_ListenMouseKey  ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
+  static void LUACALLBACK_ObjectTrigger   ( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger );
 };
