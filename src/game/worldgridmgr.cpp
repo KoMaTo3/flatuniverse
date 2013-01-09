@@ -303,3 +303,18 @@ void WorldGridManager::LoadFromFile( const std::string& fileName )
   this->worldSaver.LoadFromFile( fileName );
   this->LoadGrid( WorldGrid::WorldGridPosition( 0, 0 ) );
 }//LoadFromFile
+
+
+
+/*
+=============
+  ClearWorld
+  Очистка текущих гридов от объектов. Сами гриды при этом остаются
+=============
+*/
+void WorldGridManager::ClearWorld()
+{
+  WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
+  for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
+    ( *iterGrid )->DetachAll();
+}//ClearWorld

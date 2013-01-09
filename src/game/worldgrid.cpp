@@ -51,6 +51,7 @@ WorldGrid::~WorldGrid()
 */
 void WorldGrid::AttachObject( Object *object )
 {
+  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::AttachObject => object[x%X]", object );
   if( !object )
   {
     __log.PrintInfo( Filelevel_WARNING, "WorldGrid::AttachObject => object is NULL" );
@@ -59,7 +60,7 @@ void WorldGrid::AttachObject( Object *object )
 
   if( this->IsThisObject( object ) )
   {
-    __log.PrintInfo( Filelevel_WARNING, "WorldGrid::AttachObject => object already in this grid" );
+    __log.PrintInfo( Filelevel_WARNING, "WorldGrid::AttachObject => object x%X already in this grid", object );
     return;
   }
 
@@ -103,6 +104,19 @@ void WorldGrid::DetachObject( Object *object )
       break;
     }
 }//DetachObject
+
+
+
+/*
+=============
+  DetachAll
+=============
+*/
+void WorldGrid::DetachAll()
+{
+  this->objects.clear();
+}//DetachAll
+
 
 
 
@@ -182,6 +196,11 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject )
     //object = new Object( name, ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName.c_str() ) ) );
     object = new Object();
     object->LoadFromBuffer( reader, rootObject );
+
+    ObjectPointerType pointer( object );
+    this->objects.push_back( pointer );
+    object->PointerAdd( &( *this->objects.rbegin() ) );
+
     this->AttachObject( object );
   }//for q
 
@@ -203,10 +222,14 @@ void WorldGrid::Update()
   {
     changed = false;
     iterEnd = this->objects.end();
+    __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => pos[%d; %d] objects[%d]", this->position.x, this->position.y, this->objects.size() );
     for( iter = this->objects.begin(); iter != iterEnd; ++iter )
     {
+      __log.PrintInfo( Filelevel_DEBUG, ". pointer[x%X] object[x%X] valid[%d]", &( *iter ), iter->GetObject(), iter->GetValid() );
       if( !iter->GetValid() )
       {
+        __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => object[x%X] is not valid, delete from grid", iter->GetObject() );
+        this->DetachObject( iter->GetObject() );
         this->objects.erase( iter );
         changed = true;
         break;

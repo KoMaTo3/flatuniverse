@@ -34,19 +34,23 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   game->lua->Init();
 
-  game->core->CreateObject( "gui" );
+  game->core->CreateObject( "gui" )->SetLockToDelete( true );
 
   game->world->LoadFromFile( "data/temp/testworld.fu" );
 
-  game->core->CreateObject( "lifts" );
-
-  game->core->mouse.SetCursor( "data/temp/cursor_hw.png", game->core->CreateObject( "mouse-cursor", game->core->GetObject( "gui" ) ) );
+  game->core->mouse.SetCursor( "data/temp/cursor_hw.png", game->core->CreateObject( "mouse-cursor", game->core->GetObject( "gui" ) )->SetLockToDelete( true ) );
   //__log.PrintInfo( Filelevel_DEBUG, "test: %s", core->GetObject( "gui" )->GetNameFull().c_str() );
-  game->core->CreateObject( "bottom-block", game->core->GetObject( "gui" ) )->SetPosition( Vec3( 50.0f, 85.0f, 2.0f ) )->EnableRenderableGUI()->SetSize( Vec2( 100.0f, 30.0f ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha * 0.5f ) )
-    ->SetTexture( "data/temp/ui-bg-0.png" );
-  game->core->CreateObject( "tooltips" );
+  //game->core->CreateObject( "bottom-block", game->core->GetObject( "gui" ) )->SetPosition( Vec3( 50.0f, 85.0f, 2.0f ) )->EnableRenderableGUI()->SetSize( Vec2( 100.0f, 30.0f ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha * 0.5f ) )
+  //  ->SetTexture( "data/temp/ui-bg-0.png" );
+  game->core->CreateObject( "tooltips" )->SetLockToDelete( true );
   game->core->CreateObject( "mouse-grid", game->core->GetObject( "tooltips" ) );
+  game->core->CreateObject( "defaults" )->SetLockToDelete( true );
+  game->core->CreateObject( "camera", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
+  game->core->CreateObject( "active-object", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
+  game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
+  game->world->AddActiveObject( game->core->GetObject( "defaults/active-object" ) );
 
+  /*
   obj = game->core->CreateObject( "test-bg-2" );
   obj->SetPosition( Vec3( 50.0f, 50.0f, -9.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
@@ -69,6 +73,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetTexture( "data/temp/mario.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
   //quad->scale.Set( 0.5f, 1.0f );
   game->core->SetCamera( obj );
+  */
 
   /*
   obj = game->core->CreateObject( "wall-top" );
@@ -96,6 +101,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->world->AttachObjectToGrid( 0, 0, obj );
   */
 
+  /*
   obj = game->core->CreateObject( "wall-left" );
   obj->SetPosition( Vec3( 15.0f, 50.0f, 0.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
@@ -108,6 +114,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   ObjectTrigger* trig = obj->EnableTrigger()->SetSize( Vec3( 10.0f, 55.0f, 0.0f ) + Vec3( 2.0f, 2.0f, 0.0f ) );
   //trig->AddHandler( Game::TestTrigger );
   //game->world->AttachObjectToGrid( 0, 0, obj );
+  */
 
   /*
   obj = game->core->CreateObject( "wall-right" );
@@ -191,7 +198,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   */
 
   //game->world->AttachObjectToGrid( WorldGrid::WorldGridPosition( 0, 0 ), game->core->GetObject( "wall-left" ) );
-  game->world->AddActiveObject( game->core->GetObject( "player" ) );
+  //game->world->AddActiveObject( game->core->GetObject( "player" ) );
 
 
   /*
@@ -243,11 +250,15 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   sTimer.Update();
   game->world->Update( true );
   game->lua->RunFile( "data/scripts/test.lua" );
+  __log.PrintInfo( Filelevel_INFO, "Run" );
 
   while( game->core->Update() )
   {
+    __log.PrintInfo( Filelevel_DEBUG, "=> core->Redraw" );
     game->core->Redraw();
+    __log.PrintInfo( Filelevel_DEBUG, "=> world->Update" );
     game->world->Update();
+    __log.PrintInfo( Filelevel_DEBUG, "=> game->Update" );
     game->Update();
 
     t += sTimer.GetDeltaF();
@@ -259,6 +270,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       currentFps = 0;
     }
 
+    /*
     if( game->core->keyboard.IsPressed( VK_RETURN ) )
       game->core->RemoveObject( "wall-right" );
 
@@ -297,6 +309,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       obj = game->core->GetObject( "player" );
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, 100.0f, 0.0f ) );
     }
+    */
 
     /*
     if( game->core->keyboard.IsPressed( VK_SPACE ) )
@@ -353,11 +366,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         //obj->EnableCollision();
       }
       //game->core->RemoveObject( "/gui/button-exit" );
-    }
-
-    if( game->core->keyboard.IsPressed( VK_F1 ) )
-    {
-      game->world->UnloadGrid( WorldGrid::WorldGridPosition( 0, 0 ) );
     }
 
     //mouse tooltips
@@ -421,12 +429,14 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, Math::Sin16( rot * 3.0f ) * 100.0f, 0.0f ) );
       */
 
+    /*
     if( obj = game->core->GetObject( "test-bg-2" ) )
     {
       quad = ( RenderableQuad* ) obj->GetRenderable();
       float scale = Math::Sin16( rot * 2.0f ) * 1.0f + 5.0f;
       quad->SetScale( Vec2( scale, scale ) )->SetRotation( -rot );
     }
+    */
       //obj->SetPosition( Vec3( -20.0f, 50.0f + Math::Sin16( rot * 5.0f ) * 50.0f, 0.0f ) );
 
     ++currentFps;
@@ -463,6 +473,9 @@ Game::Game()
   LUAFUNC_GetCameraPos      = Game::LUA_GetCameraPos;
   LUAFUNC_GetWindowSize     = Game::LUA_GetWindowSize;
   LUAFUNC_ObjectAddTrigger  = Game::LUA_ObjectAddTrigger;
+  LUAFUNC_SetCamera         = Game::LUA_SetCamera;
+  LUAFUNC_GetCamera         = Game::LUA_GetCamera;
+  LUAFUNC_ClearScene        = Game::LUA_ClearScene;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -810,3 +823,57 @@ void Game::OnRemoveTrigger( ObjectTrigger *trigger )
       break;
     }
 }//OnRemoveTrigger
+
+
+/*
+=============
+  LUA_SetCamera
+=============
+*/
+void Game::LUA_SetCamera( const std::string &name )
+{
+  Object *camera = game->core->GetObject( name );
+  if( !camera )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SetCamera => object '%s' not found", name.c_str() );
+    return;
+  }
+  game->core->SetCamera( camera );
+}//LUA_CreateObject
+
+
+/*
+=============
+  LUA_GetCamera
+=============
+*/
+std::string Game::LUA_GetCamera()
+{
+  Object *camera = game->core->GetCamera();
+  if( !camera )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_GetCamera => camera not attached to object" );
+    return "";
+  }
+  return camera->GetNameFull();
+}//LUA_GetCamera
+
+
+/*
+=============
+  LUA_ClearScene
+=============
+*/
+void Game::LUA_ClearScene()
+{
+  /*
+    1. Чистим потомков core->root
+    2. Чистим ссылки на объекты в мирах __worldGridList (ObjectPointer)
+      
+  */
+  __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene core" );
+  game->core->ClearScene();
+  __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene world" );
+  game->world->ClearWorld();
+  __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene done" );
+}//LUA_ClearScene

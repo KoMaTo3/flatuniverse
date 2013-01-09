@@ -20,6 +20,10 @@ LUAFUNCPROC_GetMousePos       *LUAFUNC_GetMousePos          = NULL;
 LUAFUNCPROC_GetCameraPos      *LUAFUNC_GetCameraPos         = NULL;
 LUAFUNCPROC_GetWindowSize     *LUAFUNC_GetWindowSize        = NULL;
 LUAFUNCPROC_ObjectAddTrigger  *LUAFUNC_ObjectAddTrigger     = NULL;
+LUAFUNCPROC_SetCamera         *LUAFUNC_SetCamera            = NULL;
+LUAFUNCPROC_GetCamera         *LUAFUNC_GetCamera            = NULL;
+LUAFUNCPROC_ClearScene        *LUAFUNC_ClearScene           = NULL;
+LUAFUNCPROC_GetRandomSeed     *LUAFUNC_GetRandomSeed        = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -77,6 +81,10 @@ bool Lua::Init()
   lua_register( this->luaState, "GetCameraPos",     Lua::LUA_GetCameraPos );
   lua_register( this->luaState, "GetWindowSize",    Lua::LUA_GetWindowSize );
   lua_register( this->luaState, "ObjectAddTrigger", Lua::LUA_ObjectAddTrigger );
+  lua_register( this->luaState, "SetCamera",        Lua::LUA_SetCamera );
+  lua_register( this->luaState, "GetCamera",        Lua::LUA_GetCamera );
+  lua_register( this->luaState, "ClearScene",       Lua::LUA_ClearScene );
+  lua_register( this->luaState, "GetRandomSeed",    Lua::LUA_GetRandomSeed );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -596,3 +604,64 @@ void LUACALLBACK_ObjectTrigger( Lua *lua, const std::string &funcName, const std
 {
   Lua::LUACALLBACK_ObjectTrigger( lua, funcName, triggerName, objectName, isInTrigger );
 }//LUACALLBACK_Timer
+
+
+
+/*
+=============
+  LUA_SetCamera
+=============
+*/
+int Lua::LUA_SetCamera( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetCamera => not enough parameters" );
+    return 0;
+  }
+  std::string name = lua_tostring( lua, 1 );
+  LUAFUNC_SetCamera( name );
+  return 0;
+}//LUA_SetCamera
+
+
+
+/*
+=============
+  LUA_GetCamera
+=============
+*/
+int Lua::LUA_GetCamera( lua_State *lua )
+{
+  std::string name = LUAFUNC_GetCamera();
+  lua_pushstring( lua, name.c_str() );
+  return 1;
+}//LUA_GetCamera
+
+
+
+/*
+=============
+  LUA_ClearScene
+=============
+*/
+int Lua::LUA_ClearScene( lua_State *lua )
+{
+  LUAFUNC_ClearScene();
+  return 0;
+}//LUA_ClearScene
+
+
+
+/*
+=============
+  LUA_GetRandomSeed
+=============
+*/
+int Lua::LUA_GetRandomSeed( lua_State *lua )
+{
+  int seed = rand();
+  lua_pushinteger( lua, seed );
+  return 1;
+}//LUA_GetRandomSeed

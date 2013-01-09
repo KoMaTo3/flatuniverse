@@ -55,6 +55,7 @@ public:
 
   void  AttachObject( Object *object );
   void  DetachObject( Object *object );
+  void  DetachAll   ();
   bool  IsThisObject( Object *object );
   const WorldGridPosition&
         GetPosition () { return this->position; }

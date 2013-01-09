@@ -27,6 +27,10 @@ typedef Vec2  LUAFUNCPROC_GetMousePos       ();
 typedef Vec2  LUAFUNCPROC_GetCameraPos      ();
 typedef Size  LUAFUNCPROC_GetWindowSize     ();
 typedef void  LUAFUNCPROC_ObjectAddTrigger  ( const std::string &triggerName, const std::string &funcName );
+typedef void  LUAFUNCPROC_SetCamera         ( const std::string &name );
+typedef std::string LUAFUNCPROC_GetCamera   ();
+typedef void  LUAFUNCPROC_ClearScene        ();
+typedef int   LUAFUNCPROC_GetRandomSeed     ();
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -41,6 +45,10 @@ extern LUAFUNCPROC_GetMousePos      *LUAFUNC_GetMousePos;
 extern LUAFUNCPROC_GetCameraPos     *LUAFUNC_GetCameraPos;
 extern LUAFUNCPROC_GetWindowSize    *LUAFUNC_GetWindowSize;
 extern LUAFUNCPROC_ObjectAddTrigger *LUAFUNC_ObjectAddTrigger;
+extern LUAFUNCPROC_SetCamera        *LUAFUNC_SetCamera;
+extern LUAFUNCPROC_GetCamera        *LUAFUNC_GetCamera;
+extern LUAFUNCPROC_ClearScene       *LUAFUNC_ClearScene;
+extern LUAFUNCPROC_GetRandomSeed    *LUAFUNC_GetRandomSeed;
 
 
 //callbacks
@@ -85,7 +93,12 @@ public:
   static int LUA_GetCameraPos     ( lua_State *lua );
   static int LUA_GetWindowSize    ( lua_State *lua );
   static int LUA_ObjectAddTrigger ( lua_State *lua );
+  static int LUA_SetCamera        ( lua_State *lua );
+  static int LUA_GetCamera        ( lua_State *lua );
+  static int LUA_ClearScene       ( lua_State *lua );
+  static int LUA_GetRandomSeed    ( lua_State *lua );
 
+  //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );
   static void LUACALLBACK_ListenKeyboard  ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
   static void LUACALLBACK_ListenMouseKey  ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );

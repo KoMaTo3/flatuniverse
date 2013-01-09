@@ -4,6 +4,7 @@
 #include <vector>
 #include "interngl.h"
 #include "file.h"
+#include <time.h>
 #include "config.h"
 
 #pragma comment( lib, "opengl32.lib" )
@@ -103,6 +104,7 @@ void Core::SetState( CoreStates newState )
 */
 bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const std::string &windowName )
 {
+  srand( ( Word ) time( 0 ) );
   Math::Init();
 
   char tmp[ 1024 ];
@@ -873,7 +875,13 @@ bool Core::Redraw()
 
     __textureAtlas->Bind();
 
+    glEnableVertexAttribArray( 0 );
+    glEnableVertexAttribArray( 1 );
+    glEnableVertexAttribArray( 2 );
+    glEnableVertexAttribArray( 3 );
+
     //Основной мир
+    if( __coreRenderableList->size() )
     {
       glLoadIdentity();
       //glScalef( this->_window.windowToWorld.x, this->_window.windowToWorld.y, this->_window.windowToWorld.z );
@@ -931,37 +939,42 @@ bool Core::Redraw()
         */
       }
 
+      __log.PrintInfo( Filelevel_DEBUG, "glBindVertexArray" );
       glBindVertexArray( this->_buffers.vao );
       GL_CHECK_ERROR;
 
       //__log.PrintInfo( Filelevel_DEBUG, "glBindBuffer:GL_ARRAY_BUFFER => %d", this->_buffers.vbo );
+      __log.PrintInfo( Filelevel_DEBUG, "vbo" );
       glBindBuffer( GL_ARRAY_BUFFER, this->_buffers.vbo );
       GL_CHECK_ERROR;
+      __log.PrintInfo( Filelevel_DEBUG, "glBufferData: __coreRenderableList[x%X] size[%d]", __coreRenderableList, __coreRenderableList->size() );
       glBufferData( GL_ARRAY_BUFFER, sizeof( RenderableQuad ) * __coreRenderableList->size(), ( *__coreRenderableList->begin() ).GetPointerToVertex(), GL_DYNAMIC_DRAW );
       GL_CHECK_ERROR;
 
+      __log.PrintInfo( Filelevel_DEBUG, "ibo" );
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->_buffers.ibo );
       GL_CHECK_ERROR;
+      __log.PrintInfo( Filelevel_DEBUG, "glBufferData" );
       glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( *__coreRenderableListIndicies->begin() ) * __coreRenderableListIndicies->size(), &*__coreRenderableListIndicies->begin(), GL_DYNAMIC_DRAW );
       GL_CHECK_ERROR;
 
-      glEnableVertexAttribArray( 0 );
       GL_CHECK_ERROR;
+      __log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 0" );
       glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), 0 );
       GL_CHECK_ERROR;
 
-      glEnableVertexAttribArray( 1 );
       GL_CHECK_ERROR;
+      __log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 1" );
       glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 4 ) );
       GL_CHECK_ERROR;
 
-      glEnableVertexAttribArray( 2 );
       GL_CHECK_ERROR;
+      __log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 2" );
       glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 8 ) );
       GL_CHECK_ERROR;
 
-      glEnableVertexAttribArray( 3 );
       GL_CHECK_ERROR;
+      __log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 3" );
       glVertexAttribPointer( 3, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 12 ) );
       GL_CHECK_ERROR;
 
@@ -974,6 +987,8 @@ bool Core::Redraw()
 
 
     //GUI
+    __log.PrintInfo( Filelevel_DEBUG, "test gui: __coreGUI[x%X] size[%d]", __coreGUI, __coreGUI->size() );
+    if( __coreGUI->size() )
     {
       //glLoadIdentity();
       Mat4 matrix;
@@ -1022,6 +1037,7 @@ bool Core::Redraw()
           this->SetState( CORE_STATE_EXIT );
       }
     }
+    __log.PrintInfo( Filelevel_DEBUG, "end test gui" );
     //End GUI
 
     /*
@@ -1143,7 +1159,7 @@ LRESULT Core::Signal( DWORD code, LPARAM lParam, WPARAM wParam, void *pointer )
 */
 bool Core::Update()
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
+  __log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
   sTimer.Update();
   this->keyboard.Update();
   this->mouse.Update();
@@ -1170,7 +1186,7 @@ bool Core::Update()
   this->_rootObject->Update( sTimer.GetDeltaF() );
   //this->_rootGUIObject->Update( sTimer.GetDeltaF() );
 
-  //__log.PrintInfo( Filelevel_DEBUG, "============" );
+  __log.PrintInfo( Filelevel_DEBUG, "============" );
   return true;
 }//Update
 
@@ -1374,6 +1390,22 @@ Object* Core::GetObjectByCollision( Collision *collision )
       return iterCollision->object;
   return NULL;
 }//GetObjectByCollision
+
+
+
+
+/*
+=============
+  ClearScene
+=============
+*/
+void Core::ClearScene()
+{
+  __log.PrintInfo( Filelevel_DEBUG, "Core::ClearScene" );
+  this->_rootObject->ClearChilds( false );
+  this->camera = NULL;
+  __log.PrintInfo( Filelevel_DEBUG, "Core::ClearScene => done" );
+}//ClearScene
 
 
 

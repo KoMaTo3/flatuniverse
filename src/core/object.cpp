@@ -42,7 +42,7 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 
 Object::Object()
 :name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
-,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL )
+,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 {
   __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%X]", this );
 }//constructor
@@ -50,7 +50,7 @@ Object::Object()
 
 Object::Object( const std::string &objectName, Object* parentObject )
 :name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
-,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL )
+,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 {
   if( this->_parent )
   {
@@ -67,7 +67,7 @@ Object::Object( const std::string &objectName, Object* parentObject )
 
 Object::~Object()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%X]", this );
+  __log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%X] name['%s']", this, this->GetNameFull().c_str() );
   //if( !this->_parent )
   //  __log.PrintInfo( Filelevel_DEBUG, "is a root object" );
 
@@ -79,7 +79,7 @@ Object::~Object()
 
   if( this->pointers.size() )
   {
-    __log.PrintInfo( Filelevel_DEBUG, ". object[x%X] pointers[%d]", this, this->pointers.size() );
+    __log.PrintInfo( Filelevel_DEBUG, ". object[x%X] name['%s'] pointers[%d]", this, this->GetNameFull().c_str(), this->pointers.size() );
     ObjectPointers::iterator iter, iterEnd = this->pointers.end();
     for( iter = this->pointers.begin(); iter != iterEnd; ++iter )
     {
@@ -88,7 +88,7 @@ Object::~Object()
     }
   }
 
-  //__log.PrintInfo( Filelevel_DEBUG, "Object x%X deleted", this );
+  __log.PrintInfo( Filelevel_DEBUG, "Object x%X deleted", this );
 }//destructor
 
 
@@ -97,18 +97,52 @@ Object::~Object()
 =============
   ClearChilds
   Удаление рекурсивно всех потомков
+  forceDelete - игнорировать флаг _isLockedToDelete
 =============
 */
-void Object::ClearChilds()
+void Object::ClearChilds( bool forceDelete )
 {
   if( !this->_childs )
     return;
 
-  ObjectChilds::iterator iter;
-  while( this->_childs->size() )
-    delete *this->_childs->begin();
+  __log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => objects[%d]", this->_childs->size() );
+  if( forceDelete ) //полная очистка
+  {
+    ObjectChilds::iterator iter;
+    while( this->_childs->size() )
+      delete *this->_childs->begin();
 
-  DEF_DELETE( this->_childs );
+    DEF_DELETE( this->_childs );
+  }
+  else  //удаление только незалоченных
+  {
+    __log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => not forced" );
+    bool deleted;
+    ObjectChilds::iterator iter, iterEnd;
+    do
+    {
+      deleted = false;
+
+      iterEnd = this->_childs->end();
+      __log.PrintInfo( Filelevel_DEBUG, ". iteration +1" );
+      for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
+      {
+        __log.PrintInfo( Filelevel_DEBUG, ".   child[x%X]", *iter );
+        if( !( *iter )->IsLockedToDelete() )
+        {
+          __log.PrintInfo( Filelevel_DEBUG, ". deleted '%s'", ( *iter )->GetNameFull().c_str() );
+          deleted = true;
+          Object *tmpChild = *iter;
+          this->_childs->erase( iter );
+          delete tmpChild;
+          break;
+        }
+      }
+    } while( deleted );
+    if( !this->_childs->size() )
+      DEF_DELETE( this->_childs );
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => Done" );
 }//ClearChilds
 
 

@@ -60,6 +60,9 @@ public:
   static Size   LUA_GetWindowSize     ();
   static void   LUA_ObjectAddTrigger  ( const std::string &triggerName, const std::string &funcName );
   static void   LUA_ObjectTrigger_Handler( ObjectTrigger *trigger, Collision *collision, bool isInTrigger );
+  static void   LUA_SetCamera         ( const std::string &name );
+  static std::string  LUA_GetCamera   ();
+  static void   LUA_ClearScene        ();
 
   void Update();
   void UpdateLuaTimers();

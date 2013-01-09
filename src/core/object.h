@@ -88,6 +88,8 @@ private:
   ObjectPointers  pointers;   //перечень указателей на этот объект. объект обязан делать их невалидными беред своим уничтожением
   ObjectTrigger   *trigger;
 
+  bool            _isLockedToDelete;  //запрет на удаление объекта посредством Core::ClearScene
+
 private:
   void                _RecalculatePosition();
 
@@ -103,7 +105,7 @@ public:
   void                AttachChildObject   ( Object* newChild );
   void                UnAttachChildObject ( Object* child );
   void                UnAttachThisFromParent();
-  void                ClearChilds         ();
+  void                ClearChilds         ( bool forceDelete = true );
   Object*             SetPosition         ( const Vec3& newPosition );
   Object*             SetPosition2D       ( const Vec2& newPosition );
   inline const Vec3&  GetPosition         () const { return this->position; }
@@ -139,4 +141,8 @@ public:
   Object*             GetObject           ( const std::string& name, Object *parent = NULL );
 
   void                PointerAdd          ( ObjectPointer< Object > *pointer );
+  inline
+    Object*           SetLockToDelete     ( bool lock ) { this->_isLockedToDelete = lock; return this; }
+  inline
+    bool              IsLockedToDelete    () { return this->_isLockedToDelete; }
 };

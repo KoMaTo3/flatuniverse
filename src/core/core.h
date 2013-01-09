@@ -139,6 +139,7 @@ public:
   Object* getObjectInPoint    ( const Vec2& pos );
   Object* GetObjectByTrigger  ( ObjectTrigger *trigger );
   Object* GetObjectByCollision( Collision *collision );
+  void    ClearScene          ();
 
   bool    LoadExtension       ( const std::string &name, void** function );
   bool    IsExtensionExist    ( const std::string extensionName );

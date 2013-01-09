@@ -46,4 +46,5 @@ public:
               GetGridPositionByObject ( const Object& obj );
   void        LoadFromFile            ( const std::string& fileName );
   void        SaveToFile              ( const std::string& fileName );
+  void        ClearWorld              ();
 };
