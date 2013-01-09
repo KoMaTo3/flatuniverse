@@ -64,10 +64,56 @@ level = {
             { 1,0,0,1 }, -- цвет
         },
       },
+      {     -- 4: I
+        {   -- 1: начальное положение
+            { 1,1,1,1 },
+            { 0,0,0,0 },
+            { 0,0,0,0 },
+            { 0,0,0,0 },
+            { 1,0,0,1 }, -- цвет
+        },
+        {   -- 2
+            { 0,0,1,0 },
+            { 0,0,1,0 },
+            { 0,0,1,0 },
+            { 0,0,1,0 },
+            { 1,0,0,1 }, -- цвет
+        },
+      },
+      {     -- 5: угол
+        {   -- 1: начальное положение
+            { 0,1,1,1 },
+            { 0,0,1,0 },
+            { 0,0,0,0 },
+            { 0,0,0,0 },
+            { 0,1,0,1 }, -- цвет
+        },
+        {   -- 2
+            { 0,0,1,0 },
+            { 0,1,1,0 },
+            { 0,0,1,0 },
+            { 0,0,0,0 },
+            { 0,1,0,1 }, -- цвет
+        },
+        {   -- 3
+            { 0,0,1,0 },
+            { 0,1,1,1 },
+            { 0,0,0,0 },
+            { 0,0,0,0 },
+            { 0,1,0,1 }, -- цвет
+        },
+        {   -- 4
+            { 0,1,0,0 },
+            { 0,1,1,0 },
+            { 0,1,0,0 },
+            { 0,0,0,0 },
+            { 0,1,0,1 }, -- цвет
+        },
+      },
     },
     current = {
-      x = 0,    -- [0:level.width-1]
-      y = 0,    -- [0:level.height-1]
+      x = 1,    -- [1:level.width]
+      y = 1,    -- [1:level.height]
       item = 1, -- [1:...]
       rot = 1,  -- [1:4]
     },
@@ -84,7 +130,7 @@ level = {
       end
       level.current = {
         x = 4,
-        y = 0,
+        y = 1,
         item = math.random( 1, #level.items ),
         rot = math.random( 1, #level.items[ level.current.item ] ),
       }
@@ -99,13 +145,13 @@ level = {
     ShowBorders = function()
       local x, y
       for y = -1,level.height do
-        x = -1
+        x = 0
         ObjectCreate( 'level-border-'..y..'-'..x, '', x * tileSize + level.dx, y * tileSize + level.dy, 0, tileSize, tileSize, 'data/temp/brick0.png' )
-        x = level.width
+        x = level.width + 1
         ObjectCreate( 'level-border-'..y..'-'..x, '', x * tileSize + level.dx, y * tileSize + level.dy, 0, tileSize, tileSize, 'data/temp/brick0.png' )
       end
-      for x = 0,level.width-1 do
-        y = level.height
+      for x = 0,level.width+1 do
+        y = level.height + 1
         ObjectCreate( 'level-border-'..y..'-'..x, '', x * tileSize + level.dx, y * tileSize + level.dy, 0, tileSize, tileSize, 'data/temp/brick0.png' )
       end
     end,
@@ -140,7 +186,7 @@ level = {
           for x = 0,3 do
             if itemX + x >= 0 and itemX + x < level.width then
               if level.items[ item ][ rot ][ y + 1 ][ x + 1 ] == 1 then
-                ObjectCreate( 'level-object-'..( itemY + y )..'-'..( itemX + x ), '', ( itemX + x ) * tileSize + level.dx, ( itemY + y ) * tileSize + level.dy, 0, tileSize, tileSize, 'data/temp/brick3.png' )
+                ObjectCreate( 'level-object-'..( itemY + y + 1 )..'-'..( itemX + x + 1 ), '', ( itemX + x + 1 ) * tileSize + level.dx, ( itemY + y + 1 ) * tileSize + level.dy, 0, tileSize, tileSize, 'data/temp/brick3.png' )
                 level.field[ itemY + y + 1 ][ itemX + x + 1 ] = 1;
               end
             end
@@ -158,7 +204,7 @@ level = {
           for x = 0,3 do
             if itemX + x >= 0 and itemX + x < level.width then
               if level.items[ item ][ rot ][ y + 1 ][ x + 1 ] == 1 then
-                ObjectRemove( 'level-object-'..( itemY + y )..'-'..( itemX + x ) )
+                ObjectRemove( 'level-object-'..( itemY + y + 1 )..'-'..( itemX + x + 1 ) )
                 level.field[ itemY + y + 1 ][ itemX + x + 1 ] = 0;
               end
             end
@@ -189,10 +235,29 @@ level = {
     end,
 
     --
+    -- MovePiece
+    --
+    MovePiece = function( fromY, fromX, toY, toX )
+      if level.field[ fromY ][ fromX ] == 0 then
+        if level.field[ toY ][ toX ] == 1 then  -- удалить to
+          ObjectRemove( 'level-object-'..toY..'-'..toX )
+          level.field[ toY ][ toX ] = 0
+        end
+      else
+        if level.field[ toY ][ toX ] == 0 then  -- добавить в to, удалить from
+          ObjectCreate( 'level-object-'..toY..'-'..toX, '', toX * tileSize + level.dx, toY * tileSize + level.dy, 0, tileSize, tileSize, 'data/temp/brick3.png' )
+          level.field[ toY ][ toX ] = 1
+        end
+        ObjectRemove( 'level-object-'..fromY..'-'..fromX )
+        level.field[ fromY ][ fromX ] = 0
+      end
+    end,
+
+    --
     -- CheckLines
     --
     CheckLines = function()
-      for y = 1,level.height do
+      for y = 2,level.height do
         local isLine = true
         for x = 1,level.width do
           if level.field[ y ][ x ] == 0 then
@@ -200,20 +265,11 @@ level = {
             break
           end
         end
-        if isLine then  -- собрали линию
-          for x = 1,level.width do  -- очищаем линию
-            if level.field[ y ][ x ] ~= 0 then
-              ObjectRemove( 'level-object-'..y..'-'..x )
-              level.field[ y ][ x ] = 0;
-            end
+        if isLine then  -- собрали линию => опускаем всё, что выше неё
+          for ny = y - 1, 1, -1 do
+          for x = 1,level.width do
+            level.MovePiece( ny, x, ny + 1, x )
           end
-          for ny = y, 2, -1 do
-            for x = 1,level.width do
-              if level.field[ y - 1 ][ x ] == 1 then
-                ObjectRemove( 'level-object-'..( y - 1 )..'-'..x )
-                ObjectCreate( 'level-object-'..y..'-'..x, '', x * tileSize + level.dx, y * tileSize + level.dy, 0, tileSize, tileSize, 'data/temp/brick3.png' )
-              end
-            end
           end
         end
       end
@@ -253,7 +309,7 @@ function onKey( id, isPressed )
             level.PushItem( level.current.x, level.current.y, level.current.item, level.current.rot )
           end
       end
-      if id == 0x5A then    -- поворот
+      if id == 0x5A or id == 0x26 then    -- поворот
           level.EraseItem( level.current.x, level.current.y, level.current.item, level.current.rot )
           local nextRot = ( level.current.rot % #level.items[ level.current.item ] ) + 1
           if level.CheckPlaceForItem( level.current.x, level.current.y, level.current.item, nextRot ) == true then
