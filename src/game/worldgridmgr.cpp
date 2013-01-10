@@ -39,7 +39,7 @@ void WorldGridManager::Update( bool forceLoadGrids )
     for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
       ( *iterGrid )->Update();
 
-    WorldGridObjectList::iterator iter, iterEnd = this->activeObjects.end();
+    WorldGridObjectList::iterator iter, iterEnd;
     Short x, y;
     WorldGridList greedsToUnload = *__worldGridList;  //список гридов, которые можно выгрузить
     WorldGrid *grid;
@@ -48,11 +48,28 @@ void WorldGridManager::Update( bool forceLoadGrids )
     //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => grids to unload %d", greedsToUnload.size() );
     //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => active objects %d", this->activeObjects.size() );
 
+    //проверка на валидность
+    bool isActiveObjectsValid;
+    do
+    {
+      isActiveObjectsValid = true;
+      iterEnd = this->activeObjects.end();
+      for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter )
+        if( !iter->GetValid() )
+        {
+          this->activeObjects.erase( iter );
+          isActiveObjectsValid = false;
+          break;
+        }
+    } while( !isActiveObjectsValid );
+
+
+    iterEnd = this->activeObjects.end();
     for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter )
     {
       //__log.PrintInfo( Filelevel_DEBUG, ". object: x%X", iter->GetObject() );
       //__log.PrintInfo( Filelevel_DEBUG, ". valid: %d", iter->GetValid() );
-      WorldGrid::WorldGridPosition pos = this->GetGridPositionByObject( *iter->GetObject() );
+      WorldGrid::WorldGridPosition pos = this->GetGridPositionByObject( *( iter->GetObject< Object >() ) );
 
       for( y = pos.y - this->gridsAroundObject; y <= pos.y + this->gridsAroundObject; ++y )
       for( x = pos.x - this->gridsAroundObject; x <= pos.x + this->gridsAroundObject; ++x )
@@ -164,7 +181,9 @@ void WorldGridManager::AddActiveObject( Object *obj )
       return;
     }
 
-  this->activeObjects.push_back( WorldGridObjectList::value_type( obj ) );
+  //this->activeObjects.push_back( WorldGridObjectList::value_type( obj ) );
+    this->activeObjects.push_back( WorldGridObjectList::value_type() );
+    this->activeObjects.rbegin()->Init( obj );
   __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::AddActiveObject => object '%s' added to list", obj->GetNameFull().c_str() );
 }//AddActiveObject
 
@@ -264,9 +283,11 @@ bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition gridPos )
       __log.PrintInfo( Filelevel_DEBUG, "grid dump size %d", gridDump.getLength() );
       //tools::Dump( gridDump.getData(), gridDump.getLength(), "gridDump" );
 
+      __log.PrintInfo( Filelevel_DEBUG, ". delete grid..." );
       delete *iterGrid;
       __worldGridList->erase( iterGrid );
 
+      __log.PrintInfo( Filelevel_DEBUG, ". save grid dump..." );
       this->worldSaver.SaveGrid( gridPos.x, gridPos.y, gridDump );
 
       __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::UnloadGrid => grid[%d; %d] unloaded", gridPos.x, gridPos.y );

@@ -36,7 +36,12 @@ WorldGrid::~WorldGrid()
 {
   WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
   for( iter = this->objects.begin(); iter != iterEnd; ++iter )
-    delete iter->GetObject();
+    if( iter->GetValid() )
+    {
+      __log.PrintInfo( Filelevel_DEBUG, "~WorldGrid => deleting object x%X['%s']", iter->GetObject(), iter->GetObject< Object >()->GetNameFull().c_str() );
+      delete iter->GetObject();
+    }
+  __log.PrintInfo( Filelevel_DEBUG, "~WorldGrid => clear pointers list" );
   this->objects.clear();
 
   __log.PrintInfo( Filelevel_DEBUG, "WorldGrid deleted: pos[%d; %d]", this->position.x, this->position.y );
@@ -51,6 +56,7 @@ WorldGrid::~WorldGrid()
 */
 void WorldGrid::AttachObject( Object *object )
 {
+  this->Update();
   __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::AttachObject => object[x%X]", object );
   if( !object )
   {
@@ -58,6 +64,7 @@ void WorldGrid::AttachObject( Object *object )
     return;
   }
 
+  /*
   if( this->IsThisObject( object ) )
   {
     __log.PrintInfo( Filelevel_WARNING, "WorldGrid::AttachObject => object x%X already in this grid", object );
@@ -68,17 +75,20 @@ void WorldGrid::AttachObject( Object *object )
   WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
   for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
   {
-    if( ( *iterGrid )->IsThisObject( object ) )
+    if( ( *iterGrid ) != this && ( *iterGrid )->IsThisObject( object ) )
     {
       ( *iterGrid )->DetachObject( object );
       break;
     }
   }//for iterGrid
 
-  ObjectPointerType pointer( object );
-  this->objects.push_back( pointer );
-  object->PointerAdd( &( *this->objects.rbegin() ) );
+  this->objects.push_back( ObjectPointerType() );
+  this->objects.rbegin()->Init( object );
   __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::AttachObject => object x%X attached to grid[%d; %d] pointer[x%X]", object, this->position.x, this->position.y, &( *this->objects.rbegin() ) );
+  */
+
+  this->objects.push_back( ObjectPointerType() );
+  this->objects.rbegin()->Init( object );
 }//AttachObject
 
 
@@ -92,10 +102,12 @@ void WorldGrid::DetachObject( Object *object )
 {
   if( !object )
   {
-    __log.PrintInfo( Filelevel_WARNING, "WorldGrid::AttachObject => object is NULL" );
+    __log.PrintInfo( Filelevel_WARNING, "WorldGrid::DetachObject => object is NULL" );
     return;
   }
 
+  this->Update();
+  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::DetachObject => object[x%X]", object );
   WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
   for( iter = this->objects.begin(); iter != iterEnd; ++iter )
     if( iter->GetObject() == object )
@@ -103,6 +115,7 @@ void WorldGrid::DetachObject( Object *object )
       this->objects.erase( iter );
       break;
     }
+  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::DetachObject ok" );
 }//DetachObject
 
 
@@ -166,10 +179,11 @@ bool WorldGrid::GetGridDump( FU_OUT memory& dump )
   //Collision *collision;
   //std::string textureName;
   for( iter = this->objects.begin(); iter != iterEnd; ++iter )
+  if( iter->GetValid() )
   {
     //__log.PrintInfo( Filelevel_DEBUG, ". object x%X", iter->GetObject() );
     //__log.PrintInfo( Filelevel_DEBUG, ". valid %d", iter->GetValid() );
-    iter->GetObject()->SaveToBuffer( writer );
+    iter->GetObject< Object >()->SaveToBuffer( writer );
   }
 
   return true;
@@ -190,6 +204,7 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject )
   reader >> objectsNum;
   __log.PrintInfo( Filelevel_DEBUG, ". %d objects in dump", objectsNum );
 
+  this->Update();
   Object *object;
   for( ; q < objectsNum; ++q )
   {
@@ -197,9 +212,8 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject )
     object = new Object();
     object->LoadFromBuffer( reader, rootObject );
 
-    ObjectPointerType pointer( object );
-    this->objects.push_back( pointer );
-    object->PointerAdd( &( *this->objects.rbegin() ) );
+    //this->objects.push_back( ObjectPointerType() );
+    //this->objects.rbegin()->Init( object );
 
     this->AttachObject( object );
   }//for q
@@ -222,14 +236,14 @@ void WorldGrid::Update()
   {
     changed = false;
     iterEnd = this->objects.end();
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => pos[%d; %d] objects[%d]", this->position.x, this->position.y, this->objects.size() );
+    //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => pos[%d; %d] objects[%d]", this->position.x, this->position.y, this->objects.size() );
     for( iter = this->objects.begin(); iter != iterEnd; ++iter )
     {
-      __log.PrintInfo( Filelevel_DEBUG, ". pointer[x%X] object[x%X] valid[%d]", &( *iter ), iter->GetObject(), iter->GetValid() );
+      //__log.PrintInfo( Filelevel_DEBUG, ". pointer[x%X] object[x%X] valid[%d]", &( *iter ), iter->GetObject(), iter->GetValid() );
       if( !iter->GetValid() )
       {
-        __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => object[x%X] is not valid, delete from grid", iter->GetObject() );
-        this->DetachObject( iter->GetObject() );
+        __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => object[x%X] is not valid, delete from grid", iter->GetObjectSrc() );
+        //this->DetachObject( iter->GetObjectSrc< Object >() );
         this->objects.erase( iter );
         changed = true;
         break;

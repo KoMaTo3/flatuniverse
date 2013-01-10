@@ -12,7 +12,7 @@ private:
     Vec2    position;
     Vec2    size;
     Vec3    spriteOffset;
-    Object  *sprite;
+    ObjectPointer sprite;
     Vec2    pixelsToTexels;
   } cursor;
 

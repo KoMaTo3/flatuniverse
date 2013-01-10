@@ -13,6 +13,75 @@ ObjectByCollisionList *__objectByCollision  = NULL;
 ObjectByTriggerList   *__objectByTrigger    = NULL;
 
 
+/*
+=============
+  ObjectByCollision
+=============
+*/
+ObjectByCollision::ObjectByCollision()
+:object(), collision( NULL )
+{
+}//constructor
+
+ObjectByCollision::ObjectByCollision( Object *setObject, Collision *setCollision )
+:object( setObject ), collision( setCollision )
+{
+  if( setObject )
+    setObject->PointerAdd( &this->object );
+}//constructor
+
+ObjectByCollision::ObjectByCollision( const ObjectByCollision& copyFrom )
+{
+  this->collision = copyFrom.collision;
+  this->object.Init( copyFrom.object.GetObject() );
+}//copy-constructor
+
+
+ObjectByCollision::~ObjectByCollision()
+{
+  if( this->object.GetValid() )
+    this->object.GetObject()->PointerRemove( &this->object );
+}//destructor
+
+
+
+/*
+=============
+  ObjectByTrigger
+=============
+*/
+ObjectByTrigger::ObjectByTrigger()
+:object(), trigger( NULL )
+{
+}//constructor
+
+
+ObjectByTrigger::ObjectByTrigger( Object *setObject, ObjectTrigger *setTrigger )
+:object( setObject ), trigger( setTrigger )
+{
+  if( setObject )
+    setObject->PointerAdd( &this->object );
+}//constructor
+
+ObjectByTrigger::ObjectByTrigger( const ObjectByTrigger& copyFrom )
+{
+  this->trigger = copyFrom.trigger;
+  this->object.Init( copyFrom.object.GetObject() );
+}//copy-constructor
+
+ObjectByTrigger::~ObjectByTrigger()
+{
+  if( this->object.GetValid() )
+    this->object.GetObject()->PointerRemove( &this->object );
+}//destructor
+
+
+
+/*
+=============
+  ObjectRenderableInfo
+=============
+*/
 Object::ObjectRenderableInfo::ObjectRenderableInfo()
 {
 }//constructor
@@ -39,7 +108,11 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 
 
 
-
+/*
+=============
+  Object
+=============
+*/
 Object::Object()
 :name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
@@ -67,15 +140,9 @@ Object::Object( const std::string &objectName, Object* parentObject )
 
 Object::~Object()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%X] name['%s']", this, this->GetNameFull().c_str() );
+  __log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%X] name['%s'] pointers[%d]", this, this->GetNameFull().c_str(), this->pointers.size() );
   //if( !this->_parent )
   //  __log.PrintInfo( Filelevel_DEBUG, "is a root object" );
-
-  this->DisableRenderable();
-  this->DisableCollision();
-  this->DisableTrigger();
-  this->ClearChilds();
-  this->UnAttachThisFromParent();
 
   if( this->pointers.size() )
   {
@@ -87,6 +154,12 @@ Object::~Object()
       ( *iter )->SetValid( false );
     }
   }
+
+  this->DisableRenderable();
+  this->DisableCollision();
+  this->DisableTrigger();
+  this->ClearChilds();
+  this->UnAttachThisFromParent();
 
   __log.PrintInfo( Filelevel_DEBUG, "Object x%X deleted", this );
 }//destructor
@@ -527,7 +600,14 @@ Collision* Object::EnableCollision()
 
   this->collision = new Collision( &this->positionSrc );
   __collisionList->push_back( this->collision );
-  __objectByCollision->push_back( ObjectByCollision( this, this->collision ) );
+
+  //__objectByCollision->push_back( ObjectByCollision( this, this->collision ) );
+  /*
+  __objectByCollision->push_back( ObjectByCollision() );
+  ObjectByCollision *object = &( *__objectByCollision->rbegin() );
+  object->collision = this->collision;
+  object->object.Init( this );
+  */
 
   return this->collision;
 }//EnableCollision
@@ -548,6 +628,7 @@ void Object::DisableCollision()
   if( !__collisionList )
     return;
 
+  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableCollision..." );
   for( CollisionList::iterator iter = __collisionList->begin(); iter != __collisionList->end(); ++iter )
     if( *iter == this->collision )
     {
@@ -556,13 +637,16 @@ void Object::DisableCollision()
       break;
     }
 
+    /*
   ObjectByCollisionList::iterator iter, iterEnd = __objectByCollision->end();
   for( iter = __objectByCollision->begin(); iter != iterEnd; ++iter )
-    if( iter->object == this )
+    if( iter->object.GetObject() == this )
     {
       __objectByCollision->erase( iter );
       break;
     }
+    */
+  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableCollision done" );
 }//DisableCollision
 
 
@@ -929,11 +1013,44 @@ Object* Object::GetObjectInPoint( const Vec2& pos )
   PointerAdd
 =============
 */
-void Object::PointerAdd( ObjectPointer< Object > *pointer )
+void Object::PointerAdd( ObjectPointer *pointer )
 {
   __log.PrintInfo( Filelevel_DEBUG, "Object::PointerAdd => this[x%X] pointer[x%X]", this, pointer );
-  this->pointers.push_back( pointer );
+  bool pointerExists = false;
+  ObjectPointers::iterator iter, iterEnd = this->pointers.end();
+  for( iter = this->pointers.begin(); iter != iterEnd; ++iter )
+    if( *iter == pointer )
+    {
+      pointerExists = true;
+      __log.PrintInfo( Filelevel_WARNING, ". pointer already in list" );
+      break;
+    }
+  if( !pointerExists )
+    this->pointers.push_back( pointer );
 }//PointerAdd
+
+
+
+/*
+=============
+  PointerRemove
+=============
+*/
+void Object::PointerRemove( ObjectPointer *pointer )
+{
+  bool removed = false;
+  ObjectPointers::iterator iter, iterEnd = this->pointers.end();
+  for( iter = this->pointers.begin(); iter != iterEnd; ++iter )
+    if( *iter == pointer )
+    {
+      this->pointers.erase( iter );
+      removed = true;
+      break;
+    }
+  if( !removed )
+    __log.PrintInfo( Filelevel_WARNING, "Object::PointerRemove => pointer[x%X] not found in list of object[x%X]", pointer, this );
+}//PointerRemove
+
 
 
 
@@ -952,7 +1069,13 @@ ObjectTrigger* Object::EnableTrigger()
 
   this->trigger = new ObjectTrigger( &this->position );
   __triggerList->push_back( this->trigger );
-  __objectByTrigger->push_back( ObjectByTrigger( this, this->trigger ) );
+
+  //__objectByTrigger->push_back( ObjectByTrigger( this, this->trigger ) );
+  __objectByTrigger->push_back( ObjectByTrigger() );
+  ObjectByTrigger *object = &( *__objectByTrigger->rbegin() );
+  object->trigger = this->trigger;
+  object->object.Init( this );
+
   __log.PrintInfo( Filelevel_DEBUG, "Object::EnableTrigger => x%X", this->trigger );
 
   return this->trigger;
@@ -987,7 +1110,7 @@ void Object::DisableTrigger()
 
   ObjectByTriggerList::iterator iterTrigger, iterEndTrigger = __objectByTrigger->end();
   for( iterTrigger = __objectByTrigger->begin(); iterTrigger != iterEndTrigger; ++iterTrigger )
-    if( iterTrigger->object == this )
+    if( iterTrigger->object.GetObject() == this )
     {
       __objectByTrigger->erase( iterTrigger );
       break;

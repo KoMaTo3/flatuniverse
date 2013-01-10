@@ -885,8 +885,9 @@ bool Core::Redraw()
     {
       glLoadIdentity();
       //glScalef( this->_window.windowToWorld.x, this->_window.windowToWorld.y, this->_window.windowToWorld.z );
-      if( this->camera )
+      if( this->camera.GetValid() )
       {
+        Object *objCamera = this->camera.GetObject< Object >();
         Mat4 matrScale, matrTranslate, matrix;
         matrScale.Identity();
         matrTranslate.Identity();
@@ -899,9 +900,9 @@ bool Core::Redraw()
         matrix[ 3 ][ 0 ] = -1.0f;
         matrix[ 3 ][ 1 ] = 1.0f;
         */
-        matrTranslate[ 3 ][ 0 ] = -this->camera->GetPosition().x + this->_window.windowCenter.x;
-        matrTranslate[ 3 ][ 1 ] = -this->camera->GetPosition().y + this->_window.windowCenter.y;
-        matrTranslate[ 3 ][ 2 ] = -this->camera->GetPosition().z;
+        matrTranslate[ 3 ][ 0 ] = -objCamera->GetPosition().x + this->_window.windowCenter.x;
+        matrTranslate[ 3 ][ 1 ] = -objCamera->GetPosition().y + this->_window.windowCenter.y;
+        matrTranslate[ 3 ][ 2 ] = -objCamera->GetPosition().z;
         matrix = matrScale * matrTranslate;
         glUniformMatrix4fv( this->_shaders.matrModelLoc, 1, false, &matrix[ 0 ][ 0 ] );
 
@@ -939,42 +940,42 @@ bool Core::Redraw()
         */
       }
 
-      __log.PrintInfo( Filelevel_DEBUG, "glBindVertexArray" );
+      //__log.PrintInfo( Filelevel_DEBUG, "glBindVertexArray" );
       glBindVertexArray( this->_buffers.vao );
       GL_CHECK_ERROR;
 
       //__log.PrintInfo( Filelevel_DEBUG, "glBindBuffer:GL_ARRAY_BUFFER => %d", this->_buffers.vbo );
-      __log.PrintInfo( Filelevel_DEBUG, "vbo" );
+      //__log.PrintInfo( Filelevel_DEBUG, "vbo" );
       glBindBuffer( GL_ARRAY_BUFFER, this->_buffers.vbo );
       GL_CHECK_ERROR;
-      __log.PrintInfo( Filelevel_DEBUG, "glBufferData: __coreRenderableList[x%X] size[%d]", __coreRenderableList, __coreRenderableList->size() );
+      //__log.PrintInfo( Filelevel_DEBUG, "glBufferData: __coreRenderableList[x%X] size[%d]", __coreRenderableList, __coreRenderableList->size() );
       glBufferData( GL_ARRAY_BUFFER, sizeof( RenderableQuad ) * __coreRenderableList->size(), ( *__coreRenderableList->begin() ).GetPointerToVertex(), GL_DYNAMIC_DRAW );
       GL_CHECK_ERROR;
 
-      __log.PrintInfo( Filelevel_DEBUG, "ibo" );
+      //__log.PrintInfo( Filelevel_DEBUG, "ibo" );
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->_buffers.ibo );
       GL_CHECK_ERROR;
-      __log.PrintInfo( Filelevel_DEBUG, "glBufferData" );
+      //__log.PrintInfo( Filelevel_DEBUG, "glBufferData" );
       glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( *__coreRenderableListIndicies->begin() ) * __coreRenderableListIndicies->size(), &*__coreRenderableListIndicies->begin(), GL_DYNAMIC_DRAW );
       GL_CHECK_ERROR;
 
       GL_CHECK_ERROR;
-      __log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 0" );
+      //__log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 0" );
       glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), 0 );
       GL_CHECK_ERROR;
 
       GL_CHECK_ERROR;
-      __log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 1" );
+      //__log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 1" );
       glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 4 ) );
       GL_CHECK_ERROR;
 
       GL_CHECK_ERROR;
-      __log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 2" );
+      //__log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 2" );
       glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 8 ) );
       GL_CHECK_ERROR;
 
       GL_CHECK_ERROR;
-      __log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 3" );
+      //__log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 3" );
       glVertexAttribPointer( 3, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 12 ) );
       GL_CHECK_ERROR;
 
@@ -987,7 +988,7 @@ bool Core::Redraw()
 
 
     //GUI
-    __log.PrintInfo( Filelevel_DEBUG, "test gui: __coreGUI[x%X] size[%d]", __coreGUI, __coreGUI->size() );
+    //__log.PrintInfo( Filelevel_DEBUG, "test gui: __coreGUI[x%X] size[%d]", __coreGUI, __coreGUI->size() );
     if( __coreGUI->size() )
     {
       //glLoadIdentity();
@@ -1037,7 +1038,7 @@ bool Core::Redraw()
           this->SetState( CORE_STATE_EXIT );
       }
     }
-    __log.PrintInfo( Filelevel_DEBUG, "end test gui" );
+    //__log.PrintInfo( Filelevel_DEBUG, "end test gui" );
     //End GUI
 
     /*
@@ -1112,8 +1113,9 @@ bool Core::Redraw()
 */
 Object* Core::SetCamera( Object* newCamera )
 {
-  Object *oldCamera = this->camera;
-  this->camera = newCamera;
+  Object *oldCamera = this->camera.GetObject< Object >();
+  this->camera.Reset();
+  this->camera.Init( newCamera );
   return oldCamera;
 }//SetCamera
 
@@ -1370,8 +1372,8 @@ Object* Core::GetObjectByTrigger( ObjectTrigger *trigger )
 {
   ObjectByTriggerList::iterator iterTrigger, iterEndTrigger = __objectByTrigger->end();
   for( iterTrigger = __objectByTrigger->begin(); iterTrigger != iterEndTrigger; ++iterTrigger )
-    if( iterTrigger->trigger == trigger )
-      return iterTrigger->object;
+    if( iterTrigger->object.GetValid() && iterTrigger->trigger == trigger )
+      return iterTrigger->object.GetObject< Object >();
   return NULL;
 }//GetObjectByTrigger
 
@@ -1386,8 +1388,8 @@ Object* Core::GetObjectByCollision( Collision *collision )
 {
   ObjectByCollisionList::iterator iterCollision, iterEndCollision = __objectByCollision->end();
   for( iterCollision = __objectByCollision->begin(); iterCollision != iterEndCollision; ++iterCollision )
-    if( iterCollision->collision == collision )
-      return iterCollision->object;
+    if( iterCollision->object.GetValid() && iterCollision->collision == collision )
+      return iterCollision->object.GetObject< Object >();
   return NULL;
 }//GetObjectByCollision
 

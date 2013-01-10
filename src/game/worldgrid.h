@@ -19,7 +19,7 @@
 
 
 class WorldGrid;
-typedef ObjectPointer< Object > ObjectPointerType;
+typedef ObjectPointer ObjectPointerType;
 typedef std::deque< WorldGrid* > WorldGridList;
 typedef std::deque< ObjectPointerType > WorldGridObjectList;
 extern WorldGridList *__worldGridList;

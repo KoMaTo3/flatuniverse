@@ -286,6 +286,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\core\objectpointerinterface.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\objectpointerinterface.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\core\objecttrigger.cpp"
 				>
 			</File>

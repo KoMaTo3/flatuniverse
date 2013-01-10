@@ -6,7 +6,7 @@ level = {
     dx = -100,
     dy = -170,
     field = {},
-    speed = 5,
+    speed = 10,
     speedUp = false,
     items = {
       {     -- 1: квадрат

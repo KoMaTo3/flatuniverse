@@ -10,6 +10,7 @@
 #include "memorywriter.h"
 #include "memoryreader.h"
 #include "objectpointer.h"
+#include "objectpointerinterface.h"
 #include "objecttriggermgr.h"
 
 
@@ -19,12 +20,13 @@ class Object;
 //object by collision
 struct ObjectByCollision
 {
-  Object    *object;
-  Collision *collision;
+  ObjectPointer object;
+  Collision     *collision;
 
-  ObjectByCollision( Object *setObject, Collision *setCollision )
-    :object( setObject ), collision( setCollision )
-  {}
+  ObjectByCollision();
+  ObjectByCollision( Object *setObject, Collision *setCollision );
+  ObjectByCollision( const ObjectByCollision& copyFrom );
+  ~ObjectByCollision();
 };
 typedef std::deque< ObjectByCollision > ObjectByCollisionList;
 extern ObjectByCollisionList *__objectByCollision;
@@ -32,12 +34,13 @@ extern ObjectByCollisionList *__objectByCollision;
 //object by object trigger
 struct ObjectByTrigger
 {
-  Object        *object;
+  ObjectPointer object;
   ObjectTrigger *trigger;
 
-  ObjectByTrigger( Object *setObject, ObjectTrigger *setTrigger )
-    :object( setObject ), trigger( setTrigger )
-  {}
+  ObjectByTrigger ();
+  ObjectByTrigger ( Object *setObject, ObjectTrigger *setTrigger );
+  ObjectByTrigger ( const ObjectByTrigger& copyFrom );
+  ~ObjectByTrigger();
 };
 typedef std::deque< ObjectByTrigger > ObjectByTriggerList;
 extern ObjectByTriggerList *__objectByTrigger;
@@ -46,11 +49,11 @@ extern ObjectByTriggerList *__objectByTrigger;
 
 
 
-class Object
+class Object: public IObjectPointer
 {
 public:
   typedef std::list< Object* > ObjectChilds;
-  typedef std::list< ObjectPointer< Object >* > ObjectPointers;
+  typedef std::list< ObjectPointer* > ObjectPointers;
   struct ObjectForce  //вектор силы
   {
     long  id;
@@ -140,7 +143,8 @@ public:
 
   Object*             GetObject           ( const std::string& name, Object *parent = NULL );
 
-  void                PointerAdd          ( ObjectPointer< Object > *pointer );
+  void                PointerAdd          ( ObjectPointer *pointer );
+  void                PointerRemove       ( ObjectPointer *pointer );
   inline
     Object*           SetLockToDelete     ( bool lock ) { this->_isLockedToDelete = lock; return this; }
   inline
