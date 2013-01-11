@@ -527,18 +527,6 @@ void Game::UpdateLuaTimers()
 }//UpdateLuaTimers
 
 
-
-/*
-=============
-  LUA_RemoveObject
-=============
-*/
-bool Game::LUA_RemoveObject( const std::string &name )
-{
-  return game->core->RemoveObject( name );
-}//LUA_RemoveObject
-
-
 /*
 =============
   LUA_GetObjectPos
@@ -593,6 +581,18 @@ Dword Game::LUA_SetTimer( float time, const std::string &funcName )
   game->luaTimers[ id ].funcName  = funcName;
   return id;
 }//LUA_SetTimer
+
+
+
+/*
+=============
+  LUA_RemoveObject
+=============
+*/
+bool Game::LUA_RemoveObject( const std::string &name )
+{
+  return game->core->RemoveObject( name );
+}//LUA_RemoveObject
 
 
 /*

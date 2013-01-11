@@ -1,6 +1,7 @@
 #include "mouse.h"
 #include "file.h"
 #include "imageloader.h"
+#include "tools.h"
 
 
 
@@ -16,6 +17,7 @@ Mouse::Mouse()
 
 Mouse::~Mouse()
 {
+  DEF_DELETE( this->cursor.sprite );
 }//destructor
 
 
@@ -46,8 +48,8 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object )
     ShowCursor( true );
     return;
   }
-  this->cursor.sprite.Reset();
-  this->cursor.sprite.Init( object );
+  DEF_DELETE( this->cursor.sprite );
+  this->cursor.sprite = new ObjectPointer( object );
 
   ImageLoader image;
   image.LoadFromFile( imageFileName );
@@ -55,10 +57,10 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object )
   this->cursor.size.Set( float( image.GetImageSize()->width ) , float( image.GetImageSize()->height ) );
   this->cursor.spriteOffset.Set( this->cursor.size.x * 0.5f * this->cursor.pixelsToTexels.x, this->cursor.size.y * 0.5f * this->cursor.pixelsToTexels.y, 0.0f );
 
-  if( this->cursor.sprite.GetValid() )
+  if( this->cursor.sprite->GetValid() )
   {
-    this->cursor.sprite.GetObject< Object >()->SetPosition( Vec3( 0.0f, 0.0f, 9.0f ) );
-    RenderableQuad *render = this->cursor.sprite.GetObject< Object >()->EnableRenderableGUI();
+    this->cursor.sprite->GetObject< Object >()->SetPosition( Vec3( 0.0f, 0.0f, 9.0f ) );
+    RenderableQuad *render = this->cursor.sprite->GetObject< Object >()->EnableRenderableGUI();
     render->SetSize( Vec2( this->cursor.size.x * this->cursor.pixelsToTexels.x, this->cursor.size.y * this->cursor.pixelsToTexels.y ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
     render->SetTexture( imageFileName, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
   }
@@ -76,8 +78,13 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object )
 void Mouse::MoveCursor( const Vec2& newPosition )
 {
   this->cursor.position = newPosition;
-  if( this->cursor.sprite.GetValid() )
-    this->cursor.sprite.GetObject< Object >()->SetPosition( Vec3( this->cursor.position.x * this->cursor.pixelsToTexels.x, this->cursor.position.y * this->cursor.pixelsToTexels.y, 9.0f ) + Vec3( this->cursor.spriteOffset.x, this->cursor.spriteOffset.y, 0.0f ) );
+  if( this->cursor.sprite )
+  {
+    if( this->cursor.sprite->GetValid() )
+      this->cursor.sprite->GetObject< Object >()->SetPosition( Vec3( this->cursor.position.x * this->cursor.pixelsToTexels.x, this->cursor.position.y * this->cursor.pixelsToTexels.y, 9.0f ) + Vec3( this->cursor.spriteOffset.x, this->cursor.spriteOffset.y, 0.0f ) );
+    else
+      DEF_DELETE( this->cursor.sprite );
+  }
 }//MoveCursor
 
 

@@ -55,7 +55,7 @@ void WorldGridManager::Update( bool forceLoadGrids )
       isActiveObjectsValid = true;
       iterEnd = this->activeObjects.end();
       for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter )
-        if( !iter->GetValid() )
+        if( !( *iter )->GetValid() )
         {
           this->activeObjects.erase( iter );
           isActiveObjectsValid = false;
@@ -69,7 +69,7 @@ void WorldGridManager::Update( bool forceLoadGrids )
     {
       //__log.PrintInfo( Filelevel_DEBUG, ". object: x%X", iter->GetObject() );
       //__log.PrintInfo( Filelevel_DEBUG, ". valid: %d", iter->GetValid() );
-      WorldGrid::WorldGridPosition pos = this->GetGridPositionByObject( *( iter->GetObject< Object >() ) );
+      WorldGrid::WorldGridPosition pos = this->GetGridPositionByObject( *( ( *iter )->GetObject< Object >() ) );
 
       for( y = pos.y - this->gridsAroundObject; y <= pos.y + this->gridsAroundObject; ++y )
       for( x = pos.x - this->gridsAroundObject; x <= pos.x + this->gridsAroundObject; ++x )
@@ -175,15 +175,18 @@ void WorldGridManager::AddActiveObject( Object *obj )
   WorldGridObjectList::iterator iter, iterEnd = this->activeObjects.end();
 
   for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter )
-    if( iter->GetObject() == obj )
+    if( ( *iter )->GetObject() == obj )
     {
       __log.PrintInfo( Filelevel_WARNING, "WorldGridManager::AddActiveObject => object '%s' already in list", obj->GetNameFull().c_str() );
       return;
     }
 
   //this->activeObjects.push_back( WorldGridObjectList::value_type( obj ) );
-    this->activeObjects.push_back( WorldGridObjectList::value_type() );
-    this->activeObjects.rbegin()->Init( obj );
+  //this->activeObjects.push_back( WorldGridObjectList::value_type() );
+  //( *this->activeObjects.rbegin() )->Init( obj );
+  ObjectPointerType *pointer = new ObjectPointerType( obj );
+  this->activeObjects.push_back( pointer );
+
   __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::AddActiveObject => object '%s' added to list", obj->GetNameFull().c_str() );
 }//AddActiveObject
 

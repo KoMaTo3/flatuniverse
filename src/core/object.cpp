@@ -19,7 +19,7 @@ ObjectByTriggerList   *__objectByTrigger    = NULL;
 =============
 */
 ObjectByCollision::ObjectByCollision()
-:object(), collision( NULL )
+:object( NULL ), collision( NULL )
 {
 }//constructor
 
@@ -31,9 +31,9 @@ ObjectByCollision::ObjectByCollision( Object *setObject, Collision *setCollision
 }//constructor
 
 ObjectByCollision::ObjectByCollision( const ObjectByCollision& copyFrom )
+:object( copyFrom.object.GetObject() )
 {
   this->collision = copyFrom.collision;
-  this->object.Init( copyFrom.object.GetObject() );
 }//copy-constructor
 
 
@@ -51,7 +51,7 @@ ObjectByCollision::~ObjectByCollision()
 =============
 */
 ObjectByTrigger::ObjectByTrigger()
-:object(), trigger( NULL )
+:object( NULL ), trigger( NULL )
 {
 }//constructor
 
@@ -64,9 +64,9 @@ ObjectByTrigger::ObjectByTrigger( Object *setObject, ObjectTrigger *setTrigger )
 }//constructor
 
 ObjectByTrigger::ObjectByTrigger( const ObjectByTrigger& copyFrom )
+:object( copyFrom.object.GetObject() )
 {
   this->trigger = copyFrom.trigger;
-  this->object.Init( copyFrom.object.GetObject() );
 }//copy-constructor
 
 ObjectByTrigger::~ObjectByTrigger()
@@ -1071,10 +1071,8 @@ ObjectTrigger* Object::EnableTrigger()
   __triggerList->push_back( this->trigger );
 
   //__objectByTrigger->push_back( ObjectByTrigger( this, this->trigger ) );
-  __objectByTrigger->push_back( ObjectByTrigger() );
-  ObjectByTrigger *object = &( *__objectByTrigger->rbegin() );
-  object->trigger = this->trigger;
-  object->object.Init( this );
+  ObjectByTrigger *byTrigger = new ObjectByTrigger( this, this->trigger );
+  __objectByTrigger->push_back( byTrigger );
 
   __log.PrintInfo( Filelevel_DEBUG, "Object::EnableTrigger => x%X", this->trigger );
 
@@ -1110,7 +1108,7 @@ void Object::DisableTrigger()
 
   ObjectByTriggerList::iterator iterTrigger, iterEndTrigger = __objectByTrigger->end();
   for( iterTrigger = __objectByTrigger->begin(); iterTrigger != iterEndTrigger; ++iterTrigger )
-    if( iterTrigger->object.GetObject() == this )
+    if( ( *iterTrigger )->object.GetObject() == this )
     {
       __objectByTrigger->erase( iterTrigger );
       break;

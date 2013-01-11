@@ -885,9 +885,9 @@ bool Core::Redraw()
     {
       glLoadIdentity();
       //glScalef( this->_window.windowToWorld.x, this->_window.windowToWorld.y, this->_window.windowToWorld.z );
-      if( this->camera.GetValid() )
+      if( this->camera && this->camera->GetValid() )
       {
-        Object *objCamera = this->camera.GetObject< Object >();
+        Object *objCamera = this->camera->GetObject< Object >();
         Mat4 matrScale, matrTranslate, matrix;
         matrScale.Identity();
         matrTranslate.Identity();
@@ -1113,9 +1113,9 @@ bool Core::Redraw()
 */
 Object* Core::SetCamera( Object* newCamera )
 {
-  Object *oldCamera = this->camera.GetObject< Object >();
-  this->camera.Reset();
-  this->camera.Init( newCamera );
+  Object *oldCamera = ( this->camera ? this->camera->GetObject< Object >() : NULL );
+  DEF_DELETE( this->camera );
+  this->camera = new ObjectPointer( newCamera );
   return oldCamera;
 }//SetCamera
 
@@ -1372,8 +1372,8 @@ Object* Core::GetObjectByTrigger( ObjectTrigger *trigger )
 {
   ObjectByTriggerList::iterator iterTrigger, iterEndTrigger = __objectByTrigger->end();
   for( iterTrigger = __objectByTrigger->begin(); iterTrigger != iterEndTrigger; ++iterTrigger )
-    if( iterTrigger->object.GetValid() && iterTrigger->trigger == trigger )
-      return iterTrigger->object.GetObject< Object >();
+    if( ( *iterTrigger )->object.GetValid() && ( *iterTrigger )->trigger == trigger )
+      return ( *iterTrigger )->object.GetObject< Object >();
   return NULL;
 }//GetObjectByTrigger
 
@@ -1388,8 +1388,8 @@ Object* Core::GetObjectByCollision( Collision *collision )
 {
   ObjectByCollisionList::iterator iterCollision, iterEndCollision = __objectByCollision->end();
   for( iterCollision = __objectByCollision->begin(); iterCollision != iterEndCollision; ++iterCollision )
-    if( iterCollision->object.GetValid() && iterCollision->collision == collision )
-      return iterCollision->object.GetObject< Object >();
+    if( ( *iterCollision )->object.GetValid() && ( *iterCollision )->collision == collision )
+      return ( *iterCollision )->object.GetObject< Object >();
   return NULL;
 }//GetObjectByCollision
 

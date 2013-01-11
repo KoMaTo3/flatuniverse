@@ -99,7 +99,7 @@ private:
 
   CollisionManager      *collisionManager;
   ObjectTriggerManager  *triggerManager;
-  ObjectPointer         camera;  //текущая камера
+  ObjectPointer         *camera;  //текущая камера
 
 public:
   Keyboard  keyboard;
@@ -135,7 +135,7 @@ public:
   Object* GetObject           ( const std::string& name, Object *parent = NULL );
   bool    RemoveObject        ( const std::string& name );
   Object* SetCamera           ( Object* newCamera );
-  inline Object* GetCamera    () { return this->camera.GetObject< Object >(); }
+  inline Object* GetCamera    () { return ( this->camera ? this->camera->GetObject< Object >() : NULL ); }
   Object* getObjectInPoint    ( const Vec2& pos );
   Object* GetObjectByTrigger  ( ObjectTrigger *trigger );
   Object* GetObjectByCollision( Collision *collision );

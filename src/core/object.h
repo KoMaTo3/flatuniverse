@@ -23,12 +23,14 @@ struct ObjectByCollision
   ObjectPointer object;
   Collision     *collision;
 
-  ObjectByCollision();
   ObjectByCollision( Object *setObject, Collision *setCollision );
-  ObjectByCollision( const ObjectByCollision& copyFrom );
   ~ObjectByCollision();
+
+private:
+  ObjectByCollision();
+  ObjectByCollision( const ObjectByCollision& copyFrom );
 };
-typedef std::deque< ObjectByCollision > ObjectByCollisionList;
+typedef std::deque< ObjectByCollision* > ObjectByCollisionList;
 extern ObjectByCollisionList *__objectByCollision;
 
 //object by object trigger
@@ -37,12 +39,14 @@ struct ObjectByTrigger
   ObjectPointer object;
   ObjectTrigger *trigger;
 
-  ObjectByTrigger ();
   ObjectByTrigger ( Object *setObject, ObjectTrigger *setTrigger );
-  ObjectByTrigger ( const ObjectByTrigger& copyFrom );
   ~ObjectByTrigger();
+
+private:
+  ObjectByTrigger ();
+  ObjectByTrigger ( const ObjectByTrigger& copyFrom );
 };
-typedef std::deque< ObjectByTrigger > ObjectByTriggerList;
+typedef std::deque< ObjectByTrigger* > ObjectByTriggerList;
 extern ObjectByTriggerList *__objectByTrigger;
 
 

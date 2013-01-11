@@ -19,21 +19,35 @@ ObjectPointer::ObjectPointer( const ObjectPointer& copyFrom )
 
 
 ObjectPointer::ObjectPointer( IObjectPointer *setObject )
-:object( NULL ), valid( false )
+:object( setObject )
 {
-  this->Init( setObject );
+  this->valid = ( setObject != NULL );
+  if( setObject )
+  {
+    setObject->PointerAdd( this );
+    __log.PrintInfo( Filelevel_DEBUG, "ObjectPointer +1: object[x%X] pointer[x%X]", setObject, this );
+  }
 }//constructor
 
 
 
 ObjectPointer::~ObjectPointer()
 {
-  this->Reset();
+  if( this->object )
+    __log.PrintInfo( Filelevel_DEBUG, "ObjectPointer -1: object[x%X] valid[%d] pointer[x%X]", this->object, this->valid, this );
+  if( this->GetValid() )
+  {
+    __log.PrintInfo( Filelevel_DEBUG, ". pointer remove, object[x%X]...", this->object );
+    this->object->PointerRemove( this );
+    __log.PrintInfo( Filelevel_DEBUG, ". pointer remove ok" );
+  }
+  this->valid = false;
+  this->object = NULL;
 }//destructor
 
 
 
-
+/*
 void ObjectPointer::Init( IObjectPointer *setObject )
 {
   if( this->object || this->valid )
@@ -64,3 +78,4 @@ void ObjectPointer::Reset()
   this->valid = false;
   this->object = NULL;
 }//Reset
+*/

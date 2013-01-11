@@ -10,10 +10,13 @@ class ObjectPointer
 private:
   bool            valid;  //флаг того, что объект, на который ссылкается указатель, валиден
   IObjectPointer  *object;
-public:
+
+private:  //запрещаем конструктор по-умолчанию и конструктор копирования
   ObjectPointer ();
-  ObjectPointer ( IObjectPointer *setObject );
   ObjectPointer ( const ObjectPointer& copyFrom );
+
+public:
+  ObjectPointer ( IObjectPointer *setObject );
   ~ObjectPointer();
 
   inline void     SetValid  ( bool setValid ){ this->valid = setValid; if( !setValid ) this->object = NULL; }
@@ -27,6 +30,8 @@ public:
   template < class T >
   T*              GetObjectSrc() const { return ( T* ) this->object; }
   IObjectPointer* operator* (){ return this->object; }
+  /*
   void            Init      ( IObjectPointer *setObject );
   void            Reset     ();
+  */
 };
