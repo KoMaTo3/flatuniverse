@@ -7,8 +7,9 @@
 
 Game *game = NULL;
 
-extern CoreRenderableListIndicies  *__coreRenderableListIndicies;
-extern CoreRenderableListIndicies  *__coreGUIIndicies;
+extern CoreRenderableListIndicies *__coreRenderableListIndicies;
+extern CoreRenderableListIndicies *__coreGUIIndicies;
+extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
 
 
 File __log;
@@ -50,7 +51,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
   game->world->AddActiveObject( game->core->GetObject( "defaults/active-object" ) );
 
-  /*
   obj = game->core->CreateObject( "test-bg-2" );
   obj->SetPosition( Vec3( 50.0f, 50.0f, -9.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
@@ -73,7 +73,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetTexture( "data/temp/mario.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
   //quad->scale.Set( 0.5f, 1.0f );
   game->core->SetCamera( obj );
-  */
 
   /*
   obj = game->core->CreateObject( "wall-top" );
@@ -198,7 +197,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   */
 
   //game->world->AttachObjectToGrid( WorldGrid::WorldGridPosition( 0, 0 ), game->core->GetObject( "wall-left" ) );
-  //game->world->AddActiveObject( game->core->GetObject( "player" ) );
+  game->world->AddActiveObject( game->core->GetObject( "player" ) );
 
 
   /*
@@ -249,16 +248,28 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   sTimer.Update();
   game->world->Update( true );
-  game->lua->RunFile( "data/scripts/test.lua" );
+  game->lua->RunFile( "data/scripts/game.lua" );
   __log.PrintInfo( Filelevel_INFO, "Run" );
+
+  Font *font = game->core->CreateFont( "test-font-prop" );
+  font->SetPosition2D( Vec2( 8.0f, 8.0f ) );
+  font->SetRenderPipeline( __coreGUI, __coreGUIIndicies, __coreGUIFreeIndicies );
+  font->SetFont( "data/temp/font_default.tga", "data/temp/font_default.flw", 1.0f )->SetScale( Vec2( 100.0f / float( game->core->GetWindowSize().width ), 100.0f / float( game->core->GetWindowSize().height ) ) );
+  font->SetText( "Test message =\\" );
+
+  Font *font2 = game->core->CreateFont( "test-font" );
+  font2->SetPosition2D( Vec2( 8.0f, 20.0f ) );
+  font2->SetRenderPipeline( __coreGUI, __coreGUIIndicies, __coreGUIFreeIndicies );
+  font2->SetFont( "data/temp/font_default.tga" )->SetScale( Vec2( 100.0f / float( game->core->GetWindowSize().width ), 100.0f / float( game->core->GetWindowSize().height ) ) );
+  font2->SetText( "Test message =\\" );
 
   while( game->core->Update() )
   {
-    __log.PrintInfo( Filelevel_DEBUG, "=> core->Redraw" );
+    //__log.PrintInfo( Filelevel_DEBUG, "=> core->Redraw" );
     game->core->Redraw();
-    __log.PrintInfo( Filelevel_DEBUG, "=> world->Update" );
+    //__log.PrintInfo( Filelevel_DEBUG, "=> world->Update" );
     game->world->Update();
-    __log.PrintInfo( Filelevel_DEBUG, "=> game->Update" );
+    //__log.PrintInfo( Filelevel_DEBUG, "=> game->Update" );
     game->Update();
 
     t += sTimer.GetDeltaF();
@@ -269,10 +280,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       fps = currentFps;
       currentFps = 0;
     }
-
-    /*
-    if( game->core->keyboard.IsPressed( VK_RETURN ) )
-      game->core->RemoveObject( "wall-right" );
 
     if( game->core->keyboard.IsPressed( VK_LEFT ) || game->core->keyboard.IsPressed( VK_LETTER_A ) )
     {
@@ -309,17 +316,11 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       obj = game->core->GetObject( "player" );
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, 100.0f, 0.0f ) );
     }
-    */
 
-    /*
     if( game->core->keyboard.IsPressed( VK_SPACE ) )
     {
-      if( game->core->keyboard.IsHold( VK_SHIFT ) )
-        game->lua->RunFile( "data/scripts/test.lua" );
-      else
-        game->lua->CallFunction( "SpacePressed" );
+      font->SetText( "Omfg, is work ÝO_oE" );
     }
-    */
 
     /*
     if( game->core->mouse.IsPressed( VK_RBUTTON ) )
@@ -429,14 +430,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, Math::Sin16( rot * 3.0f ) * 100.0f, 0.0f ) );
       */
 
-    /*
     if( obj = game->core->GetObject( "test-bg-2" ) )
     {
       quad = ( RenderableQuad* ) obj->GetRenderable();
       float scale = Math::Sin16( rot * 2.0f ) * 1.0f + 5.0f;
       quad->SetScale( Vec2( scale, scale ) )->SetRotation( -rot );
     }
-    */
       //obj->SetPosition( Vec3( -20.0f, 50.0f + Math::Sin16( rot * 5.0f ) * 50.0f, 0.0f ) );
 
     ++currentFps;

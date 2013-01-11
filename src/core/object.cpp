@@ -161,7 +161,7 @@ Object::~Object()
   this->ClearChilds();
   this->UnAttachThisFromParent();
 
-  __log.PrintInfo( Filelevel_DEBUG, "Object x%X deleted", this );
+  __log.PrintInfo( Filelevel_DEBUG, "Object x%p deleted", this );
 }//destructor
 
 

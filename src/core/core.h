@@ -7,6 +7,7 @@
 #include "../gl/gl3.h"
 #include "../gl/gl.h"
 #include "object.h"
+#include "font.h"
 #include "renderable.h"
 #include "externgl.h"
 #include "timer.h"
@@ -132,6 +133,7 @@ public:
   bool    Redraw              ();
 
   Object* CreateObject        ( const std::string& name, Object *parent = NULL );
+  Font*   CreateFont          ( const std::string& name, Object *parent = NULL );
   Object* GetObject           ( const std::string& name, Object *parent = NULL );
   bool    RemoveObject        ( const std::string& name );
   Object* SetCamera           ( Object* newCamera );

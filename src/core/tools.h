@@ -11,6 +11,11 @@
 //¬ыполнение кода a только 1 раз
 #define DO_CODE_ONCE( a ) { static bool q = true; if( q ) { q = false; ##a } }
 
+//«апрещаем классам конструктор копировани€ и оператор присваивани€
+#define DISALLOW_COPY_AND_ASSIGN( TypeName )  \
+  TypeName( const TypeName& );                \
+  void operator=( const TypeName& )
+
 
 namespace tools
 {

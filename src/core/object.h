@@ -66,8 +66,9 @@ public:
     ObjectForce( long newId, const Vec3& newVec ){ this->id = newId; this->vec = newVec; }
   };
   typedef std::deque< ObjectForce > ObjectForceList;
-private:
+protected:
   Vec3            position;     //рассчитанная позиция объекта в сцене. звук это, скрипт, частица или меш, главная координата - эта. её может модифицировать физдвижок, напрямую
+private:
   Vec3            positionSrc;  //исходная позиция объекта. идет постоянный пересчет из positionSrc в position
   Mat4            matrixTransform;  //матрица трансформации для получения позиции объекта
 
@@ -77,27 +78,30 @@ private:
   std::string     nameFull; //полное имя с учетом иерархии (/root/player02/weapon0)
   ObjectForceList forces;   //перечень сил, действующих на объект
 
-  CoreRenderableList  *_renderableList; //ссылка на список рендерейблов, в котором находится объект
-  CoreRenderableListIndicies  *_renderableIndicies; //ссылка на список индексов рендерейблов
-  CoreRenderableListIndicies  *_renderableFreeIndicies; //ссылка на список свободных индексов рендерейблов
-
-  struct ObjectRenderableInfo
-  {
-    GLushort         num;    //индекс рендерейбла в массиве (т.к. в __coreRenderableList не ссылки, а объекты, то их адресация может меняться)
-    RenderableType  type;   //тип рендерейбла
-
-    ObjectRenderableInfo();
-    ObjectRenderableInfo( const ObjectRenderableInfo& from );
-    ObjectRenderableInfo( GLushort newNum, RenderableType newType );
-  } renderable;
-
   Collision       *collision;
   ObjectPointers  pointers;   //перечень указателей на этот объект. объект обязан делать их невалидными беред своим уничтожением
   ObjectTrigger   *trigger;
 
   bool            _isLockedToDelete;  //запрет на удаление объекта посредством Core::ClearScene
 
-private:
+protected:
+  CoreRenderableList  *_renderableList; //ссылка на список рендерейблов, в котором находится объект
+  CoreRenderableListIndicies  *_renderableIndicies; //ссылка на список индексов рендерейблов
+  CoreRenderableListIndicies  *_renderableFreeIndicies; //ссылка на список свободных индексов рендерейблов
+
+  class ObjectRenderableInfo
+  {
+  public:
+    GLushort         num;    //индекс рендерейбла в массиве (т.к. в __coreRenderableList не ссылки, а объекты, то их адресация может меняться)
+    RenderableType  type;   //тип рендерейбла
+
+  public:
+    ObjectRenderableInfo();
+    ObjectRenderableInfo( const ObjectRenderableInfo& from );
+    ObjectRenderableInfo( GLushort newNum, RenderableType newType );
+  } renderable;
+
+protected:
   void                _RecalculatePosition();
 
 public:

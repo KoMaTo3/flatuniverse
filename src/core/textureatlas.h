@@ -39,7 +39,9 @@ public:
   bool                Init                  ( const Size& maxTextureSize, Byte borderSize = 0 );
   void                Bind                  ();
   void                Unbind                ();
+  TextureAtlasItem*   LoadTexture           ( const std::string& textureFileName );
   Vec4                GetTextureCoords      ( const std::string& textureFileName, const Vec4& textureCoords );
+  Vec2                GetTextureSize        ( const std::string& textureFileName );
   Vec4                GetInvTextureCoords   ( const std::string& textureFileName, const Vec4& textureCoords );
   const std::string&  GetTextureNameByCoords( Vec2 texCoords );
   TextureAtlasItem*   IsTextureLoaded       ( const std::string& textureFileName );

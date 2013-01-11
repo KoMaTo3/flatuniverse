@@ -218,6 +218,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\core\font.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\font.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\core\imageloader.cpp"
 				>
 			</File>
@@ -283,10 +291,6 @@
 			</File>
 			<File
 				RelativePath="..\src\core\objectpointer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\core\objectpointerinterface.cpp"
 				>
 			</File>
 			<File

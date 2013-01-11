@@ -106,64 +106,7 @@ Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const V
   }
   else
   {
-    ImageLoader image;
-    if( !image.LoadFromFile( textureFileName ) )
-    {
-      __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::GetTextureCoords => file not found '%s'", textureFileName.c_str() );
-      return Vec4();
-    }
-
-    Size size = *image.GetImageSize();
-    if( !this->atlas.HasPlace( size ) )
-    {
-      __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::GetTextureCoords => atlas can't find needed place [ %d; %d ]", size.width, size.height );
-      return Vec4();
-    }
-
-    __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => load new texture from file '%s'", textureFileName.c_str() );
-
-    item = new TextureAtlasItem();
-    Rect< Dword > fullRect;
-    this->atlas.Cut( size + Size( this->borderPerItem * 2, this->borderPerItem * 2 ), &fullRect );
-    item->rect = Rect< Dword >( fullRect.left + 1, fullRect.top + 1, fullRect.right - 1, fullRect.bottom - 1 );
-    item->textureFileName = textureFileName;
-
-    Vec2 scale( float( item->rect.right - item->rect.left + 1 ) / float( this->size.width ), float( item->rect.bottom - item->rect.top + 1 ) / float( this->size.height ) );
-    Vec2 translate( float( item->rect.left ) / float( this->size.width ), float( item->rect.top ) / float( this->size.height ) );
-
-    item->matTransform.Identity();
-    Mat4 matTranslate, matScale, matInvTranslate, matInvScale;
-    matTranslate.Identity();
-    matInvTranslate.Identity();
-    matScale.Identity();
-    matInvScale.Identity();
-
-    matScale[ 0 ][ 0 ] = scale.x;
-    matScale[ 1 ][ 1 ] = scale.y;
-    matInvScale[ 0 ][ 0 ] = 1.0f / scale.x;
-    matInvScale[ 1 ][ 1 ] = 1.0f / scale.y;
-
-    matTranslate[ 0 ][ 3 ] = translate.x;
-    matTranslate[ 1 ][ 3 ] = translate.y;
-    matInvTranslate[ 0 ][ 3 ] = -translate.x;
-    matInvTranslate[ 1 ][ 3 ] = -translate.y;
-
-    __log.PrintInfo( Filelevel_DEBUG, "matrix translate: [ %3.3f; %3.3f ]", translate.x, translate.y );
-    __log.PrintInfo( Filelevel_DEBUG, "matrix scale: [ %3.3f; %3.3f ]", scale.x, scale.y );
-
-    item->matTransform = matTranslate * matScale;
-    item->matInvTransform = matInvScale * matInvTranslate;
-
-    //размещение картинки в текстуре
-    this->Bind();
-    Dword *dst = ( Dword* ) this->textureData.getData(),
-      *src = ( Dword* ) image.GetImageData();
-    for( Dword y = 0; y < image.GetImageSize()->height; ++y )
-      memcpy( dst + ( item->rect.top + y ) * this->size.width + item->rect.left, src + y * image.GetImageSize()->width, image.GetImageSize()->width * 4 );
-    glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
-    this->Unbind();
-
-    this->textures.push_back( item );
+    TextureAtlasItem *item = this->LoadTexture( textureFileName );
     Vec3 tex0( textureCoords.x, textureCoords.y, 0 ), tex1( textureCoords.z, textureCoords.w, 0 );
     tex0 *= item->matTransform;
     tex1 *= item->matTransform;
@@ -283,3 +226,93 @@ void TextureAtlas::__Dump( const std::string& fileName )
     f.Close();
   }
 }//__DumpToFile
+
+
+
+/*
+=============
+  GetTextureSize
+=============
+*/
+Vec2 TextureAtlas::GetTextureSize( const std::string& textureFileName )
+{
+  TextureAtlasItem *texture = this->IsTextureLoaded( textureFileName );
+  if( !texture )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::GetTextureSize => texture '%s' not found", textureFileName.c_str() );
+    return Vec2( 0.0f, 0.0f );
+  }
+
+  __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureSize => texture['%s'] size[%d; %d]", textureFileName.c_str(), texture->rect.right - texture->rect.left + 1, texture->rect.bottom - texture->rect.top + 1 );
+  return Vec2( texture->rect.right - texture->rect.left + 1.0f, texture->rect.bottom - texture->rect.top + 1.0f );
+}//GetTextureSize
+
+
+
+/*
+=============
+  LoadTexture
+=============
+*/
+TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& textureFileName )
+{
+  ImageLoader image;
+  if( !image.LoadFromFile( textureFileName ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => file not found '%s'", textureFileName.c_str() );
+    return NULL;
+  }
+
+  Size size = *image.GetImageSize();
+  if( !this->atlas.HasPlace( size ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => atlas can't find needed place [ %d; %d ]", size.width, size.height );
+    return NULL;
+  }
+
+  __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::LoadTexture => load new texture from file '%s'", textureFileName.c_str() );
+
+  TextureAtlasItem *item = new TextureAtlasItem();
+  Rect< Dword > fullRect;
+  this->atlas.Cut( size + Size( this->borderPerItem * 2, this->borderPerItem * 2 ), &fullRect );
+  item->rect = Rect< Dword >( fullRect.left + 1, fullRect.top + 1, fullRect.right - 1, fullRect.bottom - 1 );
+  item->textureFileName = textureFileName;
+
+  Vec2 scale( float( item->rect.right - item->rect.left + 1 ) / float( this->size.width ), float( item->rect.bottom - item->rect.top + 1 ) / float( this->size.height ) );
+  Vec2 translate( float( item->rect.left ) / float( this->size.width ), float( item->rect.top ) / float( this->size.height ) );
+
+  item->matTransform.Identity();
+  Mat4 matTranslate, matScale, matInvTranslate, matInvScale;
+  matTranslate.Identity();
+  matInvTranslate.Identity();
+  matScale.Identity();
+  matInvScale.Identity();
+
+  matScale[ 0 ][ 0 ] = scale.x;
+  matScale[ 1 ][ 1 ] = scale.y;
+  matInvScale[ 0 ][ 0 ] = 1.0f / scale.x;
+  matInvScale[ 1 ][ 1 ] = 1.0f / scale.y;
+
+  matTranslate[ 0 ][ 3 ] = translate.x;
+  matTranslate[ 1 ][ 3 ] = translate.y;
+  matInvTranslate[ 0 ][ 3 ] = -translate.x;
+  matInvTranslate[ 1 ][ 3 ] = -translate.y;
+
+  __log.PrintInfo( Filelevel_DEBUG, "matrix translate: [ %3.3f; %3.3f ]", translate.x, translate.y );
+  __log.PrintInfo( Filelevel_DEBUG, "matrix scale: [ %3.3f; %3.3f ]", scale.x, scale.y );
+
+  item->matTransform = matTranslate * matScale;
+  item->matInvTransform = matInvScale * matInvTranslate;
+
+  //размещение картинки в текстуре
+  this->Bind();
+  Dword *dst = ( Dword* ) this->textureData.getData(),
+    *src = ( Dword* ) image.GetImageData();
+  for( Dword y = 0; y < image.GetImageSize()->height; ++y )
+    memcpy( dst + ( item->rect.top + y ) * this->size.width + item->rect.left, src + y * image.GetImageSize()->width, image.GetImageSize()->width * 4 );
+  glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
+  this->Unbind();
+
+  this->textures.push_back( item );
+  return item;
+}//LoadTexture

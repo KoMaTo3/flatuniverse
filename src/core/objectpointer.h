@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include "file.h"
+#include "tools.h"
 #include "objectpointerinterface.h"
 
 
@@ -11,12 +12,11 @@ private:
   bool            valid;  //флаг того, что объект, на который ссылкается указатель, валиден
   IObjectPointer  *object;
 
-private:  //запрещаем конструктор по-умолчанию и конструктор копирования
-  ObjectPointer ();
-  ObjectPointer ( const ObjectPointer& copyFrom );
+private:
+  DISALLOW_COPY_AND_ASSIGN( ObjectPointer );
 
 public:
-  ObjectPointer ( IObjectPointer *setObject );
+  explicit ObjectPointer ( IObjectPointer *setObject ); //explicit запрещает неявный конструктор вида: ObjectPointer obj = someIObjectPointer;
   ~ObjectPointer();
 
   inline void     SetValid  ( bool setValid ){ this->valid = setValid; if( !setValid ) this->object = NULL; }

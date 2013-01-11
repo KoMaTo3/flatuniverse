@@ -2,12 +2,6 @@
 
 
 
-ObjectPointer::ObjectPointer()
-:object( NULL ), valid( false )
-{
-}//constructor
-
-
 
 ObjectPointer::ObjectPointer( const ObjectPointer& copyFrom )
 :object( copyFrom.object ), valid( copyFrom.valid )

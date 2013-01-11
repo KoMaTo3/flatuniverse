@@ -209,19 +209,19 @@ Bool ImageLoader::_LoadFromBufferTGA( Byte *buffer, Dword length )
   Byte bpp = tmp[ 16 ];
   if( !( bpp == 24 || bpp == 32 ) )
     return false;
-  __log.PrintInfo( Filelevel_DEBUG, ". bpp: %d", bpp );
+  //__log.PrintInfo( Filelevel_DEBUG, ". bpp: %d", bpp );
 
   Dword src_pos = 18 + idLength, dest_pos = 0;
 
   this->_size.width = *w;
   this->_size.height = *h;
-  __log.PrintInfo( Filelevel_DEBUG, ". size: %d x %d", this->_size.width, this->_size.height );
+  //__log.PrintInfo( Filelevel_DEBUG, ". size: %d x %d", this->_size.width, this->_size.height );
   this->_data.alloc( this->_size.width * this->_size.height * 4 );
   Byte *dest = ( Byte* ) this->_data.getData();
 
   if( compressed == 2 )
   {//not compressed
-    __log.PrintInfo( Filelevel_DEBUG, ". compression: none" );
+    //__log.PrintInfo( Filelevel_DEBUG, ". compression: none" );
     Word x, y;
     Byte mult = bpp >> 3;
     for( y = 0; y < this->_size.height; y++)
@@ -238,7 +238,7 @@ Bool ImageLoader::_LoadFromBufferTGA( Byte *buffer, Dword length )
   }
   else
   {//RLE-compression 0x0A
-    __log.PrintInfo( Filelevel_DEBUG, ". compression: RLE" );
+    //__log.PrintInfo( Filelevel_DEBUG, ". compression: RLE" );
     Dword src_pos = 18 + idLength, dest_pos = 0;
     Byte block, num, q;
     Byte r, g, b, a = 255;
@@ -326,7 +326,7 @@ const Size* ImageLoader::GetImageSize()
 */
 Bool ImageLoader::_LoadFromBufferJPG( Byte *buffer, Dword length )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "ImageLoader::_LoadFromBufferJPG" );
+  //__log.PrintInfo( Filelevel_DEBUG, "ImageLoader::_LoadFromBufferJPG" );
   jpeg_decompress_struct	    cinfo;
   ImgJpg::_gImporterJPEGError	jerr;
 
@@ -386,7 +386,7 @@ Bool ImageLoader::_LoadFromBufferJPG( Byte *buffer, Dword length )
   jpeg_destroy_decompress( &cinfo );
   file.Free();
 
-  __log.PrintInfo( Filelevel_DEBUG, "ImageLoader::_LoadFromBufferJPG => Done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "ImageLoader::_LoadFromBufferJPG => Done" );
 
   return true;
 }//_LoadFromBufferJPG
@@ -399,10 +399,7 @@ Bool ImageLoader::_LoadFromBufferJPG( Byte *buffer, Dword length )
 */
 Bool ImageLoader::_LoadFromBufferPNG( Byte *buffer, Dword length )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "ImageLoader::_LoadFromBufferPNG" );
-
-  __log.PrintInfo( Filelevel_DEBUG, "ImageLoader::_LoadFromBufferPNG => Done" );
-
+  //__log.PrintInfo( Filelevel_DEBUG, "ImageLoader::_LoadFromBufferPNG" );
 
   png_structp   png_ptr;
   png_infop     info_ptr;
@@ -479,7 +476,7 @@ Bool ImageLoader::_LoadFromBufferPNG( Byte *buffer, Dword length )
   this->_size.height = img_height;
   this->_data.alloc( this->_size.width * this->_size.height * 4 );
 
-  __log.PrintInfo( Filelevel_DEBUG, "color_type = %d, interlace_type = %d", color_type, interlace_type );
+  //__log.PrintInfo( Filelevel_DEBUG, "color_type = %d, interlace_type = %d", color_type, interlace_type );
   if( color_type == PNG_COLOR_TYPE_RGB )  //2
   {
     Dword x, y, pos1, pos2;

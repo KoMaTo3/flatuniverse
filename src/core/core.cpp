@@ -1161,7 +1161,7 @@ LRESULT Core::Signal( DWORD code, LPARAM lParam, WPARAM wParam, void *pointer )
 */
 bool Core::Update()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
+  //__log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
   sTimer.Update();
   this->keyboard.Update();
   this->mouse.Update();
@@ -1188,7 +1188,7 @@ bool Core::Update()
   this->_rootObject->Update( sTimer.GetDeltaF() );
   //this->_rootGUIObject->Update( sTimer.GetDeltaF() );
 
-  __log.PrintInfo( Filelevel_DEBUG, "============" );
+  //__log.PrintInfo( Filelevel_DEBUG, "============" );
   return true;
 }//Update
 
@@ -1223,6 +1223,24 @@ Object* Core::CreateObject( const std::string& name, Object *parent )
 
   return newObject;
 }//CreateObject
+
+
+
+
+
+/*
+=============
+  CreateFont
+=============
+*/
+Font* Core::CreateFont( const std::string& name, Object *parent )
+{
+  if( !parent )
+    parent = this->_rootObject;
+  Font* newFont = new Font( name, parent ); //parent автоматом аттачит this как дочерний объект
+
+  return newFont;
+}//CreateFont
 
 
 
