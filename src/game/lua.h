@@ -31,6 +31,7 @@ typedef void  LUAFUNCPROC_SetCamera         ( const std::string &name );
 typedef std::string LUAFUNCPROC_GetCamera   ();
 typedef void  LUAFUNCPROC_ClearScene        ();
 typedef int   LUAFUNCPROC_GetRandomSeed     ();
+typedef void  LUAFUNCPROC_LoadScript        ( const std::string &fileName );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -49,6 +50,7 @@ extern LUAFUNCPROC_SetCamera        *LUAFUNC_SetCamera;
 extern LUAFUNCPROC_GetCamera        *LUAFUNC_GetCamera;
 extern LUAFUNCPROC_ClearScene       *LUAFUNC_ClearScene;
 extern LUAFUNCPROC_GetRandomSeed    *LUAFUNC_GetRandomSeed;
+extern LUAFUNCPROC_LoadScript       *LUAFUNC_LoadScript;
 
 
 //callbacks
@@ -97,6 +99,7 @@ public:
   static int LUA_GetCamera        ( lua_State *lua );
   static int LUA_ClearScene       ( lua_State *lua );
   static int LUA_GetRandomSeed    ( lua_State *lua );
+  static int LUA_LoadScript       ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );

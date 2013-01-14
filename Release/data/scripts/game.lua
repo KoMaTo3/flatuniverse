@@ -13,6 +13,9 @@ function onKey( id, isPressed )
         GameExit()
       end
   end
+  if id == 0x4C then
+    LoadScript( 'data/scripts/clrscr.lua' )
+  end
 end
 
 function onMouseKey( id, isPressed )

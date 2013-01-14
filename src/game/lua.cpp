@@ -24,6 +24,7 @@ LUAFUNCPROC_SetCamera         *LUAFUNC_SetCamera            = NULL;
 LUAFUNCPROC_GetCamera         *LUAFUNC_GetCamera            = NULL;
 LUAFUNCPROC_ClearScene        *LUAFUNC_ClearScene           = NULL;
 LUAFUNCPROC_GetRandomSeed     *LUAFUNC_GetRandomSeed        = NULL;
+LUAFUNCPROC_LoadScript        *LUAFUNC_LoadScript           = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -85,6 +86,7 @@ bool Lua::Init()
   lua_register( this->luaState, "GetCamera",        Lua::LUA_GetCamera );
   lua_register( this->luaState, "ClearScene",       Lua::LUA_ClearScene );
   lua_register( this->luaState, "GetRandomSeed",    Lua::LUA_GetRandomSeed );
+  lua_register( this->luaState, "LoadScript",       Lua::LUA_LoadScript );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -665,3 +667,23 @@ int Lua::LUA_GetRandomSeed( lua_State *lua )
   lua_pushinteger( lua, seed );
   return 1;
 }//LUA_GetRandomSeed
+
+
+
+/*
+=============
+  LUA_LoadScript
+=============
+*/
+int Lua::LUA_LoadScript( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_LoadScript => not enough parameters" );
+    return 0;
+  }
+  std::string fileName = lua_tostring( lua, 1 );
+  LUAFUNC_LoadScript( fileName );
+  return 0;
+}//LUA_LoadScript

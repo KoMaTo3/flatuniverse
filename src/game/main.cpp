@@ -475,6 +475,7 @@ Game::Game()
   LUAFUNC_SetCamera         = Game::LUA_SetCamera;
   LUAFUNC_GetCamera         = Game::LUA_GetCamera;
   LUAFUNC_ClearScene        = Game::LUA_ClearScene;
+  LUAFUNC_LoadScript        = Game::LUA_LoadScript;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -876,3 +877,14 @@ void Game::LUA_ClearScene()
   game->world->ClearWorld();
   __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene done" );
 }//LUA_ClearScene
+
+
+/*
+=============
+  LUA_LoadScript
+=============
+*/
+void Game::LUA_LoadScript( const std::string &fileName )
+{
+  game->lua->RunFile( fileName );
+}//LUA_LoadScript

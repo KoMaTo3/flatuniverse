@@ -63,6 +63,7 @@ public:
   static void   LUA_SetCamera         ( const std::string &name );
   static std::string  LUA_GetCamera   ();
   static void   LUA_ClearScene        ();
+  static void   LUA_LoadScript        ( const std::string &fileName );
 
   void Update();
   void UpdateLuaTimers();
