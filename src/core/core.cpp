@@ -21,6 +21,8 @@ CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободны
 
 ConfigFile* __config = NULL;
 
+Glui2* GluiHandle = NULL;
+
 
 Core::Core()
 :_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL )
@@ -241,6 +243,7 @@ bool Core::_InitGraphics()
 {
   if( !( this->_window.dc = GetDC( this->_window.hwnd ) ) )
   {
+    __log.PrintInfo( Filelevel_CRITICALERROR, "Core::_InitGraphics => GetDC failed" );
     this->SetState( CORE_STATE_EXIT );
     return false;
   }
@@ -257,6 +260,7 @@ bool Core::_InitGraphics()
 
   if( !( this->_window.glRC = ::wglCreateContext( this->_window.dc ) ) )
   {
+    __log.PrintInfo( Filelevel_CRITICALERROR, "Core::_InitGraphics => wglCreateContext failed" );
     this->SetState( CORE_STATE_EXIT );
     return false;
   }
@@ -846,7 +850,10 @@ bool Core::_UpdatePalette( const HWND window )
 bool Core::Redraw()
 {
   if( !this->_window.glRC )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Core::Redraw => glRC is NULL" );
     return false;
+  }
 
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //GL_STENCIL_BUFFER_BIT
 
@@ -893,13 +900,6 @@ bool Core::Redraw()
         matrTranslate.Identity();
         matrScale[ 0 ][ 0 ] = 1.0f;
         matrScale[ 1 ][ 1 ] = 1.0f;
-        /*
-        matrix[ 0 ][ 0 ] = 2.0f / 320.0f;
-        matrix[ 1 ][ 1 ] = -2.0f / 200.0f;
-        matrix[ 2 ][ 2 ] = -2.0f / 20.0f;
-        matrix[ 3 ][ 0 ] = -1.0f;
-        matrix[ 3 ][ 1 ] = 1.0f;
-        */
         matrTranslate[ 3 ][ 0 ] = -objCamera->GetPosition().x + this->_window.windowCenter.x;
         matrTranslate[ 3 ][ 1 ] = -objCamera->GetPosition().y + this->_window.windowCenter.y;
         matrTranslate[ 3 ][ 2 ] = -objCamera->GetPosition().z;
@@ -928,16 +928,6 @@ bool Core::Redraw()
         glUniformMatrix4fv( this->_shaders.matrProjectionLoc, 1, false, &matrix[ 0 ][ 0 ] );
 
         //glTranslatef( -this->camera->GetPosition().x + this->_window.windowCenter.x, -this->camera->GetPosition().y + this->_window.windowCenter.y, -this->camera->GetPosition().z );
-        /*
-        GLfloat model[ 16 ];
-        GLfloat proj[ 16 ];
-        glGetFloatv( GL_MODELVIEW_MATRIX, model );
-        glGetFloatv( GL_PROJECTION_MATRIX, model );
-        GLint matrModel = glGetUniformLocation( this->_shaders.programm, "matrModel" );
-        GLint matrProj  = glGetUniformLocation( this->_shaders.programm, "matrProj" );
-        glUniformMatrix4fv( matrModel, 1, false, model );
-        glUniformMatrix4fv( matrProj, 1, false, proj );
-        */
       }
 
       //__log.PrintInfo( Filelevel_DEBUG, "glBindVertexArray" );
@@ -1041,42 +1031,6 @@ bool Core::Redraw()
     //__log.PrintInfo( Filelevel_DEBUG, "end test gui" );
     //End GUI
 
-    /*
-    for( renderableListsIter = renderableLists.begin(); renderableListsIter != renderableListsIterEnd; ++renderableListsIter )
-    {
-      glLoadIdentity();
-      if( ( *renderableListsIter ) == __coreRenderableList )
-      {
-        //игровой мир
-        glScalef( this->_window.windowToWorld.x, this->_window.windowToWorld.y, this->_window.windowToWorld.z );
-        if( this->camera )
-          glTranslatef( -this->camera->GetPosition().x + this->_window.windowCenter.x, -this->camera->GetPosition().y + this->_window.windowCenter.y, -this->camera->GetPosition().z );
-      }
-      else  //GUI
-      {
-      }
-      glBindBuffer( GL_ARRAY_BUFFER, this->_buffers.vbo );
-      glBufferData( GL_ARRAY_BUFFER, sizeof( RenderableQuad ) * ( *renderableListsIter )->size() - ( sizeof( Renderable ) ), ( *( *renderableListsIter )->begin() ).GetPointerToVertex(), GL_DYNAMIC_DRAW );
-
-      glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 0 ) );
-      glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 4 * sizeof( float ) ) );
-      glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 8 * sizeof( float ) ) );
-      glVertexAttribPointer( 3, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 12 * sizeof( float ) ) );
-      if( ( *renderableListsIter ) == __coreRenderableList )
-      {
-        //glDrawArrays( GL_POINTS, 0, ( *renderableListsIter )->size() );
-        glDrawElements( GL_POINTS, __coreRenderableListIndicies->size(), GL_UNSIGNED_SHORT, &( *( __coreRenderableListIndicies->begin() ) ) );
-      }
-      else
-        glDrawArrays( GL_POINTS, 0, ( *renderableListsIter )->size() );
-      if( glGetError() )
-      {
-        __log.PrintInfo( Filelevel_CRITICALERROR, "Core::Redraw => glDrawArrays failed" );
-          this->SetState( CORE_STATE_EXIT );
-      }
-    }//for
-    */
-
     __textureAtlas->Unbind();
 
     glDisableVertexAttribArray( 0 );
@@ -1098,6 +1052,8 @@ bool Core::Redraw()
 
   //далее рисуем интерфейс
   //glLoadIdentity();
+
+  GluiHandle->Render();
 
   SwapBuffers( this->_window.dc );
 
@@ -1522,6 +1478,7 @@ LRESULT APIENTRY CoreWindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     case WM_KEYDOWN:
     {
       core->keyboard.DoPress( wParam );
+      Glui2::__KeyboardFunc( wParam, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     }
 
@@ -1539,31 +1496,37 @@ LRESULT APIENTRY CoreWindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
     case WM_LBUTTONDOWN:
       core->mouse.DoPress( VK_LBUTTON );
+      Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     break;
 
     case WM_LBUTTONUP:
       core->mouse.DoRelease( VK_LBUTTON );
+      Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     break;
 
     case WM_RBUTTONDOWN:
       core->mouse.DoPress( VK_RBUTTON );
+      Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     break;
 
     case WM_RBUTTONUP:
       core->mouse.DoRelease( VK_RBUTTON );
+      Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     break;
 
     case WM_MBUTTONDOWN:
       core->mouse.DoPress( VK_MBUTTON );
+      Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     break;
 
     case WM_MBUTTONUP:
       core->mouse.DoRelease( VK_MBUTTON );
+      Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     break;
 

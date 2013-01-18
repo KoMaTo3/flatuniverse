@@ -5,17 +5,37 @@
 #include "worldgridmgr.h"
 #include "game.h"
 
+#include "glui2/glui2.h"
+
 Game *game = NULL;
 
 extern CoreRenderableListIndicies *__coreRenderableListIndicies;
 extern CoreRenderableListIndicies *__coreGUIIndicies;
 extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
 
+extern Glui2* GluiHandle;
+
 
 File __log;
 
+void testButton( g2Controller *controller )
+{
+  MessageBox( 0, "ok", 0, 0 );
+}
+
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
+  char *argv[ 3 ];
+  int argcp = 3;
+  argv[ 0 ] = "flatuniverse.exe";
+  argv[ 1 ] = "-geometry";
+  argv[ 2 ] = "320x200";
+  glutInit( &argcp, argv );
+  glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH );
+  glutInitWindowPosition( 300, 300 );
+  glutInitWindowSize( 640, 480 );
+  glutCreateWindow( "Glui2 Example 1" );
+
   game = new Game();
   Pos< Short> blocksPerGrid( 8, 8 );
   game->core->Init( 0, 0, false, "FlatGL" );
@@ -251,6 +271,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->lua->RunFile( "data/scripts/game.lua" );
   __log.PrintInfo( Filelevel_INFO, "Run" );
 
+  /*
   Font *font = game->core->CreateFont( "test-font-prop" );
   font->SetPosition2D( Vec2( 8.0f, 8.0f ) );
   font->SetRenderPipeline( __coreGUI, __coreGUIIndicies, __coreGUIFreeIndicies );
@@ -262,11 +283,24 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   font2->SetRenderPipeline( __coreGUI, __coreGUIIndicies, __coreGUIFreeIndicies );
   font2->SetFont( "data/temp/font_default.tga" )->SetScale( Vec2( 100.0f / float( game->core->GetWindowSize().width ), 100.0f / float( game->core->GetWindowSize().height ) ) );
   font2->SetText( "Test message =\\" );
+  */
+
+  /*
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER, 0.01f);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  */
+  GluiHandle = new Glui2( "g2Blue.cfg" );
+  g2Button* MyButton = GluiHandle->AddButton( 5, 5, "Hello, World!", testButton );
+  g2TextField *it = GluiHandle->AddTextField( 100, 100, "test" );
 
   while( game->core->Update() )
   {
     //__log.PrintInfo( Filelevel_DEBUG, "=> core->Redraw" );
     game->core->Redraw();
+
     //__log.PrintInfo( Filelevel_DEBUG, "=> world->Update" );
     game->world->Update();
     //__log.PrintInfo( Filelevel_DEBUG, "=> game->Update" );
@@ -319,7 +353,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
     if( game->core->keyboard.IsPressed( VK_SPACE ) )
     {
-      font->SetText( "Omfg, is work ÝO_oE" );
+      //font->SetText( "Omfg, is work ÝO_oE" );
     }
 
     /*

@@ -6,6 +6,7 @@
 
 #include "../gl/gl3.h"
 #include "../gl/gl.h"
+#include "glui2/glui2.h"
 #include "object.h"
 #include "font.h"
 #include "renderable.h"
@@ -21,7 +22,6 @@
 #include <string>
 #include <deque>
 #include <list>
-
 
 //
 extern CoreRenderableList *__coreRenderableList;
