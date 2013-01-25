@@ -21,11 +21,9 @@ CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободны
 
 ConfigFile* __config = NULL;
 
-Glui2* GluiHandle = NULL;
-
 
 Core::Core()
-:_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL )
+:_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL ), gui( NULL )
 {
   this->_window.isActive  = true;
   this->_window.dc        = NULL;
@@ -62,6 +60,7 @@ bool Core::Destroy()
   //DEF_DELETE( this->_rootGUIObject );
   DEF_DELETE( this->collisionManager );
   DEF_DELETE( this->triggerManager );
+  DEF_DELETE( this->gui );
   DEF_DELETE( __coreRenderableList );
   DEF_DELETE( __coreRenderableListIndicies );
   DEF_DELETE( __coreRenderableListFreeIndicies );
@@ -226,6 +225,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     return false;
   }
   //MessageBox(0,"ok",0,0);
+
+  this->gui = new Glui2( "g2Blue.cfg" );
 
   this->SetState( CORE_STATE_RUN );
   return true;
@@ -977,10 +978,16 @@ bool Core::Redraw()
     //End Основной мир
 
 
+    glUseProgram( 0 );
+    if( this->gui )
+      this->gui->Render();
+
     //GUI
     //__log.PrintInfo( Filelevel_DEBUG, "test gui: __coreGUI[x%X] size[%d]", __coreGUI, __coreGUI->size() );
     if( __coreGUI->size() )
     {
+      glUseProgram( this->_shaders.programm );
+      __textureAtlas->Bind();
       //glLoadIdentity();
       Mat4 matrix;
       matrix.Identity();
@@ -1003,7 +1010,7 @@ bool Core::Redraw()
       GL_CHECK_ERROR;
       glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( *__coreGUIIndicies->begin() ) * __coreGUIIndicies->size(), &*__coreGUIIndicies->begin(), GL_DYNAMIC_DRAW );
       GL_CHECK_ERROR;
-
+  
       //glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 0 ) );
       //glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 4 * sizeof( float ) ) );
       //glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 8 * sizeof( float ) ) );
@@ -1052,8 +1059,6 @@ bool Core::Redraw()
 
   //далее рисуем интерфейс
   //glLoadIdentity();
-
-  GluiHandle->Render();
 
   SwapBuffers( this->_window.dc );
 

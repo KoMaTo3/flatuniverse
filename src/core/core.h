@@ -105,6 +105,7 @@ private:
 public:
   Keyboard  keyboard;
   Mouse     mouse;
+  Glui2     *gui;
 
 private:
   bool  _UpdatePalette  ( const HWND window );

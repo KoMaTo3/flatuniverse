@@ -5,22 +5,18 @@
 #include "worldgridmgr.h"
 #include "game.h"
 
-#include "glui2/glui2.h"
-
 Game *game = NULL;
 
 extern CoreRenderableListIndicies *__coreRenderableListIndicies;
 extern CoreRenderableListIndicies *__coreGUIIndicies;
 extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
 
-extern Glui2* GluiHandle;
-
-
 File __log;
 
 void testButton( g2Controller *controller )
 {
-  MessageBox( 0, "ok", 0, 0 );
+  __log.PrintInfo( Filelevel_DEBUG, "testButton: x%p", controller );
+  //MessageBox( 0, "ok", 0, 0 );
 }
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
@@ -292,9 +288,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   */
-  GluiHandle = new Glui2( "g2Blue.cfg" );
-  g2Button* MyButton = GluiHandle->AddButton( 5, 5, "Hello, World!", testButton );
-  g2TextField *it = GluiHandle->AddTextField( 100, 100, "test" );
+  g2Button* MyButton = game->core->gui->AddButton( 5, 5, "Hello, World!", testButton );
+  g2TextField *it = game->core->gui->AddTextField( 100, 100, "test" );
+  MyButton = game->core->gui->AddButton( 5, 30, "test2", testButton );
 
   while( game->core->Update() )
   {
