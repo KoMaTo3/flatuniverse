@@ -629,18 +629,45 @@ bool Game::LUA_RemoveObject( const std::string &name )
   LUA_CreateObject
 =============
 */
-void Game::LUA_CreateObject( const std::string &name, const std::string &parentName, const Vec3 &pos, const Vec2 &size, const std::string &textureName, const Vec4 &color )
+void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos )
 {
-  Object *parentObj = ( parentName.length() ? game->core->GetObject( parentName ) : NULL );
-  Object *obj = game->core->CreateObject( name, parentObj );
+    __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject..." );
+  long slashPos = name.find_last_of( "/" );
+  Object *parentObj = NULL;
+  Object *obj       = NULL;
+  if( slashPos > 0 ) {
+    std::string fullPath = &name[ slashPos ];
+    std::deque< std::string > path = tools::Explode( name, "/" );
+    std::deque< std::string >::iterator iter, iterEnd = path.end();
+    std::string currentPath = "";
+    for( iter = path.begin(); iter != iterEnd; ++iter ) {
+      __log.PrintInfo( Filelevel_DEBUG, ". iter: '%s'", iter->c_str() );
+      obj = game->core->CreateObject( *iter, ( currentPath.length() ? game->core->GetObject( currentPath ) : NULL ) );
+      obj->SetPosition( pos );
+      currentPath += ( currentPath.length() ? "/" : "" ) + *iter;
+      game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
+    }
+    //std::string nextLevel = &name[ slashPos ];
+    //std::string currentLevel = name.substr( 0, slashPos );
+    //parentObj = game->core->GetObject( currentLevel );
+  } else {
+    obj = game->core->CreateObject( name );
+    obj->SetPosition( pos );
+    game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => object['%s'] parent['%s']", obj->GetNameFull().c_str(), obj->GetParentNameFull().c_str() );
+
+  //Object *parentObj = ( parentName.length() ? game->core->GetObject( parentName ) : NULL );
+  //Object *obj = game->core->CreateObject( name, parentObj );
+  /*
   Collision *col = obj->EnableCollision();
   col->SetPosition( pos )->SetIsStatic( true )->SetSize( Vec3( size.x, size.y, 0.0f ) );
   RenderableQuad *quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
   quad->SetColor( color );
   quad->SetSize( Vec2( size.x, size.y ) );
   quad->SetTexture( textureName, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+  */
 
-  game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
 }//LUA_CreateObject
 
 

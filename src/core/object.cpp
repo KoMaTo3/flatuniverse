@@ -132,7 +132,7 @@ Object::Object( const std::string &objectName, Object* parentObject )
   }
   else
     this->nameFull = "/" + this->name;
-  __log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%X] parent[x%X] name['%s']", this, this->_parent, this->nameFull.c_str() );
+  __log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%X] parent[x%X] nameFull['%s']", this, this->_parent, this->nameFull.c_str() );
 }//constructor
 
 

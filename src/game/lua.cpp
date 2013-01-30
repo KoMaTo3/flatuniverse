@@ -424,19 +424,14 @@ void LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
 int Lua::LUA_CreateObject( lua_State *lua )
 {
   int parmsCount = lua_gettop( lua ); //число параметров
-  if( parmsCount < 8 )
+  if( parmsCount < 4 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_CreateObject => not enough parameters" );
     return 0;
   }
   std::string objectName = lua_tostring( lua, 1 );
-  std::string parentName = lua_tostring( lua, 2 );
-  Vec3 pos( ( float ) lua_tonumber( lua, 3 ), ( float ) lua_tonumber( lua, 4 ), ( float ) lua_tonumber( lua, 5 ) );
-  Vec2 size( ( float ) lua_tonumber( lua, 6 ), ( float ) lua_tonumber( lua, 7 ) );
-  std::string textureName = lua_tostring( lua, 8 );
-  //Vec4 color;
-  //if( parmsCount >= 8 )
-  LUAFUNC_CreateObject( objectName, parentName, pos, size, textureName, Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
+  Vec3 pos( ( float ) lua_tonumber( lua, 2 ), ( float ) lua_tonumber( lua, 3 ), ( float ) lua_tonumber( lua, 4 ) );
+  LUAFUNC_CreateObject( objectName, pos );
   return 0;
 }//LUA_CreateObject
 

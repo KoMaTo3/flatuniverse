@@ -26,6 +26,8 @@ function onMouseKey( id, isPressed )
     }
     pos.x = math.floor( pos.x / tileSize ) * tileSize + 0.5 * tileSize
     pos.y = math.floor( pos.y / tileSize ) * tileSize + 0.5 * tileSize
-    ObjectCreate( 'wall', '', pos.x, pos.y, 0, tileSize, tileSize, 'data/temp/brick0.png' )
+    -- ObjectCreate( 'wall', '', pos.x, pos.y, 0, tileSize, tileSize, 'data/temp/brick0.png' )
+    ObjectCreate( 'wall', pos.x, pos.y, 0 )
+    ObjectCreate( 'zwall', pos.y, pos.x, 0 )
   end
 end
