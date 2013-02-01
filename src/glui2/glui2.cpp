@@ -8,6 +8,10 @@
 #include "glui2.h"
 #include "core/file.h"
 
+
+bool Glui2::__MouseInteracted = false;
+bool Glui2::__KeyboardInteracted = false;
+
 Glui2::Glui2(const char* ThemeFile, void (*GlutIdleFunc)(void), void (*GlutReshapeFunc)(int width, int height), void (*GlutKeyboardFunc)(unsigned char key, int x, int y), void (*GlutSpecialFunc)(int key, int x, int y), void (*GlutMouseFunc)(int button, int state, int x, int y), void (*GlutHoverFunc)(int x, int y))
 {
     // Save self reference
@@ -172,8 +176,8 @@ void Glui2::Render()
     // Go into temporary 2D mode
     glPushMatrix();
     
-    WindowWidth = 320;
-    WindowHeight = 200;
+    //WindowWidth = 320;
+    //WindowHeight = 200;
     // Turn into 2D projection
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
@@ -181,7 +185,6 @@ void Glui2::Render()
     glDisable(GL_DEPTH_TEST);
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
-    __log.PrintInfo( Filelevel_DEBUG, "Glui2::Render => glOrtho( %d; %d )", WindowWidth, WindowHeight );
     
     // Make sure we are in fill mode
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -246,6 +249,7 @@ void Glui2::__ReshapeFunc(int width, int height)
 
 void Glui2::__KeyboardFunc(unsigned char key, int x, int y)
 {
+    Glui2::__KeyboardInteracted = true;
     // Update console if allocated and not disabled
     if(__G2_HANDLE__->ActiveConsole != NULL && __G2_HANDLE__->ActiveConsole->GetVisibility())
         __G2_HANDLE__->ActiveConsole->__KeyEvent(key);
@@ -255,8 +259,10 @@ void Glui2::__KeyboardFunc(unsigned char key, int x, int y)
         __G2_HANDLE__->ActiveController->__KeyEvent(key);
     
     // If nothing is focused, pass to glut
-    else if(__G2_HANDLE__->GlutKeyboardFunc != NULL)
+    else if(__G2_HANDLE__->GlutKeyboardFunc != NULL) {
+        Glui2::__KeyboardInteracted = false;
         __G2_HANDLE__->GlutKeyboardFunc(key, x, y);
+    }
 }
 
 void Glui2::__SpecialFunc(int key, int x, int y)
@@ -277,24 +283,30 @@ void Glui2::__SpecialFunc(int key, int x, int y)
 void Glui2::__MouseFunc(int button, int state, int x, int y)
 {
     // Ignore if  console if allocated and not disabled
-    if(__G2_HANDLE__->ActiveConsole != NULL && __G2_HANDLE__->ActiveConsole->GetVisibility())
+    Glui2::__MouseInteracted = true;
+    if(__G2_HANDLE__->ActiveConsole != NULL && __G2_HANDLE__->ActiveConsole->GetVisibility()) {
         return;
+    }
     
     // Mouse self
     __G2_HANDLE__->RootController->__MouseClick(g2MouseButton(button), g2MouseClick(state), x, y);
     
     // Release previous active controller's state
-    if(__G2_HANDLE__->ActiveController != NULL)
+    if(__G2_HANDLE__->ActiveController != NULL) {
         __G2_HANDLE__->ActiveController->IsActive = false;
+    }
     
     // Get new active controller or set it to the console if it's within bounds
     __G2_HANDLE__->ActiveController = __G2_HANDLE__->RootController->GetController(x, y);
-    if(__G2_HANDLE__->ActiveController != NULL)
+    if(__G2_HANDLE__->ActiveController != NULL) {
         __G2_HANDLE__->ActiveController->IsActive = true;
+    }
     
     // If nothing is focused, mouse glut
-    else if(__G2_HANDLE__->GlutMouseFunc != NULL)
+    else if(__G2_HANDLE__->GlutMouseFunc != NULL) {
+      Glui2::__MouseInteracted = false;
         __G2_HANDLE__->GlutMouseFunc(button, state, x, y);
+    }
 }
 
 void Glui2::__HoverFunc(int x, int y)

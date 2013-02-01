@@ -17,6 +17,9 @@ CoreRenderableListIndicies  *__coreRenderableListFreeIndicies = NULL; //свободны
 CoreRenderableList *__coreGUI = NULL;                                 //список рендерейблов GUI
 CoreRenderableListIndicies  *__coreGUIIndicies = NULL;                //индексы рендерейблов GUI
 CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободные индексы рендерейблов GUI
+
+GuiList *__guiList  = NULL; //Glui2 элементы
+Glui2   *__coreGlui = NULL; //указатель на объект Glui2
 //
 
 ConfigFile* __config = NULL;
@@ -72,6 +75,8 @@ bool Core::Destroy()
   DEF_DELETE( __triggerList );
   DEF_DELETE( __objectByCollision );
   DEF_DELETE( __objectByTrigger );
+  DEF_DELETE( __objectByGui );
+  DEF_DELETE( __guiList );
 
   return true;
 }//Destroy
@@ -142,7 +147,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
 
   wndClass.cbSize       = sizeof( wndClass );
   wndClass.style        = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-  wndClass.lpfnWndProc  = CoreWindowProc;
+  wndClass.lpfnWndProc  = WindowProc;
   wndClass.cbClsExtra   = 0;
   wndClass.cbWndExtra   = 0 | DLGWINDOWEXTRA;
   wndClass.hInstance    = GetModuleHandle( NULL );
@@ -214,6 +219,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   this->triggerManager    = new ObjectTriggerManager();
   __objectByCollision     = new ObjectByCollisionList();
   __objectByTrigger       = new ObjectByTriggerList();
+  __objectByGui           = new ObjectByGuiList();
+  __guiList               = new GuiList();
   //
 
   this->_window.windowToWorld.Set( 100.0f / float( screenWidth ), 100.0f / float( screenHeight ), 1.0f );
@@ -226,7 +233,10 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   }
   //MessageBox(0,"ok",0,0);
 
-  this->gui = new Glui2( "g2Blue.cfg" );
+  this->gui = new Glui2( "g2Blue.cfg", NULL, NULL, Core::_GluiKeyboardFunc, NULL, Core::_GluiMouseFunc, NULL );
+  this->gui->WindowWidth  = this->_window.windowSize.width;
+  this->gui->WindowHeight = this->_window.windowSize.height;
+  __coreGlui = this->gui;
 
   this->SetState( CORE_STATE_RUN );
   return true;
@@ -1374,6 +1384,22 @@ Object* Core::GetObjectByCollision( Collision *collision )
 
 
 
+/*
+=============
+  GetObjectByGui
+=============
+*/
+Object* Core::GetObjectByGui( g2Controller *controller )
+{
+  ObjectByGuiList::iterator iterGui, iterEndGui = __objectByGui->end();
+  for( iterGui = __objectByGui->begin(); iterGui != iterEndGui; ++iterGui )
+    if( ( *iterGui )->object.GetValid() && ( *iterGui )->gui == controller )
+      return ( *iterGui )->object.GetObject< Object >();
+  return NULL;
+}//GetObjectByGui
+
+
+
 
 /*
 =============
@@ -1419,9 +1445,29 @@ void Core::RemoveGUIObject( const std::string& name )
 
 
 
+/*
+=============
+  _GluiMouseFunc
+=============
+*/
+void Core::_GluiMouseFunc( int button, int state, int x, int y )
+{
+}//_GluiMouseFunc
 
 
-LRESULT APIENTRY CoreWindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+
+/*
+=============
+  _GluiKeyboardFunc
+=============
+*/
+void Core::_GluiKeyboardFunc( unsigned char key, int x, int y )
+{
+}//_GluiKeyboardFunc
+
+
+
+LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
   Core *core = ( Core* ) GetWindowLong( hWnd, GWL_USERDATA );
   switch (message)
@@ -1482,8 +1528,9 @@ LRESULT APIENTRY CoreWindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
     case WM_KEYDOWN:
     {
+      __log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d => %d mods[%d]", wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
+      Glui2::__KeyboardFunc( Keyboard::KeyCodeToGlut( wParam ), core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       core->keyboard.DoPress( wParam );
-      Glui2::__KeyboardFunc( wParam, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     }
 
@@ -1500,38 +1547,50 @@ LRESULT APIENTRY CoreWindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     }
 
     case WM_LBUTTONDOWN:
-      core->mouse.DoPress( VK_LBUTTON );
       Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      if( !Glui2::__MouseInteracted ) {
+        core->mouse.DoPress( VK_LBUTTON );
+      }
       return 0;
     break;
 
     case WM_LBUTTONUP:
-      core->mouse.DoRelease( VK_LBUTTON );
       Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      if( !Glui2::__MouseInteracted ) {
+        core->mouse.DoRelease( VK_LBUTTON );
+      }
       return 0;
     break;
 
     case WM_RBUTTONDOWN:
-      core->mouse.DoPress( VK_RBUTTON );
       Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      if( !Glui2::__MouseInteracted ) {
+        core->mouse.DoPress( VK_RBUTTON );
+      }
       return 0;
     break;
 
     case WM_RBUTTONUP:
-      core->mouse.DoRelease( VK_RBUTTON );
       Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      if( !Glui2::__MouseInteracted ) {
+        core->mouse.DoRelease( VK_RBUTTON );
+      }
       return 0;
     break;
 
     case WM_MBUTTONDOWN:
-      core->mouse.DoPress( VK_MBUTTON );
       Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      if( !Glui2::__MouseInteracted ) {
+        core->mouse.DoPress( VK_MBUTTON );
+      }
       return 0;
     break;
 
     case WM_MBUTTONUP:
-      core->mouse.DoRelease( VK_MBUTTON );
       Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      if( !Glui2::__MouseInteracted ) {
+        core->mouse.DoRelease( VK_MBUTTON );
+      }
       return 0;
     break;
 

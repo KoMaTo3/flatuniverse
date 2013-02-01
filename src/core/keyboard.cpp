@@ -2,6 +2,9 @@
 #include "file.h"
 
 
+int Keyboard::KeyModifiers = 0;
+
+
 Keyboard::Keyboard()
 {
   this->keys.alloc        ( 1024 );
@@ -75,6 +78,18 @@ void Keyboard::DoPress( Dword keyId )
     for( iter = this->listeners.begin(); iter != iterEnd; ++iter )
       ( *iter )( keyId, true );
   }
+
+  switch( keyId )
+  {
+    case VK_SHIFT: {
+      Keyboard::KeyModifiers |= 1;//GLUT_ACTIVE_SHIFT;
+      break;
+    }
+    case VK_CONTROL: {
+      Keyboard::KeyModifiers |= 2;//GLUT_ACTIVE_CTRL;
+      break;
+    }
+  }//switch keyId
 }//DoPress
 
 
@@ -100,6 +115,18 @@ void Keyboard::DoRelease( Dword keyId )
     for( iter = this->listeners.begin(); iter != iterEnd; ++iter )
       ( *iter )( keyId, false );
   }
+
+  switch( keyId )
+  {
+    case VK_SHIFT: {
+      Keyboard::KeyModifiers &= ~( ( int ) 1 /* GLUT_ACTIVE_SHIFT */ );
+      break;
+    }
+    case VK_CONTROL: {
+      Keyboard::KeyModifiers &= ~( ( int ) 2 /* GLUT_ACTIVE_CTRL */ );
+      break;
+    }
+  }//switch keyId
 }//DoPress
 
 
@@ -207,3 +234,53 @@ void Keyboard::RemoveListener( Listener *listenerProc )
       return;
     }
 }//RemoveListener
+
+
+
+/*
+=============
+  KeyCodeToGlut
+=============
+*/
+int Keyboard::KeyCodeToGlut( WPARAM code )
+{
+  bool isShift  = ( KeyboardGetModifiers()&1 );
+  bool isCtrl   = ( KeyboardGetModifiers()&2 );
+
+  if( isCtrl ) {
+    if( code >= VK_LETTER_A && code <= VK_LETTER_Z ) {
+      code -= ( ( int ) 'A' ) - 1;
+      return code;
+    }
+  }//ctrl
+
+  switch( code )
+  {
+    case VK_BACK: return 8;
+    case VK_DELETE: return 127;
+    case VK_RETURN: return '\r';
+    case VK_LEFT: return 100; //GLUT_KEY_LEFT;
+    case VK_RIGHT: return 102; //GLUT_KEY_RIGHT;
+    case VK_NUMBER_0: return ( isShift ? ')' : code );
+    case VK_NUMBER_1: return ( isShift ? '!' : code );
+    case VK_NUMBER_2: return ( isShift ? '@' : code );
+    case VK_NUMBER_3: return ( isShift ? '#' : code );
+    case VK_NUMBER_4: return ( isShift ? '$' : code );
+    case VK_NUMBER_5: return ( isShift ? '%' : code );
+    case VK_NUMBER_6: return ( isShift ? '^' : code );
+    case VK_NUMBER_7: return ( isShift ? '&' : code );
+    case VK_NUMBER_8: return ( isShift ? '*' : code );
+    case VK_NUMBER_9: return ( isShift ? '(' : code );
+  }//switch code
+
+  if( code >= VK_LETTER_A && code <= VK_LETTER_Z && !isShift ) { //without shift
+    code += 32;
+  }
+
+  return code;
+}//KeyCodeToGlut
+
+int KeyboardGetModifiers()
+{
+  return Keyboard::KeyModifiers;
+}

@@ -20,10 +20,18 @@ LUAFUNCPROC_GetMousePos       *LUAFUNC_GetMousePos          = NULL;
 LUAFUNCPROC_GetCameraPos      *LUAFUNC_GetCameraPos         = NULL;
 LUAFUNCPROC_GetWindowSize     *LUAFUNC_GetWindowSize        = NULL;
 LUAFUNCPROC_ObjectAddTrigger  *LUAFUNC_ObjectAddTrigger     = NULL;
+LUAFUNCPROC_GuiAddTrigger     *LUAFUNC_GuiAddTrigger        = NULL;
 LUAFUNCPROC_SetCamera         *LUAFUNC_SetCamera            = NULL;
 LUAFUNCPROC_GetCamera         *LUAFUNC_GetCamera            = NULL;
 LUAFUNCPROC_ClearScene        *LUAFUNC_ClearScene           = NULL;
 LUAFUNCPROC_GetRandomSeed     *LUAFUNC_GetRandomSeed        = NULL;
+LUAFUNCPROC_GuiGetText        *LUAFUNC_GuiGetText           = NULL;
+LUAFUNCPROC_ObjectEnableRenderable  *LUAFUNC_ObjectEnableRenderable   = NULL;
+LUAFUNCPROC_ObjectDisableRenderable *LUAFUNC_ObjectDisableRenderable  = NULL;
+LUAFUNCPROC_ObjectEnableCollision   *LUAFUNC_ObjectEnableCollision    = NULL;
+LUAFUNCPROC_ObjectDisableCollision  *LUAFUNC_ObjectDisableCollision   = NULL;
+LUAFUNCPROC_ObjectEnableTrigger     *LUAFUNC_ObjectEnableTrigger      = NULL;
+LUAFUNCPROC_ObjectDisableTrigger    *LUAFUNC_ObjectDisableTrigger     = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -81,10 +89,15 @@ bool Lua::Init()
   lua_register( this->luaState, "GetCameraPos",     Lua::LUA_GetCameraPos );
   lua_register( this->luaState, "GetWindowSize",    Lua::LUA_GetWindowSize );
   lua_register( this->luaState, "ObjectAddTrigger", Lua::LUA_ObjectAddTrigger );
+  lua_register( this->luaState, "GuiAddTrigger",    Lua::LUA_GuiAddTrigger );
   lua_register( this->luaState, "SetCamera",        Lua::LUA_SetCamera );
   lua_register( this->luaState, "GetCamera",        Lua::LUA_GetCamera );
   lua_register( this->luaState, "ClearScene",       Lua::LUA_ClearScene );
   lua_register( this->luaState, "GetRandomSeed",    Lua::LUA_GetRandomSeed );
+  lua_register( this->luaState, "GuiGetText",       Lua::LUA_GuiGetText );
+  lua_register( this->luaState, "ObjectRenderable", Lua::LUA_ObjectRenderable );
+  lua_register( this->luaState, "ObjectCollision",  Lua::LUA_ObjectCollision );
+  lua_register( this->luaState, "ObjectTrigger",    Lua::LUA_ObjectTrigger );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -439,6 +452,159 @@ int Lua::LUA_CreateObject( lua_State *lua )
 
 /*
 =============
+  LUA_ObjectRenderable
+
+  1:    bool    isEnable
+  2:    string  objectName
+  3:    string  texture
+  4-5:  Vec2    size
+  6-9:  Vec4    color
+=============
+*/
+int Lua::LUA_ObjectRenderable( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectRenderable => not enough parameters" );
+    return 0;
+  }
+  int enable = lua_toboolean( lua, 1 );
+  std::string objectName = lua_tostring( lua, 2 );
+  if( enable ) {  //enable
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectRenderable => enable" );
+    if( parmsCount < 2 + 3 ) {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectRenderable => not enough parameters" );
+      return 0;
+    }
+    std::string texture = lua_tostring( lua, 3 );
+    Vec2 size( ( float ) lua_tonumber( lua, 4 ), ( float ) lua_tonumber( lua, 5 ) );
+    Vec4 color( 1.0f, 1.0f, 1.0f, 1.0f );
+    if( parmsCount >= 2 + 3 + 4 ) { //color
+      color.Set( ( float ) lua_tonumber( lua, 6 ), ( float ) lua_tonumber( lua, 7 ), ( float ) lua_tonumber( lua, 8 ), ( float ) lua_tonumber( lua, 9 ) );
+    }
+    LUAFUNC_ObjectEnableRenderable( objectName, texture, size, color );
+  } else {        //disable
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectRenderable => disable" );
+    LUAFUNC_ObjectDisableRenderable( objectName );
+  }
+  return 0;
+}//LUA_ObjectRenderable
+
+
+
+/*
+=============
+  LUA_ObjectCollision
+
+  1:    bool    isEnable
+  2:    string  objectName
+  3:    bool    isStatic
+  4-5:  Vec2    size
+  6-7:  Vec2    velocity
+  8-9:  Vec2    acceleration
+=============
+*/
+int Lua::LUA_ObjectCollision( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectCollision => not enough parameters" );
+    return 0;
+  }
+  int enable = lua_toboolean( lua, 1 );
+  std::string objectName = lua_tostring( lua, 2 );
+  if( enable ) {  //enable
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectCollision => enable, params[%d]", parmsCount );
+
+    bool isStatic = true;
+    Vec3 size( -1.0f, -1.0f, -1.0f );
+    Vec3 velocity( 0.0f, 0.0f, 0.0f );
+    Vec3 acceleration( 0.0f, 0.0f, 0.0f );
+    enum Parameters {
+      SET_ACCELERATION  = 2 + 1 + 2 + 2 + 2,
+      SET_VELOCITY      = 2 + 1 + 2 + 2,
+      SET_SIZE          = 2 + 1 + 2,
+      SET_ISSTATIC      = 2 + 1,
+    };
+
+    switch( parmsCount ) {
+      case SET_ACCELERATION: {
+        acceleration.Set( ( float ) lua_tonumber( lua, SET_ACCELERATION - 1 ), ( float ) lua_tonumber( lua, SET_ACCELERATION - 0 ), 0.0f );
+        __log.PrintInfo( Filelevel_DEBUG, ". acceleration[%3.3f; %3.3f]", acceleration.x, acceleration.y );
+      }
+      case SET_VELOCITY: {
+        velocity.Set( ( float ) lua_tonumber( lua, SET_VELOCITY - 1 ), ( float ) lua_tonumber( lua, SET_VELOCITY - 0 ), 0.0f );
+        __log.PrintInfo( Filelevel_DEBUG, ". velocity[%3.3f; %3.3f]", velocity.x, velocity.y );
+      }
+      case SET_SIZE: {
+        size.Set( ( float ) lua_tonumber( lua, SET_SIZE - 1 ), ( float ) lua_tonumber( lua, SET_SIZE - 0 ), 0.0f );
+        __log.PrintInfo( Filelevel_DEBUG, ". size[%3.3f; %3.3f]", size.x, size.y );
+      }
+      case SET_ISSTATIC: {
+        isStatic = ( lua_toboolean( lua, SET_ISSTATIC ) ? true : false );
+        __log.PrintInfo( Filelevel_DEBUG, ". isStatic[%d]", isStatic );
+      }
+    }//switch parmsCount
+    LUAFUNC_ObjectEnableCollision( objectName, isStatic, size, velocity, acceleration );
+  } else {        //disable
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectCollision => disable" );
+    LUAFUNC_ObjectDisableCollision( objectName );
+  }
+  return 0;
+}//LUA_ObjectCollision
+
+
+
+/*
+=============
+  LUA_ObjectTrigger
+
+  1:    bool    isEnable
+  2:    string  objectName
+  3-4:  Vec2    size
+=============
+*/
+int Lua::LUA_ObjectTrigger( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectTrigger => not enough parameters" );
+    return 0;
+  }
+  int enable = lua_toboolean( lua, 1 );
+  std::string objectName = lua_tostring( lua, 2 );
+  if( enable ) {  //enable
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectTrigger => enable, params[%d]", parmsCount );
+
+    bool isStatic = true;
+    Vec3 size( -1.0f, -1.0f, -1.0f );
+    Vec3 velocity( 0.0f, 0.0f, 0.0f );
+    Vec3 acceleration( 0.0f, 0.0f, 0.0f );
+    enum Parameters {
+      SET_SIZE  = 2 + 2,
+    };
+
+    switch( parmsCount ) {
+      case SET_SIZE: {
+        size.Set( ( float ) lua_tonumber( lua, SET_SIZE - 1 ), ( float ) lua_tonumber( lua, SET_SIZE - 0 ), 0.0f );
+        __log.PrintInfo( Filelevel_DEBUG, ". size[%3.3f; %3.3f]", size.x, size.y );
+      }
+    }//switch parmsCount
+    LUAFUNC_ObjectEnableTrigger( objectName, size );
+  } else {        //disable
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectTrigger => disable" );
+    LUAFUNC_ObjectDisableTrigger( objectName );
+  }
+  return 0;
+}//LUA_ObjectTrigger
+
+
+
+/*
+=============
   LUA_ListenKeyboard
 =============
 */
@@ -561,6 +727,27 @@ int Lua::LUA_ObjectAddTrigger( lua_State *lua )
 
 /*
 =============
+  LUA_GuiAddTrigger
+=============
+*/
+int Lua::LUA_GuiAddTrigger( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GuiAddTrigger => not enough parameters" );
+    return 0;
+  }
+  std::string objectName  = lua_tostring( lua, 1 );
+  std::string funcName    = lua_tostring( lua, 2 );
+  LUAFUNC_GuiAddTrigger( objectName, funcName );
+  return 0;
+}//LUA_ObjectAddTrigger
+
+
+
+/*
+=============
   LUACALLBACK_ObjectTrigger
 =============
 */
@@ -589,6 +776,34 @@ void Lua::LUACALLBACK_ObjectTrigger( Lua *lua, const std::string &funcName, cons
 
 
 
+/*
+=============
+  LUACALLBACK_GuiTrigger
+=============
+*/
+void Lua::LUACALLBACK_GuiTrigger( Lua *lua, const std::string &funcName, const std::string &objectName )
+{
+  LuaStateCheck state( lua->luaState );
+  lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
+  if( !lua_isfunction( lua->luaState, -1 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_GuiTrigger => '%s' is not a function", funcName.c_str() );
+    lua_pop( lua->luaState, 1 );  //stack:
+  }
+
+  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_GuiTrigger => funcName[%s] objectName[%s]", funcName.c_str(), objectName.c_str() );
+
+  lua_pushstring  ( lua->luaState, objectName.c_str() );  //stack: funcName objectName
+
+  if( lua_pcall( lua->luaState, 1, 0, 0 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_GuiTrigger => error by calling function '%s'", funcName.c_str() );
+    return;
+  }
+}//LUACALLBACK_GuiTrigger
+
+
+
 
 /*
 =============
@@ -598,7 +813,20 @@ void Lua::LUACALLBACK_ObjectTrigger( Lua *lua, const std::string &funcName, cons
 void LUACALLBACK_ObjectTrigger( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger )
 {
   Lua::LUACALLBACK_ObjectTrigger( lua, funcName, triggerName, objectName, isInTrigger );
-}//LUACALLBACK_Timer
+}//LUACALLBACK_ObjectTrigger
+
+
+
+
+/*
+=============
+  LUACALLBACK_GuiTrigger
+=============
+*/
+void LUACALLBACK_GuiTrigger( Lua *lua, const std::string &funcName, const std::string &objectName )
+{
+  Lua::LUACALLBACK_GuiTrigger( lua, funcName, objectName );
+}//LUACALLBACK_GuiTrigger
 
 
 
@@ -660,3 +888,26 @@ int Lua::LUA_GetRandomSeed( lua_State *lua )
   lua_pushinteger( lua, seed );
   return 1;
 }//LUA_GetRandomSeed
+
+
+
+/*
+=============
+  LUA_GuiGetText
+=============
+*/
+int Lua::LUA_GuiGetText( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GuiGetText => not enough parameters" );
+    return 0;
+  }
+  std::string guiName = lua_tostring( lua, 1 );
+  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_GuiGetText => object['%s']", guiName.c_str() );
+  std::string text = LUAFUNC_GuiGetText( guiName );
+
+  lua_pushstring( lua, text.c_str() );
+  return 1;
+}//LUA_GuiGetText

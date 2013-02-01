@@ -26,6 +26,7 @@
 //
 extern CoreRenderableList *__coreRenderableList;
 extern CoreRenderableList *__coreGUI;
+extern GuiList *__guiList;
 //
 
 /*
@@ -74,6 +75,7 @@ private:
   //std::list< Object* >        _objects;
   Object                      *_rootObject; //корневой объект сцены
   //Object                      *_rootGUIObject;  //корневой объект GUI
+  Glui2     *gui;
 
   struct shaders
   {
@@ -105,7 +107,6 @@ private:
 public:
   Keyboard  keyboard;
   Mouse     mouse;
-  Glui2     *gui;
 
 private:
   bool  _UpdatePalette  ( const HWND window );
@@ -142,6 +143,7 @@ public:
   Object* getObjectInPoint    ( const Vec2& pos );
   Object* GetObjectByTrigger  ( ObjectTrigger *trigger );
   Object* GetObjectByCollision( Collision *collision );
+  Object* GetObjectByGui      ( g2Controller *controller );
   void    ClearScene          ();
 
   bool    LoadExtension       ( const std::string &name, void** function );
@@ -150,8 +152,11 @@ public:
 
   LRESULT Signal              ( DWORD code, LPARAM lParam = 0, WPARAM wParam = 0, void *pointer = NULL ); //Don't use this function!
 
+  static LRESULT APIENTRY WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+  static void _GluiMouseFunc  ( int button, int state, int x, int y );
+  static void _GluiKeyboardFunc ( unsigned char key, int x, int y );
+
   bool    CheckGLError        ( int line = -1, const std::string& fileName = "" );
 };
 
 
-LRESULT APIENTRY CoreWindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );

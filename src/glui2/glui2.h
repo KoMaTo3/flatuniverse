@@ -116,6 +116,10 @@ public:
     __g2EXPORT void Render();
     static void __MouseFunc(int button, int state, int x, int y);
     static void __KeyboardFunc(unsigned char key, int x, int y);
+    static bool __MouseInteracted;
+    static bool __KeyboardInteracted;
+
+    int WindowWidth, WindowHeight;
     
 private:
     
@@ -126,7 +130,6 @@ private:
     /*** Window / Theme Structures ***/
     
     // Window size
-    int WindowWidth, WindowHeight;
     
     // The theme object; used to retrieve bitmap data
     g2Theme MainTheme;

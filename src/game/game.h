@@ -36,6 +36,7 @@ public:
       luaKeyboardListeners,
       luaMouseKeyListeners;
 
+  //триггеры
   struct GameObjectTrigger
   {
     std::string   funcName;
@@ -43,6 +44,15 @@ public:
   };
   typedef std::deque< GameObjectTrigger > GameObjectTriggerList;
   GameObjectTriggerList objectTriggers;
+
+  //gui-слушатели
+  struct GuiTrigger
+  {
+    std::string   funcName;
+    Object        *object;
+  };
+  typedef std::deque< GuiTrigger > GuiTriggerList;
+  GuiTriggerList guiTriggers;
 
 public:
   Game();
@@ -59,10 +69,19 @@ public:
   static Vec2   LUA_GetCameraPos      ();
   static Size   LUA_GetWindowSize     ();
   static void   LUA_ObjectAddTrigger  ( const std::string &triggerName, const std::string &funcName );
+  static void   LUA_GuiAddTrigger     ( const std::string &objectName, const std::string &funcName );
   static void   LUA_ObjectTrigger_Handler( ObjectTrigger *trigger, Collision *collision, bool isInTrigger );
+  static void   LUA_GuiTrigger_Handler( Object *guiObject );
   static void   LUA_SetCamera         ( const std::string &name );
   static std::string  LUA_GetCamera   ();
   static void   LUA_ClearScene        ();
+  static std::string LUA_GuiGetText   ( const std::string &guiName );
+  static void   LUA_ObjectEnableRenderable  ( const std::string &objectName, const std::string &texture, const Vec2 &size, const Vec4 &color );
+  static void   LUA_ObjectDisableRenderable ( const std::string &objectName );
+  static void   LUA_ObjectEnableCollision   ( const std::string &objectName, bool isStatic, const Vec3 &size, const Vec3 &velocity, const Vec3 &acceleration );
+  static void   LUA_ObjectDisableCollision  ( const std::string &objectName );
+  static void   LUA_ObjectEnableTrigger     ( const std::string &objectName, const Vec3 &size );
+  static void   LUA_ObjectDisableTrigger    ( const std::string &objectName );
 
   void Update();
   void UpdateLuaTimers();
@@ -70,6 +89,7 @@ public:
   static void   KeyboardProc          ( Dword keyId, bool isPressed );
   static void   MouseKeyProc          ( Dword keyId, bool isPressed );
   static void   OnRemoveTrigger       ( ObjectTrigger *trigger );
+  static void   GuiProc               ( Object *obj );
 
   Vec3 GetGridPosUnderCamera( float scale = 1.0f );
   Vec3 GetGridPosUnderCursor();

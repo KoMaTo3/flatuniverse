@@ -262,6 +262,37 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   DWORD fps = 0, currentFps = 0;
   //__textureAtlas->__Dump( "data/temp/__atlas.tga" );
 
+  //if edit-mode
+  {
+    Object *guiRoot = game->core->CreateObject( "editor" );
+
+    obj = game->core->CreateObject( "object.is_renderable", guiRoot );
+    Object::GuiConstructor gui;
+    gui.type = OBJECT_GUI_CHECKBOX;
+    gui.position.x = 10;
+    gui.position.y = 10;
+    gui.label = "Renderable";
+    gui.funCallback = Game::GuiProc;
+    obj->EnableGui( &gui );
+
+    obj = game->core->CreateObject( "object.reset_position", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_BUTTON;
+    gui.position.x = 10;
+    gui.position.y = 30;
+    gui.label = "Reset position";
+    gui.funCallback = Game::GuiProc;
+    obj->EnableGui( &gui );
+
+    obj = game->core->CreateObject( "object.object_name", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_EDIT;
+    gui.position.x = 10;
+    gui.position.y = 50;
+    gui.label = "";
+    obj->EnableGui( &gui );
+  }
+
   sTimer.Update();
   game->world->Update( true );
   game->lua->RunFile( "data/scripts/game.lua" );
@@ -288,9 +319,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   */
-  g2Button* MyButton = game->core->gui->AddButton( 5, 5, "Hello, World!", testButton );
-  g2TextField *it = game->core->gui->AddTextField( 100, 100, "test" );
-  MyButton = game->core->gui->AddButton( 5, 30, "test2", testButton );
+  //g2Button* MyButton = game->core->gui->AddButton( 5, 5, "Hello, World!", testButton );
+  //g2TextField *it = game->core->gui->AddTextField( 100, 100, "test" );
+  //MyButton = game->core->gui->AddButton( 5, 30, "test2", testButton );
 
   while( game->core->Update() )
   {
@@ -502,9 +533,17 @@ Game::Game()
   LUAFUNC_GetCameraPos      = Game::LUA_GetCameraPos;
   LUAFUNC_GetWindowSize     = Game::LUA_GetWindowSize;
   LUAFUNC_ObjectAddTrigger  = Game::LUA_ObjectAddTrigger;
+  LUAFUNC_GuiAddTrigger     = Game::LUA_GuiAddTrigger;
   LUAFUNC_SetCamera         = Game::LUA_SetCamera;
   LUAFUNC_GetCamera         = Game::LUA_GetCamera;
   LUAFUNC_ClearScene        = Game::LUA_ClearScene;
+  LUAFUNC_GuiGetText        = Game::LUA_GuiGetText;
+  LUAFUNC_ObjectEnableRenderable  = Game::LUA_ObjectEnableRenderable;
+  LUAFUNC_ObjectDisableRenderable = Game::LUA_ObjectDisableRenderable;
+  LUAFUNC_ObjectEnableCollision   = Game::LUA_ObjectEnableCollision;
+  LUAFUNC_ObjectDisableCollision  = Game::LUA_ObjectDisableCollision;
+  LUAFUNC_ObjectEnableTrigger     = Game::LUA_ObjectEnableTrigger;
+  LUAFUNC_ObjectDisableTrigger    = Game::LUA_ObjectDisableTrigger;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -671,6 +710,118 @@ void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos )
 }//LUA_CreateObject
 
 
+
+/*
+=============
+  LUA_ObjectEnableRenderable
+=============
+*/
+void Game::LUA_ObjectEnableRenderable( const std::string &objectName, const std::string &texture, const Vec2 &size, const Vec4 &color )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectEnableRenderable => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  RenderableQuad *render = ( RenderableQuad* ) object->EnableRenderable( RENDERABLE_TYPE_QUAD );
+  render->SetSize( size );
+  render->SetColor( color );
+  render->SetTexture( texture );
+}//LUA_ObjectEnableRenderable
+
+
+
+/*
+=============
+  LUA_ObjectDisableRenderable
+=============
+*/
+void Game::LUA_ObjectDisableRenderable( const std::string &objectName )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectDisableRenderable => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  object->DisableRenderable();
+}//LUA_ObjectDisableRenderable
+
+
+
+/*
+=============
+  LUA_ObjectEnableCollision
+=============
+*/
+void Game::LUA_ObjectEnableCollision( const std::string &objectName, bool isStatic, const Vec3 &size, const Vec3 &velocity, const Vec3 &acceleration )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectEnableCollision => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  Collision *collision = object->EnableCollision();
+  collision->SetIsStatic( isStatic );
+  collision->SetSize( size );
+  collision->SetVelocity( velocity );
+  collision->SetAcceleration( acceleration );
+}//LUA_ObjectEnableCollision
+
+
+
+/*
+=============
+  LUA_ObjectDisableCollision
+=============
+*/
+void Game::LUA_ObjectDisableCollision( const std::string &objectName )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectDisableCollision => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  object->DisableCollision();
+}//LUA_ObjectDisableCollision
+
+
+
+/*
+=============
+  LUA_ObjectEnableTrigger
+=============
+*/
+void Game::LUA_ObjectEnableTrigger( const std::string &objectName, const Vec3 &size )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectEnableTrigger => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  ObjectTrigger *trigger = object->EnableTrigger();
+  trigger->SetSize( size );
+}//LUA_ObjectEnableTrigger
+
+
+
+/*
+=============
+  LUA_ObjectDisableTrigger
+=============
+*/
+void Game::LUA_ObjectDisableTrigger( const std::string &objectName )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectDisableTrigger => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  object->DisableTrigger();
+}//LUA_ObjectDisableTrigger
+
+
+
+
 /*
 =============
   LUA_ListenKeyboard
@@ -825,6 +976,23 @@ void Game::LUA_ObjectTrigger_Handler( ObjectTrigger *trigger, Collision *collisi
 }
 
 
+
+/*
+=============
+  LUA_GuiTrigger_Handler
+  ObjectTrigger call this (ObjectTriggerHandler)
+=============
+*/
+void Game::LUA_GuiTrigger_Handler( Object *guiObject )
+{
+  GuiTriggerList::iterator iter, iterEnd = game->guiTriggers.end();
+  for( iter = game->guiTriggers.begin(); iter != iterEnd; ++iter )
+    if( iter->object == guiObject )
+      LUACALLBACK_GuiTrigger( game->lua, iter->funcName, guiObject->GetNameFull() );
+}
+
+
+
 /*
 =============
   LUA_ObjectAddTrigger
@@ -851,7 +1019,6 @@ void Game::LUA_ObjectAddTrigger( const std::string &triggerName, const std::stri
   //GameObjectTrigger objectTrigger;
   //objectTrigger.funcName = funcName;
   //objectTrigger.trigger = game->core->GetObject( triggerName );
-  //game->objectTriggers.push_back( objectTrigger );
   //game->core->SetState( CORE_STATE_EXIT );
   game->objectTriggers.push_back( GameObjectTrigger() );
   GameObjectTrigger *objectTrigger = &( *game->objectTriggers.rbegin() );
@@ -860,6 +1027,33 @@ void Game::LUA_ObjectAddTrigger( const std::string &triggerName, const std::stri
 
   __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectAddTrigger => triggerName[%s] funcName[%s]", triggerName.c_str(), funcName.c_str() );
 }//LUA_ObjectAddTrigger
+
+
+
+/*
+=============
+  LUA_GuiAddTrigger
+=============
+*/
+void Game::LUA_GuiAddTrigger( const std::string &objectName, const std::string &funcName )
+{
+  Object *guiObject = game->core->GetObject( objectName );
+  if( !guiObject )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_GuiAddTrigger => gui element '%s' not found", objectName.c_str() );
+    return;
+  }
+
+  /*
+  trigger->AddHandler( Game::LUA_ObjectTrigger_Handler );
+  */
+  game->guiTriggers.push_back( GuiTrigger() );
+  GuiTrigger *guiTrigger = &( *game->guiTriggers.rbegin() );
+  guiTrigger->funcName  = funcName;
+  guiTrigger->object    = guiObject;
+
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAddTrigger => guiName[%s] funcName[%s]", objectName.c_str(), funcName.c_str() );
+}//LUA_GuiAddTrigger
 
 
 
@@ -933,3 +1127,58 @@ void Game::LUA_ClearScene()
   game->world->ClearWorld();
   __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene done" );
 }//LUA_ClearScene
+
+
+
+/*
+=============
+  GuiProc
+  Обработка событий всяких gui-объектов
+=============
+*/
+void Game::GuiProc( Object *obj )
+{
+  LUA_GuiTrigger_Handler( obj );
+  /*
+  __log.PrintInfo( Filelevel_DEBUG, "Game::GuiProc => triggers[%d]", game->guiTriggers.size() );
+  GuiTriggerList::iterator iter, iterEnd = game->guiTriggers.end();
+  for( iter = game->guiTriggers.begin(); iter != iterEnd; ++iter ) {
+    if( iter->object == obj ) {
+      Game::LUA_GuiTrigger_Handler( obj );
+    }
+  }
+  */
+}//GuiProc
+
+
+
+/*
+=============
+  LUA_GuiGetText
+=============
+*/
+std::string Game::LUA_GuiGetText( const std::string &guiName )
+{
+  Object *object = game->core->GetObject( guiName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiGetText => gui element '%s' not found", guiName.c_str() );
+    return "";
+  }
+
+  g2Controller *controller = object->GetGui();
+  if( !controller ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiGetText => object '%s' is not gui element", guiName.c_str() );
+    return "";
+  }
+
+  switch( object->GetGuiType() ) {
+    case OBJECT_GUI_EDIT: {
+      std::string str = ( ( g2TextField* ) controller )->GetText();
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiGetText => object['%s'] text['%s']", guiName.c_str(), str.c_str() );
+      return str;
+    }
+  }//switch
+
+  __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiGetText => object '%s' don't have text", guiName.c_str() );
+  return "";
+}//LUA_GuiGetText

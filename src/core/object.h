@@ -16,6 +16,9 @@
 
 
 class Object;
+class g2Controller;
+typedef std::deque< g2Controller* > GuiList;
+
 
 //object by collision
 struct ObjectByCollision
@@ -49,6 +52,30 @@ private:
 typedef std::deque< ObjectByTrigger* > ObjectByTriggerList;
 extern ObjectByTriggerList *__objectByTrigger;
 
+//object by gui
+struct ObjectByGui
+{
+  ObjectPointer object;
+  g2Controller  *gui;
+
+  ObjectByGui( Object *setObject, g2Controller *setGui );
+  ~ObjectByGui();
+
+private:
+  ObjectByGui();
+  ObjectByGui( const ObjectByGui& copyFrom );
+};
+typedef std::deque< ObjectByGui* > ObjectByGuiList;
+extern ObjectByGuiList *__objectByGui;
+
+
+
+enum ObjectGuiType {
+  OBJECT_GUI_UNKNOWN  = 0,
+  OBJECT_GUI_BUTTON   = 1,
+  OBJECT_GUI_EDIT     = 2,
+  OBJECT_GUI_CHECKBOX = 3
+};
 
 
 
@@ -66,6 +93,27 @@ public:
     ObjectForce( long newId, const Vec3& newVec ){ this->id = newId; this->vec = newVec; }
   };
   typedef std::deque< ObjectForce > ObjectForceList;
+
+  class GuiConstructor { //конструктор создания glui-объектов
+  public:
+    ObjectGuiType type;
+    Pos< int >    position;
+    std::string   label;
+    int           width;
+    void          (*funCallback)( Object* object );
+
+    GuiConstructor() {
+      this->Reset();
+    }
+    void Reset() {
+      this->type = OBJECT_GUI_UNKNOWN;
+      this->position.x = this->position.y = 0;
+      this->label = "";
+      this->funCallback = NULL;
+      this->width = 0;
+    }
+  };
+
 protected:
   Vec3            position;     //рассчитанная позиция объекта в сцене. звук это, скрипт, частица или меш, главная координата - эта. её может модифицировать физдвижок, напрямую
 private:
@@ -79,8 +127,14 @@ private:
   ObjectForceList forces;   //перечень сил, действующих на объект
 
   Collision       *collision;
-  ObjectPointers  pointers;   //перечень указателей на этот объект. объект обязан делать их невалидными беред своим уничтожением
+  ObjectPointers  pointers;   //перечень указателей на этот объект. объект обязан делать их невалидными перед своим уничтожением
   ObjectTrigger   *trigger;
+
+  struct {
+    g2Controller  *guiController;
+    ObjectGuiType type;
+    void          (*funCallback)( Object* object );
+  } gui;
 
   bool            _isLockedToDelete;  //запрет на удаление объекта посредством Core::ClearScene
 
@@ -103,6 +157,7 @@ protected:
 
 protected:
   void                _RecalculatePosition();
+  static void         _GuiCallback( g2Controller *controller );
 
 public:
   Object();
@@ -143,6 +198,12 @@ public:
   ObjectTrigger*      GetTrigger          ();
   inline
     bool              IsTrigger           () { return this->trigger != NULL; }
+
+  g2Controller*       EnableGui           ( const GuiConstructor *info );
+  void                DisableGui          ();
+  g2Controller*       GetGui              ();
+  inline
+  ObjectGuiType       GetGuiType          () { return this->gui.type; }
 
   void                Update              ( float dt );
 

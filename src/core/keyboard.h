@@ -4,6 +4,8 @@
 #include "memory.h"
 #include <vector>
 
+int KeyboardGetModifiers();
+
 class Keyboard
 {
 public:
@@ -35,6 +37,9 @@ public:
 
   void  AddListener     ( Listener *listenerProc );
   void  RemoveListener  ( Listener *listenerProc );
+
+  static int KeyCodeToGlut( WPARAM code );
+  static int KeyModifiers;
 };
 
 /*

@@ -9,6 +9,7 @@
 ***************************************************************/
 
 #include "g2LabelEdit.h"
+extern int KeyboardGetModifiers();
 
 g2LabelEdit::g2LabelEdit(g2Controller* Parent, g2Theme* MainTheme)
 : g2Controller(Parent, MainTheme)
@@ -413,12 +414,12 @@ void g2LabelEdit::KeyEvent(unsigned char key, bool IsSpecial)
     else if(IsSpecial)
     {
         // Move far left/right
-        if(key == GLUT_KEY_LEFT && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+        if(key == GLUT_KEY_LEFT && KeyboardGetModifiers() == GLUT_ACTIVE_CTRL)
         {
             CursorIndex = 0;
             ViewIndex = 0;
         }
-        else if(key == GLUT_KEY_RIGHT && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+        else if(key == GLUT_KEY_RIGHT && KeyboardGetModifiers() == GLUT_ACTIVE_CTRL)
         {
             // Move the cursor to the far right and calculate
             // what is the best position for the view buffer to be moved to
@@ -509,7 +510,7 @@ void g2LabelEdit::KeyEvent(unsigned char key, bool IsSpecial)
     // is offset from 'a', meaning true ascii = 'a' - key + 1
     
     // Cut text
-    else if(key == ('x' - 'a' + 1) && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+    else if(key == ('x' - 'a' + 1) && KeyboardGetModifiers() == GLUT_ACTIVE_CTRL)
     {
         // Copy into buffer, then set text to empty
         CopyBuffer();
@@ -517,14 +518,14 @@ void g2LabelEdit::KeyEvent(unsigned char key, bool IsSpecial)
     }
     
     // Copy text
-    else if(key == ('c' - 'a' + 1) && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+    else if(key == ('c' - 'a' + 1) && KeyboardGetModifiers() == GLUT_ACTIVE_CTRL)
     {
         // Direct copy
         CopyBuffer();
     }
     
     // Paste text
-    else if(key == ('v' - 'a' + 1) && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+    else if(key == ('v' - 'a' + 1) && KeyboardGetModifiers() == GLUT_ACTIVE_CTRL)
     {
         // Direct paste
         PasteBuffer();

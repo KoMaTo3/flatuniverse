@@ -1,6 +1,7 @@
 #include "object.h"
 #include "file.h"
 #include "tools.h"
+#include "glui2/glui2.h"
 
 extern CoreRenderableList *__coreRenderableList;
 extern CoreRenderableListIndicies *__coreRenderableListIndicies;
@@ -8,9 +9,12 @@ extern CoreRenderableListIndicies *__coreRenderableListFreeIndicies;
 extern CoreRenderableList *__coreGUI;
 extern CoreRenderableListIndicies *__coreGUIIndicies;
 extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
+extern GuiList *__guiList;
+extern Glui2 *__coreGlui;
 
 ObjectByCollisionList *__objectByCollision  = NULL;
 ObjectByTriggerList   *__objectByTrigger    = NULL;
+ObjectByGuiList       *__objectByGui        = NULL;
 
 
 /*
@@ -79,6 +83,38 @@ ObjectByTrigger::~ObjectByTrigger()
 
 /*
 =============
+  ObjectByGui
+=============
+*/
+ObjectByGui::ObjectByGui()
+:object( NULL ), gui( NULL )
+{
+}//constructor
+
+ObjectByGui::ObjectByGui( Object *setObject, g2Controller *setGui )
+:object( setObject ), gui( setGui )
+{
+  if( setObject )
+    setObject->PointerAdd( &this->object );
+}//constructor
+
+ObjectByGui::ObjectByGui( const ObjectByGui& copyFrom )
+:object( copyFrom.object.GetObject() )
+{
+  this->gui = copyFrom.gui;
+}//copy-constructor
+
+
+ObjectByGui::~ObjectByGui()
+{
+  if( this->object.GetValid() )
+    this->object.GetObject()->PointerRemove( &this->object );
+}//destructor
+
+
+
+/*
+=============
   ObjectRenderableInfo
 =============
 */
@@ -117,6 +153,7 @@ Object::Object()
 :name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 {
+  this->gui.type = OBJECT_GUI_UNKNOWN;
   __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%X]", this );
 }//constructor
 
@@ -125,6 +162,7 @@ Object::Object( const std::string &objectName, Object* parentObject )
 :name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 {
+  this->gui.type = OBJECT_GUI_UNKNOWN;
   if( this->_parent )
   {
     this->nameFull = ( this->_parent->_parent ? this->_parent->GetNameFull() + "/" : "" ) + this->name;
@@ -158,6 +196,7 @@ Object::~Object()
   this->DisableRenderable();
   this->DisableCollision();
   this->DisableTrigger();
+  this->DisableGui();
   this->ClearChilds();
   this->UnAttachThisFromParent();
 
@@ -665,6 +704,116 @@ Collision* Object::GetCollision()
 
 /*
 =============
+  EnableGui
+=============
+*/
+g2Controller* Object::EnableGui( const GuiConstructor *info )
+{
+  if( this->gui.guiController && this->gui.type != OBJECT_GUI_UNKNOWN || !info ) {
+    this->gui.guiController->SetVisibility( true );
+    //__log.PrintInfo( Filelevel_ERROR, "Object::EnableGui => unknown type x%X or already enabled[x%X]", info.type, this->gui.guiController );
+    return this->gui.guiController;
+  }
+
+  if( !__guiList ) {
+    __log.PrintInfo( Filelevel_ERROR, "Object::EnableGui => __guiList is NULL" );
+    return NULL;
+  }
+
+  switch( info->type ) {
+    case OBJECT_GUI_BUTTON: {
+      g2Button *item = __coreGlui->AddButton( info->position.x, info->position.y, info->label.c_str(), Object::_GuiCallback );
+      this->gui.guiController = item;
+      break;
+    }//button
+    case OBJECT_GUI_EDIT: {
+      g2TextField *item = __coreGlui->AddTextField( info->position.x, info->position.y, info->label.c_str() );
+      if( info->width ) {
+        item->SetWidth( info->width );
+      }
+      this->gui.guiController = item;
+      break;
+    }//checkbox
+    case OBJECT_GUI_CHECKBOX: {
+      g2CheckBox *item = __coreGlui->AddCheckBox( info->position.x, info->position.y, info->label.c_str(), Object::_GuiCallback );
+      this->gui.guiController = item;
+      break;
+    }//checkbox
+    default: {
+      __log.PrintInfo( Filelevel_ERROR, "Object::EnableGui => unknown type x%X", info->type );
+      return NULL;
+    }
+  }//switch
+  this->gui.type = info->type;
+  this->gui.funCallback = info->funCallback;
+  __guiList->push_back( this->gui.guiController );
+  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableGui => controller[x%p]", this->gui.guiController );
+
+  ObjectByGui *byGui = new ObjectByGui( this, this->gui.guiController );
+  __objectByGui->push_back( byGui );
+  this->_isLockedToDelete = true;
+
+  return this->gui.guiController;
+}//EnableGui
+
+
+
+
+/*
+=============
+  DisableGui
+=============
+*/
+void Object::DisableGui()
+{
+  if( !this->gui.guiController || this->gui.type == OBJECT_GUI_UNKNOWN )
+    return;
+
+  if( !__guiList )
+    return;
+
+  /*
+  ObjectByGuiList::iterator iterGui, iterEndGui = __objectByGui->end();
+  for( iterGui = __objectByGui->begin(); iterGui != iterEndGui; ++iterGui )
+    if( ( *iterGui )->object.GetObject() == this )
+    {
+      __objectByGui->erase( iterGui );
+      break;
+    }
+    */
+
+  /*
+  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableGui..." );
+  for( GuiList::iterator iter = __guiList->begin(); iter != __guiList->end(); ++iter )
+    if( *iter == this->gui.guiController )
+    {
+      __guiList->erase( iter );
+      delete this->gui.guiController;
+      this->gui.guiController = NULL;
+      this->gui.type = OBJECT_GUI_UNKNOWN;
+      break;
+    }
+  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableGui done" );
+  */
+  this->gui.guiController->SetVisibility( false );
+}//DisableGui
+
+
+
+/*
+=============
+  GetGui
+=============
+*/
+g2Controller* Object::GetGui()
+{
+  return this->gui.guiController;
+}//GetGui
+
+
+
+/*
+=============
   GetMatrixTransform
 =============
 */
@@ -920,7 +1069,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
 
   Dword childsCount;
   reader >> childsCount;
-  if( childsCount )
+  if( childsCount ) //TODO: надо допиливать подгрузку дочерних объектов
   {
     __log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
   }
@@ -1126,3 +1275,22 @@ ObjectTrigger* Object::GetTrigger()
 {
   return this->trigger;
 }//GetTrigger
+
+
+
+/*
+=============
+  _GuiCallback
+  Callback-function from Glui2 to Object
+=============
+*/
+void Object::_GuiCallback( g2Controller *controller )
+{
+  __log.PrintInfo( Filelevel_DEBUG, "Object::_GuiCallback => controller[x%p] objects[%d]", controller, __objectByGui->size() );
+  ObjectByGuiList::iterator iter, iterEnd = __objectByGui->end();
+  for( iter = __objectByGui->begin(); iter != iterEnd; ++iter ) {
+    if( ( *iter )->gui == controller && ( *iter )->object.GetValid() && ( *iter )->object.GetObject< Object >()->gui.funCallback ) {
+      ( ( Object* ) ( *iter )->object.GetObject() )->gui.funCallback( ( *iter )->object.GetObject< Object >() );
+    }
+  }
+}//_GuiCallback
