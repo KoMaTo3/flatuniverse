@@ -108,6 +108,13 @@ public:
   Keyboard  keyboard;
   Mouse     mouse;
 
+  //специальный рендер объектов (подсветка в редакторе)
+  struct {
+    bool  renderRenderable,
+          renderCollision,
+          renderTrigger;
+  } debug;
+
 private:
   bool  _UpdatePalette  ( const HWND window );
   void  _Resize         ( WORD screenWidth, WORD screenHeight );
@@ -144,6 +151,8 @@ public:
   Object* GetObjectByTrigger  ( ObjectTrigger *trigger );
   Object* GetObjectByCollision( Collision *collision );
   Object* GetObjectByGui      ( g2Controller *controller );
+  Object* GetCollisionInPoint ( const Vec2& pos, const std::string &afterObject );
+  Object* GetTriggerInPoint   ( const Vec2& pos, const std::string &afterObject );
   void    ClearScene          ();
 
   bool    LoadExtension       ( const std::string &name, void** function );
@@ -155,6 +164,7 @@ public:
   static LRESULT APIENTRY WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
   static void _GluiMouseFunc  ( int button, int state, int x, int y );
   static void _GluiKeyboardFunc ( unsigned char key, int x, int y );
+  static void _GluiHoverFunc  ( int x, int y );
 
   bool    CheckGLError        ( int line = -1, const std::string& fileName = "" );
 };

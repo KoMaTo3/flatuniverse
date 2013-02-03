@@ -401,7 +401,6 @@ void g2Controller::DrawComponent(int DestX, int DestY, int DestW, int DestH, flo
     glBindTexture(GL_TEXTURE_2D, TextID); 
     
     // Draw at this position
-    glColor4f( 1.0f, 0.0f, 0.0f, 1.0f );
     glBegin(GL_QUADS);
         glTexCoord2f(SrcX, SrcY);
         glVertex2f(DestX + 0, DestY + 0);

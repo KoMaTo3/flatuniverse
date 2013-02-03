@@ -21,17 +21,6 @@ void testButton( g2Controller *controller )
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
-  char *argv[ 3 ];
-  int argcp = 3;
-  argv[ 0 ] = "flatuniverse.exe";
-  argv[ 1 ] = "-geometry";
-  argv[ 2 ] = "320x200";
-  glutInit( &argcp, argv );
-  glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH );
-  glutInitWindowPosition( 300, 300 );
-  glutInitWindowSize( 640, 480 );
-  glutCreateWindow( "Glui2 Example 1" );
-
   game = new Game();
   Pos< Short> blocksPerGrid( 8, 8 );
   game->core->Init( 0, 0, false, "FlatGL" );
@@ -265,32 +254,189 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //if edit-mode
   {
     Object *guiRoot = game->core->CreateObject( "editor" );
+    int windowWidth = game->core->GetWindowSize().width,
+        width = 200,
+        left = windowWidth - width,
+        y = 0
+        ;
 
-    obj = game->core->CreateObject( "object.is_renderable", guiRoot );
+    //panels
+    obj = game->core->CreateObject( "object.window_main", guiRoot );
     Object::GuiConstructor gui;
-    gui.type = OBJECT_GUI_CHECKBOX;
-    gui.position.x = 10;
-    gui.position.y = 10;
-    gui.label = "Renderable";
+    gui.type = OBJECT_GUI_PANEL;
+    gui.panelAnchor = g2Anchor_None;
+    gui.label = "Settings";
+    gui.position.x = left;
+    gui.position.y = y;
+    gui.width = width;
+    gui.height = 145;
     gui.funCallback = Game::GuiProc;
     obj->EnableGui( &gui );
 
-    obj = game->core->CreateObject( "object.reset_position", guiRoot );
+    obj = game->core->CreateObject( "object.window_object", guiRoot );
     gui.Reset();
-    gui.type = OBJECT_GUI_BUTTON;
-    gui.position.x = 10;
-    gui.position.y = 30;
-    gui.label = "Reset position";
+    gui.type = OBJECT_GUI_PANEL;
+    gui.panelAnchor = g2Anchor_None;
+    gui.label = "Object";
+    gui.position.x = left;
+    gui.position.y = 150;
+    gui.width = width;
+    gui.height = 95;
     gui.funCallback = Game::GuiProc;
     obj->EnableGui( &gui );
 
+    obj = game->core->CreateObject( "object.window_renderable", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_PANEL;
+    gui.panelAnchor = g2Anchor_None;
+    gui.label = "Object renderable";
+    gui.position.x = left;
+    gui.position.y = 250;
+    gui.width = width;
+    gui.height = 95;
+    gui.funCallback = Game::GuiProc;
+    obj->EnableGui( &gui );
+
+    obj = game->core->CreateObject( "object.window_collision", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_PANEL;
+    gui.panelAnchor = g2Anchor_None;
+    gui.label = "Object collision";
+    gui.position.x = left;
+    gui.position.y = 350;
+    gui.width = width;
+    gui.height = 95;
+    gui.funCallback = Game::GuiProc;
+    obj->EnableGui( &gui );
+
+    obj = game->core->CreateObject( "object.window_trigger", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_PANEL;
+    gui.panelAnchor = g2Anchor_None;
+    gui.label = "Object trigger";
+    gui.position.x = left;
+    gui.position.y = 450;
+    gui.width = width;
+    gui.height = 95;
+    gui.funCallback = Game::GuiProc;
+    obj->EnableGui( &gui );
+
+    //panel: object
     obj = game->core->CreateObject( "object.object_name", guiRoot );
     gui.Reset();
-    gui.type = OBJECT_GUI_EDIT;
-    gui.position.x = 10;
-    gui.position.y = 50;
-    gui.label = "";
+    gui.type = OBJECT_GUI_TEXTFIELD;
+    gui.position.x = 5;
+    gui.position.y = 25;
+    gui.width = width - 10;
+    gui.label = "ObjectName";
+    gui.panel = "editor/object.window_object";
     obj->EnableGui( &gui );
+
+    //panel: renderable
+    obj = game->core->CreateObject( "object.is_renderable", guiRoot );
+    gui.type = OBJECT_GUI_CHECKBOX;
+    gui.position.x = 5;
+    gui.position.y = 25;
+    gui.label = "Renderable";
+    gui.funCallback = Game::GuiProc;
+    gui.panel = "editor/object.window_renderable";
+    obj->EnableGui( &gui );
+
+    //panel: collision
+    obj = game->core->CreateObject( "object.is_collision", guiRoot );
+    gui.type = OBJECT_GUI_CHECKBOX;
+    gui.position.x = 5;
+    gui.position.y = 25;
+    gui.label = "Collision";
+    gui.funCallback = Game::GuiProc;
+    gui.panel = "editor/object.window_collision";
+    obj->EnableGui( &gui );
+
+    obj = game->core->CreateObject( "object.is_static", guiRoot );
+    gui.type = OBJECT_GUI_CHECKBOX;
+    gui.position.x = 90;
+    gui.position.y = 25;
+    gui.label = "Static";
+    gui.funCallback = Game::GuiProc;
+    gui.panel = "editor/object.window_collision";
+    obj->EnableGui( &gui );
+
+    //panel: trigger
+    obj = game->core->CreateObject( "object.is_trigger", guiRoot );
+    gui.type = OBJECT_GUI_CHECKBOX;
+    gui.position.x = 5;
+    gui.position.y = 25;
+    gui.label = "Trigger";
+    gui.funCallback = Game::GuiProc;
+    gui.panel = "editor/object.window_trigger";
+    obj->EnableGui( &gui );
+
+    //panel: settings
+    obj = game->core->CreateObject( "world.tile_label", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_LABEL;
+    gui.position.x = 5;
+    gui.position.y = 38;
+    gui.label = "Tile size:";
+    gui.panel = "editor/object.window_main";
+    obj->EnableGui( &gui );
+
+    obj = game->core->CreateObject( "world.tile_size", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_DROPDOWN;
+    gui.position.x = 60;
+    gui.position.y = 35;
+    stdDequeString dropDownList;
+    dropDownList.push_back( "8" );
+    dropDownList.push_back( "16" );
+    dropDownList.push_back( "24" );
+    dropDownList.push_back( "32" );
+    dropDownList.push_back( "48" );
+    dropDownList.push_back( "64" );
+    gui.stringList = dropDownList;
+    gui.panel = "editor/object.window_main";
+    g2Controller *controller = obj->EnableGui( &gui );
+    ( ( g2DropDown* ) controller )->SetSelectionIndex( 2 );
+    game->dropDownLists[ controller ] = dropDownList;
+    //game->dropDownLists.insert( game->dropDownLists.vavalue_type( controller, dropDownList ) );
+
+    obj = game->core->CreateObject( "object.tile_add", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_BUTTON;
+    gui.position.x = 120;
+    gui.position.y = 35;
+    gui.label = "Add";
+    gui.width = 30;
+    gui.panel = "editor/object.window_main";
+    gui.funCallback = Game::GuiProc;
+    obj->EnableGui( &gui );
+
+    obj = game->core->CreateObject( "settings.layer_label", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_LABEL;
+    gui.position.x = 5;
+    gui.position.y = 20;
+    gui.label = "Layer:";
+    gui.panel = "editor/object.window_main";
+    obj->EnableGui( &gui );
+
+    obj = game->core->CreateObject( "settings.layer", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_DROPDOWN;
+    gui.position.x = 60;
+    gui.position.y = 17;
+    gui.width = 100;
+    dropDownList.clear();
+    dropDownList.push_back( "default" );
+    dropDownList.push_back( "renderable" );
+    dropDownList.push_back( "collision" );
+    dropDownList.push_back( "trigger" );
+    gui.stringList = dropDownList;
+    gui.panel = "editor/object.window_main";
+    gui.funCallback = Game::GuiProc;
+    controller = obj->EnableGui( &gui );
+    game->dropDownLists[ controller ] = dropDownList;
+
   }
 
   sTimer.Update();
@@ -538,12 +684,18 @@ Game::Game()
   LUAFUNC_GetCamera         = Game::LUA_GetCamera;
   LUAFUNC_ClearScene        = Game::LUA_ClearScene;
   LUAFUNC_GuiGetText        = Game::LUA_GuiGetText;
+  LUAFUNC_GuiSetText        = Game::LUA_GuiSetText;
   LUAFUNC_ObjectEnableRenderable  = Game::LUA_ObjectEnableRenderable;
   LUAFUNC_ObjectDisableRenderable = Game::LUA_ObjectDisableRenderable;
   LUAFUNC_ObjectEnableCollision   = Game::LUA_ObjectEnableCollision;
   LUAFUNC_ObjectDisableCollision  = Game::LUA_ObjectDisableCollision;
   LUAFUNC_ObjectEnableTrigger     = Game::LUA_ObjectEnableTrigger;
   LUAFUNC_ObjectDisableTrigger    = Game::LUA_ObjectDisableTrigger;
+  LUAFUNC_GuiGetChecked     = Game::LUA_GuiGetChecked;
+  LUAFUNC_GetCollisionStatic= Game::LUA_GetCollisionStatic;
+  LUAFUNC_SetCollisionStatic= Game::LUA_SetCollisionStatic;
+  LUAFUNC_DebugRender       = Game::LUA_DebugRender;
+  LUAFUNC_GetObjectByPoint  = Game::LUA_GetObjectByPoint;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -621,6 +773,35 @@ void Game::LUA_SetObjectPos( const std::string &name, const Vec2 &pos )
   if( obj )
     obj->SetPosition2D( pos );
 }//LUA_SetObjectPos
+
+
+/*
+=============
+  LUA_GetCollisionStatic
+=============
+*/
+bool Game::LUA_GetCollisionStatic( const std::string &name )
+{
+  Object *obj = game->core->GetObject( name );
+  if( obj && obj->GetCollision() ) {
+    return obj->GetCollision()->IsStatic();
+  }
+  return false;
+}//LUA_GetCollisionStatic
+
+
+/*
+=============
+  LUA_SetCollisionStatic
+=============
+*/
+void Game::LUA_SetCollisionStatic( const std::string &name, bool isStatic )
+{
+  Object *obj = game->core->GetObject( name );
+  if( obj && obj->GetCollision() ) {
+    obj->GetCollision()->SetIsStatic( isStatic );
+  }
+}//LUA_SetCollisionStatic
 
 
 /*
@@ -1172,9 +1353,18 @@ std::string Game::LUA_GuiGetText( const std::string &guiName )
   }
 
   switch( object->GetGuiType() ) {
-    case OBJECT_GUI_EDIT: {
+    case OBJECT_GUI_TEXTFIELD: {
       std::string str = ( ( g2TextField* ) controller )->GetText();
-      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiGetText => object['%s'] text['%s']", guiName.c_str(), str.c_str() );
+      return str;
+    }
+    case OBJECT_GUI_DROPDOWN: {
+      dropDownListsType::iterator iter = game->dropDownLists.find( controller );
+      std::string str = "";
+      if( iter != game->dropDownLists.end() ) {
+        str = iter->second[ ( ( g2DropDown* ) controller )->GetSelectionIndex() ];
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_GuiGetText => controller not found" );
+      }
       return str;
     }
   }//switch
@@ -1182,3 +1372,111 @@ std::string Game::LUA_GuiGetText( const std::string &guiName )
   __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiGetText => object '%s' don't have text", guiName.c_str() );
   return "";
 }//LUA_GuiGetText
+
+
+
+/*
+=============
+  LUA_GuiSetText
+=============
+*/
+void Game::LUA_GuiSetText( const std::string &guiName, const std::string &text )
+{
+  Object *object = game->core->GetObject( guiName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiSetText => gui element '%s' not found", guiName.c_str() );
+    return;
+  }
+
+  g2Controller *controller = object->GetGui();
+  if( !controller ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiSetText => object '%s' is not gui element", guiName.c_str() );
+    return;
+  }
+
+  switch( object->GetGuiType() ) {
+    case OBJECT_GUI_TEXTFIELD: {
+      ( ( g2TextField* ) controller )->SetText( text.c_str() );
+      return;
+    }
+  }//switch
+
+  __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiSetText => object '%s' don't have text", guiName.c_str() );
+}//LUA_GuiSetText
+
+
+
+/*
+=============
+  LUA_GuiGetChecked
+=============
+*/
+bool Game::LUA_GuiGetChecked( const std::string &guiName )
+{
+  Object *object = game->core->GetObject( guiName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiGetChecked => gui element '%s' not found", guiName.c_str() );
+    return false;
+  }
+
+  g2Controller *controller = object->GetGui();
+  if( !controller ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiGetChecked => object '%s' is not gui element", guiName.c_str() );
+    return false;
+  }
+
+  switch( object->GetGuiType() ) {
+    case OBJECT_GUI_CHECKBOX: {
+      bool checked = ( ( g2CheckBox* ) controller )->IsChecked();
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiGetChecked => object '%s': %d", guiName.c_str(), checked );
+      return checked;
+    }
+  }//switch
+
+  __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiGetChecked => object '%s' is not checkbox", guiName.c_str() );
+  return false;
+}//LUA_GuiGetChecked
+
+
+/*
+=============
+  LUA_DebugRender
+=============
+*/
+void Game::LUA_DebugRender( int flags )
+{
+  game->core->debug.renderRenderable  = ( ( flags&1 ) == 1 );
+  game->core->debug.renderCollision   = ( ( flags&2 ) == 2 );
+  game->core->debug.renderTrigger     = ( ( flags&4 ) == 4 );
+}//LUA_DebugRender
+
+
+/*
+=============
+  LUA_GetObjectByPoint
+=============
+*/
+std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::string &afterObject )
+{
+  __log.PrintInfo( Filelevel_DEBUG, "test123: point[%3.3f; %3.3f]", point.x, point.y );
+  switch( type ) {
+    case 1: { //renderable
+      break;
+    }//renderable
+    case 2: { //collision
+      Object *object = game->core->GetCollisionInPoint( point, afterObject );
+      if( object ) {
+        return object->GetNameFull();
+      }
+      break;
+    }//collision
+    case 3: { //trigger
+      Object *object = game->core->GetTriggerInPoint( point, afterObject );
+      if( object ) {
+        return object->GetNameFull();
+      }
+      break;
+    }//trigger
+  }//
+  return "";
+}//LUA_GetObjectByPoint

@@ -41,6 +41,10 @@ Core::Core()
 
   this->_rootObject = new Object( "root", NULL );
   this->SetCamera( this->_rootObject );
+
+  this->debug.renderRenderable  = false;
+  this->debug.renderCollision   = false;
+  this->debug.renderTrigger     = false;
 }//constructor
 
 
@@ -233,7 +237,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   }
   //MessageBox(0,"ok",0,0);
 
-  this->gui = new Glui2( "g2Blue.cfg", NULL, NULL, Core::_GluiKeyboardFunc, NULL, Core::_GluiMouseFunc, NULL );
+  this->gui = new Glui2( "g2Blue.cfg", NULL, NULL, Core::_GluiKeyboardFunc, NULL, Core::_GluiMouseFunc, Core::_GluiHoverFunc );
   this->gui->WindowWidth  = this->_window.windowSize.width;
   this->gui->WindowHeight = this->_window.windowSize.height;
   __coreGlui = this->gui;
@@ -987,10 +991,79 @@ bool Core::Redraw()
     }
     //End Основной мир
 
+    //debug-render
+    if( this->GetCamera() && ( this->debug.renderRenderable|| this->debug.renderCollision || this->debug.renderTrigger ) ) {
+      glUseProgram( 0 );
+      glDisable( GL_TEXTURE_2D );
+      glDisable( GL_DEPTH_TEST );
+      float alpha = Math::Sin16( ( float ) sTimer.GetTime() * 5.0f ) * 0.25f + 0.5f;
 
-    glUseProgram( 0 );
-    if( this->gui )
+      //renderable
+      if( this->debug.renderRenderable && __coreRenderableListIndicies->size() )
+      {
+        CoreRenderableListIndicies::iterator iterIndex, iterIndexEnd = __coreRenderableListIndicies->end();
+        glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+        glBegin( GL_QUADS );
+        Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f );
+        Vec2 size;
+        RenderableQuad *quad;
+        for( iterIndex = __coreRenderableListIndicies->begin(); iterIndex != iterIndexEnd; ++iterIndex ) {
+          quad = &( ( *__coreRenderableList )[ *iterIndex ] );
+          pos = quad->GetPosition() - camera;
+          size = quad->GetSize() * 0.5f;
+          size.x *= quad->GetScale().x;
+          size.y *= quad->GetScale().y;
+          glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
+          glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
+          glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
+          glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
+        }
+        glEnd();
+      }//renderable
+
+      //collision
+      if( this->debug.renderCollision && __collisionList->size() )
+      {
+        CollisionList::iterator iter, iterEnd = __collisionList->end();
+        glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+        glBegin( GL_QUADS );
+        Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
+        for( iter = __collisionList->begin(); iter != iterEnd; ++iter ) {
+          pos = ( *iter )->GetPosition() - camera;
+          size = ( *iter )->GetSize() * 0.5f;
+          glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
+          glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
+          glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
+          glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
+        }
+        glEnd();
+      }//collisions
+
+      //trigger
+      if( this->debug.renderTrigger && __triggerList->size() )
+      {
+        ObjectTriggerList::iterator iter, iterEnd = __triggerList->end();
+        glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+        glBegin( GL_QUADS );
+        Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
+        for( iter = __triggerList->begin(); iter != iterEnd; ++iter ) {
+          pos = ( *iter )->GetPosition() - camera;
+          size = ( *iter )->GetSize() * 0.5f;
+          glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
+          glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
+          glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
+          glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
+        }
+        glEnd();
+      }//trigger
+
+      glEnable( GL_DEPTH_TEST );
+    }
+
+    if( this->gui ) {
+      glUseProgram( 0 );
       this->gui->Render();
+    }
 
     //GUI
     //__log.PrintInfo( Filelevel_DEBUG, "test gui: __coreGUI[x%X] size[%d]", __coreGUI, __coreGUI->size() );
@@ -1376,9 +1449,12 @@ Object* Core::GetObjectByTrigger( ObjectTrigger *trigger )
 Object* Core::GetObjectByCollision( Collision *collision )
 {
   ObjectByCollisionList::iterator iterCollision, iterEndCollision = __objectByCollision->end();
-  for( iterCollision = __objectByCollision->begin(); iterCollision != iterEndCollision; ++iterCollision )
+  __log.PrintInfo( Filelevel_DEBUG, "Core::GetObjectByCollision => count[%d]", __objectByCollision->size() );
+  for( iterCollision = __objectByCollision->begin(); iterCollision != iterEndCollision; ++iterCollision ) {
+    __log.PrintInfo( Filelevel_DEBUG, "Core::GetObjectByCollision => match collision[x%p] with[x%p]", collision, ( *iterCollision )->collision );
     if( ( *iterCollision )->object.GetValid() && ( *iterCollision )->collision == collision )
       return ( *iterCollision )->object.GetObject< Object >();
+  }
   return NULL;
 }//GetObjectByCollision
 
@@ -1413,6 +1489,58 @@ void Core::ClearScene()
   this->camera = NULL;
   __log.PrintInfo( Filelevel_DEBUG, "Core::ClearScene => done" );
 }//ClearScene
+
+
+
+
+/*
+=============
+  GetCollisionInPoint
+=============
+*/
+Object* Core::GetCollisionInPoint( const Vec2& pos, const std::string &afterObject )
+{
+  CollisionList::reverse_iterator iter, iterEnd = __collisionList->rend();
+  bool returnFirst = ( afterObject.length() ? false : true );
+  Object *object;
+  for( iter = __collisionList->rbegin(); iter != iterEnd; ++iter ) {
+    if( ( *iter )->TestInPoint( pos ) ) {
+      object = this->GetObjectByCollision( *iter );
+      if( returnFirst ) {
+        return object;
+      } else if( object->GetNameFull() == afterObject ) {
+        returnFirst = true;
+      }
+    }
+  }
+  return NULL;
+}//GetCollisionInPoint
+
+
+
+
+/*
+=============
+  GetTriggerInPoint
+=============
+*/
+Object* Core::GetTriggerInPoint( const Vec2& pos, const std::string &afterObject )
+{
+  ObjectTriggerList::reverse_iterator iter, iterEnd = __triggerList->rend();
+  bool returnFirst = ( afterObject.length() ? false : true );
+  Object *object;
+  for( iter = __triggerList->rbegin(); iter != iterEnd; ++iter ) {
+    if( ( *iter )->TestInPoint( pos ) ) {
+      object = this->GetObjectByTrigger( *iter );
+      if( returnFirst ) {
+        return object;
+      } else if( object->GetNameFull() == afterObject ) {
+        returnFirst = true;
+      }
+    }
+  }
+  return NULL;
+}//GetTriggerInPoint
 
 
 
@@ -1464,6 +1592,17 @@ void Core::_GluiMouseFunc( int button, int state, int x, int y )
 void Core::_GluiKeyboardFunc( unsigned char key, int x, int y )
 {
 }//_GluiKeyboardFunc
+
+
+
+/*
+=============
+  _GluiHoverFunc
+=============
+*/
+void Core::_GluiHoverFunc( int x, int y )
+{
+}//_GluiHoverFunc
 
 
 
@@ -1543,6 +1682,7 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
     case WM_MOUSEMOVE:
     {
       core->mouse.MoveCursor( Vec2( float( LOWORD( lParam ) ), float( HIWORD( lParam ) ) ) );
+      Glui2::__HoverFunc( core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     }
 

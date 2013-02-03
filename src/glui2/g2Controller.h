@@ -172,6 +172,9 @@ protected:
     // Draw a character with given scales and a 4-channel color (RGBA)
     __g2EXPORT void DrawCharacter(int DestX, int DestY, float ScaleW, float ScaleH, float R, float G, float B, float A, char Character);
     
+    // Callback function; called when a full click-through event was detected
+    __g2CallBack(PressedCallback);
+    
 private:
     
     /*** Rendering Properties ***/
@@ -193,9 +196,6 @@ private:
     
     // Active state
     bool IsActive;
-    
-    // Callback function; called when a full click-through event was detected
-    __g2CallBack(PressedCallback);
     
     /*** Managed Object Events ***/
     

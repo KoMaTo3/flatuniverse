@@ -1179,7 +1179,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\glui2\g2Button.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\glui2\g2CheckBox.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\glui2\g2CheckBox.h"
 				>
 			</File>
 			<File
@@ -1187,7 +1195,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\glui2\g2Config.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\glui2\g2Console.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\glui2\g2Console.h"
 				>
 			</File>
 			<File
@@ -1195,7 +1211,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\glui2\g2Controller.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\glui2\g2Dialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\glui2\g2Dialog.h"
 				>
 			</File>
 			<File
@@ -1203,7 +1227,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\glui2\g2DropDown.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\glui2\g2Images.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\glui2\g2Images.h"
 				>
 			</File>
 			<File
@@ -1211,7 +1243,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\glui2\g2Label.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\glui2\g2LabelEdit.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\glui2\g2LabelEdit.h"
 				>
 			</File>
 			<File
@@ -1219,7 +1259,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\glui2\g2Panel.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\glui2\g2ProgressBar.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\glui2\g2ProgressBar.h"
 				>
 			</File>
 			<File
@@ -1227,7 +1275,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\glui2\g2RadioGroup.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\glui2\g2Slider.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\glui2\g2Slider.h"
 				>
 			</File>
 			<File
@@ -1235,7 +1291,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\glui2\g2Spinner.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\glui2\g2TextField.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\glui2\g2TextField.h"
 				>
 			</File>
 			<File
@@ -1243,7 +1307,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\glui2\g2Theme.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\glui2\g2Utilities.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\glui2\g2Utilities.h"
 				>
 			</File>
 			<File
@@ -1265,277 +1337,102 @@
 			<File
 				RelativePath="..\src\glut\glut_8x13.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_9x15.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_cmap.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_cursor.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_dstr.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_event.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_gamemode.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_hel10.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_hel12.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_hel18.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_init.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_key.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_mesa.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_modifier.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_mroman.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_roman.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_tr10.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_tr24.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_util.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\glut_win.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\win32_glx.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\win32_menu.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\win32_util.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\win32_winproc.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\glut\win32_x11.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

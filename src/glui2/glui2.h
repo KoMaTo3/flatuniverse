@@ -116,6 +116,7 @@ public:
     __g2EXPORT void Render();
     static void __MouseFunc(int button, int state, int x, int y);
     static void __KeyboardFunc(unsigned char key, int x, int y);
+    static void __HoverFunc(int x, int y);
     static bool __MouseInteracted;
     static bool __KeyboardInteracted;
 
@@ -149,7 +150,6 @@ private:
     static void __IdleFunc();
     static void __ReshapeFunc(int width, int height);
     static void __SpecialFunc(int key, int x, int y);
-    static void __HoverFunc(int x, int y);
     
     /*** Root GUI Tree Node & Active Node ***/
     

@@ -158,8 +158,13 @@ void g2DropDown::MouseClick(g2MouseButton button, g2MouseClick state, int x, int
     {
         // Reset dragging and save the active index
         IsDragging = false;
-        if(ActiveSelection >= 0)
+        if(ActiveSelection >= 0) {
+            bool changed = ( ActiveIndex != ActiveSelection );
             SetSelectionIndex(ActiveSelection);
+            if( changed && PressedCallback != 0 ) {
+              PressedCallback( this );
+            }
+        }
         
         // Reset alpha color and hide
         for(int i = 0; i < OptionCount; i++)
@@ -187,7 +192,7 @@ void g2DropDown::MouseHover(int x, int y)
             // Check if it is in the controller
             if(Buttons[i]->InController(LocalX, LocalY))
             {
-                Buttons[i]->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+                Buttons[i]->SetColor(1.0f, 0.7f, 0.7f, 1.0f);
                 ActiveSelection = i;
             }
             else

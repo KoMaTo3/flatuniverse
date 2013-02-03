@@ -41,7 +41,12 @@ public:
   void  AddHandler              ( ObjectTriggerHandler handler );
   bool  IsHandlerExists         ( ObjectTriggerHandler handler );
 
-  ObjectTrigger*  SetSize( const Vec3 &setSize );
+  ObjectTrigger*  SetSize       ( const Vec3 &setSize );
+  inline
+  const Vec3&     GetSize       ( ){ return this->size; }
+  inline
+  const Vec3&     GetPosition   ( ){ return *this->position; }
+  bool            TestInPoint   ( const Vec2 &pos );
 
   void  AddOnRemoveHandler      ( ObjectTriggerOnRemoveHandler handler );
 

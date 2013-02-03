@@ -383,6 +383,24 @@ bool Collision::TestIntersect( const Vec3 &leftTopPoint, const Vec3 &rightBottom
 
 
 
+/*
+=============
+  TestInPoint
+=============
+*/
+bool Collision::TestInPoint( const Vec2 &pos )
+{
+  return
+    !( this->_rect.rightBottom.x < pos.x ||
+     this->_rect.leftTop.x       > pos.x ||
+     this->_rect.rightBottom.y   < pos.y ||
+     this->_rect.leftTop.y       > pos.y
+    );
+}//TestInPoint
+
+
+
+
 
 /*
 =============

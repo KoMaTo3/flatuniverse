@@ -9,7 +9,7 @@ ObjectTrigger::ObjectTrigger( Vec3 *setPosition )
 :position( setPosition ), offset( 0.0f, 0.0f, 0.0f ), size( 0.0f, 0.0f, 0.0f )
 {
   if( !setPosition )
-    __log.PrintInfo( Filelevel_WARNING, "ObjectTrigger => position is NULL" );
+    __log.PrintInfo( Filelevel_ERROR, "ObjectTrigger => position is NULL" );
   __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger +1" );
 }//constructor
 
@@ -39,6 +39,23 @@ void ObjectTrigger::Update()
   this->rect.leftTop      = *this->position + this->offset - this->size * 0.5f;
   this->rect.rightBottom  = *this->position + this->offset + this->size * 0.5f;
 }//Update
+
+
+
+/*
+=============
+  TestInPoint
+=============
+*/
+bool ObjectTrigger::TestInPoint( const Vec2 &pos )
+{
+  return
+    !( this->rect.rightBottom.x < pos.x ||
+     this->rect.leftTop.x       > pos.x ||
+     this->rect.rightBottom.y   < pos.y ||
+     this->rect.leftTop.y       > pos.y
+    );
+}//TestInPoint
 
 
 

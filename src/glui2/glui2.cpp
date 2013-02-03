@@ -27,6 +27,7 @@ Glui2::Glui2(const char* ThemeFile, void (*GlutIdleFunc)(void), void (*GlutResha
     this->GlutMouseFunc = GlutMouseFunc;
     
     // Register all needed callbacks
+    /*
     glutIdleFunc(__IdleFunc);
     glutReshapeFunc(__ReshapeFunc);
     glutKeyboardFunc(__KeyboardFunc);
@@ -34,6 +35,7 @@ Glui2::Glui2(const char* ThemeFile, void (*GlutIdleFunc)(void), void (*GlutResha
     glutPassiveMotionFunc(__HoverFunc);
     glutMotionFunc(__HoverFunc); // Paired with above
     glutMouseFunc(__MouseFunc);
+    */
     
     // Attempt to load given theme file if not null
     if(ThemeFile == NULL)

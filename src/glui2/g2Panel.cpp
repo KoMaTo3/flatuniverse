@@ -68,6 +68,11 @@ void g2Panel::SetSize(int NewWidth, int NewHeight)
     CenterTitle();
 }
 
+void g2Panel::SetPanelPos(int x, int y)
+{
+  SetPos( x, y );
+}
+
 g2Button* g2Panel::AddButton(int x, int y, const char* Label, __g2CallBack(callback))
 {
     g2Button* NewButton = new g2Button(this, GetTheme());
@@ -162,7 +167,7 @@ void g2Panel::Render(int pX, int pY)
     
     // Precompute the offsets and subset sizes
     int Y1 = pY;
-    int H1 = ImageHeight / 3;
+    int H1 = ImageHeight / 3 - 1;
     
     int Y3 = pY + Height - H1;
     int H3 = H1;

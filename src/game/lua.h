@@ -33,12 +33,18 @@ typedef std::string LUAFUNCPROC_GetCamera   ();
 typedef void  LUAFUNCPROC_ClearScene        ();
 typedef int   LUAFUNCPROC_GetRandomSeed     ();
 typedef std::string LUAFUNCPROC_GuiGetText  ( const std::string &guiName );
+typedef void  LUAFUNCPROC_GuiSetText        ( const std::string &guiName, const std::string &text );
 typedef void  LUAFUNCPROC_ObjectEnableRenderable  ( const std::string &objectName, const std::string &texture, const Vec2 &size, const Vec4 &color );
 typedef void  LUAFUNCPROC_ObjectDisableRenderable ( const std::string &objectName );
 typedef void  LUAFUNCPROC_ObjectEnableCollision   ( const std::string &objectName, bool isStatic, const Vec3 &size, const Vec3 &velocity, const Vec3 &acceleration );
 typedef void  LUAFUNCPROC_ObjectDisableCollision  ( const std::string &objectName );
 typedef void  LUAFUNCPROC_ObjectEnableTrigger     ( const std::string &objectName, const Vec3 &size );
 typedef void  LUAFUNCPROC_ObjectDisableTrigger    ( const std::string &objectName );
+typedef bool  LUAFUNCPROC_GuiGetChecked     ( const std::string &guiName );
+typedef bool  LUAFUNCPROC_GetCollisionStatic( const std::string &name );
+typedef void  LUAFUNCPROC_SetCollisionStatic( const std::string &name, const bool isStatic );
+typedef void  LUAFUNCPROC_DebugRender       ( int flags );
+typedef std::string LUAFUNCPROC_GetObjectByPoint  ( int type, const Vec2 &point, const std::string &afterObject );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -59,12 +65,18 @@ extern LUAFUNCPROC_GetCamera        *LUAFUNC_GetCamera;
 extern LUAFUNCPROC_ClearScene       *LUAFUNC_ClearScene;
 extern LUAFUNCPROC_GetRandomSeed    *LUAFUNC_GetRandomSeed;
 extern LUAFUNCPROC_GuiGetText       *LUAFUNC_GuiGetText;
+extern LUAFUNCPROC_GuiSetText       *LUAFUNC_GuiSetText;
 extern LUAFUNCPROC_ObjectEnableRenderable   *LUAFUNC_ObjectEnableRenderable;
 extern LUAFUNCPROC_ObjectDisableRenderable  *LUAFUNC_ObjectDisableRenderable;
 extern LUAFUNCPROC_ObjectEnableCollision    *LUAFUNC_ObjectEnableCollision;
 extern LUAFUNCPROC_ObjectDisableCollision   *LUAFUNC_ObjectDisableCollision;
 extern LUAFUNCPROC_ObjectEnableTrigger      *LUAFUNC_ObjectEnableTrigger;
 extern LUAFUNCPROC_ObjectDisableTrigger     *LUAFUNC_ObjectDisableTrigger;
+extern LUAFUNCPROC_GuiGetChecked            *LUAFUNC_GuiGetChecked;
+extern LUAFUNCPROC_GetCollisionStatic       *LUAFUNC_GetCollisionStatic;
+extern LUAFUNCPROC_SetCollisionStatic       *LUAFUNC_SetCollisionStatic;
+extern LUAFUNCPROC_DebugRender      *LUAFUNC_DebugRender;
+extern LUAFUNCPROC_GetObjectByPoint *LUAFUNC_GetObjectByPoint;
 
 
 //callbacks
@@ -116,9 +128,15 @@ public:
   static int LUA_ClearScene       ( lua_State *lua );
   static int LUA_GetRandomSeed    ( lua_State *lua );
   static int LUA_GuiGetText       ( lua_State *lua );
+  static int LUA_GuiSetText       ( lua_State *lua );
   static int LUA_ObjectRenderable ( lua_State *lua );
   static int LUA_ObjectCollision  ( lua_State *lua );
   static int LUA_ObjectTrigger    ( lua_State *lua );
+  static int LUA_GuiGetChecked    ( lua_State *lua );
+  static int LUA_GetCollisionStatic ( lua_State *lua );
+  static int LUA_SetCollisionStatic ( lua_State *lua );
+  static int LUA_DebugRender      ( lua_State *lua );
+  static int LUA_GetObjectByPoint ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );

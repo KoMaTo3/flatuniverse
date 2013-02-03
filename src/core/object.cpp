@@ -640,6 +640,9 @@ Collision* Object::EnableCollision()
   this->collision = new Collision( &this->positionSrc );
   __collisionList->push_back( this->collision );
 
+  ObjectByCollision *byCollision = new ObjectByCollision( this, this->collision );
+  __objectByCollision->push_back( byCollision);
+
   //__objectByCollision->push_back( ObjectByCollision( this, this->collision ) );
   /*
   __objectByCollision->push_back( ObjectByCollision() );
@@ -673,6 +676,14 @@ void Object::DisableCollision()
     {
       __collisionList->erase( iter );
       this->collision = NULL;
+      break;
+    }
+
+  ObjectByCollisionList::iterator iterCollision, iterEndCollision = __objectByCollision->end();
+  for( iterCollision = __objectByCollision->begin(); iterCollision != iterEndCollision; ++iterCollision )
+    if( ( *iterCollision )->object.GetObject() == this )
+    {
+      __objectByCollision->erase( iterCollision );
       break;
     }
 
@@ -720,25 +731,128 @@ g2Controller* Object::EnableGui( const GuiConstructor *info )
     return NULL;
   }
 
+  g2Panel *panel = NULL;
+  if( info->panel.length() ) {
+    Object *panelObject = this->GetObject( info->panel );
+    if( !panelObject ) {
+      __log.PrintInfo( Filelevel_WARNING, "Object::EnableGui => panel '%s' not found", info->panel.c_str() );
+    } else {
+      panel = ( g2Panel* ) panelObject->GetGui();
+    }
+  }
+
   switch( info->type ) {
+    // !position
+    // !label
+    // ?width
     case OBJECT_GUI_BUTTON: {
-      g2Button *item = __coreGlui->AddButton( info->position.x, info->position.y, info->label.c_str(), Object::_GuiCallback );
-      this->gui.guiController = item;
-      break;
-    }//button
-    case OBJECT_GUI_EDIT: {
-      g2TextField *item = __coreGlui->AddTextField( info->position.x, info->position.y, info->label.c_str() );
+      g2Button *item = NULL;
+      if( panel ) {
+        item = panel->AddButton( info->position.x, info->position.y, info->label.c_str(), Object::_GuiCallback );
+      } else {
+        item = __coreGlui->AddButton( info->position.x, info->position.y, info->label.c_str(), Object::_GuiCallback );
+      }
       if( info->width ) {
         item->SetWidth( info->width );
       }
       this->gui.guiController = item;
       break;
-    }//checkbox
+    }//button
+
+    // !position
+    // !label
     case OBJECT_GUI_CHECKBOX: {
-      g2CheckBox *item = __coreGlui->AddCheckBox( info->position.x, info->position.y, info->label.c_str(), Object::_GuiCallback );
+      g2CheckBox *item = NULL;
+      if( panel ) {
+        item = panel->AddCheckBox( info->position.x, info->position.y, info->label.c_str(), Object::_GuiCallback );
+      } else {
+        item = __coreGlui->AddCheckBox( info->position.x, info->position.y, info->label.c_str(), Object::_GuiCallback );
+      }
       this->gui.guiController = item;
       break;
     }//checkbox
+
+    // !position
+    // !stringList
+    // ?width
+    case OBJECT_GUI_DROPDOWN: {
+      g2DropDown *item = NULL;
+      const char **list = NULL;
+      int num = 0;
+      if( info->stringList.size() ) {
+        list = new const char*[ info->stringList.size() ];
+        stdDequeString::const_iterator iter, iterEnd = info->stringList.end();
+        for( iter = info->stringList.begin(); iter != iterEnd; ++iter, ++num ) {
+          list[ num ] = &( *iter )[ 0 ];
+        }
+      }
+      if( panel ) {
+        item = panel->AddDropDown( info->position.x, info->position.y, list, info->stringList.size(), Object::_GuiCallback );
+      } else {
+        item = __coreGlui->AddDropDown( info->position.x, info->position.y, list, info->stringList.size(), Object::_GuiCallback );
+      }
+      DEF_DELETEARRAY( list );
+      if( info->width ) {
+        item->SetWidth( info->width );
+      }
+      this->gui.guiController = item;
+      break;
+    }//dropdown
+
+    // !position
+    // !label
+    // ?color
+    case OBJECT_GUI_LABEL: {
+      g2Label *item = NULL;
+      if( panel ) {
+        item = panel->AddLabel( info->position.x, info->position.y, info->label.c_str() );
+      } else {
+        item = __coreGlui->AddLabel( info->position.x, info->position.y, info->label.c_str() );
+      }
+      item->SetColor( info->color.x, info->color.y, info->color.z, info->color.w );
+      this->gui.guiController = item;
+      break;
+    }//label
+
+    // !position
+    // !label
+    // ?width
+    case OBJECT_GUI_PANEL: {
+      g2Panel *item = __coreGlui->AddPanel( info->panelAnchor, info->label.c_str() );
+      item->SetPanelPos( info->position.x, info->position.y );
+      if( info->width ) {
+        item->SetSize( info->width, info->height );
+      }
+      this->gui.guiController = item;
+      break;
+    }//panel
+
+    // !position
+    // !label
+    // ?width
+    case OBJECT_GUI_TEXTFIELD: {
+      g2TextField *item = NULL;
+      if( panel ) {
+        item = panel->AddTextField( info->position.x, info->position.y, info->label.c_str() );
+      } else {
+        item = __coreGlui->AddTextField( info->position.x, info->position.y, info->label.c_str() );
+      }
+      if( info->width ) {
+        item->SetWidth( info->width );
+      }
+      this->gui.guiController = item;
+      break;
+    }//label
+
+    /*
+    case OBJECT_GUI_DIALOG: {
+      g2Dialog *item = __coreGlui->AddDialog( info->dialogType, info->label.c_str() );
+      item->Show();
+      item->()
+      //this->gui.guiController = item;
+      break;
+    }//checkbox
+    */
     default: {
       __log.PrintInfo( Filelevel_ERROR, "Object::EnableGui => unknown type x%X", info->type );
       return NULL;
@@ -1289,6 +1403,7 @@ void Object::_GuiCallback( g2Controller *controller )
   __log.PrintInfo( Filelevel_DEBUG, "Object::_GuiCallback => controller[x%p] objects[%d]", controller, __objectByGui->size() );
   ObjectByGuiList::iterator iter, iterEnd = __objectByGui->end();
   for( iter = __objectByGui->begin(); iter != iterEnd; ++iter ) {
+    __log.PrintInfo( Filelevel_DEBUG, ". controller[x%X] function['%s']", ( *iter )->gui, ( *iter )->object.GetObject< Object >()->GetNameFull().c_str() );
     if( ( *iter )->gui == controller && ( *iter )->object.GetValid() && ( *iter )->object.GetObject< Object >()->gui.funCallback ) {
       ( ( Object* ) ( *iter )->object.GetObject() )->gui.funCallback( ( *iter )->object.GetObject< Object >() );
     }

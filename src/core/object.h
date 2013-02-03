@@ -12,12 +12,14 @@
 #include "objectpointer.h"
 #include "objectpointerinterface.h"
 #include "objecttriggermgr.h"
+#include "glui2/g2Theme.h"
 
 
 
 class Object;
 class g2Controller;
 typedef std::deque< g2Controller* > GuiList;
+typedef std::deque< std::string > stdDequeString;
 
 
 //object by collision
@@ -71,10 +73,15 @@ extern ObjectByGuiList *__objectByGui;
 
 
 enum ObjectGuiType {
-  OBJECT_GUI_UNKNOWN  = 0,
-  OBJECT_GUI_BUTTON   = 1,
-  OBJECT_GUI_EDIT     = 2,
-  OBJECT_GUI_CHECKBOX = 3
+  OBJECT_GUI_UNKNOWN    = 0,
+  OBJECT_GUI_BUTTON     = 1,
+  OBJECT_GUI_TEXTFIELD  = 2,
+  OBJECT_GUI_CHECKBOX   = 3,
+  OBJECT_GUI_DROPDOWN   = 4,
+  OBJECT_GUI_LABEL      = 5,
+  OBJECT_GUI_PANEL      = 6,
+
+  //OBJECT_GUI_DIALOG   = 5
 };
 
 
@@ -100,7 +107,13 @@ public:
     Pos< int >    position;
     std::string   label;
     int           width;
+    int           height;
     void          (*funCallback)( Object* object );
+    stdDequeString stringList;
+    //g2DialogType  dialogType;
+    Vec4          color;
+    std::string   panel;
+    g2Anchor      panelAnchor;
 
     GuiConstructor() {
       this->Reset();
@@ -111,6 +124,12 @@ public:
       this->label = "";
       this->funCallback = NULL;
       this->width = 0;
+      this->height = 0;
+      this->stringList.clear();
+      this->color.Set( 0.0f, 0.0f, 0.0f, 1.0f );
+      this->panel = "";
+      this->panelAnchor = g2Anchor_Center;
+      //this->dialogType = g2DialogType_Notification;
     }
   };
 

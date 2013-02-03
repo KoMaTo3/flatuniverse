@@ -57,6 +57,8 @@ public:
     // Controllers will move based on resizing and the weighting. Unless the anchor / alignment
     // is set in g2Anchor_none, all new widths or heights may be ignored except for the appropriate handler..
     __g2EXPORT void SetSize(int NewWidth, int NewHeight);
+
+    __g2EXPORT void SetPanelPos(int x, int y);
     
     /*** Factory Methods ***/
     

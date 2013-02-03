@@ -5,6 +5,7 @@
 #include "worldgridmgr.h"
 #include "lua.h"
 #include <vector>
+#include <map>
 
 class Lua;
 
@@ -54,6 +55,15 @@ public:
   typedef std::deque< GuiTrigger > GuiTriggerList;
   GuiTriggerList guiTriggers;
 
+  typedef std::map< g2Controller*, stdDequeString > dropDownListsType;
+  dropDownListsType dropDownLists;
+  /*
+  struct {
+    stdDequeString  tileSize;
+    stdDequeString  layers;
+  } dropDownLists;
+  */
+
 public:
   Game();
   ~Game();
@@ -76,12 +86,18 @@ public:
   static std::string  LUA_GetCamera   ();
   static void   LUA_ClearScene        ();
   static std::string LUA_GuiGetText   ( const std::string &guiName );
+  static void   LUA_GuiSetText        ( const std::string &guiName, const std::string &text );
   static void   LUA_ObjectEnableRenderable  ( const std::string &objectName, const std::string &texture, const Vec2 &size, const Vec4 &color );
   static void   LUA_ObjectDisableRenderable ( const std::string &objectName );
   static void   LUA_ObjectEnableCollision   ( const std::string &objectName, bool isStatic, const Vec3 &size, const Vec3 &velocity, const Vec3 &acceleration );
   static void   LUA_ObjectDisableCollision  ( const std::string &objectName );
   static void   LUA_ObjectEnableTrigger     ( const std::string &objectName, const Vec3 &size );
   static void   LUA_ObjectDisableTrigger    ( const std::string &objectName );
+  static bool   LUA_GuiGetChecked     ( const std::string &guiName );
+  static bool   LUA_GetCollisionStatic( const std::string &name );
+  static void   LUA_SetCollisionStatic( const std::string &name, bool isStatic );
+  static void   LUA_DebugRender       ( int flags );
+  static std::string LUA_GetObjectByPoint   ( int type, const Vec2 &point, const std::string &afterObject );
 
   void Update();
   void UpdateLuaTimers();
