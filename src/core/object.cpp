@@ -1394,6 +1394,33 @@ ObjectTrigger* Object::GetTrigger()
 
 /*
 =============
+  GetObjectByRenderableIndex
+=============
+*/
+Object* Object::GetObjectByRenderableIndex( CoreRenderableList *renderableList, GLushort index )
+{
+  if( this->renderable.type != RENDERABLE_TYPE_UNKNOWN && this->renderable.num == index && this->_renderableList == renderableList ) {
+    return this;
+  }
+  if( this->_childs && this->_childs->size() ) {
+    __log.PrintInfo( Filelevel_DEBUG, "Object::GetObjectByRenderableIndex => this[x%p] name['%s'] index[%d]", this, this->GetNameFull().c_str(), index );
+    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+    Object *obj;
+    for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
+      obj = ( *iter )->GetObjectByRenderableIndex( renderableList, index );
+      if( obj ) {
+        return obj;
+      }
+    }
+  }
+  return NULL;
+}//GetObjectByRenderableIndex
+
+
+
+
+/*
+=============
   _GuiCallback
   Callback-function from Glui2 to Object
 =============

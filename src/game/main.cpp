@@ -1525,6 +1525,17 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
   __log.PrintInfo( Filelevel_DEBUG, "test123: point[%3.3f; %3.3f]", point.x, point.y );
   switch( type ) {
     case 1: { //renderable
+      Object *object = game->core->GetRenderableInPoint( point, afterObject );
+      if( object ) {
+        return object->GetNameFull();
+      } else {
+        if( afterObject.length() ) {
+          object = game->core->GetRenderableInPoint( point, "" );
+          if( object ) {
+            return object->GetNameFull();
+          }
+        }
+      }
       break;
     }//renderable
     case 2: { //collision

@@ -157,8 +157,10 @@ public:
   Object* GetObjectByTrigger  ( ObjectTrigger *trigger );
   Object* GetObjectByCollision( Collision *collision );
   Object* GetObjectByGui      ( g2Controller *controller );
+  Object* GetObjectByRenderableIndex  ( GLushort index );
   Object* GetCollisionInPoint ( const Vec2& pos, const std::string &afterObject );
   Object* GetTriggerInPoint   ( const Vec2& pos, const std::string &afterObject );
+  Object* GetRenderableInPoint( const Vec2& pos, const std::string &afterObject );
   void    ClearScene          ();
   inline
   void    SetGuiVisibility    ( bool setShow ) { this->gui.show = setShow; }

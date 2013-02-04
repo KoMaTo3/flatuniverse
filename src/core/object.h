@@ -205,6 +205,7 @@ public:
   Renderable*         GetRenderable       ();
   inline bool         IsRenderable        () { return this->renderable.type != RENDERABLE_TYPE_UNKNOWN; }
   RenderableQuad*     EnableRenderableGUI ();
+  Object*             GetObjectByRenderableIndex( CoreRenderableList *renderableList, GLushort index );
 
   Collision*          EnableCollision     ();
   void                DisableCollision    ();

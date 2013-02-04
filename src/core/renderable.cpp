@@ -270,4 +270,17 @@ bool RenderableQuad::IsHasPoint( const Vec2& pos )
     resRect.y > pos.y ||
     resRect.w < pos.y
     );
-}
+}//IsHasPoint
+
+
+/*
+=============
+  CalculateRect
+=============
+*/
+void RenderableQuad::CalculateRect( Vec2 &leftTop, Vec2 &rightBottom )
+{
+  Vec2 resSize = Vec2( this->size.x * this->scale.x, this->size.y * this->scale.y ) * 0.5f;
+  leftTop.Set( this->position.x - resSize.x, this->position.y - resSize.y );
+  rightBottom.Set( this->position.x + resSize.x, this->position.y + resSize.y );
+}//CalculateRect

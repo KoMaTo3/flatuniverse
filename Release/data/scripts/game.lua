@@ -8,6 +8,16 @@ settings = {
     guiVisibility     = false,  -- отображение GUI
     objectMode3Moved  = false,  -- bool если происходим перемещение объекта мышкой
     editorMode        = 0,      -- текущий режим редактора
+    move              = {
+      objectStart = {
+        x = 0,
+        y = 0,
+      },
+      mouseStart = {
+        x = 0,
+        y = 0,
+      },
+    },
 }
 mousePos = {    -- экранная позиция курсора
     x = 0,
@@ -140,7 +150,18 @@ function onMouseMove( x, y )
     [3] = function()
       local object = GetSelectedObject()
       local oldX, oldY = ObjectGetPos( object )
-      ObjectSetPos( object, oldX + x - mousePos.x, oldY + y - mousePos.y )
+      if not settings.objectMode3Moved then
+        settings.move.objectStart.x = oldX
+        settings.move.objectStart.y = oldY
+        settings.move.mouseStart.x = mousePos.x
+        settings.move.mouseStart.y = mousePos.y
+      end
+      local newX = settings.move.objectStart.x + x - settings.move.mouseStart.x
+      local newY = settings.move.objectStart.y + y - settings.move.mouseStart.y
+      local tileSize = GetTileSize()
+      newX = math.floor( newX / tileSize ) * tileSize + 0.5 * tileSize
+      newY = math.floor( newY / tileSize ) * tileSize + 0.5 * tileSize
+      ObjectSetPos( object, newX, newY )
       settings.objectMode3Moved = true
     end,
   }

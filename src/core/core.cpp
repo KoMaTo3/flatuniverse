@@ -1481,6 +1481,18 @@ Object* Core::GetObjectByCollision( Collision *collision )
 
 /*
 =============
+  GetObjectByRenderableIndex
+=============
+*/
+Object* Core::GetObjectByRenderableIndex( GLushort index )
+{
+  return this->_rootObject->GetObjectByRenderableIndex( __coreRenderableList, index );
+}//GetObjectByRenderableIndex
+
+
+
+/*
+=============
   GetObjectByGui
 =============
 */
@@ -1560,6 +1572,47 @@ Object* Core::GetTriggerInPoint( const Vec2& pos, const std::string &afterObject
   }
   return NULL;
 }//GetTriggerInPoint
+
+
+
+
+/*
+=============
+  GetRenderableInPoint
+=============
+*/
+Object* Core::GetRenderableInPoint( const Vec2& pos, const std::string &afterObject )
+{
+  __log.PrintInfo( Filelevel_DEBUG, "Core::GetRenderableInPoint => pos[%3.3f; %3.3f]", pos.x, pos.y );
+  CoreRenderableListIndicies::reverse_iterator iter, iterEnd = __coreRenderableListIndicies->rend();
+  RenderableQuad *quad;
+  Vec2 leftTop, rightBottom;
+  bool returnFirst = ( afterObject.length() ? false : true );
+  Object *object;
+
+  for( iter = __coreRenderableListIndicies->rbegin(); iter != iterEnd; ++iter ) {
+    quad = &( *__coreRenderableList )[ *iter ];
+    __log.PrintInfo( Filelevel_DEBUG, ". index[%d] quad[x%p]", *iter, quad );
+    quad->CalculateRect( leftTop, rightBottom );
+    __log.PrintInfo( Filelevel_DEBUG, ". . rect[%3.3f; %3.3f]-[%3.3f; %3.3f]", leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
+    if( !(
+      rightBottom.x < pos.x ||
+      leftTop.x       > pos.x ||
+      rightBottom.y   < pos.y ||
+      leftTop.y       > pos.y
+      ) ) {
+      __log.PrintInfo( Filelevel_DEBUG, ". . . test passed, this in" );
+      object = this->GetObjectByRenderableIndex( *iter );
+      if( returnFirst ) {
+        return object;
+      } else if( object->GetNameFull() == afterObject ) {
+        returnFirst = true;
+      }
+    }
+  }//for iter
+
+  return NULL;
+}//GetRenderableInPoint
 
 
 

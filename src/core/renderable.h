@@ -102,6 +102,8 @@ public:
 
   void SaveToBuffer               ( MemoryWriter &writer );
   void LoadFromBuffer             ( MemoryReader &reader );
+
+  void CalculateRect              ( Vec2 &leftTop, Vec2 &rightBottom );
 };
 
 #pragma pack( pop )
