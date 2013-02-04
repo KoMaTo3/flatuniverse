@@ -353,6 +353,25 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     gui.panel = "editor/object.window_renderable";
     obj->EnableGui( &gui );
 
+    obj = game->core->CreateObject( "renderable.texture_label", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_LABEL;
+    gui.position.x = 5;
+    gui.position.y = 40;
+    gui.label = "Texture:";
+    gui.panel = "editor/object.window_renderable";
+    obj->EnableGui( &gui );
+
+    obj = game->core->CreateObject( "renderable.texture_name", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_TEXTFIELD;
+    gui.position.x = 60;
+    gui.position.y = 37;
+    gui.width = width - 70;
+    gui.label = "temp/brick0.png";
+    gui.panel = "editor/object.window_renderable";
+    obj->EnableGui( &gui );
+
     //panel: collision
     obj = game->core->CreateObject( "object.is_collision", guiRoot );
     gui.type = OBJECT_GUI_CHECKBOX;
@@ -411,13 +430,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     game->dropDownLists[ controller ] = dropDownList;
     //game->dropDownLists.insert( game->dropDownLists.vavalue_type( controller, dropDownList ) );
 
-    obj = game->core->CreateObject( "object.tile_add", guiRoot );
+    obj = game->core->CreateObject( "object.tile_apply", guiRoot );
     gui.Reset();
     gui.type = OBJECT_GUI_BUTTON;
     gui.position.x = 120;
     gui.position.y = 35;
-    gui.label = "Add";
-    gui.width = 30;
+    gui.label = "Apply";
     gui.panel = "editor/object.window_main";
     gui.funCallback = Game::GuiProc;
     obj->EnableGui( &gui );

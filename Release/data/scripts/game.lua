@@ -39,7 +39,7 @@ function Init()
   GuiAddTrigger( 'editor/object.is_collision', 'ToggleCollision' )
   GuiAddTrigger( 'editor/object.is_trigger', 'ToggleTrigger' )
   GuiAddTrigger( 'editor/object.is_static', 'ToggleStatic' )
-  GuiAddTrigger( 'editor/object.tile_add', 'TileAdd' )
+  GuiAddTrigger( 'editor/object.tile_apply', 'TileApply' )
 
   -- показываем GUI
   settings.guiVisibility = true
@@ -73,6 +73,12 @@ function onKey( id, isPressed )
       if id == 0x33 then    -- 3
         GuiSetText( 'editor/settings.layer', 'trigger' )
         DebugRender( 4 )
+      end
+      if id == 0x2E then    -- Del
+        local object = GuiGetText( 'editor/object.object_name' )
+        if #object > 0 then
+          ObjectRemove( object )
+        end
       end
   end
 end
@@ -203,7 +209,8 @@ function ToggleRenderable( guiName )
   local checked = GuiGetChecked( 'editor/object.is_renderable' )
   if checked then
     local tileSize = GetTileSize()
-    ObjectRenderable( true, name, 'data/temp/alik16.bmp', tileSize,tileSize, 1,1,1,1 )
+    local texture = GuiGetText( 'editor/renderable.texture_name' )
+    ObjectRenderable( true, name, 'data/'..texture, tileSize,tileSize, 1,1,1,1 )
   else
     ObjectRenderable( false, name )
   end
@@ -255,9 +262,9 @@ function GetTileSize()
   return GuiGetText( 'editor/world.tile_size' )
 end
 
--- Кнопка "Add"
+-- Кнопка "Apply"
 -- TODO: переделать
-function TileAdd( guiName )
+function TileApply( guiName )
   local name = GuiGetText( 'editor/object.object_name' )
   local cameraX, cameraY = GetCameraPos()
   ObjectCreate( name, cameraX, cameraY, 0 )

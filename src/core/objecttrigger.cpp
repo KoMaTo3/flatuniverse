@@ -74,7 +74,6 @@ void ObjectTrigger::CheckCollision( Collision *collision )
 
   bool intersect = collision->TestIntersect( this->rect.leftTop, this->rect.rightBottom );
   bool inTrigger = this->IsObjectAlreadyTriggered( collision );
-  __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::CheckCollision => intersect[%d] triggered[%d]", intersect, inTrigger );
 
   if( intersect && !inTrigger ) //חאר¸כ ג ענטדדונ
   {
