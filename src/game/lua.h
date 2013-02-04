@@ -45,6 +45,7 @@ typedef bool  LUAFUNCPROC_GetCollisionStatic( const std::string &name );
 typedef void  LUAFUNCPROC_SetCollisionStatic( const std::string &name, const bool isStatic );
 typedef void  LUAFUNCPROC_DebugRender       ( int flags );
 typedef std::string LUAFUNCPROC_GetObjectByPoint  ( int type, const Vec2 &point, const std::string &afterObject );
+typedef void  LUAFUNCPROC_SetGuiVisibility  ( int show );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -77,6 +78,7 @@ extern LUAFUNCPROC_GetCollisionStatic       *LUAFUNC_GetCollisionStatic;
 extern LUAFUNCPROC_SetCollisionStatic       *LUAFUNC_SetCollisionStatic;
 extern LUAFUNCPROC_DebugRender      *LUAFUNC_DebugRender;
 extern LUAFUNCPROC_GetObjectByPoint *LUAFUNC_GetObjectByPoint;
+extern LUAFUNCPROC_SetGuiVisibility *LUAFUNC_SetGuiVisibility;
 
 
 //callbacks
@@ -137,6 +139,7 @@ public:
   static int LUA_SetCollisionStatic ( lua_State *lua );
   static int LUA_DebugRender      ( lua_State *lua );
   static int LUA_GetObjectByPoint ( lua_State *lua );
+  static int LUA_SetGuiVisibility ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );

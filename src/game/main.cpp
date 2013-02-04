@@ -696,6 +696,7 @@ Game::Game()
   LUAFUNC_SetCollisionStatic= Game::LUA_SetCollisionStatic;
   LUAFUNC_DebugRender       = Game::LUA_DebugRender;
   LUAFUNC_GetObjectByPoint  = Game::LUA_GetObjectByPoint;
+  LUAFUNC_SetGuiVisibility  = Game::LUA_SetGuiVisibility;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -1480,3 +1481,14 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
   }//
   return "";
 }//LUA_GetObjectByPoint
+
+
+/*
+=============
+  LUA_SetGuiVisibility
+=============
+*/
+void Game::LUA_SetGuiVisibility( int show )
+{
+  game->core->SetGuiVisibility( show ? true : false );
+}//LUA_SetGuiVisibility

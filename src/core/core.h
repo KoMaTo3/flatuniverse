@@ -75,7 +75,12 @@ private:
   //std::list< Object* >        _objects;
   Object                      *_rootObject; //корневой объект сцены
   //Object                      *_rootGUIObject;  //корневой объект GUI
-  Glui2     *gui;
+
+  //gui
+  struct {
+    Glui2                   *context;
+    bool                    show;
+  } gui;
 
   struct shaders
   {
@@ -154,6 +159,8 @@ public:
   Object* GetCollisionInPoint ( const Vec2& pos, const std::string &afterObject );
   Object* GetTriggerInPoint   ( const Vec2& pos, const std::string &afterObject );
   void    ClearScene          ();
+  inline
+  void    SetGuiVisibility    ( bool setShow ) { this->gui.show = setShow; }
 
   bool    LoadExtension       ( const std::string &name, void** function );
   bool    IsExtensionExist    ( const std::string extensionName );

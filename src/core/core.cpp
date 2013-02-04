@@ -26,7 +26,7 @@ ConfigFile* __config = NULL;
 
 
 Core::Core()
-:_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL ), gui( NULL )
+:_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL )
 {
   this->_window.isActive  = true;
   this->_window.dc        = NULL;
@@ -45,6 +45,9 @@ Core::Core()
   this->debug.renderRenderable  = false;
   this->debug.renderCollision   = false;
   this->debug.renderTrigger     = false;
+
+  this->gui.context = NULL;
+  this->gui.show    = true;
 }//constructor
 
 
@@ -67,7 +70,7 @@ bool Core::Destroy()
   //DEF_DELETE( this->_rootGUIObject );
   DEF_DELETE( this->collisionManager );
   DEF_DELETE( this->triggerManager );
-  DEF_DELETE( this->gui );
+  DEF_DELETE( this->gui.context );
   DEF_DELETE( __coreRenderableList );
   DEF_DELETE( __coreRenderableListIndicies );
   DEF_DELETE( __coreRenderableListFreeIndicies );
@@ -237,10 +240,10 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   }
   //MessageBox(0,"ok",0,0);
 
-  this->gui = new Glui2( "g2Blue.cfg", NULL, NULL, Core::_GluiKeyboardFunc, NULL, Core::_GluiMouseFunc, Core::_GluiHoverFunc );
-  this->gui->WindowWidth  = this->_window.windowSize.width;
-  this->gui->WindowHeight = this->_window.windowSize.height;
-  __coreGlui = this->gui;
+  this->gui.context = new Glui2( "g2Blue.cfg", NULL, NULL, Core::_GluiKeyboardFunc, NULL, Core::_GluiMouseFunc, Core::_GluiHoverFunc );
+  this->gui.context->WindowWidth  = this->_window.windowSize.width;
+  this->gui.context->WindowHeight = this->_window.windowSize.height;
+  __coreGlui = this->gui.context;
 
   this->SetState( CORE_STATE_RUN );
   return true;
@@ -991,78 +994,79 @@ bool Core::Redraw()
     }
     //End Основной мир
 
-    //debug-render
-    if( this->GetCamera() && ( this->debug.renderRenderable|| this->debug.renderCollision || this->debug.renderTrigger ) ) {
+    //editor gui
+    if( this->gui.context && this->gui.show ) {
+      //debug-render
+      if( this->GetCamera() && ( this->debug.renderRenderable|| this->debug.renderCollision || this->debug.renderTrigger ) ) {
+        glUseProgram( 0 );
+        glDisable( GL_TEXTURE_2D );
+        glDisable( GL_DEPTH_TEST );
+        float alpha = Math::Sin16( ( float ) sTimer.GetTime() * 5.0f ) * 0.25f + 0.5f;
+
+        //renderable
+        if( this->debug.renderRenderable && __coreRenderableListIndicies->size() )
+        {
+          CoreRenderableListIndicies::iterator iterIndex, iterIndexEnd = __coreRenderableListIndicies->end();
+          glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+          glBegin( GL_QUADS );
+          Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f );
+          Vec2 size;
+          RenderableQuad *quad;
+          for( iterIndex = __coreRenderableListIndicies->begin(); iterIndex != iterIndexEnd; ++iterIndex ) {
+            quad = &( ( *__coreRenderableList )[ *iterIndex ] );
+            pos = quad->GetPosition() - camera;
+            size = quad->GetSize() * 0.5f;
+            size.x *= quad->GetScale().x;
+            size.y *= quad->GetScale().y;
+            glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
+            glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
+            glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
+            glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
+          }
+          glEnd();
+        }//renderable
+
+        //collision
+        if( this->debug.renderCollision && __collisionList->size() )
+        {
+          CollisionList::iterator iter, iterEnd = __collisionList->end();
+          glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+          glBegin( GL_QUADS );
+          Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
+          for( iter = __collisionList->begin(); iter != iterEnd; ++iter ) {
+            pos = ( *iter )->GetPosition() - camera;
+            size = ( *iter )->GetSize() * 0.5f;
+            glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
+            glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
+            glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
+            glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
+          }
+          glEnd();
+        }//collisions
+
+        //trigger
+        if( this->debug.renderTrigger && __triggerList->size() )
+        {
+          ObjectTriggerList::iterator iter, iterEnd = __triggerList->end();
+          glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+          glBegin( GL_QUADS );
+          Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
+          for( iter = __triggerList->begin(); iter != iterEnd; ++iter ) {
+            pos = ( *iter )->GetPosition() - camera;
+            size = ( *iter )->GetSize() * 0.5f;
+            glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
+            glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
+            glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
+            glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
+          }
+          glEnd();
+        }//trigger
+
+        glEnable( GL_DEPTH_TEST );
+      }
+
       glUseProgram( 0 );
-      glDisable( GL_TEXTURE_2D );
-      glDisable( GL_DEPTH_TEST );
-      float alpha = Math::Sin16( ( float ) sTimer.GetTime() * 5.0f ) * 0.25f + 0.5f;
-
-      //renderable
-      if( this->debug.renderRenderable && __coreRenderableListIndicies->size() )
-      {
-        CoreRenderableListIndicies::iterator iterIndex, iterIndexEnd = __coreRenderableListIndicies->end();
-        glColor4f( 0.0f, 1.0f, 0.0f, alpha );
-        glBegin( GL_QUADS );
-        Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f );
-        Vec2 size;
-        RenderableQuad *quad;
-        for( iterIndex = __coreRenderableListIndicies->begin(); iterIndex != iterIndexEnd; ++iterIndex ) {
-          quad = &( ( *__coreRenderableList )[ *iterIndex ] );
-          pos = quad->GetPosition() - camera;
-          size = quad->GetSize() * 0.5f;
-          size.x *= quad->GetScale().x;
-          size.y *= quad->GetScale().y;
-          glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
-          glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
-          glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
-          glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
-        }
-        glEnd();
-      }//renderable
-
-      //collision
-      if( this->debug.renderCollision && __collisionList->size() )
-      {
-        CollisionList::iterator iter, iterEnd = __collisionList->end();
-        glColor4f( 0.0f, 1.0f, 0.0f, alpha );
-        glBegin( GL_QUADS );
-        Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
-        for( iter = __collisionList->begin(); iter != iterEnd; ++iter ) {
-          pos = ( *iter )->GetPosition() - camera;
-          size = ( *iter )->GetSize() * 0.5f;
-          glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
-          glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
-          glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
-          glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
-        }
-        glEnd();
-      }//collisions
-
-      //trigger
-      if( this->debug.renderTrigger && __triggerList->size() )
-      {
-        ObjectTriggerList::iterator iter, iterEnd = __triggerList->end();
-        glColor4f( 0.0f, 1.0f, 0.0f, alpha );
-        glBegin( GL_QUADS );
-        Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
-        for( iter = __triggerList->begin(); iter != iterEnd; ++iter ) {
-          pos = ( *iter )->GetPosition() - camera;
-          size = ( *iter )->GetSize() * 0.5f;
-          glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
-          glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
-          glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
-          glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
-        }
-        glEnd();
-      }//trigger
-
-      glEnable( GL_DEPTH_TEST );
-    }
-
-    if( this->gui ) {
-      glUseProgram( 0 );
-      this->gui->Render();
+      this->gui.context->Render();
     }
 
     //GUI
@@ -1638,6 +1642,17 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
         return TRUE;
     break;
 
+    case WM_SYSKEYDOWN:
+    case WM_SYSKEYUP:
+    case WM_SYSCHAR: {
+      bool altPressed = ( ( lParam&( 1<<29 ) ) == ( 1<<29) );
+      if( wParam == VK_F4 && altPressed ) { //Alt+F4
+        core->SetState( CORE_STATE_EXIT );
+      }
+      return 0;
+      break;
+    }
+
     case WM_PAINT:
       if( core )
       {
@@ -1667,8 +1682,10 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 
     case WM_KEYDOWN:
     {
-      __log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d => %d mods[%d]", wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
-      Glui2::__KeyboardFunc( Keyboard::KeyCodeToGlut( wParam ), core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      //__log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d => %d mods[%d]", wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
+      if( core->gui.show ) {
+        Glui2::__KeyboardFunc( Keyboard::KeyCodeToGlut( wParam ), core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      }
       core->keyboard.DoPress( wParam );
       return 0;
     }
@@ -1681,54 +1698,68 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 
     case WM_MOUSEMOVE:
     {
+      if( core->gui.show ) {
+        Glui2::__HoverFunc( core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      }
       core->mouse.MoveCursor( Vec2( float( LOWORD( lParam ) ), float( HIWORD( lParam ) ) ) );
-      Glui2::__HoverFunc( core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       return 0;
     }
 
     case WM_LBUTTONDOWN:
-      Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
-      if( !Glui2::__MouseInteracted ) {
+      if( core->gui.show ) {
+        Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      }
+      if( !core->gui.show || !Glui2::__MouseInteracted ) {
         core->mouse.DoPress( VK_LBUTTON );
       }
       return 0;
     break;
 
     case WM_LBUTTONUP:
-      Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
-      if( !Glui2::__MouseInteracted ) {
+      if( core->gui.show ) {
+        Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      }
+      if( !core->gui.show || !Glui2::__MouseInteracted ) {
         core->mouse.DoRelease( VK_LBUTTON );
       }
       return 0;
     break;
 
     case WM_RBUTTONDOWN:
-      Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
-      if( !Glui2::__MouseInteracted ) {
+      if( core->gui.show ) {
+        Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      }
+      if( !core->gui.show || !Glui2::__MouseInteracted ) {
         core->mouse.DoPress( VK_RBUTTON );
       }
       return 0;
     break;
 
     case WM_RBUTTONUP:
-      Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
-      if( !Glui2::__MouseInteracted ) {
+      if( core->gui.show ) {
+        Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      }
+      if( !core->gui.show || !Glui2::__MouseInteracted ) {
         core->mouse.DoRelease( VK_RBUTTON );
       }
       return 0;
     break;
 
     case WM_MBUTTONDOWN:
-      Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
-      if( !Glui2::__MouseInteracted ) {
+      if( core->gui.show ) {
+        Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      }
+      if( !core->gui.show || !Glui2::__MouseInteracted ) {
         core->mouse.DoPress( VK_MBUTTON );
       }
       return 0;
     break;
 
     case WM_MBUTTONUP:
-      Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
-      if( !Glui2::__MouseInteracted ) {
+      if( core->gui.show ) {
+        Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
+      }
+      if( !core->gui.show || !Glui2::__MouseInteracted ) {
         core->mouse.DoRelease( VK_MBUTTON );
       }
       return 0;

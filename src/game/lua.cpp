@@ -39,6 +39,7 @@ LUAFUNCPROC_GetCollisionStatic*LUAFUNC_GetCollisionStatic   = NULL;
 LUAFUNCPROC_SetCollisionStatic*LUAFUNC_SetCollisionStatic   = NULL;
 LUAFUNCPROC_DebugRender       *LUAFUNC_DebugRender          = NULL;
 LUAFUNCPROC_GetObjectByPoint  *LUAFUNC_GetObjectByPoint     = NULL;
+LUAFUNCPROC_SetGuiVisibility  *LUAFUNC_SetGuiVisibility     = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -98,6 +99,7 @@ bool Lua::Init()
   lua_register( this->luaState, "ObjectAddTrigger", Lua::LUA_ObjectAddTrigger );
   lua_register( this->luaState, "GuiAddTrigger",    Lua::LUA_GuiAddTrigger );
   lua_register( this->luaState, "SetCamera",        Lua::LUA_SetCamera );
+  lua_register( this->luaState, "SetGuiVisibility", Lua::LUA_SetGuiVisibility );
   lua_register( this->luaState, "GetCamera",        Lua::LUA_GetCamera );
   lua_register( this->luaState, "ClearScene",       Lua::LUA_ClearScene );
   lua_register( this->luaState, "GetRandomSeed",    Lua::LUA_GetRandomSeed );
@@ -889,6 +891,26 @@ int Lua::LUA_SetCamera( lua_State *lua )
   LUAFUNC_SetCamera( name );
   return 0;
 }//LUA_SetCamera
+
+
+
+/*
+=============
+  LUA_SetGuiVisibility
+=============
+*/
+int Lua::LUA_SetGuiVisibility( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetGuiVisibility => not enough parameters" );
+    return 0;
+  }
+  int show = lua_toboolean( lua, 1 );
+  LUAFUNC_SetGuiVisibility( show );
+  return 0;
+}//LUA_SetGuiVisibility
 
 
 

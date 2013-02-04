@@ -1,6 +1,9 @@
 -- 0: none
 -- 1: drag object
 editorMode = 0
+settings = {
+    guiVisibility = false
+}
 
 function Init()
   math.randomseed( GetRandomSeed() )
@@ -12,6 +15,8 @@ function Init()
   GuiAddTrigger( 'editor/object.is_trigger', 'ToggleTrigger' )
   GuiAddTrigger( 'editor/object.is_static', 'ToggleStatic' )
   GuiAddTrigger( 'editor/object.tile_add', 'TileAdd' )
+  settings.guiVisibility = false
+  SetGuiVisibility( settings.guiVisibility )
 end
 Init()
 
@@ -19,6 +24,10 @@ function onKey( id, isPressed )
   if isPressed then
       if id == 0x1B then
         GameExit()
+      end
+      if id == 0x5A then
+        settings.guiVisibility = not settings.guiVisibility
+        SetGuiVisibility( settings.guiVisibility )
       end
   end
 end

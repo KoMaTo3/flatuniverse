@@ -98,6 +98,7 @@ public:
   static void   LUA_SetCollisionStatic( const std::string &name, bool isStatic );
   static void   LUA_DebugRender       ( int flags );
   static std::string LUA_GetObjectByPoint   ( int type, const Vec2 &point, const std::string &afterObject );
+  static void   LUA_SetGuiVisibility  ( int show );
 
   void Update();
   void UpdateLuaTimers();
