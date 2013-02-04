@@ -85,6 +85,13 @@ void Mouse::MoveCursor( const Vec2& newPosition )
     else
       DEF_DELETE( this->cursor.sprite );
   }
+
+  if( this->moveListeners.size() )
+  {
+    MoveListenerList::iterator iter, iterEnd = this->moveListeners.end();
+    for( iter = this->moveListeners.begin(); iter != iterEnd; ++iter )
+      ( *iter )( this->cursor.position );
+  }
 }//MoveCursor
 
 
@@ -98,3 +105,36 @@ const Vec2& Mouse::GetCursorPosition()
 {
   return this->cursor.position;
 }//GetCursorPosition
+
+
+
+/*
+=============
+  AddMoveListener
+=============
+*/
+void Mouse::AddMoveListener( MoveListener *listenerProc )
+{
+  if( listenerProc )
+    this->moveListeners.push_back( listenerProc );
+  else
+    __log.PrintInfo( Filelevel_WARNING, "Mouse::AddMoveListener => function is NULL" );
+}//AddMoveListener
+
+
+
+/*
+=============
+  RemoveMoveListener
+=============
+*/
+void Mouse::RemoveMoveListener( MoveListener *listenerProc )
+{
+  MoveListenerList::iterator iter, iterEnd = this->moveListeners.end();
+  for( iter = this->moveListeners.begin(); iter != iterEnd; ++iter )
+    if( *iter == listenerProc )
+    {
+      this->moveListeners.erase( iter );
+      return;
+    }
+}//RemoveMoveListener

@@ -6,6 +6,10 @@
 
 class Mouse: public Keyboard
 {
+public:
+  typedef void MoveListener( const Vec2 &pos );
+  typedef std::vector< MoveListener* > MoveListenerList;
+
 private:
   struct
   {
@@ -15,6 +19,7 @@ private:
     ObjectPointer *sprite;
     Vec2    pixelsToTexels;
   } cursor;
+  MoveListenerList  moveListeners;
 
   Size  windowSize;
 
@@ -26,4 +31,7 @@ public:
   void  SetCursor               ( const std::string& imageFileName, Object* object );
   void  MoveCursor              ( const Vec2& newPosition );
   const Vec2& GetCursorPosition ();
+
+  void  AddMoveListener         ( MoveListener *listenerProc );
+  void  RemoveMoveListener      ( MoveListener *listenerProc );
 };

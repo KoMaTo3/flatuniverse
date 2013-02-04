@@ -26,6 +26,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->core->Init( 0, 0, false, "FlatGL" );
   game->core->keyboard.AddListener( Game::KeyboardProc );
   game->core->mouse.AddListener( Game::MouseKeyProc );
+  game->core->mouse.AddMoveListener( Game::MouseMoveProc );
   Short gridsAroundObject = ( Short )  __config->GetNumber( "grids_preload_range", 0.0f );
   if( !gridsAroundObject )
     gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
@@ -259,10 +260,20 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         left = windowWidth - width,
         y = 0
         ;
+    Object::GuiConstructor gui;
+
+    obj = game->core->CreateObject( "debug", guiRoot );
+    gui.Reset();
+    gui.type = OBJECT_GUI_TEXTFIELD;
+    gui.position.x = 0;
+    gui.position.y = 0;
+    gui.width = 200;
+    gui.label = "";
+    obj->EnableGui( &gui );
 
     //panels
     obj = game->core->CreateObject( "object.window_main", guiRoot );
-    Object::GuiConstructor gui;
+    gui.Reset();
     gui.type = OBJECT_GUI_PANEL;
     gui.panelAnchor = g2Anchor_None;
     gui.label = "Settings";
@@ -674,6 +685,7 @@ Game::Game()
   LUAFUNC_CreateObject      = Game::LUA_CreateObject;
   LUAFUNC_ListenKeyboard    = Game::LUA_ListenKeyboard;
   LUAFUNC_ListenMouseKey    = Game::LUA_ListenMouseKey;
+  LUAFUNC_ListenMouseMove   = Game::LUA_ListenMouseMove;
   LUAFUNC_GameExit          = Game::LUA_GameExit;
   LUAFUNC_GetMousePos       = Game::LUA_GetMousePos;
   LUAFUNC_GetCameraPos      = Game::LUA_GetCameraPos;
@@ -697,6 +709,8 @@ Game::Game()
   LUAFUNC_DebugRender       = Game::LUA_DebugRender;
   LUAFUNC_GetObjectByPoint  = Game::LUA_GetObjectByPoint;
   LUAFUNC_SetGuiVisibility  = Game::LUA_SetGuiVisibility;
+  LUAFUNC_SelectObject      = Game::LUA_SelectObject;
+  LUAFUNC_GetSelectedObject = Game::LUA_GetSelectedObject;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -1034,6 +1048,23 @@ void Game::LUA_ListenMouseKey( const std::string &funcName )
 }//LUA_ListenMouseKey
 
 
+/*
+=============
+  LUA_ListenMouseMove
+=============
+*/
+void Game::LUA_ListenMouseMove( const std::string &funcName )
+{
+  luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseMoveListeners.end();
+  for( iter = game->luaMouseMoveListeners.begin(); iter != iterEnd; ++iter ) {
+    if( *iter == funcName ) {
+      return;
+    }
+  }
+  game->luaMouseMoveListeners.push_back( funcName );
+}//LUA_ListenMouseMove
+
+
 
 /*
 =============
@@ -1093,6 +1124,21 @@ void Game::MouseKeyProc( Dword keyId, bool isPressed )
   for( iter = game->luaMouseKeyListeners.begin(); iter != iterEnd; ++iter )
     LUACALLBACK_ListenMouseKey( game->lua, *iter, keyId, isPressed );
 }//MouseKeyProc
+
+
+/*
+=============
+  MouseMoveProc
+=============
+*/
+void Game::MouseMoveProc( const Vec2 &pos )
+{
+  if( !game->luaMouseMoveListeners.size() )
+    return;
+  luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseMoveListeners.end();
+  for( iter = game->luaMouseMoveListeners.begin(); iter != iterEnd; ++iter )
+    LUACALLBACK_ListenMouseMove( game->lua, *iter, pos );
+}//MouseMoveProc
 
 
 /*
@@ -1400,6 +1446,23 @@ void Game::LUA_GuiSetText( const std::string &guiName, const std::string &text )
       ( ( g2TextField* ) controller )->SetText( text.c_str() );
       return;
     }
+    case OBJECT_GUI_DROPDOWN: {
+      dropDownListsType::iterator iter = game->dropDownLists.find( controller );
+      std::string str = "";
+      if( iter != game->dropDownLists.end() ) {
+        stdDequeString::iterator iterStr, iterStrEnd = iter->second.end();
+        int index = 0;
+        for( iterStr = iter->second.begin(); iterStr != iterStrEnd; ++iterStr, ++index ) {
+          if( *iterStr == text ) {
+            ( ( g2DropDown* ) controller )->SetSelectionIndex( index );
+            break;
+          }
+        }
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_GuiSetText => controller not found" );
+      }
+      return;
+    }
   }//switch
 
   __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiSetText => object '%s' don't have text", guiName.c_str() );
@@ -1468,6 +1531,13 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
       Object *object = game->core->GetCollisionInPoint( point, afterObject );
       if( object ) {
         return object->GetNameFull();
+      } else {
+        if( afterObject.length() ) {
+          object = game->core->GetCollisionInPoint( point, "" );
+          if( object ) {
+            return object->GetNameFull();
+          }
+        }
       }
       break;
     }//collision
@@ -1475,6 +1545,13 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
       Object *object = game->core->GetTriggerInPoint( point, afterObject );
       if( object ) {
         return object->GetNameFull();
+      } else {
+        if( afterObject.length() ) {
+          object = game->core->GetTriggerInPoint( point, "" );
+          if( object ) {
+            return object->GetNameFull();
+          }
+        }
       }
       break;
     }//trigger
@@ -1492,3 +1569,34 @@ void Game::LUA_SetGuiVisibility( int show )
 {
   game->core->SetGuiVisibility( show ? true : false );
 }//LUA_SetGuiVisibility
+
+
+/*
+=============
+  LUA_SelectObject
+=============
+*/
+void Game::LUA_SelectObject( const std::string &name )
+{
+  if( !name.length() ) {
+    game->core->debug.selectedObject = NULL;
+  } else {
+    Object *object = game->core->GetObject( name );
+    if( !object ) {
+      __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SelectObject => object '%s' not found", name.c_str() );
+    } else {
+      game->core->debug.selectedObject = object;
+    }
+  }
+}//LUA_SelectObject
+
+
+/*
+=============
+  LUA_GetSelectedObject
+=============
+*/
+std::string Game::LUA_GetSelectedObject()
+{
+  return ( game->core->debug.selectedObject ? game->core->debug.selectedObject->GetNameFull() : "" );
+}//LUA_GetSelectedObject

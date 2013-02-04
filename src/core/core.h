@@ -118,6 +118,7 @@ public:
     bool  renderRenderable,
           renderCollision,
           renderTrigger;
+    Object *selectedObject;
   } debug;
 
 private:

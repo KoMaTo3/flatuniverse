@@ -31,11 +31,12 @@ public:
   };
   std::vector< GameLuaTimer > luaTimers;
 
-  //lua-слушатели клавиатуры
+  //lua-слушатели клавиатуры и мыши
   typedef std::deque< std::string > luaKeyboardListenersList;
   luaKeyboardListenersList
       luaKeyboardListeners,
-      luaMouseKeyListeners;
+      luaMouseKeyListeners,
+      luaMouseMoveListeners;
 
   //триггеры
   struct GameObjectTrigger
@@ -74,6 +75,7 @@ public:
   static void   LUA_CreateObject      ( const std::string &name, const Vec3 &pos );
   static void   LUA_ListenKeyboard    ( const std::string &funcName );
   static void   LUA_ListenMouseKey    ( const std::string &funcName );
+  static void   LUA_ListenMouseMove   ( const std::string &funcName );
   static void   LUA_GameExit          ();
   static Vec2   LUA_GetMousePos       ();
   static Vec2   LUA_GetCameraPos      ();
@@ -98,13 +100,16 @@ public:
   static void   LUA_SetCollisionStatic( const std::string &name, bool isStatic );
   static void   LUA_DebugRender       ( int flags );
   static std::string LUA_GetObjectByPoint   ( int type, const Vec2 &point, const std::string &afterObject );
-  static void   LUA_SetGuiVisibility  ( int show );
+  static void   LUA_SetGuiVisibility        ( int show );
+  static void   LUA_SelectObject            ( const std::string &name );
+  static std::string LUA_GetSelectedObject  ();
 
   void Update();
   void UpdateLuaTimers();
 
   static void   KeyboardProc          ( Dword keyId, bool isPressed );
   static void   MouseKeyProc          ( Dword keyId, bool isPressed );
+  static void   MouseMoveProc         ( const Vec2 &pos );
   static void   OnRemoveTrigger       ( ObjectTrigger *trigger );
   static void   GuiProc               ( Object *obj );
 

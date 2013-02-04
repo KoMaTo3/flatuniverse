@@ -45,6 +45,7 @@ Core::Core()
   this->debug.renderRenderable  = false;
   this->debug.renderCollision   = false;
   this->debug.renderTrigger     = false;
+  this->debug.selectedObject    = NULL;
 
   this->gui.context = NULL;
   this->gui.show    = true;
@@ -1007,7 +1008,7 @@ bool Core::Redraw()
         if( this->debug.renderRenderable && __coreRenderableListIndicies->size() )
         {
           CoreRenderableListIndicies::iterator iterIndex, iterIndexEnd = __coreRenderableListIndicies->end();
-          glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+          glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
           glBegin( GL_QUADS );
           Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f );
           Vec2 size;
@@ -1018,24 +1019,34 @@ bool Core::Redraw()
             size = quad->GetSize() * 0.5f;
             size.x *= quad->GetScale().x;
             size.y *= quad->GetScale().y;
+            if( this->debug.selectedObject && this->debug.selectedObject->GetRenderable() == quad ) {
+              glColor4f( 1.0f, 0.0f, 0.0f, alpha );
+            } else {
+              glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+            }
             glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
             glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
             glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
             glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
           }
           glEnd();
+          glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         }//renderable
 
         //collision
         if( this->debug.renderCollision && __collisionList->size() )
         {
           CollisionList::iterator iter, iterEnd = __collisionList->end();
-          glColor4f( 0.0f, 1.0f, 0.0f, alpha );
           glBegin( GL_QUADS );
           Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
           for( iter = __collisionList->begin(); iter != iterEnd; ++iter ) {
             pos = ( *iter )->GetPosition() - camera;
             size = ( *iter )->GetSize() * 0.5f;
+            if( this->debug.selectedObject && this->debug.selectedObject->GetCollision() == *iter ) {
+              glColor4f( 1.0f, 0.0f, 0.0f, alpha );
+            } else {
+              glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+            }
             glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
             glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
             glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
@@ -1048,12 +1059,16 @@ bool Core::Redraw()
         if( this->debug.renderTrigger && __triggerList->size() )
         {
           ObjectTriggerList::iterator iter, iterEnd = __triggerList->end();
-          glColor4f( 0.0f, 1.0f, 0.0f, alpha );
           glBegin( GL_QUADS );
           Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
           for( iter = __triggerList->begin(); iter != iterEnd; ++iter ) {
             pos = ( *iter )->GetPosition() - camera;
             size = ( *iter )->GetSize() * 0.5f;
+            if( this->debug.selectedObject && this->debug.selectedObject->GetTrigger() == *iter ) {
+              glColor4f( 1.0f, 0.0f, 0.0f, alpha );
+            } else {
+              glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+            }
             glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
             glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
             glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
@@ -1682,7 +1697,7 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 
     case WM_KEYDOWN:
     {
-      //__log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d => %d mods[%d]", wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
+      __log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d => %d mods[%d]", wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
       if( core->gui.show ) {
         Glui2::__KeyboardFunc( Keyboard::KeyCodeToGlut( wParam ), core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }

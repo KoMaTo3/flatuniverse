@@ -16,6 +16,7 @@ LUAFUNCPROC_LogWrite          *LUAFUNC_LogWrite             = NULL;
 LUAFUNCPROC_CreateObject      *LUAFUNC_CreateObject         = NULL;
 LUAFUNCPROC_ListenKeyboard    *LUAFUNC_ListenKeyboard       = NULL;
 LUAFUNCPROC_ListenMouseKey    *LUAFUNC_ListenMouseKey       = NULL;
+LUAFUNCPROC_ListenMouseMove   *LUAFUNC_ListenMouseMove      = NULL;
 LUAFUNCPROC_GameExit          *LUAFUNC_GameExit             = NULL;
 LUAFUNCPROC_GetMousePos       *LUAFUNC_GetMousePos          = NULL;
 LUAFUNCPROC_GetCameraPos      *LUAFUNC_GetCameraPos         = NULL;
@@ -40,6 +41,8 @@ LUAFUNCPROC_SetCollisionStatic*LUAFUNC_SetCollisionStatic   = NULL;
 LUAFUNCPROC_DebugRender       *LUAFUNC_DebugRender          = NULL;
 LUAFUNCPROC_GetObjectByPoint  *LUAFUNC_GetObjectByPoint     = NULL;
 LUAFUNCPROC_SetGuiVisibility  *LUAFUNC_SetGuiVisibility     = NULL;
+LUAFUNCPROC_SelectObject      *LUAFUNC_SelectObject         = NULL;
+LUAFUNCPROC_GetSelectedObject *LUAFUNC_GetSelectedObject    = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -92,6 +95,7 @@ bool Lua::Init()
   lua_register( this->luaState, "ObjectCreate",     Lua::LUA_CreateObject );
   lua_register( this->luaState, "ListenKeyboard",   Lua::LUA_ListenKeyboard );
   lua_register( this->luaState, "ListenMouseKey",   Lua::LUA_ListenMouseKey );
+  lua_register( this->luaState, "ListenMouseMove",  Lua::LUA_ListenMouseMove );
   lua_register( this->luaState, "GameExit",         Lua::LUA_GameExit );
   lua_register( this->luaState, "GetMousePos",      Lua::LUA_GetMousePos );
   lua_register( this->luaState, "GetCameraPos",     Lua::LUA_GetCameraPos );
@@ -113,6 +117,8 @@ bool Lua::Init()
   lua_register( this->luaState, "CollisionSetStatic", Lua::LUA_SetCollisionStatic );
   lua_register( this->luaState, "DebugRender",      Lua::LUA_DebugRender );
   lua_register( this->luaState, "GetObjectByPoint", Lua::LUA_GetObjectByPoint );
+  lua_register( this->luaState, "SelectObject",     Lua::LUA_SelectObject );
+  lua_register( this->luaState, "GetSelectedObject",Lua::LUA_GetSelectedObject );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -412,6 +418,18 @@ void LUACALLBACK_ListenMouseKey( Lua *lua, const std::string &funcName, Dword ke
 
 /*
 =============
+  LUACALLBACK_ListenMouseMove
+=============
+*/
+void LUACALLBACK_ListenMouseMove( Lua *lua, const std::string &funcName, const Vec2 &pos )
+{
+  Lua::LUACALLBACK_ListenMouseMove( lua, funcName, pos );
+}//LUACALLBACK_ListenMouseMove
+
+
+
+/*
+=============
   LUACALLBACK_ListenKeyboard
 =============
 */
@@ -459,6 +477,32 @@ void Lua::LUACALLBACK_ListenMouseKey( Lua *lua, const std::string &funcName, Dwo
     return;
   }
 }//LUACALLBACK_ListenMouseKey
+
+
+
+/*
+=============
+  LUACALLBACK_ListenMouseMove
+=============
+*/
+void Lua::LUACALLBACK_ListenMouseMove( Lua *lua, const std::string &funcName, const Vec2 &pos )
+{
+  LuaStateCheck state( lua->luaState );
+  lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
+  if( !lua_isfunction( lua->luaState, -1 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenMouseMove => '%s' is not a function", funcName.c_str() );
+    lua_pop( lua->luaState, 1 );  //stack:
+  }
+
+  lua_pushnumber( lua->luaState, pos.x ); //stack: funcName x
+  lua_pushnumber( lua->luaState, pos.y ); //stack: funcName x y
+  if( lua_pcall( lua->luaState, 2, 0, 0 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenMouseMove => error by calling function '%s'", funcName.c_str() );
+    return;
+  }
+}//LUACALLBACK_ListenMouseMove
 
 
 
@@ -684,6 +728,26 @@ int Lua::LUA_ListenMouseKey( lua_State *lua )
   LUAFUNC_ListenMouseKey( funcName );
   return 0;
 }//LUA_ListenMouseKey
+
+
+
+/*
+=============
+  LUA_ListenMouseMove
+=============
+*/
+int Lua::LUA_ListenMouseMove( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenMouseMove => not enough parameters" );
+    return 0;
+  }
+  std::string funcName = lua_tostring( lua, 1 );
+  LUAFUNC_ListenMouseMove( funcName );
+  return 0;
+}//LUA_ListenMouseMove
 
 
 
@@ -1067,3 +1131,37 @@ int Lua::LUA_GetObjectByPoint( lua_State *lua )
 
   return 1;
 }//LUA_GetObjectByPoint
+
+
+
+/*
+=============
+  LUA_SelectObject
+=============
+*/
+int Lua::LUA_SelectObject( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SelectObject => not enough parameters" );
+    return 0;
+  }
+  std::string name = lua_tostring( lua, 1 );
+  LUAFUNC_SelectObject( name );
+  return 0;
+}//LUA_SelectObject
+
+
+
+/*
+=============
+  LUA_GetSelectedObject
+=============
+*/
+int Lua::LUA_GetSelectedObject( lua_State *lua )
+{
+  std::string name = LUAFUNC_GetSelectedObject();
+  lua_pushstring( lua, name.c_str() );  //stack: name
+  return 1;
+}//LUA_GetSelectedObject

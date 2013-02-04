@@ -22,6 +22,7 @@ typedef void  LUAFUNCPROC_LogWrite          ( const std::string &text );
 typedef void  LUAFUNCPROC_CreateObject      ( const std::string &name, const Vec3 &pos );
 typedef void  LUAFUNCPROC_ListenKeyboard    ( const std::string &funcName );
 typedef void  LUAFUNCPROC_ListenMouseKey    ( const std::string &funcName );
+typedef void  LUAFUNCPROC_ListenMouseMove   ( const std::string &funcName );
 typedef void  LUAFUNCPROC_GameExit          ();
 typedef Vec2  LUAFUNCPROC_GetMousePos       ();
 typedef Vec2  LUAFUNCPROC_GetCameraPos      ();
@@ -45,7 +46,9 @@ typedef bool  LUAFUNCPROC_GetCollisionStatic( const std::string &name );
 typedef void  LUAFUNCPROC_SetCollisionStatic( const std::string &name, const bool isStatic );
 typedef void  LUAFUNCPROC_DebugRender       ( int flags );
 typedef std::string LUAFUNCPROC_GetObjectByPoint  ( int type, const Vec2 &point, const std::string &afterObject );
-typedef void  LUAFUNCPROC_SetGuiVisibility  ( int show );
+typedef void  LUAFUNCPROC_SetGuiVisibility        ( int show );
+typedef void  LUAFUNCPROC_SelectObject            ( const std::string &name );
+typedef std::string LUAFUNCPROC_GetSelectedObject ();
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -55,6 +58,7 @@ extern LUAFUNCPROC_LogWrite         *LUAFUNC_LogWrite;
 extern LUAFUNCPROC_CreateObject     *LUAFUNC_CreateObject;
 extern LUAFUNCPROC_ListenKeyboard   *LUAFUNC_ListenKeyboard;
 extern LUAFUNCPROC_ListenMouseKey   *LUAFUNC_ListenMouseKey;
+extern LUAFUNCPROC_ListenMouseMove  *LUAFUNC_ListenMouseMove;
 extern LUAFUNCPROC_GameExit         *LUAFUNC_GameExit;
 extern LUAFUNCPROC_GetMousePos      *LUAFUNC_GetMousePos;
 extern LUAFUNCPROC_GetCameraPos     *LUAFUNC_GetCameraPos;
@@ -79,12 +83,15 @@ extern LUAFUNCPROC_SetCollisionStatic       *LUAFUNC_SetCollisionStatic;
 extern LUAFUNCPROC_DebugRender      *LUAFUNC_DebugRender;
 extern LUAFUNCPROC_GetObjectByPoint *LUAFUNC_GetObjectByPoint;
 extern LUAFUNCPROC_SetGuiVisibility *LUAFUNC_SetGuiVisibility;
+extern LUAFUNCPROC_SelectObject     *LUAFUNC_SelectObject;
+extern LUAFUNCPROC_GetSelectedObject        *LUAFUNC_GetSelectedObject;
 
 
 //callbacks
 void LUACALLBACK_Timer            ( Lua *lua, Dword id, const std::string &funcName );
 void LUACALLBACK_ListenKeyboard   ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
 void LUACALLBACK_ListenMouseKey   ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
+void LUACALLBACK_ListenMouseMove  ( Lua *lua, const std::string &funcName, const Vec2 &pos );
 void LUACALLBACK_ObjectTrigger    ( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger );
 void LUACALLBACK_GuiTrigger       ( Lua *lua, const std::string &funcName, const std::string &objectName );
 
@@ -119,6 +126,7 @@ public:
   static int LUA_CreateObject     ( lua_State *lua );
   static int LUA_ListenKeyboard   ( lua_State *lua );
   static int LUA_ListenMouseKey   ( lua_State *lua );
+  static int LUA_ListenMouseMove  ( lua_State *lua );
   static int LUA_GameExit         ( lua_State *lua );
   static int LUA_GetMousePos      ( lua_State *lua );
   static int LUA_GetCameraPos     ( lua_State *lua );
@@ -140,11 +148,14 @@ public:
   static int LUA_DebugRender      ( lua_State *lua );
   static int LUA_GetObjectByPoint ( lua_State *lua );
   static int LUA_SetGuiVisibility ( lua_State *lua );
+  static int LUA_SelectObject     ( lua_State *lua );
+  static int LUA_GetSelectedObject( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );
   static void LUACALLBACK_ListenKeyboard  ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
   static void LUACALLBACK_ListenMouseKey  ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
+  static void LUACALLBACK_ListenMouseMove ( Lua *lua, const std::string &funcName, const Vec2 &pos );
   static void LUACALLBACK_ObjectTrigger   ( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger );
   static void LUACALLBACK_GuiTrigger      ( Lua *lua, const std::string &funcName, const std::string &objectName );
 };

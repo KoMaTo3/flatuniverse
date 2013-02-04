@@ -1,99 +1,184 @@
--- 0: none
--- 1: drag object
-editorMode = 0
+--[[ editorMode
+-- 0: none, default
+-- 1: нажал ЛКМ и смотрим, будет ли двигать мышью
+-- 2: выбран объект
+-- 3: перемещение выбранного объекта
+]]
 settings = {
-    guiVisibility = false
+    guiVisibility     = false,  -- отображение GUI
+    objectMode3Moved  = false,  -- bool если происходим перемещение объекта мышкой
+    editorMode        = 0,      -- текущий режим редактора
+}
+mousePos = {    -- экранная позиция курсора
+    x = 0,
+    y = 0,
 }
 
+-- Инициализация
 function Init()
   math.randomseed( GetRandomSeed() )
+
+  -- Ставим обработчики на всё: клаву, кнопки и движение мыши
   ListenKeyboard( 'onKey' )
   ListenMouseKey( 'onMouseKey' )
+  ListenMouseMove( 'onMouseMove' )
+
+  -- Ставим обработчики чекбоксов и кнопок редактора
   GuiAddTrigger( 'editor/settings.layer', 'ToggleLayer' )
   GuiAddTrigger( 'editor/object.is_renderable', 'ToggleRenderable' )
   GuiAddTrigger( 'editor/object.is_collision', 'ToggleCollision' )
   GuiAddTrigger( 'editor/object.is_trigger', 'ToggleTrigger' )
   GuiAddTrigger( 'editor/object.is_static', 'ToggleStatic' )
   GuiAddTrigger( 'editor/object.tile_add', 'TileAdd' )
-  settings.guiVisibility = false
+
+  -- показываем GUI
+  settings.guiVisibility = true
   SetGuiVisibility( settings.guiVisibility )
+  -- SetTimer( 0.01, 'UpdateDebug' )
 end
 Init()
 
+-- Обработка кнопок клавы
 function onKey( id, isPressed )
   if isPressed then
-      if id == 0x1B then
+      if id == 0x1B then    -- Esc
         GameExit()
       end
-      if id == 0x5A then
+      if id == 0x5A then    -- Z
         settings.guiVisibility = not settings.guiVisibility
         SetGuiVisibility( settings.guiVisibility )
+      end
+      if id == 0xC0 then    -- ~
+        GuiSetText( 'editor/settings.layer', 'default' )
+        DebugRender( 0 )
+      end
+      if id == 0x31 then    -- 1
+        GuiSetText( 'editor/settings.layer', 'renderable' )
+        DebugRender( 1 )
+      end
+      if id == 0x32 then    -- 2
+        GuiSetText( 'editor/settings.layer', 'collision' )
+        DebugRender( 2 )
+      end
+      if id == 0x33 then    -- 3
+        GuiSetText( 'editor/settings.layer', 'trigger' )
+        DebugRender( 4 )
       end
   end
 end
 
+-- Обработка кнопок мыши
 function onMouseKey( id, isPressed )
   local mode = {
     [0] = function()
       if isPressed then
-        local mx, my = GetMousePos()
-        local cx, cy = GetCameraPos()
-        local width, height = GetWindowSize()
-        local pos = {
-          x = cx + mx - width * 0.5,
-          y = cy + my - height * 0.5
-        }
-        local layer = GuiGetText( 'editor/settings.layer' )
-        local name = ''
-        if layer == 'renderable' then
-          name = GetObjectByPoint( 1, pos.x, pos.y )
+        local object = GetObjectUnderCursorByMode()
+        if #object > 0 then
+            GuiSetText( 'editor/object.object_name', object )
+            SelectObject( object )
+            settings.editorMode = 1
+        else
+            -- multiselect?
         end
-        if layer == 'collision' then
-          name = GetObjectByPoint( 2, pos.x, pos.y )
-        end
-        if layer == 'trigger' then
-          name = GetObjectByPoint( 3, pos.x, pos.y )
-        end
-        GuiSetText( 'editor/object.object_name', name )
       else
       end
     end,
-    [1] = function ()
+    [1] = function()
       if isPressed then
       else
-        editorMode = 0
+        local object = GetSelectedObject()
+        if #object > 0 then
+          settings.editorMode = 2
+        else
+          settings.editorMode = 0
+      end
+      end
+    end,
+    [2] = function()
+      if isPressed then
+        settings.editorMode = 3
+        settings.objectMode3Moved = false
+      else
+        local object = GetObjectUnderCursorByMode()
+        if #object > 0 then
+          GuiSetText( 'editor/object.object_name', object )
+          SelectObject( object )
+        end
+      end
+    end,
+    [3] = function()
+      if isPressed then
+      else
+        if settings.objectMode3Moved then
+          settings.editorMode = 2
+        else
+          local object = GetObjectUnderCursorByMode()
+          GuiSetText( 'editor/object.object_name', object )
+          SelectObject( object )
+          if #object > 0 then
+            settings.editorMode = 2
+          else
+            settings.editorMode = 0
+          end
+        end
       end
     end,
   }
-  mode[ editorMode ]()
-  --[[
-  if isPressed then
-    if id == 1 then
-        local mx, my = GetMousePos()
-        local cx, cy = GetCameraPos()
-        local width, height = GetWindowSize()
-        local pos = {
-          x = cx + mx - width * 0.5,
-          y = cy + my - height * 0.5
-        }
-        pos.x = math.floor( pos.x / tileSize ) * tileSize + 0.5 * tileSize
-        pos.y = math.floor( pos.y / tileSize ) * tileSize + 0.5 * tileSize
-        -- ObjectCreate( 'wall', '', pos.x, pos.y, 0, tileSize, tileSize, 'data/temp/brick0.png' )
-        while ObjectRemove( 'wall' ) do
-        end
-        local tileSize = GetTileSize()
-        ObjectCreate( 'wall', pos.x, pos.y, 0 )
-        ObjectRenderable( true, 'wall', 'data/temp/alik16.bmp', tileSize,tileSize, 1,1,1,1 )
-        ObjectCollision( true, 'wall', true, 20,20 )
-    else
-        ObjectCollision( false, 'wall' )
-    end
-  end
-  ]]
+  mode[ settings.editorMode ]()
 end
 
+-- Обработка движения мыши
+function onMouseMove( x, y )
+  local mode = {
+    [0] = function()
+    end,
+    [1] = function()
+      settings.editorMode = 3
+    end,
+    [2] = function()
+    end,
+    [3] = function()
+      local object = GetSelectedObject()
+      local oldX, oldY = ObjectGetPos( object )
+      ObjectSetPos( object, oldX + x - mousePos.x, oldY + y - mousePos.y )
+      settings.objectMode3Moved = true
+    end,
+  }
+  mode[ settings.editorMode ]()
+  mousePos.x = x
+  mousePos.y = y
+end
+
+-- Возвращает объект под курсором
+-- Если уже выбран какой-то объект, то берётся следующий за ним
+function GetObjectUnderCursorByMode()
+    local mx, my = GetMousePos()
+    local cx, cy = GetCameraPos()
+    local width, height = GetWindowSize()
+    local pos = {
+      x = cx + mx - width * 0.5,
+      y = cy + my - height * 0.5
+    }
+    local layer = GuiGetText( 'editor/settings.layer' )
+    local name = GetSelectedObject()
+    if layer == 'renderable' then
+      name = GetObjectByPoint( 1, pos.x, pos.y, name )
+    end
+    if layer == 'collision' then
+      name = GetObjectByPoint( 2, pos.x, pos.y, name )
+    end
+    if layer == 'trigger' then
+      name = GetObjectByPoint( 3, pos.x, pos.y, name )
+    end
+    return name
+end --GetObjectUnderCursorByMode
+
+-- Чекбокс "Renderable"
 function ToggleRenderable( guiName )
-  local name = GuiGetText( 'editor/object.object_name' )
+  local name = GetSelectedObject()
+  if #name < 1 then
+    return
+  end
   local checked = GuiGetChecked( 'editor/object.is_renderable' )
   if checked then
     local tileSize = GetTileSize()
@@ -103,8 +188,12 @@ function ToggleRenderable( guiName )
   end
 end
 
+-- Чекбокс "Collision"
 function ToggleCollision( guiName )
-  local name = GuiGetText( 'editor/object.object_name' )
+  local name = GetSelectedObject()
+  if #name < 1 then
+    return
+  end
   local checked = GuiGetChecked( 'editor/object.is_collision' )
   local isStatic = GuiGetChecked( 'editor/object.is_static' )
   if checked then
@@ -115,14 +204,22 @@ function ToggleCollision( guiName )
   end
 end
 
+-- Чекбокс "Collision:Static"
 function ToggleStatic( guiName )
-  local name = GuiGetText( 'editor/object.object_name' )
+  local name = GetSelectedObject()
+  if #name < 1 then
+    return
+  end
   local checked = GuiGetChecked( 'editor/object.is_static' )
   CollisionSetStatic( name, checked )
 end
 
+-- Чекбокс "Trigger"
 function ToggleTrigger( guiName )
-  local name = GuiGetText( 'editor/object.object_name' )
+  local name = GetSelectedObject()
+  if #name < 1 then
+    return
+  end
   local checked = GuiGetChecked( 'editor/object.is_trigger' )
   if checked then
     local tileSize = GetTileSize()
@@ -132,31 +229,23 @@ function ToggleTrigger( guiName )
   end
 end
 
+-- Возвращает текущий размер тайлов (из дропбокса)
 function GetTileSize()
   return GuiGetText( 'editor/world.tile_size' )
 end
 
+-- Кнопка "Add"
+-- TODO: переделать
 function TileAdd( guiName )
   local name = GuiGetText( 'editor/object.object_name' )
   local cameraX, cameraY = GetCameraPos()
   ObjectCreate( name, cameraX, cameraY, 0 )
+  SelectObject( name )
   ToggleRenderable( 'editor/object.is_renderable' )
-  editorMode = 1
-  SetTimer( 0.01, 'UpdateEditorMode1' )
+  settings.editorMode = 2
 end
 
-function UpdateEditorMode1()
-  local name = GuiGetText( 'editor/object.object_name' )
-  local cursorX, cursorY = GetMousePos()
-  local cameraX, cameraY = GetCameraPos()
-  local windowW, windowH = GetWindowSize()
-  local tileSize = GetTileSize()
-  ObjectSetPos( name, math.floor( ( cursorX + cameraX - windowW / 2 + 0.5 * tileSize ) / tileSize ) * tileSize, math.floor( ( cursorY + cameraY - windowH / 2 + 0.5 * tileSize ) / tileSize ) * tileSize )
-  if editorMode == 1 then
-    SetTimer( 0.01, 'UpdateEditorMode1' )
-  end
-end
-
+-- Дропбокс "Layer"
 function ToggleLayer( guiName )
   local layer = GuiGetText( 'editor/settings.layer' )
   local flags = 0
@@ -170,4 +259,9 @@ function ToggleLayer( guiName )
     flags = 4
   end
   DebugRender( flags )
+end
+
+function UpdateDebug()
+  GuiSetText( 'editor/debug', settings.editorMode..':'..( settings.objectMode3Moved and 'true' or 'false' ) )
+  SetTimer( 0.01, 'UpdateDebug' )
 end
