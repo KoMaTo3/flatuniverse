@@ -443,6 +443,18 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
 
 /*
 ----------
+  FileExists
+----------
+*/
+bool FileManager::FileExists( const std::string& fileName )
+{
+  return
+    this->_items.find( fileName ) != this->_items.end();
+}//FileExists
+
+
+/*
+----------
   FindFile
 ----------
 */

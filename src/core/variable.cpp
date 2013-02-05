@@ -32,6 +32,25 @@ void Variable::SetNumber( const std::string &value )
 
 
 
+
+/*
+=============
+  SetNumber
+=============
+*/
+void Variable::SetNumber( float value )
+{
+  char t[ 1024 ];
+  sprintf_s( t, sizeof( t ), "%3.6f", value );
+  this->f = value;
+  this->b = ( this->f != 0.0f );
+  this->s = t;
+  this->type  = VariableType_NUMBER;
+}//SetNumber
+
+
+
+
 /*
 =============
   SetBoolean
@@ -78,3 +97,79 @@ void Variable::SetString( const std::string &value )
   this->s     = value;
   this->type  = VariableType_STRING;
 }//SetString
+
+
+
+
+/*
+=============
+  SetNull
+=============
+*/
+void Variable::SetNull()
+{
+  this->f     = 0.0f;
+  this->b     = false;
+  this->s     = "";
+  this->type  = VariableType_NULL;
+}//SetNull
+
+
+
+/*
+=============
+  SetVec2
+=============
+*/
+void Variable::SetVec2( const Vec2 &value )
+{
+  char t[ 1024 ];
+  sprintf_s( t, sizeof( t ), "%3.6f %3.6f", value.x, value.y );
+  this->f = value.x;
+  this->b = ( this->f != 0.0f );
+  this->s = t;
+  this->v2 = value;
+  this->v3 = Vec3( value.x, value.y, 0.0f );
+  this->v4 = Vec4( value.x, value.y, 0.0f, 0.0f );
+  this->type  = VariableType_VEC2;
+}//SetVec2
+
+
+
+/*
+=============
+  SetVec3
+=============
+*/
+void Variable::SetVec3( const Vec3 &value )
+{
+  char t[ 1024 ];
+  sprintf_s( t, sizeof( t ), "%3.6f %3.6f %3.6f", value.x, value.y, value.z );
+  this->f = value.x;
+  this->b = ( this->f != 0.0f );
+  this->s = t;
+  this->v2 = Vec2( value.x, value.y );
+  this->v3 = value;
+  this->v4 = Vec4( value.x, value.y, value.z, 0.0f );
+  this->type  = VariableType_VEC3;
+}//SetVec3
+
+
+
+/*
+=============
+  SetVec4
+=============
+*/
+void Variable::SetVec4( const Vec4 &value )
+{
+  char t[ 1024 ];
+  sprintf_s( t, sizeof( t ), "%3.6f %3.6f %3.6f %3.6f", value.x, value.y, value.z, value.w );
+  this->f = value.x;
+  this->b = ( this->f != 0.0f );
+  this->s = t;
+  this->v2 = Vec2( value.x, value.y );
+  this->v3 = Vec3( value.x, value.y, value.z );
+  this->v4 = value;
+  this->type  = VariableType_VEC4;
+}//SetVec4

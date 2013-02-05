@@ -105,6 +105,7 @@ public:
   static std::string LUA_GetSelectedObject  ();
   static void   LUA_GuiAttr           ( const std::string &guiName, const std::string &parameter, Variable &value, bool isSet );
   static void   LUA_LoadScript        ( const std::string &fileName );
+  static void   LUA_ObjectAttr        ( const std::string &objectName, VariableAttributesList &setAttributes, VariableAttributesList &getAttributes );
 
   void Update();
   void UpdateLuaTimers();

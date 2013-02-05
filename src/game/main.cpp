@@ -731,6 +731,7 @@ Game::Game()
   LUAFUNC_GetSelectedObject = Game::LUA_GetSelectedObject;
   LUAFUNC_GuiAttr           = Game::LUA_GuiAttr;
   LUAFUNC_LoadScript        = Game::LUA_LoadScript;
+  LUAFUNC_ObjectAttr        = Game::LUA_ObjectAttr;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -1804,3 +1805,357 @@ void Game::LUA_LoadScript( const std::string &fileName )
 {
   game->lua->RunFile( fileName );
 }//LUA_LoadScript
+
+
+/*
+=============
+  LUA_ObjectAttr
+=============
+*/
+void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList &setAttributes, VariableAttributesList &getAttributes )
+{
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectAttr: %d", setAttributes.size() );
+
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectAttr => object '%s' not found", objectName.c_str() );
+    return;
+  }
+
+  VariableAttributesList::iterator iter, iterEnd = setAttributes.end();
+  RenderableQuad  *renderable;
+  Collision       *collision;
+  ObjectTrigger   *trigger;
+  //set
+  for( iter = setAttributes.begin(); iter != iterEnd; ++iter ) {
+    __log.PrintInfo( Filelevel_DEBUG, ". set %s = '%s'", ( *iter )->name.c_str(), ( *iter )->value.GetString().c_str() );
+
+    const std::string &name = ( *iter )->name;
+    const Variable &value   = ( *iter )->value;
+
+    //object
+    if( name == "renderable" ) {
+      if( value.GetBoolean() ) {
+        __log.PrintInfo( Filelevel_DEBUG, ". EnableRenderable['%s']", object->GetNameFull().c_str() );
+        object->EnableRenderable( RENDERABLE_TYPE_QUAD );
+      } else {
+        __log.PrintInfo( Filelevel_DEBUG, ". DisableRenderable['%s']", object->GetNameFull().c_str() );
+        object->DisableRenderable();
+      }
+      continue;
+    }//renderable
+    if( name == "collision" ) {
+      if( value.GetBoolean() ) {
+        __log.PrintInfo( Filelevel_DEBUG, ". EnableCollision['%s']", object->GetNameFull().c_str() );
+        object->EnableCollision();
+      } else {
+        __log.PrintInfo( Filelevel_DEBUG, ". DisableCollision['%s']", object->GetNameFull().c_str() );
+        object->DisableCollision();
+      }
+      continue;
+    }//collision
+    if( name == "trigger" ) {
+      if( value.GetBoolean() ) {
+        __log.PrintInfo( Filelevel_DEBUG, ". EnableTrigger['%s']", object->GetNameFull().c_str() );
+        object->EnableTrigger();
+      } else {
+        __log.PrintInfo( Filelevel_DEBUG, ". DisableTrigger['%s']", object->GetNameFull().c_str() );
+        object->DisableTrigger();
+      }
+      continue;
+    }//trigger
+    if( name == "position" ) {
+      Vec3 pos = object->GetPosition();
+      sscanf_s( value.GetString().c_str(), "%f %f", &pos.x, &pos.y );
+      object->SetPosition( pos );
+      continue;
+    }//position
+
+    //renderable
+    if( name == "textureName" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      std::string textureFileName = std::string( FileManager_DATADIRECTORY ) + "/" + value.GetString();
+      if( renderable && __fileManager->FileExists( textureFileName ) ) {
+        renderable->SetTexture( textureFileName );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => texture '%s' not found or object not renderable", textureFileName.c_str() );
+      }
+      continue;
+    }//textureName
+    if( name == "renderableSize" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        Vec2 size( 1.0f, 1.0f );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f", &size.x, &size.y );
+        if( res < 2 ) {
+          size.y = size.x;
+        }
+        renderable->SetSize( size );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderableSize: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//renderableSize
+    if( name == "renderablePosition" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        Vec3 pos( 0, 0, 0 );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f", &pos.x, &pos.y );
+        if( res < 2 ) {
+          pos.y = pos.x;
+        }
+        renderable->SetPosition( pos );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderablePosition: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//renderablePosition
+    if( name == "color" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        Vec4 color( 1.0f, 1.0f, 1.0f, 1.0f );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f %f %f", &color.x, &color.y, &color.z, &color.w );
+        if( res < 4 ) {
+          color.y = color.z = color.w = color.x;
+        }
+        renderable->SetColor( color );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => color: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//color
+    if( name == "renderableScale" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        Vec2 scale( 1.0f, 1.0f );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f", &scale.x, &scale.y );
+        if( res < 2 ) {
+          scale.y = scale.x;
+        }
+        renderable->SetScale( scale );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderableScale: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//renderableScale
+    if( name == "renderableRotation" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        float angle = value.GetNumber();
+        renderable->SetRotation( DEG2RAD( angle ) );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderableRotation: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//renderableRotation
+
+    //collision
+    if( name == "collisionSize" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 size( 1.0f, 1.0f, 0.0f );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f", &size.x, &size.y );
+        if( res < 2 ) {
+          size.y = size.x;
+        }
+        collision->SetSize( size );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionSize: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionSize
+    if( name == "collisionAcceleration" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 vec( 0.0f, 0.0f, 0.0f );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f", &vec.x, &vec.y );
+        if( res < 2 ) {
+          vec.y = vec.x;
+        }
+        collision->SetAcceleration( vec );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionAcceleration: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionAcceleration
+    if( name == "collisionVelocity" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 vec( 0.0f, 0.0f, 0.0f );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f", &vec.x, &vec.y );
+        if( res < 2 ) {
+          vec.y = vec.x;
+        }
+        collision->SetVelocity( vec );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionVelocity: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionVelocity
+    if( name == "collisionStatic" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        collision->SetIsStatic( value.GetBoolean( true ) );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionStatic: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionStatic
+    if( name == "collisionForce" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 vec = collision->GetForce();
+        int res = sscanf_s( value.GetString().c_str(), "%f %f", &vec.x, &vec.y );
+        if( res < 2 ) {
+          vec.y = vec.x;
+        }
+        collision->SetForce( vec );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionForce: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionForce
+
+    //trigger
+    if( name == "triggerSize" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        Vec3 size( 1.0f, 1.0f, 0.0f );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f", &size.x, &size.y );
+        if( res < 2 ) {
+          size.y = size.x;
+        }
+        trigger->SetSize( size );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => triggerSize: object '%s' not triger", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//triggerSize
+
+  }//for iter
+
+  //get
+  iterEnd = getAttributes.end();
+  for( iter = getAttributes.begin(); iter != iterEnd; ++iter ) {
+    __log.PrintInfo( Filelevel_DEBUG, ". get '%s'", ( *iter )->name.c_str() );
+
+    const std::string &name = ( *iter )->name;
+    Variable &value         = ( *iter )->value;
+
+    //object
+    if( name == "renderable" ) {
+      value.SetBoolean( object->IsRenderable() );
+      continue;
+    }//renderable
+    if( name == "collision" ) {
+      value.SetBoolean( object->IsCollision() );
+      continue;
+    }//collision
+    if( name == "trigger" ) {
+      value.SetBoolean( object->IsTrigger() );
+      continue;
+    }//trigger
+    if( name == "position" ) {
+      value.SetVec3( object->GetPosition() );
+      continue;
+    }//position
+
+    //renderable
+    if( name == "textureName" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        const std::string &texture = renderable->GetTextureFileName();
+        value.SetString( texture.length() ? &renderable->GetTextureFileName()[ strlen( FileManager_DATADIRECTORY ) + 1 ] : texture );
+      }
+      continue;
+    }//textureName
+    if( name == "renderableSize" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        value.SetVec2( renderable->GetSize() );
+      }
+      continue;
+    }//renderableSize
+    if( name == "renderablePosition" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        const Vec3 &pos = renderable->GetPosition();
+        value.SetVec2( Vec2( pos.x, pos.y ) );
+      }
+      continue;
+    }//renderablePosition
+    if( name == "color" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        value.SetVec4( renderable->GetColor() );
+      }
+      continue;
+    }//color
+    if( name == "renderableScale" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        value.SetVec2( renderable->GetScale() );
+      }
+      continue;
+    }//renderableScale
+    if( name == "renderableRotation" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        value.SetNumber( renderable->GetRotation() );
+      }
+      continue;
+    }//renderableRotation
+
+    //collision
+    if( name == "collisionSize" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        const Vec3 &size = collision->GetSize();
+        value.SetVec2( Vec2( size.x, size.y ) );
+      }
+      continue;
+    }//collisionSize
+    if( name == "collisionAcceleration" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 acceleration = collision->GetAcceleration();
+        value.SetVec2( Vec2( acceleration.x, acceleration.y ) );
+      }
+      continue;
+    }//collisionAcceleration
+    if( name == "collisionVelocity" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 velocity = collision->GetVelocity();
+        value.SetVec2( Vec2( velocity.x, velocity.y ) );
+      }
+      continue;
+    }//collisionVelocity
+    if( name == "collisionStatic" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        value.SetBoolean( collision->IsStatic() );
+      }
+      continue;
+    }//collisionStatic
+    if( name == "collisionForce" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 force = collision->GetForce();
+        value.SetVec2( Vec2( force.x, force.y ) );
+      }
+      continue;
+    }//collisionForce
+
+    //trigger
+    if( name == "triggerSize" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        Vec3 size = trigger->GetSize();
+        value.SetVec2( Vec2( size.x, size.y ) );
+      }
+      continue;
+    }//triggerSize
+
+  }
+}//LUA_ObjectAttr

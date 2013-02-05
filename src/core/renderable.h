@@ -93,6 +93,8 @@ public:
   inline
   const Vec4&     GetTexCoords    () { return this->texCoords; }
   Vec2            GetMiddleTextureCoords();
+  inline
+  std::string     GetTextureFileName(){ return ( this->info ? this->info->textureName : "" ); }
 
   inline void* GetPointerToVertex () { return &this->position.x; }
   inline void* GetPointerToColor  () { return &this->color.x; }

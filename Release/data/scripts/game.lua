@@ -45,6 +45,10 @@ function Init()
   settings.guiVisibility = true
   SetGuiVisibility( settings.guiVisibility )
   -- SetTimer( 0.01, 'UpdateDebug' )
+
+  -- ObjectAttr( 'wall', { 'textureName' } )
+  local r,g,b,a = ObjectAttr( 'wall', { 'color' } )
+  Alert( '', r..':'..g..':'..b..':'..a )
 end
 Init()
 
@@ -213,9 +217,9 @@ function ToggleRenderable( guiName )
   if checked then
     local tileSize = GetTileSize()
     local texture = GuiGetText( 'editor/renderable.texture_name' )
-    ObjectRenderable( true, name, 'data/'..texture, tileSize,tileSize, 1,1,1,1 )
+    ObjectAttr( name, { renderable = true, textureName = texture, renderableSize = tileSize..' '..tileSize } )
   else
-    ObjectRenderable( false, name )
+    ObjectAttr( name, { renderable = false } )
   end
 end
 
@@ -229,9 +233,9 @@ function ToggleCollision( guiName )
   local isStatic = GuiGetChecked( 'editor/object.is_static' )
   if checked then
     local tileSize = GetTileSize()
-    ObjectCollision( true, name, isStatic, tileSize, tileSize )
+    ObjectAttr( name, { collision = true, collisionSize = tileSize..' '..tileSize, collisionStatic = isStatic } )
   else
-    ObjectCollision( false, name )
+    ObjectAttr( name, { collision = false } )
   end
 end
 
@@ -242,7 +246,7 @@ function ToggleStatic( guiName )
     return
   end
   local checked = GuiGetChecked( 'editor/object.is_static' )
-  CollisionSetStatic( name, checked )
+  ObjectAttr( name, { collisionStatic = checked } )
 end
 
 -- Чекбокс "Trigger"
@@ -254,9 +258,9 @@ function ToggleTrigger( guiName )
   local checked = GuiGetChecked( 'editor/object.is_trigger' )
   if checked then
     local tileSize = GetTileSize()
-    ObjectTrigger( true, name, tileSize, tileSize )
+    ObjectAttr( name, { trigger = true, triggerSize = tileSize..' '..tileSize } )
   else
-    ObjectTrigger( false, name )
+    ObjectAttr( name, { trigger = false } )
   end
 end
 
@@ -273,6 +277,8 @@ function TileApply( guiName )
   ObjectCreate( name, cameraX, cameraY, 0 )
   SelectObject( name )
   ToggleRenderable( 'editor/object.is_renderable' )
+  ToggleCollision( 'editor/object.is_collision' )
+  ToggleTrigger( 'editor/object.is_trigger' )
   settings.editorMode = 2
 end
 

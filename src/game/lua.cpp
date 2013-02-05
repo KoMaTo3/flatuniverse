@@ -3,6 +3,7 @@
 #include "windows.h"
 #include "luastatecheck.h"
 #include "core/timer.h"
+#include "core/tools.h"
 
 
 File Lua::log;
@@ -45,6 +46,7 @@ LUAFUNCPROC_SelectObject      *LUAFUNC_SelectObject         = NULL;
 LUAFUNCPROC_GetSelectedObject *LUAFUNC_GetSelectedObject    = NULL;
 LUAFUNCPROC_GuiAttr           *LUAFUNC_GuiAttr              = NULL;
 LUAFUNCPROC_LoadScript        *LUAFUNC_LoadScript           = NULL;
+LUAFUNCPROC_ObjectAttr        *LUAFUNC_ObjectAttr           = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -123,6 +125,7 @@ bool Lua::Init()
   lua_register( this->luaState, "GetSelectedObject",Lua::LUA_GetSelectedObject );
   lua_register( this->luaState, "GuiAttr",          Lua::LUA_GuiAttr );
   lua_register( this->luaState, "LoadScript",       Lua::LUA_LoadScript );
+  lua_register( this->luaState, "ObjectAttr",       Lua::LUA_ObjectAttr );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -1132,13 +1135,181 @@ int Lua::LUA_GuiAttr( lua_State *lua )
     }
   } else {  //set
     __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_GuiAttr => set..." );
-    val.SetString( lua_tostring( lua, 3 ) );
+    if( lua_isboolean( lua, 3 ) ) {
+      val.SetBoolean( lua_toboolean( lua, 3 ) != 0 );
+    } else if( lua_isnumber( lua, 3 ) ) {
+      val.SetNumber( ( float ) lua_tonumber( lua, 3 ) );
+    } else if( lua_isstring( lua, 3 ) ) {
+      val.SetString( lua_tostring( lua, 3 ) );
+    } else {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GuiAttr => set, unknown type" );
+    }
     __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_GuiAttr => value['%s']", val.GetString().c_str() );
     LUAFUNC_GuiAttr( guiName, parameter, val, true );
   }
 
   return res;
 }//LUA_GuiAttr
+
+
+
+/*
+=============
+  LUA_ObjectAttr
+=============
+*/
+int Lua::LUA_ObjectAttr( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount != 2 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => not enough parameters" );
+    return 0;
+  }
+
+  std::string objectName = lua_tostring( lua, 1 );
+
+  int res = 0;
+  VariableAttributesList setAttrs, getAttrs;
+  if( lua_istable( lua, 2 ) ) {
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => start:" );
+
+    lua_pushvalue( lua, -1 );
+    lua_pushnil( lua );
+    int num = 0;
+    VariableAttribute *attr = NULL;
+    while( lua_next( lua, -2 ) ) {
+      lua_pushvalue( lua, -2 );
+
+      if( lua_isnumber( lua, -1 ) ) { //get parameter
+        if( lua_isstring( lua, -2 ) ) {
+          __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => get '%s'", lua_tostring( lua, -2 ) );
+          attr = new VariableAttribute();
+          attr->name = lua_tostring( lua, -2 );
+          getAttrs.push_back( attr );
+        } else {
+          __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => wrong get-parameter" );
+        }
+      } else {
+        if( lua_isstring( lua, -1 ) ) {
+          attr = NULL;
+          if( lua_isboolean( lua, -2 ) ) {  //set parameters...
+            attr = new VariableAttribute();
+            attr->value.SetBoolean( lua_toboolean( lua, -2 ) ? true : false );
+          } else if( lua_isnil( lua, -2 ) || lua_isnone( lua, -2 ) ) {
+            attr = new VariableAttribute();
+            attr->value.SetNull();
+          } else if( lua_isnumber( lua, -2 ) ) {
+            attr = new VariableAttribute();
+            attr->value.SetNumber( ( float ) lua_tonumber( lua, -2 ) );
+          } else if( lua_isstring( lua, -2 ) ) {
+            attr = new VariableAttribute();
+            attr->value.SetString( lua_tostring( lua, -2 ) );
+          } else {
+            __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => parameter's  key '%s' has bad value", attr->name.c_str() );
+          }
+          if( attr ) {
+            attr->name = lua_tostring( lua, -1 );
+            if(
+              attr->name == "renderable"  ||
+              attr->name == "collision"   ||
+              attr->name == "trigger"
+              )
+              setAttrs.push_front( attr );
+            else
+              setAttrs.push_back( attr );
+            __log.PrintInfo( Filelevel_DEBUG, ". '%s' => '%s'", attr->name.c_str(), attr->value.GetString().c_str() );
+          }
+
+        } else {
+          __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => parameter's key №%d is not a string" );
+        }
+      }
+
+      //__log.PrintInfo( Filelevel_DEBUG, ". '%s' = '%s'\n", lua_tostring( lua, -1 ), lua_tostring( lua, -2 ) );
+      lua_pop( lua, 2 );
+      ++num;
+    }//while
+
+    LUAFUNC_ObjectAttr( objectName, setAttrs, getAttrs );
+
+    if( getAttrs.size() ) { //return parameters
+      __log.PrintInfo( Filelevel_DEBUG, ". getAttrs[%d]", getAttrs.size() );
+      VariableAttributesList::iterator iter, iterEnd = getAttrs.end();
+      VariableAttribute *var;
+      for( iter = getAttrs.begin(); iter != iterEnd; ++iter ) {
+        var = *iter;
+        switch( ( *iter )->value.GetType() ) {
+          case VariableType_NUMBER: {
+            __log.PrintInfo( Filelevel_DEBUG, ". number[%3.3f]", var->value.GetNumber() );
+            lua_pushnumber( lua, var->value.GetNumber() );
+            ++res;
+            break;
+          }
+          case VariableType_STRING: {
+            __log.PrintInfo( Filelevel_DEBUG, ". string['%s']", var->value.GetString().c_str() );
+            lua_pushstring( lua, var->value.GetString().c_str() );
+            ++res;
+            break;
+          }
+          case VariableType_BOOLEAN: {
+            __log.PrintInfo( Filelevel_DEBUG, ". bool[%d]", var->value.GetBoolean() );
+            lua_pushboolean( lua, var->value.GetBoolean() );
+            ++res;
+            break;
+          }
+          case VariableType_NULL: {
+            __log.PrintInfo( Filelevel_DEBUG, ". null" );
+            lua_pushnil( lua );
+            ++res;
+            break;
+          }
+          case VariableType_VEC2: {
+            __log.PrintInfo( Filelevel_DEBUG, ". vec2[%3.3f; %3.3f]", var->value.GetVec2().x, var->value.GetVec2().y );
+            lua_pushnumber( lua, var->value.GetVec2().x );
+            lua_pushnumber( lua, var->value.GetVec2().y );
+            res += 2;
+            break;
+          }
+          case VariableType_VEC3: {
+            __log.PrintInfo( Filelevel_DEBUG, ". vec3[%3.3f; %3.3f; %3.3f]", var->value.GetVec3().x, var->value.GetVec3().y, var->value.GetVec3().z );
+            lua_pushnumber( lua, var->value.GetVec3().x );
+            lua_pushnumber( lua, var->value.GetVec3().y );
+            lua_pushnumber( lua, var->value.GetVec3().z );
+            res += 3;
+            break;
+          }
+          case VariableType_VEC4: {
+            __log.PrintInfo( Filelevel_DEBUG, ". vec4[%3.3f; %3.3f; %3.3f; %3.3f]", var->value.GetVec4().x, var->value.GetVec4().y, var->value.GetVec4().z, var->value.GetVec4().w );
+            lua_pushnumber( lua, var->value.GetVec4().x );
+            lua_pushnumber( lua, var->value.GetVec4().y );
+            lua_pushnumber( lua, var->value.GetVec4().z );
+            lua_pushnumber( lua, var->value.GetVec4().w );
+            res += 4;
+            break;
+          }
+        }//switch
+      }//for
+    }
+
+    VariableAttributesList::iterator iter, iterEnd = setAttrs.end();
+    for( iter = setAttrs.begin(); iter != iterEnd; ++iter ) {
+      delete *iter;
+    }
+    setAttrs.clear();
+
+    iterEnd = getAttrs.end();
+    for( iter = getAttrs.begin(); iter != iterEnd; ++iter ) {
+      delete *iter;
+    }
+    getAttrs.clear();
+
+  } else {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => parameter 2: need table" );
+  }
+
+  return res;
+}//LUA_ObjectAttr
 
 
 

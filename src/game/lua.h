@@ -52,6 +52,7 @@ typedef void  LUAFUNCPROC_SelectObject            ( const std::string &name );
 typedef std::string LUAFUNCPROC_GetSelectedObject ();
 typedef void  LUAFUNCPROC_GuiAttr           ( const std::string &guiName, const std::string &parameter, Variable &value, bool isSet );
 typedef void  LUAFUNCPROC_LoadScript        ( const std::string &fileName );
+typedef void  LUAFUNCPROC_ObjectAttr        ( const std::string &objectName, VariableAttributesList &setAttributes, VariableAttributesList &getAttributes );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -90,6 +91,7 @@ extern LUAFUNCPROC_SelectObject     *LUAFUNC_SelectObject;
 extern LUAFUNCPROC_GetSelectedObject        *LUAFUNC_GetSelectedObject;
 extern LUAFUNCPROC_GuiAttr          *LUAFUNC_GuiAttr;
 extern LUAFUNCPROC_LoadScript       *LUAFUNC_LoadScript;
+extern LUAFUNCPROC_ObjectAttr       *LUAFUNC_ObjectAttr;
 
 
 //callbacks
@@ -157,6 +159,7 @@ public:
   static int LUA_GetSelectedObject( lua_State *lua );
   static int LUA_GuiAttr          ( lua_State *lua );
   static int LUA_LoadScript       ( lua_State *lua );
+  static int LUA_ObjectAttr       ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );
