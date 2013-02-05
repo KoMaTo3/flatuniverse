@@ -729,6 +729,7 @@ Game::Game()
   LUAFUNC_SetGuiVisibility  = Game::LUA_SetGuiVisibility;
   LUAFUNC_SelectObject      = Game::LUA_SelectObject;
   LUAFUNC_GetSelectedObject = Game::LUA_GetSelectedObject;
+  LUAFUNC_GuiAttr           = Game::LUA_GuiAttr;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -1629,3 +1630,166 @@ std::string Game::LUA_GetSelectedObject()
 {
   return ( game->core->debug.selectedObject ? game->core->debug.selectedObject->GetNameFull() : "" );
 }//LUA_GetSelectedObject
+
+
+
+/*
+=============
+  LUA_GuiAttr
+=============
+*/
+void Game::LUA_GuiAttr( const std::string &guiName, const std::string &parameter, Variable &value, bool isSet )
+{
+  Object *object = game->core->GetObject( guiName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiAttr => gui element '%s' not found", guiName.c_str() );
+    return;
+  }
+
+  g2Controller *controller = object->GetGui();
+  if( !controller ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiAttr => object '%s' is not gui element", guiName.c_str() );
+    return;
+  }
+
+  if( parameter == "val" ) {
+    if( isSet ) { //set
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => set val" );
+      switch( object->GetGuiType() ) {
+        case OBJECT_GUI_BUTTON: {
+          g2Button *item = ( g2Button* ) controller;
+          item->SetText( value.GetString().c_str() );
+          break;
+        }
+        case OBJECT_GUI_TEXTFIELD: {
+          g2TextField *item = ( g2TextField* ) controller;
+          item->SetText( value.GetString().c_str() );
+          break;
+        }
+        case OBJECT_GUI_CHECKBOX: {
+          g2CheckBox *item = ( g2CheckBox* ) controller;
+          item->SetChecked( value.GetBoolean() );
+          break;
+        }
+        case OBJECT_GUI_DROPDOWN: {
+          dropDownListsType::iterator iter = game->dropDownLists.find( controller );
+          std::string str = "", text = value.GetString();
+          if( iter != game->dropDownLists.end() ) {
+            stdDequeString::iterator iterStr, iterStrEnd = iter->second.end();
+            int index = 0;
+            for( iterStr = iter->second.begin(); iterStr != iterStrEnd; ++iterStr, ++index ) {
+              if( *iterStr == text ) {
+                ( ( g2DropDown* ) controller )->SetSelectionIndex( index );
+                break;
+              }
+            }
+          } else {
+            __log.PrintInfo( Filelevel_ERROR, "Game::LUA_GuiAttr => controller not found" );
+          }
+          break;
+        }
+        case OBJECT_GUI_LABEL: {
+          g2Label *item = ( g2Label* ) controller;
+          item->SetText( value.GetString().c_str() );
+          break;
+        }
+        case OBJECT_GUI_PANEL: {
+          g2Panel *item = ( g2Panel* ) controller;
+          item->SetTitle( value.GetString().c_str() );
+          break;
+        }
+      }
+    } else {  //get
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => get val" );
+      switch( object->GetGuiType() ) {
+        case OBJECT_GUI_BUTTON: {
+          value.SetString( ( ( g2Button* ) controller )->GetLabel()->GetText() );
+          break;
+        }
+        case OBJECT_GUI_TEXTFIELD: {
+          value.SetString( ( ( g2TextField* ) controller )->GetText() );
+          break;
+        }
+        case OBJECT_GUI_CHECKBOX: {
+          value.SetBoolean( ( ( g2CheckBox* ) controller )->IsChecked() );
+          break;
+        }
+        case OBJECT_GUI_LABEL: {
+          value.SetString( ( ( g2Label* ) controller )->GetText() );
+          break;
+        }
+        case OBJECT_GUI_PANEL: {
+          value.SetString( ( ( g2Panel* ) controller )->GetTitle()->GetText() );
+          break;
+        }
+        case OBJECT_GUI_DROPDOWN: {
+          dropDownListsType::iterator iter = game->dropDownLists.find( controller );
+          if( iter != game->dropDownLists.end() ) {
+            value.SetString( iter->second[ ( ( g2DropDown* ) controller )->GetSelectionIndex() ] );
+          } else {
+            value.SetString( "" );
+            __log.PrintInfo( Filelevel_ERROR, "Game::LUA_GuiAttr => controller not found" );
+          }
+          break;
+        }
+      }
+    }//get
+    //val
+  } else if( parameter == "enabled" ) {
+    if( isSet ) { //set
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => set enabled" );
+      controller->SetDisabled( !value.GetBoolean( false ) );
+    } else {  //get
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => get enabled" );
+      value.SetBoolean( !controller->GetDisabled() );
+    }
+    //enabled
+  } else if( parameter == "disabled" ) {
+    if( isSet ) { //set
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => set disabled" );
+      controller->SetDisabled( value.GetBoolean( false ) );
+    } else {  //get
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => get disabled" );
+      value.SetBoolean( controller->GetDisabled() );
+    }
+    //disabled
+  } else if( parameter == "visible" ) {
+    if( isSet ) { //set
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => set visible" );
+      controller->SetVisibility( value.GetBoolean( false ) );
+    } else {  //get
+      value.SetBoolean( controller->GetVisibility() );
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => get visible" );
+    }
+    //visible
+  } else if( parameter == "active" ) {
+    if( isSet ) { //set
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => set active" );
+    } else {  //get
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => get active" );
+      value.SetBoolean( controller->GetActive() );
+    }
+    //active
+  } else if( parameter == "checked" ) {
+    if( isSet ) { //set
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => set checked" );
+      switch( object->GetGuiType() ) {
+        case OBJECT_GUI_CHECKBOX: {
+          ( ( g2CheckBox* ) controller )->SetChecked( value.GetBoolean() );
+          break;
+        }
+      }
+    } else {  //get
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAttr => get checked" );
+      switch( object->GetGuiType() ) {
+        case OBJECT_GUI_CHECKBOX: {
+          value.SetBoolean( ( ( g2CheckBox* ) controller )->IsChecked() );
+          break;
+        }
+        default: {
+        }
+      }
+    }
+    //checked
+  }
+}//LUA_GuiAttr

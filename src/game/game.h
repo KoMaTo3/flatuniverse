@@ -103,6 +103,7 @@ public:
   static void   LUA_SetGuiVisibility        ( int show );
   static void   LUA_SelectObject            ( const std::string &name );
   static std::string LUA_GetSelectedObject  ();
+  static void   LUA_GuiAttr           ( const std::string &guiName, const std::string &parameter, Variable &value, bool isSet );
 
   void Update();
   void UpdateLuaTimers();

@@ -43,6 +43,7 @@ LUAFUNCPROC_GetObjectByPoint  *LUAFUNC_GetObjectByPoint     = NULL;
 LUAFUNCPROC_SetGuiVisibility  *LUAFUNC_SetGuiVisibility     = NULL;
 LUAFUNCPROC_SelectObject      *LUAFUNC_SelectObject         = NULL;
 LUAFUNCPROC_GetSelectedObject *LUAFUNC_GetSelectedObject    = NULL;
+LUAFUNCPROC_GuiAttr           *LUAFUNC_GuiAttr              = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -119,6 +120,7 @@ bool Lua::Init()
   lua_register( this->luaState, "GetObjectByPoint", Lua::LUA_GetObjectByPoint );
   lua_register( this->luaState, "SelectObject",     Lua::LUA_SelectObject );
   lua_register( this->luaState, "GetSelectedObject",Lua::LUA_GetSelectedObject );
+  lua_register( this->luaState, "GuiAttr",          Lua::LUA_GuiAttr );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -1060,6 +1062,61 @@ int Lua::LUA_GuiSetText( lua_State *lua )
 
   return 0;
 }//LUA_GuiSetText
+
+
+
+/*
+=============
+  LUA_GuiAttr
+=============
+*/
+int Lua::LUA_GuiAttr( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GuiAttr => not enough parameters" );
+    return 0;
+  }
+
+  std::string guiName   = lua_tostring( lua, 1 );
+  std::string parameter = lua_tostring( lua, 2 );
+  Variable val;
+
+  int res = 0;
+  if( parmsCount == 2 ) { //get
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_GuiAttr => get..." );
+    LUAFUNC_GuiAttr( guiName, parameter, val, false );
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_GuiAttr => value type = %d", val.GetType() );
+    switch( val.GetType() ) {
+      case VariableType_NUMBER: {
+        lua_pushnumber( lua, val.GetNumber() );
+        res = 1;
+        break;
+      }
+      case VariableType_STRING: {
+        lua_pushstring( lua, val.GetString().c_str() );
+        res = 1;
+        break;
+      }
+      case VariableType_BOOLEAN: {
+        lua_pushboolean( lua, val.GetBoolean() );
+        res = 1;
+        break;
+      }
+      default: {
+        res = 0;
+      }
+    }
+  } else {  //set
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_GuiAttr => set..." );
+    val.SetString( lua_tostring( lua, 3 ) );
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_GuiAttr => value['%s']", val.GetString().c_str() );
+    LUAFUNC_GuiAttr( guiName, parameter, val, true );
+  }
+
+  return res;
+}//LUA_GuiAttr
 
 
 

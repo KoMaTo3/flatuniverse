@@ -362,6 +362,14 @@
 				RelativePath="..\src\core\tools.h"
 				>
 			</File>
+			<File
+				RelativePath="..\src\core\variable.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\variable.h"
+				>
+			</File>
 			<Filter
 				Name="math"
 				>

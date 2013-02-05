@@ -9,6 +9,7 @@ extern "C" {
 }
 
 #include "core/klib.h"
+#include "core/variable.h"
 #include "core/file.h"
 #include <string>
 
@@ -49,6 +50,7 @@ typedef std::string LUAFUNCPROC_GetObjectByPoint  ( int type, const Vec2 &point,
 typedef void  LUAFUNCPROC_SetGuiVisibility        ( int show );
 typedef void  LUAFUNCPROC_SelectObject            ( const std::string &name );
 typedef std::string LUAFUNCPROC_GetSelectedObject ();
+typedef void  LUAFUNCPROC_GuiAttr           ( const std::string &guiName, const std::string &parameter, Variable &value, bool isSet );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -85,6 +87,7 @@ extern LUAFUNCPROC_GetObjectByPoint *LUAFUNC_GetObjectByPoint;
 extern LUAFUNCPROC_SetGuiVisibility *LUAFUNC_SetGuiVisibility;
 extern LUAFUNCPROC_SelectObject     *LUAFUNC_SelectObject;
 extern LUAFUNCPROC_GetSelectedObject        *LUAFUNC_GetSelectedObject;
+extern LUAFUNCPROC_GuiAttr          *LUAFUNC_GuiAttr;
 
 
 //callbacks
@@ -150,6 +153,7 @@ public:
   static int LUA_SetGuiVisibility ( lua_State *lua );
   static int LUA_SelectObject     ( lua_State *lua );
   static int LUA_GetSelectedObject( lua_State *lua );
+  static int LUA_GuiAttr          ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );
