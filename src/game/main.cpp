@@ -253,220 +253,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //__textureAtlas->__Dump( "data/temp/__atlas.tga" );
 
   //if edit-mode
-  {
-    Object *guiRoot = game->core->CreateObject( "editor" );
-    int windowWidth = game->core->GetWindowSize().width,
-        width = 200,
-        left = windowWidth - width,
-        y = 0
-        ;
-    Object::GuiConstructor gui;
-
-    obj = game->core->CreateObject( "debug", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_TEXTFIELD;
-    gui.position.x = 0;
-    gui.position.y = 0;
-    gui.width = 200;
-    gui.label = "";
-    obj->EnableGui( &gui );
-
-    //panels
-    obj = game->core->CreateObject( "object.window_main", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_PANEL;
-    gui.panelAnchor = g2Anchor_None;
-    gui.label = "Settings";
-    gui.position.x = left;
-    gui.position.y = y;
-    gui.width = width;
-    gui.height = 145;
-    gui.funCallback = Game::GuiProc;
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "object.window_object", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_PANEL;
-    gui.panelAnchor = g2Anchor_None;
-    gui.label = "Object";
-    gui.position.x = left;
-    gui.position.y = 150;
-    gui.width = width;
-    gui.height = 95;
-    gui.funCallback = Game::GuiProc;
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "object.window_renderable", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_PANEL;
-    gui.panelAnchor = g2Anchor_None;
-    gui.label = "Object renderable";
-    gui.position.x = left;
-    gui.position.y = 250;
-    gui.width = width;
-    gui.height = 95;
-    gui.funCallback = Game::GuiProc;
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "object.window_collision", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_PANEL;
-    gui.panelAnchor = g2Anchor_None;
-    gui.label = "Object collision";
-    gui.position.x = left;
-    gui.position.y = 350;
-    gui.width = width;
-    gui.height = 95;
-    gui.funCallback = Game::GuiProc;
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "object.window_trigger", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_PANEL;
-    gui.panelAnchor = g2Anchor_None;
-    gui.label = "Object trigger";
-    gui.position.x = left;
-    gui.position.y = 450;
-    gui.width = width;
-    gui.height = 95;
-    gui.funCallback = Game::GuiProc;
-    obj->EnableGui( &gui );
-
-    //panel: object
-    obj = game->core->CreateObject( "object.object_name", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_TEXTFIELD;
-    gui.position.x = 5;
-    gui.position.y = 25;
-    gui.width = width - 10;
-    gui.label = "ObjectName";
-    gui.panel = "editor/object.window_object";
-    obj->EnableGui( &gui );
-
-    //panel: renderable
-    obj = game->core->CreateObject( "object.is_renderable", guiRoot );
-    gui.type = OBJECT_GUI_CHECKBOX;
-    gui.position.x = 5;
-    gui.position.y = 25;
-    gui.label = "Renderable";
-    gui.funCallback = Game::GuiProc;
-    gui.panel = "editor/object.window_renderable";
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "renderable.texture_label", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_LABEL;
-    gui.position.x = 5;
-    gui.position.y = 40;
-    gui.label = "Texture:";
-    gui.panel = "editor/object.window_renderable";
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "renderable.texture_name", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_TEXTFIELD;
-    gui.position.x = 60;
-    gui.position.y = 37;
-    gui.width = width - 70;
-    gui.label = "temp/brick0.png";
-    gui.panel = "editor/object.window_renderable";
-    obj->EnableGui( &gui );
-
-    //panel: collision
-    obj = game->core->CreateObject( "object.is_collision", guiRoot );
-    gui.type = OBJECT_GUI_CHECKBOX;
-    gui.position.x = 5;
-    gui.position.y = 25;
-    gui.label = "Collision";
-    gui.funCallback = Game::GuiProc;
-    gui.panel = "editor/object.window_collision";
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "object.is_static", guiRoot );
-    gui.type = OBJECT_GUI_CHECKBOX;
-    gui.position.x = 90;
-    gui.position.y = 25;
-    gui.label = "Static";
-    gui.funCallback = Game::GuiProc;
-    gui.panel = "editor/object.window_collision";
-    obj->EnableGui( &gui );
-
-    //panel: trigger
-    obj = game->core->CreateObject( "object.is_trigger", guiRoot );
-    gui.type = OBJECT_GUI_CHECKBOX;
-    gui.position.x = 5;
-    gui.position.y = 25;
-    gui.label = "Trigger";
-    gui.funCallback = Game::GuiProc;
-    gui.panel = "editor/object.window_trigger";
-    obj->EnableGui( &gui );
-
-    //panel: settings
-    obj = game->core->CreateObject( "world.tile_label", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_LABEL;
-    gui.position.x = 5;
-    gui.position.y = 38;
-    gui.label = "Tile size:";
-    gui.panel = "editor/object.window_main";
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "world.tile_size", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_DROPDOWN;
-    gui.position.x = 60;
-    gui.position.y = 35;
-    stdDequeString dropDownList;
-    dropDownList.push_back( "8" );
-    dropDownList.push_back( "16" );
-    dropDownList.push_back( "24" );
-    dropDownList.push_back( "32" );
-    dropDownList.push_back( "48" );
-    dropDownList.push_back( "64" );
-    gui.stringList = dropDownList;
-    gui.panel = "editor/object.window_main";
-    g2Controller *controller = obj->EnableGui( &gui );
-    ( ( g2DropDown* ) controller )->SetSelectionIndex( 2 );
-    game->dropDownLists[ controller ] = dropDownList;
-    //game->dropDownLists.insert( game->dropDownLists.vavalue_type( controller, dropDownList ) );
-
-    obj = game->core->CreateObject( "object.tile_apply", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_BUTTON;
-    gui.position.x = 120;
-    gui.position.y = 35;
-    gui.label = "Apply";
-    gui.panel = "editor/object.window_main";
-    gui.funCallback = Game::GuiProc;
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "settings.layer_label", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_LABEL;
-    gui.position.x = 5;
-    gui.position.y = 20;
-    gui.label = "Layer:";
-    gui.panel = "editor/object.window_main";
-    obj->EnableGui( &gui );
-
-    obj = game->core->CreateObject( "settings.layer", guiRoot );
-    gui.Reset();
-    gui.type = OBJECT_GUI_DROPDOWN;
-    gui.position.x = 60;
-    gui.position.y = 17;
-    gui.width = 100;
-    dropDownList.clear();
-    dropDownList.push_back( "default" );
-    dropDownList.push_back( "renderable" );
-    dropDownList.push_back( "collision" );
-    dropDownList.push_back( "trigger" );
-    gui.stringList = dropDownList;
-    gui.panel = "editor/object.window_main";
-    gui.funCallback = Game::GuiProc;
-    controller = obj->EnableGui( &gui );
-    game->dropDownLists[ controller ] = dropDownList;
-
-  }
+  game->InitGui();
 
   sTimer.Update();
   game->world->Update( true );
@@ -669,8 +456,10 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     if( obj = game->core->GetObject( "test-bg-2" ) )
     {
       quad = ( RenderableQuad* ) obj->GetRenderable();
-      float scale = Math::Sin16( rot * 2.0f ) * 1.0f + 5.0f;
-      quad->SetScale( Vec2( scale, scale ) )->SetRotation( -rot );
+      if( quad ) {
+        float scale = Math::Sin16( rot * 2.0f ) * 1.0f + 5.0f;
+        quad->SetScale( Vec2( scale, scale ) )->SetRotation( -rot );
+      }
     }
       //obj->SetPosition( Vec3( -20.0f, 50.0f + Math::Sin16( rot * 5.0f ) * 50.0f, 0.0f ) );
 
@@ -1425,6 +1214,12 @@ std::string Game::LUA_GuiGetText( const std::string &guiName )
       std::string str = ( ( g2TextField* ) controller )->GetText();
       return str;
     }
+    case OBJECT_GUI_SPINNER: {
+      Variable v;
+      v.SetNumber( ( ( g2Spinner* ) controller )->GetFloat() );
+      std::string str = v.GetString();
+      return str;
+    }
     case OBJECT_GUI_DROPDOWN: {
       dropDownListsType::iterator iter = game->dropDownLists.find( controller );
       std::string str = "";
@@ -1465,6 +1260,12 @@ void Game::LUA_GuiSetText( const std::string &guiName, const std::string &text )
   switch( object->GetGuiType() ) {
     case OBJECT_GUI_TEXTFIELD: {
       ( ( g2TextField* ) controller )->SetText( text.c_str() );
+      return;
+    }
+    case OBJECT_GUI_SPINNER: {
+      Variable v;
+      v.SetNumber( text );
+      ( ( g2Spinner* ) controller )->SetFloat( v.GetNumber() );
       return;
     }
     case OBJECT_GUI_DROPDOWN: {
@@ -2159,3 +1960,270 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
 
   }
 }//LUA_ObjectAttr
+
+
+/*
+=============
+  InitGui
+=============
+*/
+void Game::InitGui() {
+  Object *obj;
+
+  Object *guiRoot = game->core->CreateObject( "editor" );
+  int windowWidth = game->core->GetWindowSize().width,
+      width = 200,
+      left = windowWidth - width,
+      y = 0
+      ;
+  Object::GuiConstructor gui;
+
+  obj = game->core->CreateObject( "debug", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_TEXTFIELD;
+  gui.position.x = 0;
+  gui.position.y = 0;
+  gui.width = 200;
+  gui.label = "";
+  obj->EnableGui( &gui );
+
+  //panels
+  obj = game->core->CreateObject( "object.window_main", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_PANEL;
+  gui.panelAnchor = g2Anchor_None;
+  gui.label = "Settings";
+  gui.position.x = left;
+  gui.position.y = y;
+  gui.width = width;
+  gui.height = 145;
+  gui.funCallback = Game::GuiProc;
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "object.window_object", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_PANEL;
+  gui.panelAnchor = g2Anchor_None;
+  gui.label = "Object";
+  gui.position.x = left;
+  gui.position.y = 150;
+  gui.width = width;
+  gui.height = 95;
+  gui.funCallback = Game::GuiProc;
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "object.window_renderable", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_PANEL;
+  gui.panelAnchor = g2Anchor_None;
+  gui.label = "Object renderable";
+  gui.position.x = left;
+  gui.position.y = 250;
+  gui.width = width;
+  gui.height = 95;
+  gui.funCallback = Game::GuiProc;
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "object.window_collision", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_PANEL;
+  gui.panelAnchor = g2Anchor_None;
+  gui.label = "Object collision";
+  gui.position.x = left;
+  gui.position.y = 350;
+  gui.width = width;
+  gui.height = 95;
+  gui.funCallback = Game::GuiProc;
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "object.window_trigger", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_PANEL;
+  gui.panelAnchor = g2Anchor_None;
+  gui.label = "Object trigger";
+  gui.position.x = left;
+  gui.position.y = 450;
+  gui.width = width;
+  gui.height = 95;
+  gui.funCallback = Game::GuiProc;
+  obj->EnableGui( &gui );
+
+  //panel: object
+  obj = game->core->CreateObject( "object.object_name", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_TEXTFIELD;
+  gui.position.x = 5;
+  gui.position.y = 25;
+  gui.width = width - 10;
+  gui.label = "ObjectName";
+  gui.panel = "editor/object.window_object";
+  obj->EnableGui( &gui );
+
+  //panel: renderable
+  obj = game->core->CreateObject( "object.is_renderable", guiRoot );
+  gui.type = OBJECT_GUI_CHECKBOX;
+  gui.position.x = 5;
+  gui.position.y = 25;
+  gui.label = "Renderable";
+  gui.funCallback = Game::GuiProc;
+  gui.panel = "editor/object.window_renderable";
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "renderable.texture_label", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_LABEL;
+  gui.position.x = 5;
+  gui.position.y = 40;
+  gui.label = "Texture:";
+  gui.panel = "editor/object.window_renderable";
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "renderable.texture_name", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_TEXTFIELD;
+  gui.position.x = 60;
+  gui.position.y = 37;
+  gui.width = width - 70;
+  gui.label = "temp/brick0.png";
+  gui.panel = "editor/object.window_renderable";
+  obj->EnableGui( &gui );
+
+  //renderable size
+  obj = game->core->CreateObject( "renderable.width_label", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_LABEL;
+  gui.position.x = 5;
+  gui.position.y = 55;
+  gui.label = "Size:";
+  gui.panel = "editor/object.window_renderable";
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "renderable.width", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_SPINNER;
+  gui.position.x = 35;
+  gui.position.y = 52;
+  gui.width = 40;
+  gui.spinnerType = g2SpinnerType_Float;
+  gui.bounds.min = 0.0f;
+  gui.bounds.max = 65536.0f;
+  gui.panel = "editor/object.window_renderable";
+  gui.funCallback = Game::GuiProc;
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "renderable.height_label", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_LABEL;
+  gui.position.x = 95;
+  gui.position.y = 55;
+  gui.label = "X";
+  gui.panel = "editor/object.window_renderable";
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "renderable.height", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_SPINNER;
+  gui.position.x = 105;
+  gui.position.y = 52;
+  gui.width = 40;
+  gui.spinnerType = g2SpinnerType_Float;
+  gui.bounds.min = 0.0f;
+  gui.bounds.max = 65536.0f;
+  gui.panel = "editor/object.window_renderable";
+  gui.funCallback = Game::GuiProc;
+  obj->EnableGui( &gui );
+
+  //panel: collision
+  obj = game->core->CreateObject( "object.is_collision", guiRoot );
+  gui.type = OBJECT_GUI_CHECKBOX;
+  gui.position.x = 5;
+  gui.position.y = 25;
+  gui.label = "Collision";
+  gui.funCallback = Game::GuiProc;
+  gui.panel = "editor/object.window_collision";
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "object.is_static", guiRoot );
+  gui.type = OBJECT_GUI_CHECKBOX;
+  gui.position.x = 90;
+  gui.position.y = 25;
+  gui.label = "Static";
+  gui.funCallback = Game::GuiProc;
+  gui.panel = "editor/object.window_collision";
+  obj->EnableGui( &gui );
+
+  //panel: trigger
+  obj = game->core->CreateObject( "object.is_trigger", guiRoot );
+  gui.type = OBJECT_GUI_CHECKBOX;
+  gui.position.x = 5;
+  gui.position.y = 25;
+  gui.label = "Trigger";
+  gui.funCallback = Game::GuiProc;
+  gui.panel = "editor/object.window_trigger";
+  obj->EnableGui( &gui );
+
+  //panel: settings
+  obj = game->core->CreateObject( "world.tile_label", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_LABEL;
+  gui.position.x = 5;
+  gui.position.y = 38;
+  gui.label = "Tile size:";
+  gui.panel = "editor/object.window_main";
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "world.tile_size", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_DROPDOWN;
+  gui.position.x = 60;
+  gui.position.y = 35;
+  stdDequeString dropDownList;
+  dropDownList.push_back( "8" );
+  dropDownList.push_back( "16" );
+  dropDownList.push_back( "24" );
+  dropDownList.push_back( "32" );
+  dropDownList.push_back( "48" );
+  dropDownList.push_back( "64" );
+  gui.stringList = dropDownList;
+  gui.panel = "editor/object.window_main";
+  g2Controller *controller = obj->EnableGui( &gui );
+  ( ( g2DropDown* ) controller )->SetSelectionIndex( 2 );
+  game->dropDownLists[ controller ] = dropDownList;
+  //game->dropDownLists.insert( game->dropDownLists.vavalue_type( controller, dropDownList ) );
+
+  obj = game->core->CreateObject( "object.tile_apply", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_BUTTON;
+  gui.position.x = 120;
+  gui.position.y = 35;
+  gui.label = "Apply";
+  gui.panel = "editor/object.window_main";
+  gui.funCallback = Game::GuiProc;
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "settings.layer_label", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_LABEL;
+  gui.position.x = 5;
+  gui.position.y = 20;
+  gui.label = "Layer:";
+  gui.panel = "editor/object.window_main";
+  obj->EnableGui( &gui );
+
+  obj = game->core->CreateObject( "settings.layer", guiRoot );
+  gui.Reset();
+  gui.type = OBJECT_GUI_DROPDOWN;
+  gui.position.x = 60;
+  gui.position.y = 17;
+  gui.width = 100;
+  dropDownList.clear();
+  dropDownList.push_back( "default" );
+  dropDownList.push_back( "renderable" );
+  dropDownList.push_back( "collision" );
+  dropDownList.push_back( "trigger" );
+  gui.stringList = dropDownList;
+  gui.panel = "editor/object.window_main";
+  gui.funCallback = Game::GuiProc;
+  controller = obj->EnableGui( &gui );
+  game->dropDownLists[ controller ] = dropDownList;
+}//InitGui

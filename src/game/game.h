@@ -109,6 +109,7 @@ public:
 
   void Update();
   void UpdateLuaTimers();
+  void InitGui();
 
   static void   KeyboardProc          ( Dword keyId, bool isPressed );
   static void   MouseKeyProc          ( Dword keyId, bool isPressed );

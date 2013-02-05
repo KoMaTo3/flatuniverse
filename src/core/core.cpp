@@ -1002,13 +1002,16 @@ bool Core::Redraw()
         glUseProgram( 0 );
         glDisable( GL_TEXTURE_2D );
         glDisable( GL_DEPTH_TEST );
-        float alpha = Math::Sin16( ( float ) sTimer.GetTime() * 5.0f ) * 0.25f + 0.5f;
+        float alpha = Math::Sin16( ( float ) sTimer.GetTime() * 5.0f ) * 0.5f + 0.5f;
+        bool showSelected = false;
+        Vec4 selectedRect;
 
         //renderable
         if( this->debug.renderRenderable && __coreRenderableListIndicies->size() )
         {
           CoreRenderableListIndicies::iterator iterIndex, iterIndexEnd = __coreRenderableListIndicies->end();
           glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+          glLineWidth( 2.0f );
           glBegin( GL_QUADS );
           Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f );
           Vec2 size;
@@ -1020,14 +1023,22 @@ bool Core::Redraw()
             size.x *= quad->GetScale().x;
             size.y *= quad->GetScale().y;
             if( this->debug.selectedObject && this->debug.selectedObject->GetRenderable() == quad ) {
-              glColor4f( 1.0f, 0.0f, 0.0f, alpha );
+              showSelected = true;
+              selectedRect.Set( pos.x - size.x, pos.y - size.y, pos.x + size.x, pos.y + size.y );
             } else {
               glColor4f( 0.0f, 1.0f, 0.0f, alpha );
+              glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
+              glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
+              glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
+              glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
             }
-            glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
-            glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
-            glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
-            glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
+          }
+          if( showSelected ) {
+            glColor4f( 1.0f, 0.0f, 0.0f, alpha );
+            glVertex3f( selectedRect.x, selectedRect.y, 0.0f );
+            glVertex3f( selectedRect.z, selectedRect.y, 0.0f );
+            glVertex3f( selectedRect.z, selectedRect.w, 0.0f );
+            glVertex3f( selectedRect.x, selectedRect.w, 0.0f );
           }
           glEnd();
           glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -1043,7 +1054,7 @@ bool Core::Redraw()
             pos = ( *iter )->GetPosition() - camera;
             size = ( *iter )->GetSize() * 0.5f;
             if( this->debug.selectedObject && this->debug.selectedObject->GetCollision() == *iter ) {
-              glColor4f( 1.0f, 0.0f, 0.0f, alpha );
+              glColor4f( 1.0f, 0.0f, 0.0f, Math::Sqrt16( alpha ) );
             } else {
               glColor4f( 0.0f, 1.0f, 0.0f, alpha );
             }
@@ -1065,7 +1076,7 @@ bool Core::Redraw()
             pos = ( *iter )->GetPosition() - camera;
             size = ( *iter )->GetSize() * 0.5f;
             if( this->debug.selectedObject && this->debug.selectedObject->GetTrigger() == *iter ) {
-              glColor4f( 1.0f, 0.0f, 0.0f, alpha );
+              glColor4f( 1.0f, 0.0f, 0.0f, Math::Sqrt16( alpha ) );
             } else {
               glColor4f( 0.0f, 1.0f, 0.0f, alpha );
             }
@@ -1750,11 +1761,13 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 
     case WM_KEYDOWN:
     {
-      __log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d => %d mods[%d]", wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
+      __log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d[x%X] => %d mods[%d]", wParam, wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
       if( core->gui.show ) {
         Glui2::__KeyboardFunc( Keyboard::KeyCodeToGlut( wParam ), core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }
-      core->keyboard.DoPress( wParam );
+      if( !core->gui.show || !Glui2::__KeyboardInteracted ) {
+        core->keyboard.DoPress( wParam );
+      }
       return 0;
     }
 

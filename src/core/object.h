@@ -13,6 +13,7 @@
 #include "objectpointerinterface.h"
 #include "objecttriggermgr.h"
 #include "glui2/g2Theme.h"
+#include "glui2/g2Spinner.h"
 
 
 
@@ -80,6 +81,7 @@ enum ObjectGuiType {
   OBJECT_GUI_DROPDOWN   = 4,
   OBJECT_GUI_LABEL      = 5,
   OBJECT_GUI_PANEL      = 6,
+  OBJECT_GUI_SPINNER    = 7,
 
   //OBJECT_GUI_DIALOG   = 5
 };
@@ -114,6 +116,10 @@ public:
     Vec4          color;
     std::string   panel;
     g2Anchor      panelAnchor;
+    g2SpinnerType spinnerType;
+    struct {
+      float min, max;
+    } bounds;
 
     GuiConstructor() {
       this->Reset();
@@ -129,6 +135,9 @@ public:
       this->color.Set( 0.0f, 0.0f, 0.0f, 1.0f );
       this->panel = "";
       this->panelAnchor = g2Anchor_Center;
+      this->spinnerType = g2SpinnerType_Float;
+      this->bounds.min = -10000.0f;
+      this->bounds.max = 10000.0f;
       //this->dialogType = g2DialogType_Notification;
     }
   };

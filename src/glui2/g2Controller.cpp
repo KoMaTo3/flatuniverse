@@ -738,7 +738,7 @@ void g2Controller::__MouseHover(int x, int y)
 void g2Controller::__MouseClick(g2MouseButton button, g2MouseClick state, int x, int y)
 {
     // Ignore if not visible
-    if(!GetVisibility())
+  if(!GetVisibility() || GetDisabled())
         return;
     
     // Update mouse to localized positions

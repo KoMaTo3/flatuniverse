@@ -40,17 +40,19 @@ function Init()
   GuiAddTrigger( 'editor/object.is_trigger', 'ToggleTrigger' )
   GuiAddTrigger( 'editor/object.is_static', 'ToggleStatic' )
   GuiAddTrigger( 'editor/object.tile_apply', 'TileApply' )
+  GuiAddTrigger( 'editor/renderable.width', 'ToggleRenderableSize' )
+  GuiAddTrigger( 'editor/renderable.height', 'ToggleRenderableSize' )
 
   -- показываем GUI
   settings.guiVisibility = true
   SetGuiVisibility( settings.guiVisibility )
   -- SetTimer( 0.01, 'UpdateDebug' )
 
+  UpdateGuiBySelectedObject()
   -- ObjectAttr( 'wall', { 'textureName' } )
-  local r,g,b,a = ObjectAttr( 'wall', { 'color' } )
-  Alert( '', r..':'..g..':'..b..':'..a )
+  -- local r,g,b,a = ObjectAttr( 'wall', { 'color' } )
+  -- Alert( '', r..':'..g..':'..b..':'..a )
 end
-Init()
 
 -- Обработка кнопок клавы
 function onKey( id, isPressed )
@@ -84,6 +86,10 @@ function onKey( id, isPressed )
           ObjectRemove( object )
         end
       end
+      if id == 0x20 then    -- Space
+        SelectObject( '' )
+        UpdateGuiBySelectedObject()
+      end
   end
   if id == 0x4C then
     LoadScript( 'data/scripts/clrscr.lua' )
@@ -97,8 +103,8 @@ function onMouseKey( id, isPressed )
       if isPressed then
         local object = GetObjectUnderCursorByMode()
         if #object > 0 then
-            GuiSetText( 'editor/object.object_name', object )
             SelectObject( object )
+            UpdateGuiBySelectedObject()
             settings.editorMode = 1
         else
             -- multiselect?
@@ -124,8 +130,8 @@ function onMouseKey( id, isPressed )
       else
         local object = GetObjectUnderCursorByMode()
         if #object > 0 then
-          GuiSetText( 'editor/object.object_name', object )
           SelectObject( object )
+          UpdateGuiBySelectedObject()
         end
       end
     end,
@@ -136,8 +142,8 @@ function onMouseKey( id, isPressed )
           settings.editorMode = 2
         else
           local object = GetObjectUnderCursorByMode()
-          GuiSetText( 'editor/object.object_name', object )
           SelectObject( object )
+          UpdateGuiBySelectedObject()
           if #object > 0 then
             settings.editorMode = 2
           else
@@ -279,6 +285,7 @@ function TileApply( guiName )
   ToggleRenderable( 'editor/object.is_renderable' )
   ToggleCollision( 'editor/object.is_collision' )
   ToggleTrigger( 'editor/object.is_trigger' )
+  UpdateGuiBySelectedObject()
   settings.editorMode = 2
 end
 
@@ -302,3 +309,62 @@ function UpdateDebug()
   GuiSetText( 'editor/debug', settings.editorMode..':'..( settings.objectMode3Moved and 'true' or 'false' ) )
   SetTimer( 0.01, 'UpdateDebug' )
 end
+
+function UpdateGuiBySelectedObject()
+  local object = GetSelectedObject()
+  elements = {
+    'editor/object.object_name',
+    'editor/object.is_renderable',
+    'editor/renderable.texture_name',
+    'editor/object.is_collision',
+    'editor/object.is_static',
+    'editor/object.is_trigger',
+    'editor/renderable.width',
+    'editor/renderable.height',
+  }
+  if #object < 1 then
+    for i=1,#elements do
+      GuiAttr( elements[ i ], 'enabled', false )
+      GuiAttr( elements[ i ], 'checked', false )
+    end
+  else
+    local isRenderable
+        , isCollision
+        , isTrigger
+        , textureName
+        , renderableSizeX
+        , renderableSizeY
+        = ObjectAttr( object, {
+          'renderable',
+          'collision',
+          'trigger',
+          'textureName',
+          'renderableSize',
+        } )
+    GuiAttr( 'editor/object.is_renderable', 'enabled', true )
+    GuiAttr( 'editor/object.is_collision', 'enabled', true )
+    GuiAttr( 'editor/object.is_trigger', 'enabled', true )
+    GuiAttr( 'editor/renderable.width', 'enabled', isRenderable )
+    GuiAttr( 'editor/renderable.height', 'enabled', isRenderable )
+    GuiAttr( 'editor/renderable.texture_name', 'enabled', isRenderable )
+    GuiAttr( 'editor/object.is_renderable', 'checked', isRenderable )
+    GuiAttr( 'editor/object.is_collision', 'checked', isCollision )
+    GuiAttr( 'editor/object.is_trigger', 'checked', isTrigger )
+    GuiSetText( 'editor/renderable.texture_name', textureName )
+    GuiSetText( 'editor/renderable.width', renderableSizeX )
+    GuiSetText( 'editor/renderable.height', renderableSizeY )
+  end
+  GuiSetText( 'editor/object.object_name', object )
+end
+
+function ToggleRenderableSize()
+  local object = GetSelectedObject()
+  if #object < 1 then
+  else
+    local width   = GuiGetText( 'editor/renderable.width' )
+    local height  = GuiGetText( 'editor/renderable.height' )
+    ObjectAttr( object, { renderableSize = width..' '..height } )
+  end
+end
+
+Init()
