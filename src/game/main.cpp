@@ -730,6 +730,7 @@ Game::Game()
   LUAFUNC_SelectObject      = Game::LUA_SelectObject;
   LUAFUNC_GetSelectedObject = Game::LUA_GetSelectedObject;
   LUAFUNC_GuiAttr           = Game::LUA_GuiAttr;
+  LUAFUNC_LoadScript        = Game::LUA_LoadScript;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -1793,3 +1794,13 @@ void Game::LUA_GuiAttr( const std::string &guiName, const std::string &parameter
     //checked
   }
 }//LUA_GuiAttr
+
+/*
+=============
+  LUA_LoadScript
+=============
+*/
+void Game::LUA_LoadScript( const std::string &fileName )
+{
+  game->lua->RunFile( fileName );
+}//LUA_LoadScript

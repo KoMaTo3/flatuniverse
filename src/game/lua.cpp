@@ -44,6 +44,7 @@ LUAFUNCPROC_SetGuiVisibility  *LUAFUNC_SetGuiVisibility     = NULL;
 LUAFUNCPROC_SelectObject      *LUAFUNC_SelectObject         = NULL;
 LUAFUNCPROC_GetSelectedObject *LUAFUNC_GetSelectedObject    = NULL;
 LUAFUNCPROC_GuiAttr           *LUAFUNC_GuiAttr              = NULL;
+LUAFUNCPROC_LoadScript        *LUAFUNC_LoadScript           = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -121,6 +122,7 @@ bool Lua::Init()
   lua_register( this->luaState, "SelectObject",     Lua::LUA_SelectObject );
   lua_register( this->luaState, "GetSelectedObject",Lua::LUA_GetSelectedObject );
   lua_register( this->luaState, "GuiAttr",          Lua::LUA_GuiAttr );
+  lua_register( this->luaState, "LoadScript",       Lua::LUA_LoadScript );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -1018,6 +1020,26 @@ int Lua::LUA_GetRandomSeed( lua_State *lua )
   lua_pushinteger( lua, seed );
   return 1;
 }//LUA_GetRandomSeed
+
+
+
+/*
+=============
+  LUA_LoadScript
+=============
+*/
+int Lua::LUA_LoadScript( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_LoadScript => not enough parameters" );
+    return 0;
+  }
+  std::string fileName = lua_tostring( lua, 1 );
+  LUAFUNC_LoadScript( fileName );
+  return 0;
+}//LUA_LoadScript
 
 
 

@@ -81,6 +81,9 @@ function onKey( id, isPressed )
         end
       end
   end
+  if id == 0x4C then
+    LoadScript( 'data/scripts/clrscr.lua' )
+  end
 end
 
 -- Обработка кнопок мыши
