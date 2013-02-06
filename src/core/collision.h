@@ -4,8 +4,77 @@
 #include "memorywriter.h"
 #include "memoryreader.h"
 #include <deque>
+#include "tools.h"
 
 #define COLLISION_FRICTION_FORCE   ( 0.95f )
+
+enum CollisionElementType {
+  COLLISION_ELEMENT_TYPE_UNDEFINED,
+  COLLISION_ELEMENT_TYPE_SQUARE,    //выталкивает только самого себя
+  COLLISION_ELEMENT_TYPE_CIRCLE,    //выталкивает себя и квадраты
+  COLLISION_ELEMENT_TYPE_POLYLINE,  //выталкивает себя, круги и квадраты
+};
+
+struct CollisionRect {
+  Vec3  leftTop;
+  Vec3  rightBottom;
+  float radius2;    //квадрат радиуса объекта
+};
+
+//"болванка" для различных видов коллизий
+class CollisionElementSquare;
+class CollisionElement {
+  friend class CollisionElementSquare;
+  friend class CollisionElementCircle;
+public:
+  CollisionElement( CollisionElementType setType, Vec3 *setPos, CollisionRect *setRect );
+  virtual ~CollisionElement(){}
+  inline        CollisionElementType GetType(){ return this->type; }
+  virtual void  Update() = 0;
+  virtual void  __Dump() = 0;
+  virtual bool  TestIntersect( CollisionElement &object, Vec3 *outSolver ) = NULL;
+
+protected:
+  Vec3 *position;
+  CollisionRect *_rect; //рассчитанный контур объекта (квадрат)
+
+
+  DISALLOW_COPY_AND_ASSIGN( CollisionElement );
+  CollisionElementType  type; //тип коллизии: квадрат, полигон, круг...
+};
+
+//квадрат. всегда в одном положении
+class CollisionElementSquare: public CollisionElement {
+public:
+  CollisionElementSquare( Vec3 *setPos, CollisionRect *setRect );
+  void Update ();
+  void SetSize( const Vec3 &setSize );
+  void __Dump ();
+  bool TestIntersect( CollisionElement &object, Vec3 *outSolver );
+  bool TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver );
+
+private:
+  Vec3 size;
+
+  DISALLOW_COPY_AND_ASSIGN( CollisionElementSquare );
+};
+
+//круг
+class CollisionElementCircle: public CollisionElement {
+public:
+  CollisionElementCircle( Vec3 *setPos, CollisionRect *setRect );
+  void Update ();
+  void SetDiameter( float setDiameter );
+  void __Dump     ();
+  bool TestIntersect( CollisionElement &object, Vec3 *outSolver );
+  bool TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver );
+  bool TestIntersectWithCircle( CollisionElement &object, Vec3 *outSolver );
+
+private:
+  float diameter;
+
+  DISALLOW_COPY_AND_ASSIGN( CollisionElementCircle );
+};
 
 
 
@@ -20,20 +89,20 @@ private:
   float mass;         //масса объекта
   Vec3  force;        //некая "сила", смещающая объект помимо своих скорости/ускорения
 
-  struct
-  {
-    Vec3  leftTop;
-    Vec3  rightBottom;
-    float radius2;    //квадрат радиуса объекта
-  } _rect;            //рассчитанный контур объекта (квадрат)
+  CollisionRect _rect;//рассчитанный контур объекта (квадрат)
+
+  CollisionElement *collisionElement;
 
   struct CollisionResolver
   {
     Vec3 power;
     Vec3 resolveVector;
+    bool useAllAxices;
   };
   typedef std::deque< CollisionResolver > CollisionResolverList;
   CollisionResolverList resolver;
+
+  DISALLOW_COPY_AND_ASSIGN( Collision );
 
 public:
   Collision( Vec3* objectPosition );
@@ -47,6 +116,8 @@ public:
   Collision*  SetIsStatic     ( bool newIsStatic );
   Collision*  SetMass         ( float newMass );
   Collision*  SetForce        ( const Vec3& newForce );
+  Collision*  InitCircle      ( float setDiameter );
+  //Collision*  AddPolyLine     ( z );
 
   inline
   float       GetRadius2      () const { return this->_rect.radius2; }
@@ -72,4 +143,6 @@ public:
 
   void        SaveToBuffer    ( MemoryWriter &writer );
   void        LoadFromBuffer  ( MemoryReader &reader );
+
+  void        __Dump();
 };

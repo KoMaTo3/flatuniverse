@@ -47,8 +47,6 @@ function Init()
   -- SetTimer( 0.01, 'UpdateDebug' )
 
   -- ObjectAttr( 'wall', { 'textureName' } )
-  local r,g,b,a = ObjectAttr( 'wall', { 'color' } )
-  Alert( '', r..':'..g..':'..b..':'..a )
 end
 Init()
 

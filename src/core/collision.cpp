@@ -6,7 +6,7 @@ Vec3 __nullCollisionPosition( 0.0f, 0.0f, 0.0f );
 
 
 Collision::Collision( Vec3* objectPosition )
-:position( NULL ), velocity( 0.0f, 0.0f, 0.0f ), acceleration( 0.0f, 0.0f, 0.0f ), isStatic( true ), mass( 1.0f ), force( 0.0f, 0.0f, 0.0f )
+:position( NULL ), velocity( 0.0f, 0.0f, 0.0f ), acceleration( 0.0f, 0.0f, 0.0f ), isStatic( true ), mass( 1.0f ), force( 0.0f, 0.0f, 0.0f ), collisionElement( NULL )
 {
   this->position = objectPosition;
 }//constructor
@@ -15,6 +15,7 @@ Collision::Collision( Vec3* objectPosition )
 
 Collision::~Collision()
 {
+  DEF_DELETE( collisionElement );
 }//destructor
 
 
@@ -36,11 +37,16 @@ bool Collision::Update( float dt )
   *this->position += ( this->velocity + this->force ) * dt;
 
   //пересчет характеристик
+  /*
   Vec3 halfSize           = this->size * 0.5f;
   this->_rect.leftTop     = *this->position - halfSize;
   this->_rect.rightBottom = *this->position + halfSize;
   //this->_rect.radius2     = halfSize.x * halfSize.x + halfSize.y * halfSize.y;
   this->_rect.radius2     = this->size.x * this->size.x + this->size.y * this->size.y;
+  */
+  if( this->collisionElement ) {
+    this->collisionElement->Update();
+  }
 
   this->resolver.clear();
 
@@ -118,9 +124,37 @@ Collision* Collision::SetPositionBy( const Vec3& deltaPosition )
 */
 Collision* Collision::SetSize( const Vec3& newSize )
 {
+  if( !this->collisionElement ) {
+    CollisionElementSquare *item = new CollisionElementSquare( this->position, &this->_rect );
+    this->collisionElement = item;
+    item->SetSize( newSize );
+  } else if( this->collisionElement->GetType() != COLLISION_ELEMENT_TYPE_SQUARE ) {
+    //__log.PrintInfo( Filelevel_ERROR, "Collision::SetSize => this is not a square" );
+    return this;
+  }
   this->size = newSize;
   return this;
 }//SetSize
+
+
+
+/*
+=============
+  InitCircle
+=============
+*/
+Collision* Collision::InitCircle( float setDiameter ) {
+  if( this->collisionElement ) {
+    __log.PrintInfo( Filelevel_ERROR, "Collision::InitCircle => already initialized" );
+    return this;
+  }
+  CollisionElementCircle *item = new CollisionElementCircle( this->position, &this->_rect );
+  this->collisionElement = item;
+  item->SetDiameter( setDiameter );
+
+  return this;
+}//InitCircle
+
 
 
 
@@ -190,18 +224,34 @@ bool Collision::TestIntersect( Collision& item )
   //__log.PrintInfo( Filelevel_DEBUG, "(%3.3f;%3.3f):(%3.3f;%3.3f) - (%3.3f;%3.3f):(%3.3f;%3.3f)", this->_rect.leftTop.x, this->_rect.leftTop.y, this->_rect.rightBottom.x, this->_rect.rightBottom.y
   //  , item._rect.leftTop.x, item._rect.leftTop.y, item._rect.rightBottom.x, item._rect.rightBottom.y
   //  );
+  /*
   if( this->_rect.rightBottom.x <= item._rect.leftTop.x ||
     this->_rect.leftTop.x       >= item._rect.rightBottom.x ||
     this->_rect.rightBottom.y   <= item._rect.leftTop.y ||
     this->_rect.leftTop.y       >= item._rect.rightBottom.y
     )
+  {
+    __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => first square test: false" );
     return false;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => first square test: true" );
 
   Vec3 intersectPower = Vec3(
       Math::Fabs( max( this->_rect.leftTop.x, item._rect.leftTop.x ) - min( this->_rect.rightBottom.x, item._rect.rightBottom.x ) ),
       Math::Fabs( max( this->_rect.leftTop.y, item._rect.leftTop.y ) - min( this->_rect.rightBottom.y, item._rect.rightBottom.y ) ),
       0.0f
     );
+    */
+  Vec3 intersectPower;
+  if( !this->collisionElement || !item.collisionElement ) {
+    __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => some collision is NULL" );
+    return false;
+  }
+  if( !this->collisionElement->TestIntersect( *item.collisionElement, &intersectPower ) ) {
+    __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => no intersect" );
+    return false;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => intersect, solving" );
   Vec3 halfIntersectPower = intersectPower * 0.5f;
 
   /*
@@ -313,15 +363,23 @@ bool Collision::TestIntersect( Collision& item )
   {
     itemResolver0.power = intersectPower;
     itemResolver0.resolveVector = Vec3Null;
-    if( item0->_rect.leftTop.x < item1->_rect.leftTop.x ) //двигаем влево
-      itemResolver0.resolveVector.x = -intersectPower.x;
-    else
-      itemResolver0.resolveVector.x = intersectPower.x;
-    if( item0->_rect.leftTop.y < item1->_rect.leftTop.y ) //поднимаем
-      itemResolver0.resolveVector.y = -intersectPower.y;
-    else
-      itemResolver0.resolveVector.y = intersectPower.y;
-    item0->resolver.push_back( itemResolver0 );
+    itemResolver0.useAllAxices = false;
+    if( item0->collisionElement->GetType() == COLLISION_ELEMENT_TYPE_SQUARE && item1->collisionElement->GetType() == COLLISION_ELEMENT_TYPE_SQUARE ) {
+      if( item0->_rect.leftTop.x < item1->_rect.leftTop.x ) //двигаем влево
+        itemResolver0.resolveVector.x = -intersectPower.x;
+      else
+        itemResolver0.resolveVector.x = intersectPower.x;
+      if( item0->_rect.leftTop.y < item1->_rect.leftTop.y ) //поднимаем
+        itemResolver0.resolveVector.y = -intersectPower.y;
+      else
+        itemResolver0.resolveVector.y = intersectPower.y;
+      item0->resolver.push_back( itemResolver0 );
+    } else {
+      itemResolver0.power = intersectPower;
+      itemResolver0.resolveVector = intersectPower;
+      itemResolver0.useAllAxices = true;
+      item0->resolver.push_back( itemResolver0 );
+    }
     /*
     if( intersectPower.x )
     {
@@ -427,16 +485,24 @@ void Collision::ResolveCollision()
   }
   //__log.PrintInfo( Filelevel_DEBUG, ". power[%3.3f; %3.3f] vector[%3.3f; %3.3f]", result->power.x, result->power.y, result->resolveVector.x, result->resolveVector.y );
 
-  if( result->power.x < result->power.y ) //смещаем по x
-    result->resolveVector.y = 0.0f;
-  else  //смещаем по y
-  {
-    result->resolveVector.x = 0.0f;
-    if( result->resolveVector.y < 0.0f && this->velocity.y > 0.0f )
+  if( result->useAllAxices ) {
+    Vec3 coeffVec = result->resolveVector;
+    coeffVec.Normalize();
+    if( Sign( this->velocity.y ) != Sign( coeffVec.y ) ) {
       this->velocity.y = 0.0f;
-    else
-    if( result->resolveVector.y > 0.0f && this->velocity.y < 0.0f )
-      this->velocity.y = 0.0f;
+    }
+  } else {
+    if( result->power.x < result->power.y ) //смещаем по x
+      result->resolveVector.y = 0.0f;
+    else  //смещаем по y
+    {
+      result->resolveVector.x = 0.0f;
+      if( result->resolveVector.y < 0.0f && this->velocity.y > 0.0f )
+        this->velocity.y = 0.0f;
+      else
+      if( result->resolveVector.y > 0.0f && this->velocity.y < 0.0f )
+        this->velocity.y = 0.0f;
+    }
   }
   this->SetPositionBy( result->resolveVector );
 
@@ -494,3 +560,264 @@ void Collision::LoadFromBuffer( MemoryReader &reader )
   reader >> v3;
   this->SetForce( v3 );
 }//LoadFromBuffer
+
+
+
+/*
+=============
+  __Dump
+=============
+*/
+void Collision::__Dump() {
+  __log.PrintUseTime( "Collision::__Dump\n" );
+  __log.PrintAligned( ". initialized: %s\n", ( this->collisionElement ? "true" : "false" ) );
+  if( this->collisionElement ) {
+    __log.PrintAligned( ". type: %d\n", this->collisionElement->GetType() );
+    this->collisionElement->__Dump();
+  }
+  __log.PrintAligned( "Collision::__Dump Done\n" );
+}//__Dump
+
+
+
+//
+//  CollisionElement
+//
+
+
+/*
+//=============
+//  CollisionElement
+//=============
+*/
+CollisionElement::CollisionElement( CollisionElementType setType, Vec3 *setPos, CollisionRect *setRect )
+:type( setType ), position( setPos ), _rect( setRect )
+{
+  if( !setPos ) {
+    __log.PrintInfo( Filelevel_ERROR, "CollisionElement => position is NULL" );
+  }
+  if( !setRect ) {
+    __log.PrintInfo( Filelevel_ERROR, "CollisionElement => rect is NULL" );
+  }
+}//constructor
+
+
+
+//
+//  CollisionElementSquare
+//
+
+CollisionElementSquare::CollisionElementSquare( Vec3 *setPos, CollisionRect *setRect )
+:CollisionElement( COLLISION_ELEMENT_TYPE_SQUARE, setPos, setRect )
+{
+}//constructor
+
+
+/*
+=============
+  Update
+=============
+*/
+void CollisionElementSquare::Update() {
+  Vec3 halfSize = this->size * 0.5f;
+  //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::Update => size[%3.1f; %3.1f]", this->size.x, this->size.y );
+  this->_rect->leftTop = Vec3( this->position->x - halfSize.x, this->position->y - halfSize.y, 0.0f );
+  this->_rect->rightBottom = Vec3( this->position->x + halfSize.x, this->position->y + halfSize.y, 0.0f );
+  this->_rect->radius2 = this->size.x * this->size.x + this->size.y * this->size.y;
+}
+
+
+/*
+=============
+  __Dump
+=============
+*/
+void CollisionElementSquare::__Dump() {
+  __log.PrintAligned( "CollisionElementSquare: rect[%3.1f; %3.1f]-[%3.1f; %3.1f] radius2[%3.1f]\n", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y, this->_rect->radius2 );
+}//__Dump
+
+
+/*
+=============
+  SetSize
+=============
+*/
+void CollisionElementSquare::SetSize( const Vec3 &setSize ) {
+  this->size = setSize;
+}//SetSize
+
+
+
+/*
+=============
+  TestIntersect
+=============
+*/
+bool CollisionElementSquare::TestIntersect( CollisionElement &object, Vec3 *outSolver ) {
+  if( this->type < object.GetType() ) { //всегда решение коллизий должен делать более "старший" вид коллизии
+    bool res = object.TestIntersect( *this, outSolver );
+    *outSolver = -*outSolver;
+    return res;
+  }
+
+  if( this->_rect->rightBottom.x  <= object._rect->leftTop.x ||
+    this->_rect->leftTop.x        >= object._rect->rightBottom.x ||
+    this->_rect->rightBottom.y    <= object._rect->leftTop.y ||
+    this->_rect->leftTop.y        >= object._rect->rightBottom.y
+    )
+  {
+    //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::TestIntersect => first square test: false" );
+    return false;
+  }
+  //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::TestIntersect => first square test: true" );
+
+  switch( object.GetType() ) {
+    case COLLISION_ELEMENT_TYPE_SQUARE: {
+      return this->TestIntersectWithSquare( object, outSolver );
+      break;
+    }
+  }//type
+
+  return true;
+}//TestIntersect
+
+
+
+/*
+=============
+  TestIntersectWithSquare
+  square + square
+  В эту функцию мы попадаем уже пройдя первоначальную проверку по квадратам, остаётся только вернуть решение
+=============
+*/
+bool CollisionElementSquare::TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver ) {
+  if( outSolver ) {
+    outSolver->Set(
+      Math::Fabs( max( this->_rect->leftTop.x, object._rect->leftTop.x ) - min( this->_rect->rightBottom.x, object._rect->rightBottom.x ) ),
+      Math::Fabs( max( this->_rect->leftTop.y, object._rect->leftTop.y ) - min( this->_rect->rightBottom.y, object._rect->rightBottom.y ) ),
+      0.0f
+    );
+    //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::TestIntersectWithSquare => result[ %3.1f; %3.1f ]", outSolver->x, outSolver->y );
+  }
+  return true;
+}//TestIntersectWithSquare
+
+
+
+//
+//  CollisionElementCircle
+//
+
+CollisionElementCircle::CollisionElementCircle( Vec3 *setPos, CollisionRect *setRect )
+:CollisionElement( COLLISION_ELEMENT_TYPE_CIRCLE, setPos, setRect )
+{
+}//constructor
+
+
+
+/*
+=============
+  SetDiameter
+=============
+*/
+void CollisionElementCircle::SetDiameter( float setDiameter ) {
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::SetDiameter => diameter[%3.1f]", setDiameter );
+  this->diameter = setDiameter;
+}//SetDiameter
+
+
+/*
+=============
+  Update
+=============
+*/
+void CollisionElementCircle::Update() {
+  float halfSize = this->diameter;
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::Update => diameter[%3.1f]", this->diameter );
+  this->_rect->leftTop = Vec3( this->position->x - halfSize, this->position->y - halfSize, 0.0f );
+  this->_rect->rightBottom = Vec3( this->position->x + halfSize, this->position->y + halfSize, 0.0f );
+  this->_rect->radius2 = halfSize * halfSize;
+}
+
+
+/*
+=============
+  __Dump
+=============
+*/
+void CollisionElementCircle::__Dump() {
+  __log.PrintAligned( "CollisionElementCircle: rect[%3.1f; %3.1f]-[%3.1f; %3.1f] radius2[%3.1f] diameter[%3.1f]\n", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y, this->_rect->radius2, this->diameter );
+}//__Dump
+
+
+
+/*
+=============
+  TestIntersect
+=============
+*/
+bool CollisionElementCircle::TestIntersect( CollisionElement &object, Vec3 *outSolver ) {
+  if( this->type < object.GetType() ) { //всегда решение коллизий должен делать более "старший" вид коллизии
+    bool res = object.TestIntersect( *this, outSolver );
+    *outSolver = -*outSolver;
+    return res;
+  }
+
+  if( this->_rect->rightBottom.x  <= object._rect->leftTop.x ||
+    this->_rect->leftTop.x        >= object._rect->rightBottom.x ||
+    this->_rect->rightBottom.y    <= object._rect->leftTop.y ||
+    this->_rect->leftTop.y        >= object._rect->rightBottom.y
+    )
+  {
+    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersect => first square test: false" );
+    return false;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersect => first square test: true" );
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersect => diameters: %3.1f : %3.1f", this->diameter, ( ( CollisionElementCircle* ) &object )->diameter );
+
+  switch( object.GetType() ) {
+    case COLLISION_ELEMENT_TYPE_SQUARE: {
+      //return this->TestIntersectWithSquare( object, outSolver );
+      break;
+    }
+    case COLLISION_ELEMENT_TYPE_CIRCLE: {
+      return this->TestIntersectWithCircle( object, outSolver );
+      break;
+    }
+  }//type
+
+  return true;
+}//TestIntersect
+
+
+
+/*
+=============
+  TestIntersectWithCircle
+=============
+*/
+bool CollisionElementCircle::TestIntersectWithCircle( CollisionElement &object, Vec3 *outSolver ) {
+  CollisionElementCircle *obj = ( CollisionElementCircle* ) &object;
+  float summRadius = ( this->diameter + obj->diameter ) * 0.5f;
+  float minDistance = summRadius * summRadius;
+  Vec3 distance       = *obj->position - *this->position;
+  float distance2     = distance.x * distance.x + distance.y * distance.y;
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersectWithCircle => %3.1f >= %3.1f", minDistance, distance2 );
+  if( minDistance < distance2 ) {
+    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersectWithCircle => no intersect" );
+    return false;
+  }
+
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersectWithCircle => intersected, solvnig" );
+  if( outSolver ) {
+    float currentDistance = Vec3( *obj->position - *this->position ).Length();
+    float minDistance = ( this->diameter + obj->diameter ) * 0.5f;
+    __log.PrintInfo( Filelevel_DEBUG, ". currentDistance[%3.1f]", currentDistance );
+    __log.PrintInfo( Filelevel_DEBUG, ". minDistance[%3.1f]", minDistance );
+    distance.Normalize();
+    *outSolver = -distance * ( minDistance - currentDistance + 1.0f );
+    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersectWithCircle => solvation[%3.1f; %3.1f]", outSolver->x, outSolver->y );
+  }
+
+  return true;
+}//TestIntersectWithCircle
