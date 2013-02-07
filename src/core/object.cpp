@@ -842,7 +842,25 @@ g2Controller* Object::EnableGui( const GuiConstructor *info )
       }
       this->gui.guiController = item;
       break;
-    }//label
+    }//textfield
+
+    // !position
+    // !spinnerType
+    // ?width
+    case OBJECT_GUI_SPINNER: {
+      g2Spinner *item = NULL;
+      if( panel ) {
+        item = panel->AddSpinner( info->position.x, info->position.y, info->spinnerType, Object::_GuiCallback );
+      } else {
+        item = __coreGlui->AddSpinner( info->position.x, info->position.y, info->spinnerType, Object::_GuiCallback );
+      }
+      item->SetBounds( info->bounds.min, info->bounds.max );
+      if( info->width ) {
+        item->SetWidth( info->width );
+      }
+      this->gui.guiController = item;
+      break;
+    }//spinner
 
     /*
     case OBJECT_GUI_DIALOG: {
@@ -1427,12 +1445,16 @@ Object* Object::GetObjectByRenderableIndex( CoreRenderableList *renderableList, 
 */
 void Object::_GuiCallback( g2Controller *controller )
 {
+  if( !controller || controller->GetDisabled() ) {
+    return;
+  }
   __log.PrintInfo( Filelevel_DEBUG, "Object::_GuiCallback => controller[x%p] objects[%d]", controller, __objectByGui->size() );
   ObjectByGuiList::iterator iter, iterEnd = __objectByGui->end();
-  for( iter = __objectByGui->begin(); iter != iterEnd; ++iter ) {
+  for( iter = __objectByGui->begin(); iter != iterEnd; ++iter ) if( !controller->GetDisabled() ) {
     __log.PrintInfo( Filelevel_DEBUG, ". controller[x%X] function['%s']", ( *iter )->gui, ( *iter )->object.GetObject< Object >()->GetNameFull().c_str() );
     if( ( *iter )->gui == controller && ( *iter )->object.GetValid() && ( *iter )->object.GetObject< Object >()->gui.funCallback ) {
       ( ( Object* ) ( *iter )->object.GetObject() )->gui.funCallback( ( *iter )->object.GetObject< Object >() );
     }
   }
+  __log.PrintInfo( Filelevel_DEBUG, "Object::_GuiCallback => done" );
 }//_GuiCallback

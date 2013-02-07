@@ -1239,6 +1239,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
       VariableAttribute *var;
       for( iter = getAttrs.begin(); iter != iterEnd; ++iter ) {
         var = *iter;
+        __log.PrintInfo( Filelevel_DEBUG, ". type[%d]", var->value.GetType() );
         switch( ( *iter )->value.GetType() ) {
           case VariableType_NUMBER: {
             __log.PrintInfo( Filelevel_DEBUG, ". number[%3.3f]", var->value.GetNumber() );

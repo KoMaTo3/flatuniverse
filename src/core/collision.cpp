@@ -1,5 +1,6 @@
 #include "collision.h"
 #include "file.h"
+#include "gl/gl.h"
 
 
 Vec3 __nullCollisionPosition( 0.0f, 0.0f, 0.0f );
@@ -602,6 +603,48 @@ void Collision::__Dump() {
   }
   __log.PrintAligned( "Collision::__Dump Done\n" );
 }//__Dump
+
+
+
+
+/*
+=============
+  Render
+=============
+*/
+void Collision::Render( float phase, const Vec3 &offset, bool isActive ) {
+  if( !this->collisionElement ) {
+    return;
+  }
+  if( isActive ) {
+    glColor4f( 1.0f, 0.0f, 0.0f, Math::Sqrt16( phase ) );
+  } else {
+    glColor4f( 0.0f, 1.0f, 0.0f, phase );
+  }
+  switch( this->collisionElement->GetType() ) {
+    case COLLISION_ELEMENT_TYPE_CIRCLE: {
+      glBegin( GL_TRIANGLE_FAN );
+      CollisionElementCircle *item = ( CollisionElementCircle* ) this->collisionElement;
+      for( float a = 0.0f; a < Math::PI * 2.0f; a += 0.5f ) {
+        glVertex3f( this->position->x - offset.x + item->GetDiameter() * 0.5f * Math::Sin16( a ), this->_rect.leftTop.y - offset.y + item->GetDiameter() * ( 0.5f + 0.5f * Math::Cos16( a ) ), 0.0f );
+      }
+      glEnd();
+      break;
+    }
+    case COLLISION_ELEMENT_TYPE_POLYGON: {
+      break;
+    }
+    default: {
+      glBegin( GL_QUADS );
+      glVertex3f( this->_rect.leftTop.x - offset.x, this->_rect.leftTop.y - offset.y, 0.0f );
+      glVertex3f( this->_rect.rightBottom.x - offset.x, this->_rect.leftTop.y - offset.y, 0.0f );
+      glVertex3f( this->_rect.rightBottom.x - offset.x, this->_rect.rightBottom.y - offset.y, 0.0f );
+      glVertex3f( this->_rect.leftTop.x - offset.x, this->_rect.rightBottom.y - offset.y, 0.0f );
+      glEnd();
+    }
+  }
+}//Render
+
 
 
 

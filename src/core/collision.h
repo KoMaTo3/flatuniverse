@@ -67,6 +67,8 @@ public:
   CollisionElementCircle( Vec3 *setPos, CollisionRect *setRect );
   void Update ();
   void SetDiameter( float setDiameter );
+  inline
+  float GetDiameter() { return this->diameter; }
   void __Dump     ();
   bool TestIntersect( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver );
@@ -171,6 +173,8 @@ public:
 
   void        SaveToBuffer    ( MemoryWriter &writer );
   void        LoadFromBuffer  ( MemoryReader &reader );
+
+  void        Render          ( float phase, const Vec3 &offset, bool isActive );
 
   void        __Dump();
 };

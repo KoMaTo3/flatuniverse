@@ -244,12 +244,12 @@ void Keyboard::RemoveListener( Listener *listenerProc )
 */
 int Keyboard::KeyCodeToGlut( WPARAM code )
 {
-  bool isShift  = ( KeyboardGetModifiers()&1 );
-  bool isCtrl   = ( KeyboardGetModifiers()&2 );
+  bool isShift  = ( KeyboardGetModifiers()&1 ) ? true : false;
+  bool isCtrl   = ( KeyboardGetModifiers()&2 ) ? true : false;
 
   if( isCtrl ) {
     if( code >= VK_LETTER_A && code <= VK_LETTER_Z ) {
-      code -= ( ( int ) 'A' ) - 1;
+      code -= VK_LETTER_A - 1;
       return code;
     }
   }//ctrl
@@ -271,6 +271,9 @@ int Keyboard::KeyCodeToGlut( WPARAM code )
     case VK_NUMBER_7: return ( isShift ? '&' : code );
     case VK_NUMBER_8: return ( isShift ? '*' : code );
     case VK_NUMBER_9: return ( isShift ? '(' : code );
+    case VK_OEM_PERIOD: return ( isShift ? ',' : '.' );
+    case VK_OEM_MINUS: return ( isShift ? '_' : '-' );
+    case VK_OEM_PLUS: return ( isShift ? '+' : '=' );
   }//switch code
 
   if( code >= VK_LETTER_A && code <= VK_LETTER_Z && !isShift ) { //without shift
