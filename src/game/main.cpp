@@ -67,7 +67,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   obj = game->core->CreateObject( "player" );
   col = obj->EnableCollision();
-  col->SetSize( Vec3( 17.0f, 20.0f, 0.0f ) );
+  col->InitSquare( Vec3( 17.0f, 20.0f, 0.0f ) );
   //col->InitCircle( 20.0f );
   col->SetPosition( Vec3( 65.0f, 30.0f, 0.0f ) );
   col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
@@ -81,7 +81,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //quad->scale.Set( 0.5f, 1.0f );
   game->core->SetCamera( obj );
 
-  /*
   obj = game->core->CreateObject( "collision-test-0" );
   col = obj->EnableCollision();
   //col->SetSize( Vec3( 20.0f, 20.0f, 0.0f ) );
@@ -94,7 +93,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetColor( Vec4( 0.0f, 0.0f, 0.0f, 0.5f ) );
   quad->SetSize( Vec2( 20.0f, 20.0f ) );
   quad->SetTexture( "data/temp/T_VFX_FLOWER.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  */
 
   /*
   obj = game->core->CreateObject( "wall-top" );
@@ -995,7 +993,7 @@ void Game::LUA_ObjectEnableCollision( const std::string &objectName, bool isStat
   }
   Collision *collision = object->EnableCollision();
   collision->SetIsStatic( isStatic );
-  collision->SetSize( size );
+  collision->InitSquare( size );
   collision->SetVelocity( velocity );
   collision->SetAcceleration( acceleration );
 }//LUA_ObjectEnableCollision
@@ -1974,7 +1972,7 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
         if( res < 2 ) {
           size.y = size.x;
         }
-        collision->SetSize( size );
+        collision->InitSquare( size );
       } else {
         __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionSize: object '%s' not collision", object->GetNameFull().c_str() );
       }

@@ -119,22 +119,22 @@ Collision* Collision::SetPositionBy( const Vec3& deltaPosition )
 
 /*
 =============
-  SetSize
+  InitSquare
 =============
 */
-Collision* Collision::SetSize( const Vec3& newSize )
+Collision* Collision::InitSquare( const Vec3& newSize )
 {
   if( !this->collisionElement ) {
     CollisionElementSquare *item = new CollisionElementSquare( this->position, &this->_rect );
     this->collisionElement = item;
     item->SetSize( newSize );
   } else if( this->collisionElement->GetType() != COLLISION_ELEMENT_TYPE_SQUARE ) {
-    //__log.PrintInfo( Filelevel_ERROR, "Collision::SetSize => this is not a square" );
+    __log.PrintInfo( Filelevel_ERROR, "Collision::InitSquare => this already initialized by type %d", this->collisionElement->GetType() );
     return this;
   }
   this->size = newSize;
   return this;
-}//SetSize
+}//InitSquare
 
 
 
@@ -154,6 +154,25 @@ Collision* Collision::InitCircle( float setDiameter ) {
 
   return this;
 }//InitCircle
+
+
+
+/*
+=============
+  InitPolygon
+=============
+*/
+Collision* Collision::InitPolygon( const CollisionElementPolygon::PointList &points ) {
+  if( this->collisionElement ) {
+    __log.PrintInfo( Filelevel_ERROR, "Collision::InitPolygon => already initialized" );
+    return this;
+  }
+  CollisionElementPolygon *item = new CollisionElementPolygon( this->position, &this->_rect );
+  this->collisionElement = item;
+  item->SetPointList( points );
+
+  return this;
+}//InitPolygon
 
 
 
@@ -485,12 +504,15 @@ void Collision::ResolveCollision()
   }
   //__log.PrintInfo( Filelevel_DEBUG, ". power[%3.3f; %3.3f] vector[%3.3f; %3.3f]", result->power.x, result->power.y, result->resolveVector.x, result->resolveVector.y );
 
+  Vec3 resolved( Vec3Null );
   if( result->useAllAxices ) {
-    Vec3 coeffVec = result->resolveVector;
-    coeffVec.Normalize();
-    if( Sign( this->velocity.y ) != Sign( coeffVec.y ) ) {
-      this->velocity.y = 0.0f;
-    }
+    //Vec3 coeffVec = result->resolveVector;
+    //coeffVec.Normalize();
+    //float coeffSign = Sign( coeffVec.y );
+    //__log.PrintInfo( Filelevel_DEBUG, "coeffVec: %3.1f:%3.1f", Sign( this->velocity.y ), Sign( coeffVec.y ) );
+    //if( Sign( this->velocity.y ) != coeffSign && coeffSign != 0.0f ) {
+    //  this->velocity.y = 0.0f;
+    //}
   } else {
     if( result->power.x < result->power.y ) //смещаем по x
       result->resolveVector.y = 0.0f;
@@ -505,6 +527,9 @@ void Collision::ResolveCollision()
     }
   }
   this->SetPositionBy( result->resolveVector );
+  if( result->resolveVector.y != 0.0f && Sign( result->resolveVector.y ) != Sign( this->velocity.y ) ) {
+    this->velocity.y *= 0.5f;
+  }
 
   this->Update( 0.0f );
 }//ResolveCollision
@@ -549,7 +574,7 @@ void Collision::LoadFromBuffer( MemoryReader &reader )
   this->SetAcceleration( v3 );
 
   reader >> v3;
-  this->SetSize( v3 );
+  this->InitSquare( v3 );
 
   reader >> b;
   this->SetIsStatic( b );
@@ -732,11 +757,11 @@ void CollisionElementCircle::SetDiameter( float setDiameter ) {
 =============
 */
 void CollisionElementCircle::Update() {
-  float halfSize = this->diameter;
+  float halfSize = this->diameter * 0.5f;
   __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::Update => diameter[%3.1f]", this->diameter );
   this->_rect->leftTop = Vec3( this->position->x - halfSize, this->position->y - halfSize, 0.0f );
   this->_rect->rightBottom = Vec3( this->position->x + halfSize, this->position->y + halfSize, 0.0f );
-  this->_rect->radius2 = halfSize * halfSize;
+  this->_rect->radius2 = halfSize * halfSize * 4.0f;
 }
 
 
@@ -777,7 +802,7 @@ bool CollisionElementCircle::TestIntersect( CollisionElement &object, Vec3 *outS
 
   switch( object.GetType() ) {
     case COLLISION_ELEMENT_TYPE_SQUARE: {
-      //return this->TestIntersectWithSquare( object, outSolver );
+      return this->TestIntersectWithSquare( object, outSolver );
       break;
     }
     case COLLISION_ELEMENT_TYPE_CIRCLE: {
@@ -788,6 +813,73 @@ bool CollisionElementCircle::TestIntersect( CollisionElement &object, Vec3 *outS
 
   return true;
 }//TestIntersect
+
+
+
+/*
+=============
+  TestIntersectWithSquare
+  circle + square
+=============
+*/
+bool CollisionElementCircle::TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver ) {
+  float radius = this->diameter * 0.5f;
+  bool thisPosXInSquare = this->position->x >= object._rect->leftTop.x && this->position->x <= object._rect->rightBottom.x;
+  bool thisPosYInSquare = this->position->y >= object._rect->leftTop.y && this->position->y <= object._rect->rightBottom.y;
+  if( thisPosXInSquare || thisPosYInSquare ) {  //круг выталкивается либо вертикально, либо горизонтально
+    if( outSolver ) {
+      float dy = this->position->y - object.position->y;
+      float xDivY = ( fabs( dy ) < 0.01f ? 10.0f : fabs( ( this->position->x - object.position->x ) / dy ) );
+      __log.PrintInfo( Filelevel_DEBUG, ". xDivY[%3.1f] dy[%3.1f]", xDivY, dy );
+      if( xDivY > 1.0f ) {  //горизонтально
+        outSolver->Set(
+          this->position->x < object.position->x ? object._rect->leftTop.x - this->_rect->rightBottom.x : object._rect->rightBottom.x - this->_rect->leftTop.x,
+          0.0f, 0.0f );
+      } else {  //вертикально
+        outSolver->Set( 0.0f,
+          this->position->y < object.position->y ? object._rect->leftTop.y - this->_rect->rightBottom.y : object._rect->rightBottom.y - this->_rect->leftTop.y,
+          0.0f );
+      }
+    }
+    __log.PrintInfo( Filelevel_DEBUG, ". linear: solve[%3.1f; %3.1f]", ( outSolver ? outSolver->x : 0.0f ), ( outSolver ? outSolver->y : 0.0f ) );
+  } else {  //круг находится по диагонали от квадрата
+    Vec3 point( Vec3Null );
+    if( this->position->x < object.position->x ) {
+      point.x = object._rect->leftTop.x;
+    } else {
+      point.x = object._rect->rightBottom.x;
+    }
+    if( this->position->y < object.position->y ) {
+      point.y = object._rect->leftTop.y;
+    } else {
+      point.y = object._rect->rightBottom.y;
+    }
+    Vec3 dir = *this->position - point;
+    float distance = this->diameter * 0.5f - dir.Length();
+    if( distance < 0.0f ) {
+      __log.PrintInfo( Filelevel_DEBUG, ". no collision" );
+      return false;
+    } else {
+      if( outSolver ) {
+        dir.Normalize();
+        dir *= distance;
+        *outSolver = dir;
+      }
+    __log.PrintInfo( Filelevel_DEBUG, ". diagonal: solve[%3.1f; %3.1f]", dir.x, dir.y );
+    }
+  }
+  /*
+  if( outSolver ) {
+    outSolver->Set(
+      Math::Fabs( max( this->_rect->leftTop.x, object._rect->leftTop.x ) - min( this->_rect->rightBottom.x, object._rect->rightBottom.x ) ),
+      Math::Fabs( max( this->_rect->leftTop.y, object._rect->leftTop.y ) - min( this->_rect->rightBottom.y, object._rect->rightBottom.y ) ),
+      0.0f
+    );
+  }
+  */
+  //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersectWithSquare => thisType[%d]", this->type );
+  return true;
+}//TestIntersectWithSquare
 
 
 
@@ -821,3 +913,156 @@ bool CollisionElementCircle::TestIntersectWithCircle( CollisionElement &object, 
 
   return true;
 }//TestIntersectWithCircle
+
+
+
+
+//
+// CollisionElementPolygon
+//
+
+CollisionElementPolygon::CollisionElementPolygon( Vec3 *setPos, CollisionRect *setRect )
+:CollisionElement( COLLISION_ELEMENT_TYPE_POLYGON, setPos, setRect )
+{
+}//constructor
+
+/*
+=============
+  SetPointList
+  Точки необходимо задавать обходя по часовой стрелке
+=============
+*/
+void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
+  if( setPoints.size() < 3 ) {
+    __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::SetPointList => not enough points" );
+    return;
+  }
+  this->pointsSource = setPoints;
+  this->pointsResult.clear();
+  this->pointsResult.resize( setPoints.size() + 1 );
+
+  //copy src to result
+  int num = 0;
+  PointList::iterator iter, iterEnd = this->pointsSource.end();
+  for( iter = this->pointsSource.begin(); iter != iterEnd; ++iter, ++num ) {
+    this->pointsResult[ num ] = *iter;
+  }
+  this->pointsResult[ this->pointsResult.size() - 1 ] = this->pointsSource[ 0 ];
+
+  Point *point;
+  Vec2 radiusVector( Vec2Null );
+  Vec3 edge0, edge1, edge2;
+  float sign;
+  num = 0;
+  iterEnd = this->pointsResult.end();
+  for( iter = this->pointsResult.begin(); iter != iterEnd; ++iter, ++num ) {
+    point = &( *iter );
+    radiusVector.Set( max( fabs( point->x ), radiusVector.x ), max( fabs( point->y ), radiusVector.y ) );
+    if( num > 1 ) {
+      edge0 = this->pointsResult[ num ];  //точка
+      edge1 = this->pointsResult[ num - 1 ];
+      edge2 = this->pointsResult[ num - 2 ];
+      sign = ( edge0.x - edge1.x ) * ( edge0.y - edge2.y ) - ( edge0.y - edge1.y )*( edge0.x - edge2.x );
+      __log.PrintInfo( Filelevel_DEBUG, ".test: %3.1f", sign );
+      if( sign > 0 ) {
+        __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::SetPointList => points[%d] is not clockwise", num );
+        this->pointsResult.clear();
+        this->pointsSource.clear();
+        return;
+      }
+    }
+  }//for
+  this->_rect->radius2 = Square( radiusVector.Length() );
+}//SetPointList
+
+
+/*
+=============
+  Update
+=============
+*/
+void CollisionElementPolygon::Update() {
+  PointList::iterator iter, iterEnd = this->pointsSource.end();
+  int count = this->pointsSource.size();
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => points[%d] pointsResult[%d]", count, this->pointsResult.size() );
+  if( count > 2 ) {
+    Vec2 min, max, radius;
+    Point *point;
+    int num = 0;
+    for( iter = this->pointsSource.begin(); iter != iterEnd; ++iter, ++num ) {
+      this->pointsResult[ num ] = *this->position + *iter;
+      point = &this->pointsResult[ num ];
+      if( num == 0 ) {
+        min.Set( point->x, point->y );
+        max = min;
+      } else {
+        min.Set(
+          min.x < point->x ? min.x : point->x,
+          min.y < point->y ? min.y : point->y
+          );
+        max.Set(
+          max.x > point->x ? max.x : point->x,
+          max.y > point->y ? max.y : point->y
+          );
+      }
+      __log.PrintInfo( Filelevel_DEBUG, ". point[%3.1f; %3.1f]", this->pointsResult[ num ].x, this->pointsResult[ num ].y );
+    }
+    this->_rect->leftTop.Set( min.x, min.y, 0.0f );
+    this->_rect->rightBottom.Set( max.x, max.y, 0.0f );
+  } else {
+    __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::Update => not enough points" );
+  }
+}//Update
+
+
+
+/*
+=============
+  TestIntersect
+=============
+*/
+bool CollisionElementPolygon::TestIntersect( CollisionElement &object, Vec3 *outSolver ) {
+  if( this->type < object.GetType() ) { //всегда решение коллизий должен делать более "старший" вид коллизии
+    bool res = object.TestIntersect( *this, outSolver );
+    *outSolver = -*outSolver;
+    return res;
+  }
+
+  if( this->_rect->rightBottom.x  <= object._rect->leftTop.x ||
+    this->_rect->leftTop.x        >= object._rect->rightBottom.x ||
+    this->_rect->rightBottom.y    <= object._rect->leftTop.y ||
+    this->_rect->leftTop.y        >= object._rect->rightBottom.y
+    )
+  {
+    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => first square test: false" );
+    return false;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => first square test: true" );
+
+  switch( object.GetType() ) {
+    case COLLISION_ELEMENT_TYPE_SQUARE: {
+      //return this->TestIntersectWithSquare( object, outSolver );
+      break;
+    }
+    case COLLISION_ELEMENT_TYPE_CIRCLE: {
+      //return this->TestIntersectWithCircle( object, outSolver );
+      break;
+    }
+    case COLLISION_ELEMENT_TYPE_POLYGON: {
+      //return this->TestIntersectWithPolygon( object, outSolver );
+      break;
+    }
+  }//type
+
+  return true;
+}//TestIntersect
+
+
+/*
+=============
+  __Dump
+=============
+*/
+void CollisionElementPolygon::__Dump() {
+  __log.PrintAligned( "CollisionElementPolygon: rect[%3.1f; %3.1f]-[%3.1f; %3.1f] radius2[%3.1f]\n", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y, this->_rect->radius2 );
+}//__Dump

@@ -46,9 +46,17 @@ function Init()
   SetGuiVisibility( settings.guiVisibility )
   -- SetTimer( 0.01, 'UpdateDebug' )
 
+  ObjectAttr( 'wall', { trigger = true, triggerSize = 26 } )
+  ObjectAddTrigger( 'wall', 'testFun1' );
+
   -- ObjectAttr( 'wall', { 'textureName' } )
 end
 Init()
+
+function testFun1( obj )
+  settings.guiVisibility = not settings.guiVisibility
+  SetGuiVisibility( settings.guiVisibility )
+end
 
 -- Обработка кнопок клавы
 function onKey( id, isPressed )

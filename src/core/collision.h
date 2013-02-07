@@ -4,6 +4,7 @@
 #include "memorywriter.h"
 #include "memoryreader.h"
 #include <deque>
+#include <vector>
 #include "tools.h"
 
 #define COLLISION_FRICTION_FORCE   ( 0.95f )
@@ -12,7 +13,7 @@ enum CollisionElementType {
   COLLISION_ELEMENT_TYPE_UNDEFINED,
   COLLISION_ELEMENT_TYPE_SQUARE,    //выталкивает только самого себя
   COLLISION_ELEMENT_TYPE_CIRCLE,    //выталкивает себя и квадраты
-  COLLISION_ELEMENT_TYPE_POLYLINE,  //выталкивает себя, круги и квадраты
+  COLLISION_ELEMENT_TYPE_POLYGON,   //выталкивает себя, круги и квадраты
 };
 
 struct CollisionRect {
@@ -26,6 +27,7 @@ class CollisionElementSquare;
 class CollisionElement {
   friend class CollisionElementSquare;
   friend class CollisionElementCircle;
+  friend class CollisionElementPolygon;
 public:
   CollisionElement( CollisionElementType setType, Vec3 *setPos, CollisionRect *setRect );
   virtual ~CollisionElement(){}
@@ -76,6 +78,31 @@ private:
   DISALLOW_COPY_AND_ASSIGN( CollisionElementCircle );
 };
 
+//выпуклый полигон
+class CollisionElementPolygon: public CollisionElement {
+public:
+  typedef Vec3  Point;
+  typedef std::vector< Point > PointList;
+
+  CollisionElementPolygon( Vec3 *setPos, CollisionRect *setRect );
+  void Update ();
+  void SetPointList( const PointList &setPoints );
+  void __Dump     ();
+  bool TestIntersect            ( CollisionElement &object, Vec3 *outSolver );
+  bool TestIntersectWithSquare  ( CollisionElement &object, Vec3 *outSolver );
+  bool TestIntersectWithCircle  ( CollisionElement &object, Vec3 *outSolver );
+  bool TestIntersectWithPolygon ( CollisionElement &object, Vec3 *outSolver );
+
+private:
+  PointList pointsSource, //положение точек относительно центра
+            pointsResult; //рассчитанное положение точек
+
+  DISALLOW_COPY_AND_ASSIGN( CollisionElementPolygon );
+};
+
+
+
+
 
 
 class Collision
@@ -112,12 +139,13 @@ public:
   Collision*  SetVelocity     ( const Vec3& newVelocity );
   Collision*  SetPosition     ( const Vec3& newPosition );
   Collision*  SetPositionBy   ( const Vec3& deltaPosition );
-  Collision*  SetSize         ( const Vec3& newSize );
+  //Collision*  SetSize         ( const Vec3& newSize );
   Collision*  SetIsStatic     ( bool newIsStatic );
   Collision*  SetMass         ( float newMass );
   Collision*  SetForce        ( const Vec3& newForce );
+  Collision*  InitSquare      ( const Vec3& newSize );
   Collision*  InitCircle      ( float setDiameter );
-  //Collision*  AddPolyLine     ( z );
+  Collision*  InitPolygon     ( const CollisionElementPolygon::PointList &points );
 
   inline
   float       GetRadius2      () const { return this->_rect.radius2; }

@@ -15,12 +15,16 @@ class ObjectTrigger
 private:
   Vec3  *position;  //ссылка на координаты Object
   Vec3  offset;     //смещение центра триггера относительно position
-  Vec3  size;       //габариты триггера
+  //Vec3  size;       //габариты триггера
+  Vec3  triggerPosition;  //рассчитанная позиция триггера: *position + offset
+  Collision *triggerRect; //фигура, описывающая триггер
+  /*
   struct
   {
     Vec3 leftTop;
     Vec3 rightBottom;
   } rect;
+  */
 
   typedef std::deque< Collision* > collisionInTriggerList;
   collisionInTriggerList  collisionsInTrigger; //список объектов, находящихся в триггере
@@ -42,8 +46,7 @@ public:
   bool  IsHandlerExists         ( ObjectTriggerHandler handler );
 
   ObjectTrigger*  SetSize       ( const Vec3 &setSize );
-  inline
-  const Vec3&     GetSize       ( ){ return this->size; }
+  const Vec3&     GetSize       ( );
   inline
   const Vec3&     GetPosition   ( ){ return *this->position; }
   bool            TestInPoint   ( const Vec2 &pos );

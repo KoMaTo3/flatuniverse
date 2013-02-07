@@ -6,11 +6,12 @@ extern ObjectTriggerOnRemoveHandler __ObjectTriggerOnRemoveGlobalHandler = NULL;
 
 
 ObjectTrigger::ObjectTrigger( Vec3 *setPosition )
-:position( setPosition ), offset( 0.0f, 0.0f, 0.0f ), size( 0.0f, 0.0f, 0.0f )
+:position( setPosition ), offset( 0.0f, 0.0f, 0.0f )
 {
   if( !setPosition )
     __log.PrintInfo( Filelevel_ERROR, "ObjectTrigger => position is NULL" );
   __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger +1" );
+  this->triggerRect = new Collision( this->position );
 }//constructor
 
 
@@ -24,6 +25,7 @@ ObjectTrigger::~ObjectTrigger()
   __log.PrintInfo( Filelevel_DEBUG, "__ObjectTriggerOnRemoveGlobalHandler = x%X", __ObjectTriggerOnRemoveGlobalHandler );
   if( __ObjectTriggerOnRemoveGlobalHandler )
     __ObjectTriggerOnRemoveGlobalHandler( this );
+  DEF_DELETE( this->triggerRect );
   __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger -1" );
 }//destructor
 
@@ -36,8 +38,10 @@ ObjectTrigger::~ObjectTrigger()
 */
 void ObjectTrigger::Update()
 {
-  this->rect.leftTop      = *this->position + this->offset - this->size * 0.5f;
-  this->rect.rightBottom  = *this->position + this->offset + this->size * 0.5f;
+  this->triggerPosition   = *this->position + this->offset;
+  this->triggerRect->Update( 0.0f );
+  //this->rect.leftTop      = this->triggerPosition - this->size * 0.5f;
+  //this->rect.rightBottom  = this->triggerPosition + this->size * 0.5f;
 }//Update
 
 
@@ -49,13 +53,17 @@ void ObjectTrigger::Update()
 */
 bool ObjectTrigger::TestInPoint( const Vec2 &pos )
 {
+  return this->triggerRect->TestInPoint( pos );
+  /*
   return
     !( this->rect.rightBottom.x < pos.x ||
      this->rect.leftTop.x       > pos.x ||
      this->rect.rightBottom.y   < pos.y ||
      this->rect.leftTop.y       > pos.y
     );
+    */
 }//TestInPoint
+
 
 
 
@@ -72,7 +80,7 @@ void ObjectTrigger::CheckCollision( Collision *collision )
     return;
   }
 
-  bool intersect = collision->TestIntersect( this->rect.leftTop, this->rect.rightBottom );
+  bool intersect = collision->TestIntersect( *this->triggerRect );
   bool inTrigger = this->IsObjectAlreadyTriggered( collision );
 
   if( intersect && !inTrigger ) //חאר¸כ ג ענטדדונ
@@ -127,9 +135,21 @@ bool ObjectTrigger::IsObjectAlreadyTriggered( Collision *collision )
 */
 ObjectTrigger* ObjectTrigger::SetSize( const Vec3 &setSize )
 {
-  this->size = setSize;
+  this->triggerRect->InitSquare( setSize );
   return this;
 }//SetSize
+
+
+
+/*
+=============
+  GetSize
+=============
+*/
+const Vec3& ObjectTrigger::GetSize( )
+{
+  return this->triggerRect->GetSize();
+}//GetSize
 
 
 
