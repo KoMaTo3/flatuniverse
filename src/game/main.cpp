@@ -261,7 +261,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   */
 
   float t = 0.0f, rot = 0.0f;
-  wglSwapIntervalEXT( __config->GetBoolean( "gl_vsync" ) );
+  if( wglSwapIntervalEXT ) {
+    wglSwapIntervalEXT( __config->GetBoolean( "gl_vsync" ) );
+  }
   char tempChar[ 1024 ];
   DWORD fps = 0, currentFps = 0;
   //__textureAtlas->__Dump( "data/temp/__atlas.tga" );

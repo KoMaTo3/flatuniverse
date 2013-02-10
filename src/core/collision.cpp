@@ -613,6 +613,7 @@ void Collision::__Dump() {
 =============
 */
 void Collision::Render( float phase, const Vec3 &offset, bool isActive ) {
+#ifndef COLISION_NO_OPENGL
   if( !this->collisionElement ) {
     return;
   }
@@ -643,6 +644,7 @@ void Collision::Render( float phase, const Vec3 &offset, bool isActive ) {
       glEnd();
     }
   }
+#endif
 }//Render
 
 
@@ -1016,6 +1018,7 @@ void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
     }
   }//for
   this->_rect->radius2 = Square( radiusVector.Length() );
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::SetPointList => raduis2[%3.1f]", this->_rect->radius2 );
 }//SetPointList
 
 
@@ -1052,6 +1055,7 @@ void CollisionElementPolygon::Update() {
     }
     this->_rect->leftTop.Set( min.x, min.y, 0.0f );
     this->_rect->rightBottom.Set( max.x, max.y, 0.0f );
+    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => rect[%3.1f; %3.1f]-[%3.1f; %3.1f]", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y );
   } else {
     __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::Update => not enough points" );
   }
@@ -1084,16 +1088,22 @@ bool CollisionElementPolygon::TestIntersect( CollisionElement &object, Vec3 *out
 
   switch( object.GetType() ) {
     case COLLISION_ELEMENT_TYPE_SQUARE: {
-      //return this->TestIntersectWithSquare( object, outSolver );
+      __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with square" );
+      return this->TestIntersectWithSquare( object, outSolver );
       break;
     }
     case COLLISION_ELEMENT_TYPE_CIRCLE: {
+      __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with circle" );
       //return this->TestIntersectWithCircle( object, outSolver );
       break;
     }
     case COLLISION_ELEMENT_TYPE_POLYGON: {
+      __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with polygon" );
       //return this->TestIntersectWithPolygon( object, outSolver );
       break;
+    }
+    default: {
+      __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::TestIntersect => bad type" );
     }
   }//type
 
@@ -1109,3 +1119,21 @@ bool CollisionElementPolygon::TestIntersect( CollisionElement &object, Vec3 *out
 void CollisionElementPolygon::__Dump() {
   __log.PrintAligned( "CollisionElementPolygon: rect[%3.1f; %3.1f]-[%3.1f; %3.1f] radius2[%3.1f]\n", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y, this->_rect->radius2 );
 }//__Dump
+
+
+
+/*
+=============
+  TestIntersectWithSquare
+=============
+*/
+bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver ) {
+  if( this->pointsResult.size() < 3 ) {
+    __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::TestIntersectWithSquare => not enough points" );
+    return false;
+  }
+
+  __log.PrintInfo( Filelevel_WARNING, "CollisionElementPolygon::TestIntersectWithSquare => insert algorythm" );
+
+  return true;
+}//TestIntersectWithSquare
