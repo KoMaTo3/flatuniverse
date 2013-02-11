@@ -39,10 +39,11 @@ public:
 protected:
   Vec3 *position;
   CollisionRect *_rect; //рассчитанный контур объекта (квадрат)
+  CollisionElementType  type; //тип коллизии: квадрат, полигон, круг...
 
 
   DISALLOW_COPY_AND_ASSIGN( CollisionElement );
-  CollisionElementType  type; //тип коллизии: квадрат, полигон, круг...
+  virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max ) = 0;
 };
 
 //квадрат. всегда в одном положении
@@ -54,6 +55,9 @@ public:
   void __Dump ();
   bool TestIntersect( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver );
+
+protected:
+  virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );
 
 private:
   Vec3 size;
@@ -74,6 +78,9 @@ public:
   bool TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithCircle( CollisionElement &object, Vec3 *outSolver );
 
+protected:
+  virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );
+
 private:
   float diameter;
 
@@ -83,8 +90,9 @@ private:
 //выпуклый полигон
 class CollisionElementPolygon: public CollisionElement {
 public:
-  typedef Vec3  Point;
+  typedef Vec2  Point;
   typedef std::vector< Point > PointList;
+  typedef std::vector< Vec2 > AxisList;
 
   CollisionElementPolygon( Vec3 *setPos, CollisionRect *setRect );
   void Update ();
@@ -95,11 +103,16 @@ public:
   bool TestIntersectWithCircle  ( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithPolygon ( CollisionElement &object, Vec3 *outSolver );
 
+protected:
+  virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );
+
 private:
   PointList pointsSource, //положение точек относительно центра
             pointsResult; //рассчитанное положение точек
+  AxisList  axes;         //разделительные оси без учета поворота объекта
 
-  DISALLOW_COPY_AND_ASSIGN( CollisionElementPolygon );
+  DISALLOW_COPY_AND_ASSIGN  ( CollisionElementPolygon );
+  bool  _IsAxisExists       ( const Vec2 &axis );
 };
 
 

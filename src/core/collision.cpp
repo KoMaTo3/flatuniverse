@@ -2,6 +2,9 @@
 #include "file.h"
 #include "gl/gl.h"
 
+//разделяющие оси могу иметь погрешности, поэтому игнорируем некоторые почти-параллельные оси
+const float COLLISION_POLYGON_AXIS_E = 0.01f;
+
 
 Vec3 __nullCollisionPosition( 0.0f, 0.0f, 0.0f );
 
@@ -774,6 +777,37 @@ bool CollisionElementSquare::TestIntersectWithSquare( CollisionElement &object, 
 
 
 
+/*
+=============
+  _ProjectObjectToAxis
+=============
+*/
+void CollisionElementSquare::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max ) {
+  if( !min || !max ) {
+    return;
+  }
+
+  float resultPoints[ 4 ];
+  resultPoints[ 0 ] = axis.Dot( Vec2( this->_rect->leftTop.x, this->_rect->leftTop.y ) );
+  resultPoints[ 1 ] = axis.Dot( Vec2( this->_rect->rightBottom.x, this->_rect->leftTop.y ) );
+  resultPoints[ 2 ] = axis.Dot( Vec2( this->_rect->rightBottom.x, this->_rect->rightBottom.y ) );
+  resultPoints[ 3 ] = axis.Dot( Vec2( this->_rect->leftTop.x, this->_rect->rightBottom.y ) );
+  *min = *max = resultPoints[ 0 ];
+  for( int q = 1; q < 4; ++q ) {
+    if( resultPoints[ q ] < *min ) {
+      *min = resultPoints[ q ];
+    }
+    if( resultPoints[ q ] > *max ) {
+      *max = resultPoints[ q ];
+    }
+  }
+
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::_ProjectObjectToAxis" );
+}//_ProjectObjectToAxis
+
+
+
+
 //
 //  CollisionElementCircle
 //
@@ -961,6 +995,25 @@ bool CollisionElementCircle::TestIntersectWithCircle( CollisionElement &object, 
 
 
 
+/*
+=============
+  _ProjectObjectToAxis
+=============
+*/
+void CollisionElementCircle::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max ) {
+  if( !min || !max ) {
+    return;
+  }
+
+  float center = axis.Dot( Vec2( this->position->x, this->position->y ) );
+  *min = center - this->diameter * 0.5f;
+  *max = center + this->diameter * 0.5f;
+
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::_ProjectObjectToAxis" );
+}//_ProjectObjectToAxis
+
+
+
 
 //
 // CollisionElementPolygon
@@ -996,7 +1049,7 @@ void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
 
   Point *point;
   Vec2 radiusVector( Vec2Null );
-  Vec3 edge0, edge1, edge2;
+  Vec2 edge0, edge1, edge2;
   float sign;
   num = 0;
   iterEnd = this->pointsResult.end();
@@ -1008,7 +1061,6 @@ void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
       edge1 = this->pointsResult[ num - 1 ];
       edge2 = this->pointsResult[ num - 2 ];
       sign = ( edge0.x - edge1.x ) * ( edge0.y - edge2.y ) - ( edge0.y - edge1.y )*( edge0.x - edge2.x );
-      __log.PrintInfo( Filelevel_DEBUG, ".test: %3.1f", sign );
       if( sign > 0 ) {
         __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::SetPointList => points[%d] is not clockwise", num );
         this->pointsResult.clear();
@@ -1018,6 +1070,29 @@ void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
     }
   }//for
   this->_rect->radius2 = Square( radiusVector.Length() );
+
+  //формирования списка разделающих осей
+  Vec2 axis;
+  Vec2 tmpVec2;
+  iterEnd = this->pointsResult.end();
+  iter = this->pointsResult.begin();
+  num = 1;
+  for( ++iter; iter != iterEnd; ++iter, ++num ) {
+    tmpVec2 = this->pointsResult[ num ] - this->pointsResult[ num - 1 ];
+    axis.Set( tmpVec2.x, tmpVec2.y );
+    axis.Rotate90CW();
+    if( axis.x < 0 ) {
+      axis *= -1.0f;
+    } else if( axis.y < 0.0f ) {
+      axis *= -1.0f;
+    }
+    axis.Normalize();
+    if( !this->_IsAxisExists( axis ) ) {
+      this->axes.push_back( axis );
+      __log.PrintInfo( Filelevel_DEBUG, ". axis[%3.1f; %3.1f]", axis.x, axis.y );
+    }
+  }//foreach pointsSource
+
   __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::SetPointList => raduis2[%3.1f]", this->_rect->radius2 );
 }//SetPointList
 
@@ -1035,8 +1110,9 @@ void CollisionElementPolygon::Update() {
     Vec2 min, max, radius;
     Point *point;
     int num = 0;
+    Vec2 pos2D( this->position->x, this->position->y );
     for( iter = this->pointsSource.begin(); iter != iterEnd; ++iter, ++num ) {
-      this->pointsResult[ num ] = *this->position + *iter;
+      this->pointsResult[ num ] = pos2D + *iter;
       point = &this->pointsResult[ num ];
       if( num == 0 ) {
         min.Set( point->x, point->y );
@@ -1135,5 +1211,89 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
 
   __log.PrintInfo( Filelevel_WARNING, "CollisionElementPolygon::TestIntersectWithSquare => insert algorythm" );
 
+  //Проецируем объекты на разделяющие оси: оси полигона + 2 оси квадрата
+  AxisList::const_iterator iter, iterEnd = this->axes.end();
+  float projectMin[ 2 ], projectMax[ 2 ];
+  Vec2 intersectAxis;
+  bool isIntersected = true;
+  bool intersectResultInitialized = false;
+  float lastIntersectPower = 100000.0f, curIntersectPower;
+  for( iter = this->axes.begin(); iter != iterEnd; ++iter ) {
+    object._ProjectObjectToAxis( *iter, &projectMin[ 0 ], &projectMax[ 0 ] );
+    this->_ProjectObjectToAxis( *iter, &projectMin[ 1 ], &projectMax[ 1 ] );
+    if( projectMin[ 0 ] > projectMax[ 1 ] || projectMax[ 0 ] < projectMin[ 1 ] ) {
+      isIntersected = false;
+      break;
+    }
+    curIntersectPower = Math::Fabs( max( projectMin[ 0 ], projectMin[ 1 ] ) - min( projectMax[ 0 ], projectMax[ 1 ] ) );
+    if( intersectResultInitialized ) {
+      if( curIntersectPower < lastIntersectPower ) {
+        lastIntersectPower = curIntersectPower;
+        intersectAxis = *iter;
+      }
+    } else {
+      intersectAxis = *iter;
+      intersectResultInitialized = true;
+    }
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f]", projectMin[ 0 ], projectMax[ 0 ], iter->x, iter->y );
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f]", projectMin[ 1 ], projectMax[ 1 ], iter->x, iter->y );
+  }//foreach axes
+
+  __log.PrintInfo( Filelevel_DEBUG, ". result[%d] power[%3.1f] axis[%3.1f; %3.1f]", isIntersected, lastIntersectPower, intersectAxis.x, intersectAxis.y );
+
   return true;
 }//TestIntersectWithSquare
+
+
+
+/*
+=============
+  _IsAxisExists
+=============
+*/
+bool CollisionElementPolygon::_IsAxisExists( const Vec2 &axis ) {
+  if( !this->axes.size() ) {
+    return false;
+  }
+
+  AxisList::const_iterator iter, iterEnd = this->axes.end();
+  for( iter = this->axes.begin(); iter != iterEnd; ++iter ) {
+    if( ( *iter - axis ).LengthFast() < COLLISION_POLYGON_AXIS_E ) {
+      return true;
+    }
+  }
+
+  return false;
+}//_IsAxisExists
+
+
+
+/*
+=============
+  _ProjectObjectToAxis
+=============
+*/
+void CollisionElementPolygon::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max ) {
+  if( !min || !max ) {
+    return;
+  }
+
+  bool isInitialized = false;
+  float dot;
+  PointList::const_iterator iter, iterEnd = this->pointsResult.end();
+  for( iter = this->pointsResult.begin(); iter != iterEnd; ++iter ) {
+    dot = axis.Dot( *iter );
+    if( isInitialized ) {
+      if( dot < *min ) {
+        *min = dot;
+      } else if( dot > *max ) {
+        *max = dot;
+      }
+    } else {
+      *min = *max = dot;
+      isInitialized = true;
+    }
+  }//foreach pointsResult
+
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::_ProjectObjectToAxis" );
+}//_ProjectObjectToAxis

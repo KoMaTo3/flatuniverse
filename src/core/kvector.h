@@ -51,7 +51,7 @@ public:
   Void      Rotate90CW(); //k
   Void      Rotate90CCW();  //k
   Vec2      Projection( Vec2 &a );  //k
-  Float     Dot( Vec2 &a ); //k
+  Float     Dot( const Vec2 &a ) const; //k
 
   Int       GetDimension( Void ) const;
 
@@ -90,7 +90,7 @@ KM_INLINE Vec2 Vec2::Projection( Vec2 &a ) {
   return a * ( a.Dot( *this ) / a.LengthSqr() );
 }
 
-KM_INLINE Float Vec2::Dot( Vec2 &a ) {
+KM_INLINE Float Vec2::Dot( const Vec2 &a ) const {
   return this->x * a.x + this->y * a.y;
 }
 
