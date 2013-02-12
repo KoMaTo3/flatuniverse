@@ -402,6 +402,7 @@ bool Collision::TestIntersect( Collision& item )
       itemResolver0.resolveVector = intersectPower;
       itemResolver0.useAllAxices = true;
       item0->resolver.push_back( itemResolver0 );
+      __log.PrintInfo( Filelevel_DEBUG, "testz: %3.1f; %3.1f", itemResolver0.resolveVector.x, itemResolver0.resolveVector.y );
     }
     /*
     if( intersectPower.x )
@@ -625,6 +626,8 @@ void Collision::Render( float phase, const Vec3 &offset, bool isActive ) {
   } else {
     glColor4f( 0.0f, 1.0f, 0.0f, phase );
   }
+  this->collisionElement->_Render( offset );
+  /*
   switch( this->collisionElement->GetType() ) {
     case COLLISION_ELEMENT_TYPE_CIRCLE: {
       glBegin( GL_TRIANGLE_FAN );
@@ -647,6 +650,7 @@ void Collision::Render( float phase, const Vec3 &offset, bool isActive ) {
       glEnd();
     }
   }
+  */
 #endif
 }//Render
 
@@ -804,6 +808,22 @@ void CollisionElementSquare::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT floa
 
   __log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::_ProjectObjectToAxis" );
 }//_ProjectObjectToAxis
+
+
+
+/*
+=============
+  _Render
+=============
+*/
+void CollisionElementSquare::_Render( const Vec3 &offset ) {
+  glBegin( GL_QUADS );
+  glVertex3f( this->_rect->leftTop.x - offset.x, this->_rect->leftTop.y - offset.y, 0.0f );
+  glVertex3f( this->_rect->rightBottom.x - offset.x, this->_rect->leftTop.y - offset.y, 0.0f );
+  glVertex3f( this->_rect->rightBottom.x - offset.x, this->_rect->rightBottom.y - offset.y, 0.0f );
+  glVertex3f( this->_rect->leftTop.x - offset.x, this->_rect->rightBottom.y - offset.y, 0.0f );
+  glEnd();
+}//_Render
 
 
 
@@ -1014,6 +1034,21 @@ void CollisionElementCircle::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT floa
 
 
 
+/*
+=============
+  _Render
+=============
+*/
+void CollisionElementCircle::_Render( const Vec3 &offset ) {
+  glBegin( GL_TRIANGLE_FAN );
+  for( float a = 0.0f; a < Math::PI * 2.0f; a += 0.5f ) {
+    glVertex3f( this->position->x - offset.x + this->diameter * 0.5f * Math::Sin16( a ), this->position->y - offset.y + this->diameter * 0.5f * Math::Cos16( a ), 0.0f );
+  }
+  glEnd();
+}//_Render
+
+
+
 
 //
 // CollisionElementPolygon
@@ -1130,6 +1165,7 @@ void CollisionElementPolygon::Update() {
       }
       __log.PrintInfo( Filelevel_DEBUG, ". point[%3.1f; %3.1f]", this->pointsResult[ num ].x, this->pointsResult[ num ].y );
     }
+    this->pointsResult[ this->pointsResult.size() - 1 ] = this->pointsResult[ 0 ];
     this->_rect->leftTop.Set( min.x, min.y, 0.0f );
     this->_rect->rightBottom.Set( max.x, max.y, 0.0f );
     __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => rect[%3.1f; %3.1f]-[%3.1f; %3.1f]", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y );
@@ -1218,6 +1254,7 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
   Vec2 intersectAxis;
   bool isIntersected = true;
   bool intersectResultInitialized = false;
+  bool inverseSolver = false;
   float lastIntersectPower = 100000.0f, curIntersectPower;
   for( iter = this->axes.begin(); iter != iterEnd; ++iter ) {
     object._ProjectObjectToAxis( *iter, &projectMin[ 0 ], &projectMax[ 0 ] );
@@ -1231,14 +1268,27 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
       if( curIntersectPower < lastIntersectPower ) {
         lastIntersectPower = curIntersectPower;
         intersectAxis = *iter;
+        inverseSolver = ( projectMax[ 0 ] > projectMax[ 1 ] );
       }
     } else {
+      lastIntersectPower = curIntersectPower;
       intersectAxis = *iter;
       intersectResultInitialized = true;
+      inverseSolver = ( projectMax[ 0 ] > projectMax[ 1 ] );
     }
-    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f]", projectMin[ 0 ], projectMax[ 0 ], iter->x, iter->y );
-    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f]", projectMin[ 1 ], projectMax[ 1 ], iter->x, iter->y );
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f] lastIntersectPower[%3.1f]", projectMin[ 0 ], projectMax[ 0 ], iter->x, iter->y, lastIntersectPower );
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f] lastIntersectPower[%3.1f]", projectMin[ 1 ], projectMax[ 1 ], iter->x, iter->y, lastIntersectPower );
   }//foreach axes
+
+  if( isIntersected ) {
+    if( outSolver ) {
+      outSolver->Set( intersectAxis.x * lastIntersectPower, intersectAxis.y * lastIntersectPower, 0.0f );
+      if( inverseSolver ) {
+        *outSolver *= -1.0f;
+      }
+      __log.PrintInfo( Filelevel_DEBUG, ". resultsolveIntersect[%3.1f; %3.1f]", outSolver->x, outSolver->y );
+    }
+  }
 
   __log.PrintInfo( Filelevel_DEBUG, ". result[%d] power[%3.1f] axis[%3.1f; %3.1f]", isIntersected, lastIntersectPower, intersectAxis.x, intersectAxis.y );
 
@@ -1298,3 +1348,21 @@ void CollisionElementPolygon::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT flo
 
   __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::_ProjectObjectToAxis" );
 }//_ProjectObjectToAxis
+
+
+
+/*
+=============
+  _Render
+=============
+*/
+void CollisionElementPolygon::_Render( const Vec3 &offset ) {
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::_Render" );
+  glBegin( GL_TRIANGLE_FAN );
+  PointList::const_iterator iter, iterEnd = this->pointsResult.end();
+  for( iter = this->pointsResult.begin(); iter != iterEnd; ++iter ) {
+    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::_Render => point[%3.1f; %3.1f]", iter->x, iter->y );
+    glVertex3f( iter->x - offset.x, iter->y - offset.y, 0.0f );
+  }
+  glEnd();
+}//_Render

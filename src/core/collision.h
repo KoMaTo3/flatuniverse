@@ -23,7 +23,6 @@ struct CollisionRect {
 };
 
 //"болванка" для различных видов коллизий
-class CollisionElementSquare;
 class CollisionElement {
   friend class CollisionElementSquare;
   friend class CollisionElementCircle;
@@ -35,6 +34,7 @@ public:
   virtual void  Update() = 0;
   virtual void  __Dump() = 0;
   virtual bool  TestIntersect( CollisionElement &object, Vec3 *outSolver ) = NULL;
+  virtual void  _Render( const Vec3 &offset ) = 0;
 
 protected:
   Vec3 *position;
@@ -55,6 +55,7 @@ public:
   void __Dump ();
   bool TestIntersect( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver );
+  virtual void  _Render( const Vec3 &offset );
 
 protected:
   virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );
@@ -77,6 +78,7 @@ public:
   bool TestIntersect( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithCircle( CollisionElement &object, Vec3 *outSolver );
+  virtual void _Render( const Vec3 &offset );
 
 protected:
   virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );
@@ -102,6 +104,7 @@ public:
   bool TestIntersectWithSquare  ( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithCircle  ( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithPolygon ( CollisionElement &object, Vec3 *outSolver );
+  virtual void  _Render( const Vec3 &offset );
 
 protected:
   virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );
