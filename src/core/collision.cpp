@@ -1057,10 +1057,11 @@ void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
     point = &( *iter );
     radiusVector.Set( max( fabs( point->x ), radiusVector.x ), max( fabs( point->y ), radiusVector.y ) );
     if( num > 1 ) {
-      edge0 = this->pointsResult[ num ];  //точка
-      edge1 = this->pointsResult[ num - 1 ];
-      edge2 = this->pointsResult[ num - 2 ];
-      sign = ( edge0.x - edge1.x ) * ( edge0.y - edge2.y ) - ( edge0.y - edge1.y )*( edge0.x - edge2.x );
+      //нормальзовать не нужно т.к. нужно не значение, а только знак
+      edge0 = this->pointsResult[ num - 1 ] - this->pointsResult[ num - 2 ];
+      edge1 = this->pointsResult[ num ] - this->pointsResult[ num - 2 ];
+      edge1.Rotate90CW();
+      sign = edge0.Dot( edge1 );
       if( sign > 0 ) {
         __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::SetPointList => points[%d] is not clockwise", num );
         this->pointsResult.clear();
