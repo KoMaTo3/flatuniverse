@@ -817,12 +817,14 @@ void CollisionElementSquare::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT floa
 =============
 */
 void CollisionElementSquare::_Render( const Vec3 &offset ) {
+#ifndef COLISION_NO_OPENGL
   glBegin( GL_QUADS );
   glVertex3f( this->_rect->leftTop.x - offset.x, this->_rect->leftTop.y - offset.y, 0.0f );
   glVertex3f( this->_rect->rightBottom.x - offset.x, this->_rect->leftTop.y - offset.y, 0.0f );
   glVertex3f( this->_rect->rightBottom.x - offset.x, this->_rect->rightBottom.y - offset.y, 0.0f );
   glVertex3f( this->_rect->leftTop.x - offset.x, this->_rect->rightBottom.y - offset.y, 0.0f );
   glEnd();
+#endif
 }//_Render
 
 
@@ -1040,11 +1042,13 @@ void CollisionElementCircle::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT floa
 =============
 */
 void CollisionElementCircle::_Render( const Vec3 &offset ) {
+#ifndef COLISION_NO_OPENGL
   glBegin( GL_TRIANGLE_FAN );
   for( float a = 0.0f; a < Math::PI * 2.0f; a += 0.5f ) {
     glVertex3f( this->position->x - offset.x + this->diameter * 0.5f * Math::Sin16( a ), this->position->y - offset.y + this->diameter * 0.5f * Math::Cos16( a ), 0.0f );
   }
   glEnd();
+#endif
 }//_Render
 
 
@@ -1256,6 +1260,8 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
   bool intersectResultInitialized = false;
   bool inverseSolver = false;
   float lastIntersectPower = 100000.0f, curIntersectPower;
+
+  //проецируем на оси полигона
   for( iter = this->axes.begin(); iter != iterEnd; ++iter ) {
     object._ProjectObjectToAxis( *iter, &projectMin[ 0 ], &projectMax[ 0 ] );
     this->_ProjectObjectToAxis( *iter, &projectMin[ 1 ], &projectMax[ 1 ] );
@@ -1264,6 +1270,10 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
       break;
     }
     curIntersectPower = Math::Fabs( max( projectMin[ 0 ], projectMin[ 1 ] ) - min( projectMax[ 0 ], projectMax[ 1 ] ) );
+
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 0 ], projectMax[ 0 ], iter->x, iter->y, curIntersectPower );
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 1 ], projectMax[ 1 ], iter->x, iter->y, curIntersectPower );
+
     if( intersectResultInitialized ) {
       if( curIntersectPower < lastIntersectPower ) {
         lastIntersectPower = curIntersectPower;
@@ -1276,11 +1286,40 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
       intersectResultInitialized = true;
       inverseSolver = ( projectMax[ 0 ] > projectMax[ 1 ] );
     }
-    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f] lastIntersectPower[%3.1f]", projectMin[ 0 ], projectMax[ 0 ], iter->x, iter->y, lastIntersectPower );
-    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f] lastIntersectPower[%3.1f]", projectMin[ 1 ], projectMax[ 1 ], iter->x, iter->y, lastIntersectPower );
+  }//foreach axes
+
+  //проецируем на оси квадрата
+  Vec2 squareAxis[ 2 ];
+  squareAxis[ 0 ].Set( 1.0f, 0.0f );
+  squareAxis[ 1 ].Set( 0.0f, 1.0f );
+  for( int axisNum = 0; axisNum < 2; ++axisNum ) {
+    object._ProjectObjectToAxis( squareAxis[ axisNum ], &projectMin[ 0 ], &projectMax[ 0 ] );
+    this->_ProjectObjectToAxis( squareAxis[ axisNum ], &projectMin[ 1 ], &projectMax[ 1 ] );
+    if( projectMin[ 0 ] > projectMax[ 1 ] || projectMax[ 0 ] < projectMin[ 1 ] ) {
+      isIntersected = false;
+      break;
+    }
+    curIntersectPower = Math::Fabs( max( projectMin[ 0 ], projectMin[ 1 ] ) - min( projectMax[ 0 ], projectMax[ 1 ] ) );
+
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 0 ], projectMax[ 0 ], squareAxis[ axisNum ].x, squareAxis[ axisNum ].y, curIntersectPower );
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 1 ], projectMax[ 1 ], squareAxis[ axisNum ].x, squareAxis[ axisNum ].y, curIntersectPower );
+
+    if( intersectResultInitialized ) {
+      if( curIntersectPower < lastIntersectPower ) {
+        lastIntersectPower = curIntersectPower;
+        intersectAxis = squareAxis[ axisNum ];
+        inverseSolver = ( projectMax[ 0 ] > projectMax[ 1 ] );
+      }
+    } else {
+      lastIntersectPower = curIntersectPower;
+      intersectAxis = squareAxis[ axisNum ];
+      intersectResultInitialized = true;
+      inverseSolver = ( projectMax[ 0 ] > projectMax[ 1 ] );
+    }
   }//foreach axes
 
   if( isIntersected ) {
+    __log.PrintInfo( Filelevel_DEBUG, ". lastIntersectPower[%3.1f] intersectAxis[%3.1f; %3.1f] inverseSolver[%d]", lastIntersectPower, intersectAxis.x, intersectAxis.y, inverseSolver );
     if( outSolver ) {
       outSolver->Set( intersectAxis.x * lastIntersectPower, intersectAxis.y * lastIntersectPower, 0.0f );
       if( inverseSolver ) {
@@ -1288,9 +1327,11 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
       }
       __log.PrintInfo( Filelevel_DEBUG, ". resultsolveIntersect[%3.1f; %3.1f]", outSolver->x, outSolver->y );
     }
+    __log.PrintInfo( Filelevel_DEBUG, ". result[%d] power[%3.1f] axis[%3.1f; %3.1f]", isIntersected, lastIntersectPower, intersectAxis.x, intersectAxis.y );
+  } else {
+    __log.PrintInfo( Filelevel_DEBUG, ". no intersect" );
+    return false;
   }
-
-  __log.PrintInfo( Filelevel_DEBUG, ". result[%d] power[%3.1f] axis[%3.1f; %3.1f]", isIntersected, lastIntersectPower, intersectAxis.x, intersectAxis.y );
 
   return true;
 }//TestIntersectWithSquare
@@ -1357,7 +1398,7 @@ void CollisionElementPolygon::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT flo
 =============
 */
 void CollisionElementPolygon::_Render( const Vec3 &offset ) {
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::_Render" );
+#ifndef COLISION_NO_OPENGL
   glBegin( GL_TRIANGLE_FAN );
   PointList::const_iterator iter, iterEnd = this->pointsResult.end();
   for( iter = this->pointsResult.begin(); iter != iterEnd; ++iter ) {
@@ -1365,4 +1406,5 @@ void CollisionElementPolygon::_Render( const Vec3 &offset ) {
     glVertex3f( iter->x - offset.x, iter->y - offset.y, 0.0f );
   }
   glEnd();
+#endif
 }//_Render
