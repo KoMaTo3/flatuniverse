@@ -1211,7 +1211,7 @@ bool CollisionElementPolygon::TestIntersect( CollisionElement &object, Vec3 *out
     }
     case COLLISION_ELEMENT_TYPE_CIRCLE: {
       __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with circle" );
-      //return this->TestIntersectWithCircle( object, outSolver );
+      return this->TestIntersectWithCircle( object, outSolver );
       break;
     }
     case COLLISION_ELEMENT_TYPE_POLYGON: {
@@ -1335,6 +1335,119 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
 
   return true;
 }//TestIntersectWithSquare
+
+
+
+/*
+=============
+  TestIntersectWithCircle
+  TODO: требует доработки
+=============
+*/
+bool CollisionElementPolygon::TestIntersectWithCircle( CollisionElement &object, Vec3 *outSolver ) {
+  if( this->pointsResult.size() < 3 ) {
+    __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::TestIntersectWithCircle => not enough points" );
+    return false;
+  }
+
+  __log.PrintInfo( Filelevel_WARNING, "CollisionElementPolygon::TestIntersectWithCircle => insert algorythm" );
+
+  //ѕроецируем объекты на раздел€ющие оси: оси полигона + 2 оси квадрата
+  AxisList::const_iterator iter, iterEnd = this->axes.end();
+  float projectMin[ 2 ], projectMax[ 2 ];
+  Vec2 intersectAxis;
+  bool isIntersected = true;
+  bool intersectResultInitialized = false;
+  bool inverseSolver = false;
+  float lastIntersectPower = 100000.0f, curIntersectPower;
+
+  //проецируем на оси полигона
+  for( iter = this->axes.begin(); iter != iterEnd; ++iter ) {
+    object._ProjectObjectToAxis( *iter, &projectMin[ 0 ], &projectMax[ 0 ] );
+    this->_ProjectObjectToAxis( *iter, &projectMin[ 1 ], &projectMax[ 1 ] );
+    if( projectMin[ 0 ] > projectMax[ 1 ] || projectMax[ 0 ] < projectMin[ 1 ] ) {
+      isIntersected = false;
+      break;
+    }
+    curIntersectPower = Math::Fabs( max( projectMin[ 0 ], projectMin[ 1 ] ) - min( projectMax[ 0 ], projectMax[ 1 ] ) );
+
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 0 ], projectMax[ 0 ], iter->x, iter->y, curIntersectPower );
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 1 ], projectMax[ 1 ], iter->x, iter->y, curIntersectPower );
+
+    if( intersectResultInitialized ) {
+      if( curIntersectPower < lastIntersectPower ) {
+        lastIntersectPower = curIntersectPower;
+        intersectAxis = *iter;
+        inverseSolver = ( projectMax[ 0 ] > projectMax[ 1 ] );
+      }
+    } else {
+      lastIntersectPower = curIntersectPower;
+      intersectAxis = *iter;
+      intersectResultInitialized = true;
+      inverseSolver = ( projectMax[ 0 ] > projectMax[ 1 ] );
+    }
+  }//foreach axes
+
+  //ищем ближайшую точку полигона и проецируем объекты на ось точка=>центр руга
+  PointList::const_iterator iterPoint = this->pointsResult.begin(), iterPointEnd = this->pointsResult.end();
+  int pointsNum = this->pointsResult.size() - 1;
+  float minDistance = this->_rect->radius2 + object._rect->radius2,
+    curDistance;
+  minDistance *= minDistance;
+  Vec2 axis( Vec2Null );
+  for( int num = 0; num < pointsNum; ++num, ++iterPoint ) {
+    curDistance = ( *iterPoint - Vec2( object.position->x, object.position->y ) ).LengthSqr();
+    if( curDistance < minDistance ) {
+      minDistance = curDistance;
+      axis = *iterPoint;
+    }
+  }//foreach pointNum
+  if( axis.x < 0 ) {
+    axis *= -1.0f;
+  } else if( axis.y < 0.0f ) {
+    axis *= -1.0f;
+  }
+  axis.Normalize();
+  object._ProjectObjectToAxis( axis, &projectMin[ 0 ], &projectMax[ 0 ] );
+  this->_ProjectObjectToAxis( axis, &projectMin[ 1 ], &projectMax[ 1 ] );
+  if( projectMin[ 0 ] > projectMax[ 1 ] || projectMax[ 0 ] < projectMin[ 1 ] ) {
+    isIntersected = false;
+  } else {
+    curIntersectPower = Math::Fabs( max( projectMin[ 0 ], projectMin[ 1 ] ) - min( projectMax[ 0 ], projectMax[ 1 ] ) );
+
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 0 ], projectMax[ 0 ], axis.x, axis.y, curIntersectPower );
+    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 1 ], projectMax[ 1 ], axis.x, axis.y, curIntersectPower );
+
+    if( intersectResultInitialized ) {
+      if( curIntersectPower < lastIntersectPower ) {
+        lastIntersectPower = curIntersectPower;
+        intersectAxis = axis;
+      }
+    } else {
+      lastIntersectPower = curIntersectPower;
+      intersectAxis = axis;
+      intersectResultInitialized = true;
+    }
+  }
+  //
+
+  if( isIntersected ) {
+    __log.PrintInfo( Filelevel_DEBUG, ". lastIntersectPower[%3.1f] intersectAxis[%3.1f; %3.1f] inverseSolver[%d]", lastIntersectPower, intersectAxis.x, intersectAxis.y, inverseSolver );
+    if( outSolver ) {
+      outSolver->Set( intersectAxis.x * lastIntersectPower, intersectAxis.y * lastIntersectPower, 0.0f );
+      if( inverseSolver ) {
+        *outSolver *= -1.0f;
+      }
+      __log.PrintInfo( Filelevel_DEBUG, ". resultsolveIntersect[%3.1f; %3.1f]", outSolver->x, outSolver->y );
+    }
+    __log.PrintInfo( Filelevel_DEBUG, ". result[%d] power[%3.1f] axis[%3.1f; %3.1f]", isIntersected, lastIntersectPower, intersectAxis.x, intersectAxis.y );
+  } else {
+    __log.PrintInfo( Filelevel_DEBUG, ". no intersect" );
+    return false;
+  }
+
+  return true;
+}//TestIntersectWithCircle
 
 
 

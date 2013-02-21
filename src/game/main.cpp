@@ -38,6 +38,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   RenderableQuad *quad;
   Collision *col;
   float worldAlpha = ( isDebug ? 0.1f : 1.0f );
+  CollisionElementPolygon::PointList polyPoints;
 
   game->lua->Init();
 
@@ -67,8 +68,16 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   obj = game->core->CreateObject( "player" );
   col = obj->EnableCollision();
-  col->InitSquare( Vec3( 17.0f, 20.0f, 0.0f ) );
-  //col->InitCircle( 20.0f );
+  //col->InitSquare( Vec3( 17.0f, 20.0f, 0.0f ) );
+  /*
+  polyPoints.clear();
+  polyPoints.push_back( Vec2( -8.0f,  10.0f ) );
+  polyPoints.push_back( Vec2( -8.0f, -10.0f ) );
+  polyPoints.push_back( Vec2(  8.0f, -10.0f ) );
+  polyPoints.push_back( Vec2(  8.0f,  10.0f ) );
+  col->InitPolygon( polyPoints );
+  */
+  col->InitCircle( 20.0f );
   col->SetPosition( Vec3( 65.0f, 30.0f, 0.0f ) );
   col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
   col->SetIsStatic( false );
@@ -97,7 +106,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   obj = game->core->CreateObject( "collision-test-1" );
   col = obj->EnableCollision();
   //col->SetSize( Vec3( 20.0f, 20.0f, 0.0f ) );
-  CollisionElementPolygon::PointList polyPoints;
+  polyPoints.clear();
   polyPoints.push_back( CollisionElementPolygon::Point( -50.0f,  10.0f ) );
   polyPoints.push_back( CollisionElementPolygon::Point( -10.0f, -10.0f ) );
   polyPoints.push_back( CollisionElementPolygon::Point(  10.0f, -10.0f ) );
