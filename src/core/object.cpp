@@ -1130,13 +1130,16 @@ void Object::RemoveForce( long forceId )
 */
 void Object::SaveToBuffer( MemoryWriter &writer )
 {
-  bool isRenderable, isCollision;
+  bool isRenderable, isCollision, isTrigger;
 
   isRenderable = this->IsRenderable();
   writer << isRenderable;  //renderable true/false
 
   isCollision = this->IsCollision();
   writer << isCollision;  //collision true/false
+
+  isTrigger = this->IsTrigger();
+  writer << isTrigger;    //trigger true/false
 
   writer << this->GetName();
   writer << this->GetParentNameFull();
@@ -1147,6 +1150,9 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 
   if( isCollision )
     this->GetCollision()->SaveToBuffer( writer );
+
+  if( isTrigger )
+    this->GetTrigger()->SaveToBuffer( writer );
 
   Dword childsCount = ( this->_childs ? this->_childs->size() : 0 );
 
@@ -1169,12 +1175,13 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 */
 void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
 {
-  bool isRenderable, isCollision;
+  bool isRenderable, isCollision, isTrigger;
   std::string tmpName, parentName;
   Vec3 position;
 
   reader >> isRenderable;
   reader >> isCollision;
+  reader >> isTrigger;
   reader >> tmpName;
   reader >> parentName;
   reader >> position;
@@ -1198,6 +1205,9 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
 
   if( isCollision )
     this->EnableCollision()->LoadFromBuffer( reader );
+
+  if( isTrigger )
+    this->EnableTrigger()->LoadFromBuffer( reader );
 
   Dword childsCount;
   reader >> childsCount;

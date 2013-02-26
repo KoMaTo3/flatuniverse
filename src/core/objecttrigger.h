@@ -10,6 +10,9 @@ typedef void ( *ObjectTriggerHandler )        ( ObjectTrigger *trigger, Collisio
 typedef void ( *ObjectTriggerOnRemoveHandler )( ObjectTrigger *trigger );
 extern ObjectTriggerOnRemoveHandler __ObjectTriggerOnRemoveGlobalHandler;
 
+class MemoryWriter;
+class MemoryReader;
+
 class ObjectTrigger
 {
 private:
@@ -52,6 +55,9 @@ public:
   bool            TestInPoint   ( const Vec2 &pos );
 
   void  AddOnRemoveHandler      ( ObjectTriggerOnRemoveHandler handler );
+
+  void  SaveToBuffer            ( MemoryWriter &writer );
+  void  LoadFromBuffer          ( MemoryReader &reader );
 
 private:
   void  _TouchHandlers( Collision *collision, bool isInTrigger );

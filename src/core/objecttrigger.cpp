@@ -1,6 +1,8 @@
 #include "objecttrigger.h"
 #include "collision.h"
 #include "file.h"
+#include "memorywriter.h"
+#include "memoryreader.h"
 
 extern ObjectTriggerOnRemoveHandler __ObjectTriggerOnRemoveGlobalHandler = NULL;
 
@@ -202,3 +204,37 @@ void ObjectTrigger::AddOnRemoveHandler( ObjectTriggerOnRemoveHandler handler )
 {
   this->onRemoveHandlers.push_back( handler );
 }//AddOnRemoveHandler
+
+
+
+
+
+/*
+=============
+  SaveToBuffer
+=============
+*/
+void ObjectTrigger::SaveToBuffer( MemoryWriter &writer )
+{
+  writer << this->offset;
+  this->triggerRect->SaveToBuffer( writer );
+}//SaveToBuffer
+
+
+
+/*
+=============
+  LoadFromBuffer
+=============
+*/
+void ObjectTrigger::LoadFromBuffer( MemoryReader &reader )
+{
+  Vec3 v3;
+
+  reader >> v3;
+  this->offset = v3;
+
+  DEF_DELETE( this->triggerRect );
+  this->triggerRect = new Collision( this->position );
+  this->triggerRect->LoadFromBuffer( reader );
+}//LoadFromBuffer
