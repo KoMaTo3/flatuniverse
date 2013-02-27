@@ -185,6 +185,18 @@ void CollisionElementSquare::_Render( const Vec3 &offset ) {
 
 
 
+/*
+=============
+  SaveToBuffer
+=============
+*/
+void CollisionElementSquare::SaveToBuffer( MemoryWriter &writer ) {
+  writer << this->size;
+}//SaveToBuffer
+
+
+
+
 
 //
 //  CollisionElementCircle
@@ -406,6 +418,20 @@ void CollisionElementCircle::_Render( const Vec3 &offset ) {
   glEnd();
 #endif
 }//_Render
+
+
+
+/*
+=============
+  SaveToBuffer
+=============
+*/
+void CollisionElementCircle::SaveToBuffer( MemoryWriter &writer ) {
+  writer << this->diameter;
+}//SaveToBuffer
+
+
+
 
 
 
@@ -877,3 +903,20 @@ void CollisionElementPolygon::_Render( const Vec3 &offset ) {
   glEnd();
 #endif
 }//_Render
+
+
+
+/*
+=============
+  SaveToBuffer
+=============
+*/
+void CollisionElementPolygon::SaveToBuffer( MemoryWriter &writer ) {
+  int count = this->pointsSource.size();
+  writer << count;
+
+  PointList::const_iterator iter, iterEnd = this->pointsSource.end();
+  for( iter = this->pointsSource.begin(); iter != iterEnd; ++iter ) {
+    writer << *iter;
+  }
+}//SaveToBuffer
