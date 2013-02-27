@@ -48,9 +48,22 @@ function Init()
   SetGuiVisibility( settings.guiVisibility )
   -- SetTimer( 0.01, 'UpdateDebug' )
 
+  --[[
   ObjectAttr( 'wall', { trigger = true, triggerSize = 26 } )
   ObjectAddTrigger( 'wall', 'testFun1' );
+  ]]
   UpdateGuiBySelectedObject()
+
+  -- create temp object
+  --[[
+  local cameraX, cameraY = GetCameraPos()
+  local name = 'wall-new'
+  local tileSize = GetTileSize()
+  ObjectCreate( name, cameraX, cameraY, -1 )
+  ObjectAttr( name, { renderable = true, textureName = 'temp/enemy0.png', renderableSize = tileSize..' '..tileSize } )
+  ObjectAttr( name, { collision = true, collisionSize = tileSize..' '..tileSize, collisionStatic = isStatic } )
+  ObjectAttr( name, { trigger = true, triggerSize = ( tileSize + 2 )..' '..( tileSize + 2 ) } )
+  --]]
 
   -- ObjectAttr( 'wall', { 'textureName' } )
   -- ObjectAttr( 'wall', { 'textureName' } )

@@ -175,6 +175,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\core\collisionelement.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\collisionelement.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\core\collisionmgr.cpp"
 				>
 			</File>
@@ -1336,110 +1344,6 @@
 			</File>
 			<File
 				RelativePath="..\src\glui2\stb_image.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="glut"
-			>
-			<File
-				RelativePath="..\src\glut\glut_8x13.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_9x15.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_cmap.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_cursor.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_dstr.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_event.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_gamemode.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_hel10.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_hel12.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_hel18.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_init.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_key.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_mesa.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_modifier.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_mroman.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_roman.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_tr10.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_tr24.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_util.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\glut_win.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\win32_glx.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\win32_menu.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\win32_util.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\win32_winproc.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\glut\win32_x11.c"
 				>
 			</File>
 		</Filter>
