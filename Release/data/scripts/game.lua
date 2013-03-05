@@ -18,6 +18,8 @@ settings = {
         y = 0,
       },
     },
+    timer = 0.0,
+    windowSize = { x = 0, y = 0 },
 }
 mousePos = {    -- экранная позиция курсора
     x = 0,
@@ -27,6 +29,9 @@ mousePos = {    -- экранная позиция курсора
 -- Инициализация
 function Init()
   math.randomseed( GetRandomSeed() )
+  local x,y = GetWindowSize()
+  settings.windowSize.x = x
+  settings.windowSize.y = y
 
   -- Ставим обработчики на всё: клаву, кнопки и движение мыши
   ListenKeyboard( 'onKey' )
@@ -69,6 +74,8 @@ function Init()
   -- ObjectAttr( 'wall', { 'textureName' } )
   -- local r,g,b,a = ObjectAttr( 'wall', { 'color' } )
   -- Alert( '', r..':'..g..':'..b..':'..a )
+
+  RenderGUI()
 end
 
 function testFun1( obj )
@@ -389,4 +396,20 @@ function ToggleRenderableSize()
   end
 end
 
+function RenderGUI()
+  settings.timer = settings.timer + 0.01
+  local a = -settings.timer * 6.0 - 0.1
+  local b = -settings.timer * 6.0 + 0.1
+  local x = 25
+  local y = 25
+  local r = 50
+  Render( 'clrscr' )
+  Render( 'line', x,y,0, x + math.sin( a ) * r,y + math.cos( a ) * r,0, 1,0,0,1 )
+  Render( 'line', x,y,0, x + math.sin( b ) * r,y + math.cos( b ) * r,0, 0,1,0,1 )
+  Render( 'line', x + math.sin( a ) * r,y + math.cos( a ) * r,0, x + math.sin( b ) * r,y + math.cos( b ) * r,0, 0,0,1,1 )
+  Render( 'sprite', 0,0,0, 50 + math.random( 0, 20 ),50 + math.random( 0, 20 ),0, 'data/temp/BLUE_STARA.png' )
+  SetTimer( 0.01, 'RenderGUI' )
+end
+
 Init()
+

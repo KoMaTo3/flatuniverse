@@ -160,6 +160,7 @@ public:
   static int LUA_GuiAttr          ( lua_State *lua );
   static int LUA_LoadScript       ( lua_State *lua );
   static int LUA_ObjectAttr       ( lua_State *lua );
+  static int LUA_Render           ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );

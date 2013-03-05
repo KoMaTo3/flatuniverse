@@ -6,6 +6,7 @@
 #include "file.h"
 #include <time.h>
 #include "config.h"
+#include "debugrenderer.h"
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -23,6 +24,8 @@ Glui2   *__coreGlui = NULL; //указатель на объект Glui2
 //
 
 ConfigFile* __config = NULL;
+
+extern DebugRenderer* __debugRender;
 
 
 Core::Core()
@@ -1094,6 +1097,11 @@ bool Core::Redraw()
 
       glUseProgram( 0 );
       this->gui.context->Render();
+
+      if( __debugRender ) {
+        __debugRender->Render();
+      }
+
     }
 
     //GUI
@@ -1164,6 +1172,7 @@ bool Core::Redraw()
 
     glDisableClientState( GL_VERTEX_ARRAY );
     glUseProgram( NULL );
+
     //glEnableClientState( GL_VERTEX_ARRAY );
     //glVertexPointer( 3, GL_FLOAT, sizeof( RenderableQuad ), ( *__coreRenderableList->begin() ).GetPointerToVertex() );
     //glDrawArrays( GL_POINTS, 0, __coreRenderableList->size() );

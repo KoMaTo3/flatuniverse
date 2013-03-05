@@ -4,10 +4,12 @@
 #include "luastatecheck.h"
 #include "core/timer.h"
 #include "core/tools.h"
+#include "core/debugrenderer.h"
 
 
 File Lua::log;
 Lua *__LuaCurrentContext = NULL;
+DebugRenderer* __debugRender = NULL;
 
 LUAFUNCPROC_RemoveObject      *LUAFUNC_RemoveObject         = NULL;
 LUAFUNCPROC_GetObjectPos      *LUAFUNC_GetObjectPos         = NULL;
@@ -55,6 +57,7 @@ LUAFUNCPROC_ObjectAttr        *LUAFUNC_ObjectAttr           = NULL;
 Lua::Lua()
 :luaState( NULL )
 {
+  __debugRender = new DebugRenderer();
 }//constructor
 
 
@@ -62,6 +65,7 @@ Lua::Lua()
 Lua::~Lua()
 {
   this->Destroy();
+  DEF_DELETE( __debugRender );
 }//destructor
 
 
@@ -126,6 +130,7 @@ bool Lua::Init()
   lua_register( this->luaState, "GuiAttr",          Lua::LUA_GuiAttr );
   lua_register( this->luaState, "LoadScript",       Lua::LUA_LoadScript );
   lua_register( this->luaState, "ObjectAttr",       Lua::LUA_ObjectAttr );
+  lua_register( this->luaState, "Render",           Lua::LUA_Render );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -1416,3 +1421,51 @@ int Lua::LUA_GetSelectedObject( lua_State *lua )
   lua_pushstring( lua, name.c_str() );  //stack: name
   return 1;
 }//LUA_GetSelectedObject
+
+
+
+/*
+=============
+  LUA_Render
+=============
+*/
+int Lua::LUA_Render( lua_State *lua ) {
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters" );
+    return 0;
+  }
+  std::string operation = lua_tostring( lua, 1 );
+
+  if( operation == "clrscr" ) {
+    __debugRender->Clrscr();
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+  } else if( operation == "line" ) {
+    if( parmsCount < 11 ) {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for 'line'" );
+    } else {
+      __debugRender->Line(
+          Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
+          Vec3( ( Float ) lua_tonumber( lua, 5 ), ( Float ) lua_tonumber( lua, 6 ), ( Float ) lua_tonumber( lua, 7 ) ),
+          Vec4( ( Float ) lua_tonumber( lua, 8 ), ( Float ) lua_tonumber( lua, 9 ), ( Float ) lua_tonumber( lua, 10 ), ( Float ) lua_tonumber( lua, 11 ) )
+          );
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+    }
+  } else if( operation == "sprite" ) {
+    if( parmsCount < 8 ) {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for 'sprite'" );
+    } else {
+      __debugRender->Sprite(
+          Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
+          Vec3( ( Float ) lua_tonumber( lua, 5 ), ( Float ) lua_tonumber( lua, 6 ), ( Float ) lua_tonumber( lua, 7 ) ),
+          lua_tostring( lua, 8 )
+          );
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+    }
+  } else {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => unknown shape '%s'", operation.c_str() );
+  }
+
+  return 0;
+}//LUA_Render
