@@ -5,6 +5,7 @@
 #include "core/timer.h"
 #include "core/tools.h"
 #include "core/debugrenderer.h"
+#include "core/tools.h"
 
 
 File Lua::log;
@@ -1442,24 +1443,37 @@ int Lua::LUA_Render( lua_State *lua ) {
     __debugRender->Clrscr();
     __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
   } else if( operation == "line" ) {
-    if( parmsCount < 11 ) {
-      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for 'line'" );
+    if( parmsCount < 8 ) {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
+      Vec4 color;
+      Lua::GetColor( lua, 8, color );
       __debugRender->Line(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
           Vec3( ( Float ) lua_tonumber( lua, 5 ), ( Float ) lua_tonumber( lua, 6 ), ( Float ) lua_tonumber( lua, 7 ) ),
-          Vec4( ( Float ) lua_tonumber( lua, 8 ), ( Float ) lua_tonumber( lua, 9 ), ( Float ) lua_tonumber( lua, 10 ), ( Float ) lua_tonumber( lua, 11 ) )
+          color
           );
       __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
   } else if( operation == "sprite" ) {
     if( parmsCount < 8 ) {
-      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for 'sprite'" );
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
       __debugRender->Sprite(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
           Vec3( ( Float ) lua_tonumber( lua, 5 ), ( Float ) lua_tonumber( lua, 6 ), ( Float ) lua_tonumber( lua, 7 ) ),
           lua_tostring( lua, 8 )
+          );
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+    }
+  } else if( operation == "rect" ) {
+    if( parmsCount < 11 ) {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
+    } else {
+      __debugRender->Rect(
+          Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
+          Vec3( ( Float ) lua_tonumber( lua, 5 ), ( Float ) lua_tonumber( lua, 6 ), ( Float ) lua_tonumber( lua, 7 ) ),
+          Vec4( ( Float ) lua_tonumber( lua, 8 ), ( Float ) lua_tonumber( lua, 9 ), ( Float ) lua_tonumber( lua, 10 ), ( Float ) lua_tonumber( lua, 11 ) )
           );
       __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
@@ -1469,3 +1483,58 @@ int Lua::LUA_Render( lua_State *lua ) {
 
   return 0;
 }//LUA_Render
+
+
+
+/*
+=============
+  GetColor
+=============
+*/
+int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < stackIndex ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => not enough parameters" );
+    return 0;
+  }
+
+  if( lua_istable( lua, stackIndex ) ) {  //{R,G,B,A}
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by table" );
+    lua_pushvalue( lua, -1 );
+    lua_pushnil( lua );
+    float f[ 4 ];
+    int num = 0;
+
+    for( int num = 0; num < 4; ++num ) {
+      lua_next( lua, -2 );
+      lua_pushvalue( lua, -2 );
+      f[ num ] = ( float ) lua_tonumber( lua, -2 );
+      lua_pop( lua, 2 );
+    }
+    color.Set( f[ 0 ], f[ 1 ], f[ 2 ], f[ 3 ] );
+    return 1;
+  } else if( lua_isnumber( lua, stackIndex ) ) {  //R,G,B,A
+    if( parmsCount < stackIndex + 3 ) {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => by 4 float => not enough parameters" );
+      return 0;
+    }
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by 4 float" );
+    color.Set(
+      ( float ) lua_tonumber( lua, stackIndex ),
+      ( float ) lua_tonumber( lua, stackIndex + 1 ),
+      ( float ) lua_tonumber( lua, stackIndex + 2 ),
+      ( float ) lua_tonumber( lua, stackIndex + 3 )
+    );
+    return 4;
+  } else if( lua_isstring( lua, stackIndex ) ) {  //"RRGGBBAA" in hex
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by string" );
+    color = tools::StringToColor( lua_tostring( lua, stackIndex ) );
+    return 1;
+  } else {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => unknown type" );
+    return 0;
+  }
+
+  __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => unknown error" );
+  return 0;
+}//GetColor

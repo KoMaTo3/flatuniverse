@@ -1050,6 +1050,7 @@ bool Core::Redraw()
         //collision
         if( this->debug.renderCollision && __collisionList->size() )
         {
+          glLineWidth( 1.0f );
           CollisionList::iterator iter, iterEnd = __collisionList->end();
           Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
           for( iter = __collisionList->begin(); iter != iterEnd; ++iter ) {
@@ -1073,6 +1074,7 @@ bool Core::Redraw()
         //trigger
         if( this->debug.renderTrigger && __triggerList->size() )
         {
+          glLineWidth( 1.0f );
           ObjectTriggerList::iterator iter, iterEnd = __triggerList->end();
           glBegin( GL_QUADS );
           Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;

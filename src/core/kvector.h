@@ -1087,5 +1087,8 @@ KM_INLINE Vec3 Polar3::ToVec3( Void ) const {
 
 
 extern Vec2 Vec2Null;
+extern Vec2 Vec2One;
 extern Vec3 Vec3Null;
+extern Vec3 Vec3One;
 extern Vec4 Vec4Null;
+extern Vec4 Vec4One;

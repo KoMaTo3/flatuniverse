@@ -42,6 +42,7 @@ Int64       GetFileWriteTime    ( const std::string& file );
 void        Dump                ( void *mem, Dword size, const std::string& comment );
 std::string StrToLowerCase      ( std::string str );
 std::string StrToUpperCase      ( std::string str );
+Vec4        StringToColor       ( const std::string& str );
 
 
 }//namespace tools

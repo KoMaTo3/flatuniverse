@@ -41,7 +41,6 @@ DebugRendererSprite::~DebugRendererSprite() {
 
 void DebugRendererSprite::Render() {
   __textureAtlas->Bind();
-  //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
   Vec4 texCoords = __textureAtlas->GetTextureCoords( this->textureName, Vec4( 0.0f, 0.0f, 1.0f, 1.0f ) );
   glBegin( GL_QUADS );
@@ -61,3 +60,22 @@ void DebugRendererSprite::Render() {
   glEnd();
 }//Render
 
+
+
+DebugRendererRect::DebugRendererRect( const Vec3& setLeftTop, const Vec3& setRightBottom, const Vec4& setColor )
+:leftTop( setLeftTop ), rightBottom( setRightBottom ), color( setColor )
+{
+}//constructor
+
+DebugRendererRect::~DebugRendererRect() {
+}
+
+void DebugRendererRect::Render() {
+  glColor4f( this->color.x, this->color.y, this->color.z, this->color.w );
+  glBegin( GL_LINE_LOOP );
+  glVertex3f( this->leftTop.x, this->leftTop.y, this->leftTop.z );
+  glVertex3f( this->leftTop.x, this->rightBottom.y, this->rightBottom.z );
+  glVertex3f( this->rightBottom.x, this->rightBottom.y, this->rightBottom.z );
+  glVertex3f( this->rightBottom.x, this->leftTop.y, this->rightBottom.z );
+  glEnd();
+}//Render

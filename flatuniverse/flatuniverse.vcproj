@@ -207,6 +207,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\core\debugrenderer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\debugrenderer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\debugrendererobjects.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\debugrendererobjects.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\core\externgl.h"
 				>
 			</File>
@@ -344,6 +360,30 @@
 			</File>
 			<File
 				RelativePath="..\src\core\squareatlas.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\state.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\state.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\stateaction.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\stateaction.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\statemachine.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\core\statemachine.h"
 				>
 			</File>
 			<File

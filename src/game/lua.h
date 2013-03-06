@@ -169,4 +169,7 @@ public:
   static void LUACALLBACK_ListenMouseMove ( Lua *lua, const std::string &funcName, const Vec2 &pos );
   static void LUACALLBACK_ObjectTrigger   ( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger );
   static void LUACALLBACK_GuiTrigger      ( Lua *lua, const std::string &funcName, const std::string &objectName );
+
+private:
+  static int  GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color );
 };

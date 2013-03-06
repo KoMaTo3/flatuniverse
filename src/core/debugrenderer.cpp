@@ -1,5 +1,6 @@
 #include "debugrenderer.h"
 #include "debugrendererobjects.h"
+#include "gl/gl.h"
 
 
 
@@ -36,6 +37,9 @@ void DebugRenderer::Clrscr() {
 =============
 */
 void DebugRenderer::Render() {
+  glLineWidth( 1.0f );
+  glLoadIdentity();
+
   ObjectsList::const_iterator iter, iterEnd = this->pipeline.end();
   for( iter = this->pipeline.begin(); iter != iterEnd; ++iter ) {
     ( *iter )->Render();
@@ -65,3 +69,15 @@ void DebugRenderer::Sprite( const Vec3& leftTop, const Vec3& rightBottom, const 
   DebugRendererSprite *item = new DebugRendererSprite( leftTop, rightBottom, textureName );
   this->pipeline.push_back( item );
 }//Sprite
+
+
+
+/*
+=============
+  Rect
+=============
+*/
+void DebugRenderer::Rect( const Vec3& leftTop, const Vec3& rightBottom, const Vec4& color ) {
+  DebugRendererRect *item = new DebugRendererRect( leftTop, rightBottom, color );
+  this->pipeline.push_back( item );
+}//Rect

@@ -45,3 +45,19 @@ private:
         rightBottom;
   std::string textureName;
 };
+
+
+
+
+class DebugRendererRect: public DebugRendererObject {
+public:
+  DebugRendererRect( const Vec3& setLeftTop, const Vec3& setRightBottom, const Vec4& setColor );
+  virtual ~DebugRendererRect();
+
+  virtual void Render();
+
+private:
+  Vec3  leftTop,
+        rightBottom;
+  Vec4  color;
+};

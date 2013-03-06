@@ -9,6 +9,7 @@
 
 namespace tools
 {
+const float oneBy256 = 1.0f / 256.0f;
 
 /*
 ----------
@@ -322,6 +323,26 @@ std::string StrToUpperCase( std::string str )
   transform( str.begin(), str.end(), str.begin(), ::toupper );
   return str;
 }//StrToUpperCase
+
+
+
+Vec4 StringToColor( const std::string& str ) {
+  Vec4 color( Vec4One );
+  if( str.length() != 8 ) {
+    __log.PrintInfo( Filelevel_WARNING, "tools::StringToColor => bad string '%s'", str.c_str() );
+  } else {
+    std::string newStr = StrToLowerCase( str );
+    Byte *data = ( Byte* ) newStr.c_str();
+    color.Set(
+      float( ( ( data[ 0 ] - ( data[ 0 ] <= '9' ? '0' : 'a' - 10 ) ) << 4 ) + data[ 1 ] - ( data[ 1 ] <= '9' ? '0' : 'a' - 10 ) ) * oneBy256,
+      float( ( ( data[ 2 ] - ( data[ 2 ] <= '9' ? '0' : 'a' - 10 ) ) << 4 ) + data[ 3 ] - ( data[ 3 ] <= '9' ? '0' : 'a' - 10 ) ) * oneBy256,
+      float( ( ( data[ 4 ] - ( data[ 4 ] <= '9' ? '0' : 'a' - 10 ) ) << 4 ) + data[ 5 ] - ( data[ 5 ] <= '9' ? '0' : 'a' - 10 ) ) * oneBy256,
+      float( ( ( data[ 6 ] - ( data[ 6 ] <= '9' ? '0' : 'a' - 10 ) ) << 4 ) + data[ 7 ] - ( data[ 7 ] <= '9' ? '0' : 'a' - 10 ) ) * oneBy256
+      );
+  }
+  return color;
+}//StringToColor
+
 
 
 }//namespace tools

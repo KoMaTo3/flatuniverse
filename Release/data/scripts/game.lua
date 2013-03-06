@@ -25,6 +25,14 @@ mousePos = {    -- экранная позиция курсора
     x = 0,
     y = 0,
 }
+GUI = {
+  DOM = {
+    x = 0,
+    y = 0,
+    width = 100,
+    height = 100,
+  }
+}
 
 -- Инициализация
 function Init()
@@ -404,10 +412,15 @@ function RenderGUI()
   local y = 25
   local r = 50
   Render( 'clrscr' )
-  Render( 'line', x,y,0, x + math.sin( a ) * r,y + math.cos( a ) * r,0, 1,0,0,1 )
+  Render( 'line', x,y,0, x + math.sin( a ) * r,y + math.cos( a ) * r,0, 'aa0000ff' )
+  --[[
   Render( 'line', x,y,0, x + math.sin( b ) * r,y + math.cos( b ) * r,0, 0,1,0,1 )
   Render( 'line', x + math.sin( a ) * r,y + math.cos( a ) * r,0, x + math.sin( b ) * r,y + math.cos( b ) * r,0, 0,0,1,1 )
   Render( 'sprite', 0,0,0, 50 + math.random( 0, 20 ),50 + math.random( 0, 20 ),0, 'data/temp/BLUE_STARA.png' )
+  ]]
+
+  --Render( 'sprite', GUI.DOM.x, GUI.DOM.y,0, GUI.DOM.x + GUI.DOM.width, GUI.DOM.y + GUI.DOM.height, 0, 'data/temp/ui-bg-0.png' )
+
   SetTimer( 0.01, 'RenderGUI' )
 end
 
