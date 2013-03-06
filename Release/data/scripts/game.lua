@@ -3,6 +3,9 @@
 -- 1: нажал ЛКМ и смотрим, будет ли двигать мышью
 -- 2: выбран объект
 -- 3: перемещение выбранного объекта
+-- 10: mouseover на GUI.templates
+-- 11: перемещение GUI.templates
+-- 12: скролл GUI.templates
 ]]
 settings = {
     guiVisibility     = false,  -- отображение GUI
@@ -31,6 +34,47 @@ GUI = {
     y = 0,
     width = 100,
     height = 100,
+  },
+  templates = {
+    x = 5,
+    y = 5,
+    width = 90,
+    height = 0,
+    moving = {
+      x = 0,
+      y = 0,
+    },
+    scroll = 0,
+    maxScroll = 350,
+    itemSize = 64,
+    itemsCount = 15,
+    currentItem = 0,
+    Draw = function()
+      GUI.templates.maxScroll = ( GUI.templates.itemsCount * ( GUI.templates.itemSize + 5 ) + 10 ) - ( GUI.templates.height - 15 );
+      if GUI.templates.maxScroll < 1 then
+        GUI.templates.maxScroll = 1
+      end
+      local y
+      -- bg
+      Render( 'sprite', GUI.templates.x, GUI.templates.y, 0, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, 0, 'data/temp/blank.png', '333333FF' )
+      -- scroll bg
+      Render( 'sprite', GUI.templates.x + GUI.templates.width - 15, GUI.templates.y, 0, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, 0, 'data/temp/blank.png', '555555FF' )
+      -- scroll bar
+      y = GUI.templates.y + 15 + GUI.templates.scroll*(GUI.templates.height-29)
+      Render( 'sprite', GUI.templates.x + GUI.templates.width - 14, y + 1, 0, GUI.templates.x + GUI.templates.width - 1, y + 13, 0, 'data/temp/blank.png', '888888FF' )
+      -- header
+      Render( 'sprite', GUI.templates.x, GUI.templates.y, 0, GUI.templates.x + GUI.templates.width, GUI.templates.y + 15, 0, 'data/temp/blank.png', '999999FF' )
+      -- items
+      -- Render( 'scissorEnable', GUI.templates.x, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 0 ), GUI.templates.x + GUI.templates.width - 15, settings.windowSize.y - 16 )
+      Render( 'scissorEnable', GUI.templates.x + 1, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 1 ), GUI.templates.x + GUI.templates.width - 17, settings.windowSize.y - ( GUI.templates.y + 17 ) )
+      for i = 0,GUI.templates.itemsCount-1 do
+        y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + i * ( GUI.templates.itemSize + 5 ) + 20
+        Render( 'sprite', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, 'data/temp/brick0.png', 'ffffffff' )
+      end
+      y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + GUI.templates.currentItem * ( GUI.templates.itemSize + 5 ) + 20
+      Render( 'rect', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, '00ff00ff' )
+      Render( 'scissorDisable' )
+    end,
   }
 }
 
@@ -40,6 +84,7 @@ function Init()
   local x,y = GetWindowSize()
   settings.windowSize.x = x
   settings.windowSize.y = y
+  GUI.templates.height = settings.windowSize.y - 10;
 
   -- Ставим обработчики на всё: клаву, кнопки и движение мыши
   ListenKeyboard( 'onKey' )
@@ -59,7 +104,7 @@ function Init()
   -- показываем GUI
   settings.guiVisibility = true
   SetGuiVisibility( settings.guiVisibility )
-  -- SetTimer( 0.01, 'UpdateDebug' )
+  SetTimer( 0.01, 'UpdateDebug' )
 
   --[[
   ObjectAttr( 'wall', { trigger = true, triggerSize = 26 } )
@@ -189,39 +234,78 @@ function onMouseKey( id, isPressed )
         end
       end
     end,
+    [10] = function()
+      if isPressed then
+        if mousePos.x >= GUI.templates.x and
+           mousePos.x <= GUI.templates.x + GUI.templates.width and
+           mousePos.y >= GUI.templates.y and
+           mousePos.y <= GUI.templates.y + 15
+           then
+          settings.editorMode = 11
+          GUI.templates.moving.x = mousePos.x
+          GUI.templates.moving.y = mousePos.y
+        elseif mousePos.x >= GUI.templates.x + GUI.templates.width - 15 and
+          mousePos.x <= GUI.templates.x + GUI.templates.width and
+          mousePos.y >= GUI.templates.y + 15 and
+          mousePos.y <= GUI.templates.y + GUI.templates.height then
+            settings.editorMode = 12
+            TestMouseOnGUI( mousePos.x, mousePos.y )
+        else
+          GUI.templates.currentItem = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) )
+        end
+      else
+      end
+    end,
+    [11] = function()
+      if isPressed then
+      else
+        settings.editorMode = 10
+      end
+    end,
+    [12] = function()
+      if isPressed then
+      else
+        if settings.editorMode == 12 then
+          settings.editorMode = 10
+        end
+      end
+    end,
   }
   mode[ settings.editorMode ]()
 end
 
 -- Обработка движения мыши
 function onMouseMove( x, y )
-  local mode = {
-    [0] = function()
-    end,
-    [1] = function()
-      settings.editorMode = 3
-    end,
-    [2] = function()
-    end,
-    [3] = function()
-      local object = GetSelectedObject()
-      local oldX, oldY = ObjectGetPos( object )
-      if not settings.objectMode3Moved then
-        settings.move.objectStart.x = oldX
-        settings.move.objectStart.y = oldY
-        settings.move.mouseStart.x = mousePos.x
-        settings.move.mouseStart.y = mousePos.y
-      end
-      local newX = settings.move.objectStart.x + x - settings.move.mouseStart.x
-      local newY = settings.move.objectStart.y + y - settings.move.mouseStart.y
-      local tileSize = GetTileSize()
-      newX = math.floor( newX / tileSize ) * tileSize + 0.5 * tileSize
-      newY = math.floor( newY / tileSize ) * tileSize + 0.5 * tileSize
-      ObjectSetPos( object, newX, newY )
-      settings.objectMode3Moved = true
-    end,
-  }
-  mode[ settings.editorMode ]()
+  if TestMouseOnGUI( x, y ) then
+  else
+    local mode = {
+      [0] = function()
+      end,
+      [1] = function()
+        settings.editorMode = 3
+      end,
+      [2] = function()
+      end,
+      [3] = function()
+        local object = GetSelectedObject()
+        local oldX, oldY = ObjectGetPos( object )
+        if not settings.objectMode3Moved then
+          settings.move.objectStart.x = oldX
+          settings.move.objectStart.y = oldY
+          settings.move.mouseStart.x = mousePos.x
+          settings.move.mouseStart.y = mousePos.y
+        end
+        local newX = settings.move.objectStart.x + x - settings.move.mouseStart.x
+        local newY = settings.move.objectStart.y + y - settings.move.mouseStart.y
+        local tileSize = GetTileSize()
+        newX = math.floor( newX / tileSize ) * tileSize + 0.5 * tileSize
+        newY = math.floor( newY / tileSize ) * tileSize + 0.5 * tileSize
+        ObjectSetPos( object, newX, newY )
+        settings.objectMode3Moved = true
+      end,
+    }
+    mode[ settings.editorMode ]()
+  end
   mousePos.x = x
   mousePos.y = y
 end
@@ -412,16 +496,43 @@ function RenderGUI()
   local y = 25
   local r = 50
   Render( 'clrscr' )
-  Render( 'line', x,y,0, x + math.sin( a ) * r,y + math.cos( a ) * r,0, 'aa0000ff' )
-  --[[
-  Render( 'line', x,y,0, x + math.sin( b ) * r,y + math.cos( b ) * r,0, 0,1,0,1 )
-  Render( 'line', x + math.sin( a ) * r,y + math.cos( a ) * r,0, x + math.sin( b ) * r,y + math.cos( b ) * r,0, 0,0,1,1 )
-  Render( 'sprite', 0,0,0, 50 + math.random( 0, 20 ),50 + math.random( 0, 20 ),0, 'data/temp/BLUE_STARA.png' )
-  ]]
-
-  --Render( 'sprite', GUI.DOM.x, GUI.DOM.y,0, GUI.DOM.x + GUI.DOM.width, GUI.DOM.y + GUI.DOM.height, 0, 'data/temp/ui-bg-0.png' )
+  GUI.templates.Draw()
 
   SetTimer( 0.01, 'RenderGUI' )
+end
+
+function TestMouseOnGUI( x, y )
+  if settings.editorMode == 12 then
+    GUI.templates.scroll = ( y - GUI.templates.y - 8 - 15 ) / ( GUI.templates.height - 32 )
+    if GUI.templates.scroll < 0 then
+      GUI.templates.scroll = 0
+    elseif GUI.templates.scroll > 1 then
+      GUI.templates.scroll = 1
+    end
+    return true
+  elseif settings.editorMode == 11 then
+    local dx = mousePos.x - GUI.templates.moving.x
+    local dy = mousePos.y - GUI.templates.moving.y
+    GUI.templates.moving.x = mousePos.x
+    GUI.templates.moving.y = mousePos.y
+    GUI.templates.x = GUI.templates.x + dx
+    GUI.templates.y = GUI.templates.y + dy
+    return true
+  end
+  if x >= GUI.templates.x and
+     x <= GUI.templates.x + GUI.templates.width and
+     y >= GUI.templates.y and
+     y <= GUI.templates.y + GUI.templates.height
+     then
+    settings.editorMode = 10
+    return true
+  else
+    if settings.editorMode == 10 then
+      settings.editorMode = 0
+      return false
+    end
+  end
+  return false
 end
 
 Init()

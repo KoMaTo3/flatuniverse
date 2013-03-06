@@ -2024,7 +2024,7 @@ void Game::InitGui() {
   obj = game->core->CreateObject( "debug", guiRoot );
   gui.Reset();
   gui.type = OBJECT_GUI_TEXTFIELD;
-  gui.position.x = 0;
+  gui.position.x = 100;
   gui.position.y = 0;
   gui.width = 200;
   gui.label = "";

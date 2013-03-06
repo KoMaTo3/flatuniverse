@@ -1459,24 +1459,42 @@ int Lua::LUA_Render( lua_State *lua ) {
     if( parmsCount < 8 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
+      Vec4 color( Vec4One );
+      Lua::GetColor( lua, 9, color );
       __debugRender->Sprite(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
           Vec3( ( Float ) lua_tonumber( lua, 5 ), ( Float ) lua_tonumber( lua, 6 ), ( Float ) lua_tonumber( lua, 7 ) ),
-          lua_tostring( lua, 8 )
+          lua_tostring( lua, 8 ),
+          color
           );
       __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
   } else if( operation == "rect" ) {
-    if( parmsCount < 11 ) {
+    if( parmsCount < 8 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
+      Vec4 color( Vec4One );
+      Lua::GetColor( lua, 8, color );
       __debugRender->Rect(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
           Vec3( ( Float ) lua_tonumber( lua, 5 ), ( Float ) lua_tonumber( lua, 6 ), ( Float ) lua_tonumber( lua, 7 ) ),
-          Vec4( ( Float ) lua_tonumber( lua, 8 ), ( Float ) lua_tonumber( lua, 9 ), ( Float ) lua_tonumber( lua, 10 ), ( Float ) lua_tonumber( lua, 11 ) )
+          color
           );
       __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
+  } else if( operation == "scissorEnable" ) {
+    if( parmsCount < 5 ) {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
+    } else {
+      __debugRender->SciccorEnable(
+          Vec2( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ) ),
+          Vec2( ( Float ) lua_tonumber( lua, 4 ), ( Float ) lua_tonumber( lua, 5 ) )
+          );
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+    }
+  } else if( operation == "scissorDisable" ) {
+    __debugRender->SciccorDisable();
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
   } else {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => unknown shape '%s'", operation.c_str() );
   }

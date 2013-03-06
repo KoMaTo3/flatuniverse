@@ -35,7 +35,7 @@ private:
 
 class DebugRendererSprite: public DebugRendererObject {
 public:
-  DebugRendererSprite( const Vec3& setLeftTop, const Vec3& setRightBottom, const std::string& setTextureName );
+  DebugRendererSprite( const Vec3& setLeftTop, const Vec3& setRightBottom, const std::string& setTextureName, const Vec4& setColor );
   virtual ~DebugRendererSprite();
 
   virtual void Render();
@@ -44,6 +44,7 @@ private:
   Vec3  leftTop,
         rightBottom;
   std::string textureName;
+  Vec4  color;
 };
 
 
@@ -60,4 +61,30 @@ private:
   Vec3  leftTop,
         rightBottom;
   Vec4  color;
+};
+
+
+
+
+class DebugRendererScissorEnable: public DebugRendererObject {
+public:
+  DebugRendererScissorEnable( const Vec2& setLeftTop, const Vec2& setRightBottom );
+  virtual ~DebugRendererScissorEnable() {}
+
+  virtual void Render();
+
+private:
+  Vec2  leftTop,
+        rightBottom;
+};
+
+
+
+
+class DebugRendererScissorDisable: public DebugRendererObject {
+public:
+  DebugRendererScissorDisable() {}
+  virtual ~DebugRendererScissorDisable() {}
+
+  virtual void Render();
 };
