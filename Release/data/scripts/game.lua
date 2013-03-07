@@ -47,14 +47,15 @@ GUI = {
     scroll = 0,
     maxScroll = 350,
     itemSize = 64,
-    itemsCount = 15,
+    items = {},
     currentItem = 0,
     Draw = function()
-      GUI.templates.maxScroll = ( GUI.templates.itemsCount * ( GUI.templates.itemSize + 5 ) + 10 ) - ( GUI.templates.height - 15 );
+      GUI.templates.maxScroll = ( #GUI.templates.items * ( GUI.templates.itemSize + 5 ) + 10 ) - ( GUI.templates.height - 15 )
       if GUI.templates.maxScroll < 1 then
         GUI.templates.maxScroll = 1
       end
       local y
+      local i
       -- bg
       Render( 'sprite', GUI.templates.x, GUI.templates.y, 0, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, 0, 'data/temp/blank.png', '333333FF' )
       -- scroll bg
@@ -67,13 +68,18 @@ GUI = {
       -- items
       -- Render( 'scissorEnable', GUI.templates.x, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 0 ), GUI.templates.x + GUI.templates.width - 15, settings.windowSize.y - 16 )
       Render( 'scissorEnable', GUI.templates.x + 1, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 1 ), GUI.templates.x + GUI.templates.width - 17, settings.windowSize.y - ( GUI.templates.y + 17 ) )
-      for i = 0,GUI.templates.itemsCount-1 do
-        y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + i * ( GUI.templates.itemSize + 5 ) + 20
-        Render( 'sprite', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, 'data/temp/brick0.png', 'ffffffff' )
+      i = 0
+      -- for key,item in pairs( GUI.templates.items ) do
+      table.foreach( GUI.templates.items, GUI.templates.DrawItem )
+      if GUI.templates.currentItem > 0 and GUI.templates.currentItem <= #GUI.templates.items then
+        y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + ( GUI.templates.currentItem - 1 ) * ( GUI.templates.itemSize + 5 ) + 20
+        Render( 'rect', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, '00ff00ff' )
       end
-      y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + GUI.templates.currentItem * ( GUI.templates.itemSize + 5 ) + 20
-      Render( 'rect', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, '00ff00ff' )
       Render( 'scissorDisable' )
+    end,
+    DrawItem = function( i, item )
+      y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + ( i - 1 ) * ( GUI.templates.itemSize + 5 ) + 20
+      Render( 'sprite', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, item.icon, 'ffffffff' )
     end,
   }
 }
@@ -84,7 +90,11 @@ function Init()
   local x,y = GetWindowSize()
   settings.windowSize.x = x
   settings.windowSize.y = y
-  GUI.templates.height = settings.windowSize.y - 10;
+  LoadScript( 'data/scripts/editor.lua' )
+  LoadScript( 'data/scripts/objecttemplates.lua' )
+
+  GUI.templates.height = settings.windowSize.y - 10
+  GUI.templates.items = GetObjectsTemplates()
 
   -- Ставим обработчики на всё: клаву, кнопки и движение мыши
   ListenKeyboard( 'onKey' )
@@ -108,7 +118,7 @@ function Init()
 
   --[[
   ObjectAttr( 'wall', { trigger = true, triggerSize = 26 } )
-  ObjectAddTrigger( 'wall', 'testFun1' );
+  ObjectAddTrigger( 'wall', 'testFun1' )
   ]]
   UpdateGuiBySelectedObject()
 
@@ -171,6 +181,9 @@ function onKey( id, isPressed )
       if id == 0x20 then    -- Space
         SelectObject( '' )
         UpdateGuiBySelectedObject()
+      end
+      if id == 0x51 then    -- Q
+        TestInsertItem()
       end
   end
   if id == 0x4C then
@@ -251,7 +264,10 @@ function onMouseKey( id, isPressed )
             settings.editorMode = 12
             TestMouseOnGUI( mousePos.x, mousePos.y )
         else
-          GUI.templates.currentItem = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) )
+          local num = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) ) + 1
+          if num > 0 and num <= #GUI.templates.items then
+            GUI.templates.currentItem = num
+          end
         end
       else
       end
@@ -427,7 +443,7 @@ function ToggleLayer( guiName )
 end
 
 function UpdateDebug()
-  GuiSetText( 'editor/debug', settings.editorMode..':'..( settings.objectMode3Moved and 'true' or 'false' ) )
+  GuiSetText( 'editor/debug', settings.editorMode..':'..( settings.objectMode3Moved and 'true' or 'false' )..':mouse['..mousePos.x..'.'..mousePos.y..']' )
   SetTimer( 0.01, 'UpdateDebug' )
 end
 
@@ -535,5 +551,41 @@ function TestMouseOnGUI( x, y )
   return false
 end
 
-Init()
+function tableLength( T )
+  local count = 0
+  for _ in pairs( T ) do count = count + 1 end
+  return count
+end
 
+function TestInsertItem()
+  if GUI.templates.currentItem <= 0 or GUI.templates.currentItem > #GUI.templates.items then
+    return false
+  end
+
+  local cameraX, cameraY = GetCameraPos()
+  local tileSize = GetTileSize()
+  local name = 'test-wall'
+  local attrs = GUI.templates.items[ GUI.templates.currentItem ].attr
+  attrs.renderableSize = tileSize..' '..tileSize
+  if attrs['collision'] ~= nil and attrs.collision then
+    local size = tileSize
+    if attrs['_collisionScale'] ~= nil then
+      size = size * attrs['_collisionScale']
+    end
+    attrs['collisionSize'] = size..' '..size
+  end
+  --attrs.collisionSize = ( tileSize * _collisionScale )..' '..( tileSize * _collisionScale )
+  --attrs.triggerSize = ( tileSize * _triggerScale )..' '..( tileSize * _triggerScale )
+
+  local width, height = GetWindowSize()
+  local pos = {
+    x = cameraX + mousePos.x - width * 0.5,
+    y = cameraY + mousePos.y - height * 0.5
+  }
+
+  ObjectRemove( name )
+  ObjectCreate( name, pos.x, pos.y, 0 )
+  ObjectAttr( name, attrs )
+end
+
+Init()

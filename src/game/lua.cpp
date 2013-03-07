@@ -94,6 +94,8 @@ bool Lua::Init()
   lua_pcall( this->luaState, 0, 0, 0 );
   lua_pushcfunction( this->luaState, luaopen_string );
   lua_pcall( this->luaState, 0, 0, 0 );
+  lua_pushcfunction( this->luaState, luaopen_table );
+  lua_pcall( this->luaState, 0, 0, 0 );
 
   lua_register( this->luaState, "Alert",            Lua::LUA_Alert );
   lua_register( this->luaState, "ObjectRemove",     Lua::LUA_ObjectRemove );
