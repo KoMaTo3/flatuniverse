@@ -24,6 +24,7 @@ LUAFUNCPROC_ListenMouseMove   *LUAFUNC_ListenMouseMove      = NULL;
 LUAFUNCPROC_GameExit          *LUAFUNC_GameExit             = NULL;
 LUAFUNCPROC_GetMousePos       *LUAFUNC_GetMousePos          = NULL;
 LUAFUNCPROC_GetCameraPos      *LUAFUNC_GetCameraPos         = NULL;
+LUAFUNCPROC_GetGridSize       *LUAFUNC_GetGridSize          = NULL;
 LUAFUNCPROC_GetWindowSize     *LUAFUNC_GetWindowSize        = NULL;
 LUAFUNCPROC_ObjectAddTrigger  *LUAFUNC_ObjectAddTrigger     = NULL;
 LUAFUNCPROC_GuiAddTrigger     *LUAFUNC_GuiAddTrigger        = NULL;
@@ -110,6 +111,7 @@ bool Lua::Init()
   lua_register( this->luaState, "GameExit",         Lua::LUA_GameExit );
   lua_register( this->luaState, "GetMousePos",      Lua::LUA_GetMousePos );
   lua_register( this->luaState, "GetCameraPos",     Lua::LUA_GetCameraPos );
+  lua_register( this->luaState, "GetGridSize",      Lua::LUA_GetGridSize );
   lua_register( this->luaState, "GetWindowSize",    Lua::LUA_GetWindowSize );
   lua_register( this->luaState, "ObjectAddTrigger", Lua::LUA_ObjectAddTrigger );
   lua_register( this->luaState, "GuiAddTrigger",    Lua::LUA_GuiAddTrigger );
@@ -808,6 +810,21 @@ int Lua::LUA_GetCameraPos( lua_State *lua )
 
   return 2;
 }//LUA_GetCameraPos
+
+
+
+/*
+=============
+  LUA_GetGridSize
+=============
+*/
+int Lua::LUA_GetGridSize( lua_State *lua )
+{
+  float size = LUAFUNC_GetGridSize();
+  lua_pushnumber( lua, size );
+
+  return 1;
+}//LUA_GetGridSize
 
 
 

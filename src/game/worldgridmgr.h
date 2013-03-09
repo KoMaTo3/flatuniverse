@@ -26,13 +26,14 @@ private:
   Object*             rootGridObject;     //корневой _для_всех_гридов_ объект
   float               currentTime;        //время, прошедшее с момента последнего обновления
   WorldGridObjectList activeObjects;      //перечень активных объектов
-  Pos< Short>         blocksPerGrid;      //число блоков в одном гриде
-  float               blockSize;          //размер одного блока в гриде
+  //Pos< Short>         blocksPerGrid;      //число блоков в одном гриде
+  //float               blockSize;          //размер одного блока в гриде
+  float               gridSize;           //размер грида в пикселях
   Short               gridsAroundObject;  //число гридов, которые должны быть активны, в каждую сторону от объекта
   WorldSaver          worldSaver;         //хранилище мира
 
 public:
-  WorldGridManager( Object* newRootGridObject, Short setGridsAroundObject = 2, Pos< Short> setBlocksPerGrid = Pos< Short>( 8, 8 ) );
+  WorldGridManager( Object* newRootGridObject, Short setGridsAroundObject = 2, float setGridSize = 1024.0f );
   virtual ~WorldGridManager();
 
   void        Update                  ( bool forceLoadGrids = false );
@@ -44,7 +45,10 @@ public:
   bool        UnloadGrid              ( const WorldGrid::WorldGridPosition gridPos );
   WorldGrid::WorldGridPosition
               GetGridPositionByObject ( const Object& obj );
+  WorldGrid::WorldGridPosition
+              GetGridPositionByCoords ( const Vec3& coords );
   void        LoadFromFile            ( const std::string& fileName );
   void        SaveToFile              ( const std::string& fileName );
   void        ClearWorld              ();
+  inline float  GetGridSize           () { return this->gridSize; }
 };

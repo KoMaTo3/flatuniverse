@@ -79,6 +79,7 @@ public:
   static void   LUA_GameExit          ();
   static Vec2   LUA_GetMousePos       ();
   static Vec2   LUA_GetCameraPos      ();
+  static float  LUA_GetGridSize       ();
   static Size   LUA_GetWindowSize     ();
   static void   LUA_ObjectAddTrigger  ( const std::string &triggerName, const std::string &funcName );
   static void   LUA_GuiAddTrigger     ( const std::string &objectName, const std::string &funcName );
@@ -116,9 +117,6 @@ public:
   static void   MouseMoveProc         ( const Vec2 &pos );
   static void   OnRemoveTrigger       ( ObjectTrigger *trigger );
   static void   GuiProc               ( Object *obj );
-
-  Vec3 GetGridPosUnderCamera( float scale = 1.0f );
-  Vec3 GetGridPosUnderCursor();
 
   //debug/test
 };

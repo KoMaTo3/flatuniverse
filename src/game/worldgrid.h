@@ -24,7 +24,7 @@ typedef std::deque< WorldGrid* > WorldGridList;
 typedef std::deque< ObjectPointerType* > WorldGridObjectList;
 extern WorldGridList *__worldGridList;
 
-#define WORLD_GRID_BLOCK_SIZE ( 16 )
+//#define WORLD_GRID_BLOCK_SIZE ( 16 )
 
 
 class WorldGrid

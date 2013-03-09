@@ -5,8 +5,8 @@
 
 
 
-WorldGridManager::WorldGridManager( Object* newRootGridObject, Short setGridsAroundObject, Pos< Short> setBlocksPerGrid )
-:currentTime( 0.0f ), blocksPerGrid( setBlocksPerGrid ), blockSize( WORLD_GRID_BLOCK_SIZE ), gridsAroundObject( setGridsAroundObject ), rootGridObject( newRootGridObject )
+WorldGridManager::WorldGridManager( Object* newRootGridObject, Short setGridsAroundObject, float setGridSize )
+:currentTime( 0.0f ), gridSize( setGridSize ), gridsAroundObject( setGridsAroundObject ), rootGridObject( newRootGridObject )
 {
   if( !__worldGridList )
     __worldGridList = new WorldGridList();
@@ -142,6 +142,21 @@ WorldGrid* WorldGridManager::IsGridLoaded( const WorldGrid::WorldGridPosition& g
 
 
 
+/*
+=============
+  GetGridPositionByCoords
+=============
+*/
+WorldGrid::WorldGridPosition WorldGridManager::GetGridPositionByCoords( const Vec3& coords ) {
+  return WorldGrid::WorldGridPosition(
+    Short( Math::Floor( coords.x / this->gridSize ) ),
+    Short( Math::Floor( coords.y / this->gridSize ) )
+    );
+}//GetGridPositionByCoords
+
+
+
+
 
 /*
 =============
@@ -150,11 +165,7 @@ WorldGrid* WorldGridManager::IsGridLoaded( const WorldGrid::WorldGridPosition& g
 */
 WorldGrid::WorldGridPosition WorldGridManager::GetGridPositionByObject( const Object& obj )
 {
-  const Vec3& objectPos = obj.GetPosition();
-  return WorldGrid::WorldGridPosition(
-    Short( Math::Floor( objectPos.x / ( float( this->blocksPerGrid.x ) * this->blockSize ) ) ),
-    Short( Math::Floor( objectPos.y / ( float( this->blocksPerGrid.y ) * this->blockSize ) ) )
-    );
+  return this->GetGridPositionByCoords( obj.GetPosition() );
 }//GetGridPositionByObject
 
 

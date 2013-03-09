@@ -6,6 +6,7 @@
 -- 10: mouseover на GUI.templates
 -- 11: перемещение GUI.templates
 -- 12: скролл GUI.templates
+-- 20: промежуточный режим вставки тайла: нажал мышь и ждём отпускания или движения
 ]]
 settings = {
     guiVisibility     = false,  -- отображение GUI
@@ -23,6 +24,8 @@ settings = {
     },
     timer = 0.0,
     windowSize = { x = 0, y = 0 },
+    showGrid = false,
+    editorType = 0, -- 0 - общий режим, 1 - рендерейблы, 2 - коллизии, 3 - триггеры
 }
 mousePos = {    -- экранная позиция курсора
     x = 0,
@@ -81,7 +84,23 @@ GUI = {
       y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + ( i - 1 ) * ( GUI.templates.itemSize + 5 ) + 20
       Render( 'sprite', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, item.icon, 'ffffffff' )
     end,
-  }
+  }, -- templates
+  grid = {
+    Render = function()
+      local tileSize = GetTileSize()
+      local cameraX, cameraY = GetCameraPos()
+      local sx, sy
+      sx = ( math.floor( settings.windowSize.x * 0.5 - cameraX ) ) % tileSize + tileSize * 0.5
+      sy = ( math.floor( settings.windowSize.y * 0.5 - cameraY ) ) % tileSize + tileSize * 0.5
+      local halfTileSize = tileSize * 0.5
+      for x = 0, settings.windowSize.x, tileSize do
+        Render( 'line', sx + x, 0, 0, sx + x, settings.windowSize.y, 0, '00FF0044' )
+      end
+      for y = 0, settings.windowSize.y, tileSize do
+        Render( 'line', 0, sy + y, 0, settings.windowSize.x, sy + y, 0, '00FF0044' )
+      end
+    end,
+  }, -- grid
 }
 
 -- Инициализация
@@ -139,12 +158,12 @@ function Init()
   -- Alert( '', r..':'..g..':'..b..':'..a )
 
   RenderGUI()
-end
+end --Init
 
 function testFun1( obj )
   settings.guiVisibility = not settings.guiVisibility
   SetGuiVisibility( settings.guiVisibility )
-end
+end --testFun1
 
 -- Обработка кнопок клавы
 function onKey( id, isPressed )
@@ -159,18 +178,23 @@ function onKey( id, isPressed )
       if id == 0xC0 then    -- ~
         GuiSetText( 'editor/settings.layer', 'default' )
         DebugRender( 0 )
+        settings.editorType = 0
+        settings.editorMode = 0
       end
       if id == 0x31 then    -- 1
         GuiSetText( 'editor/settings.layer', 'renderable' )
         DebugRender( 1 )
+        settings.editorType = 1
       end
       if id == 0x32 then    -- 2
         GuiSetText( 'editor/settings.layer', 'collision' )
         DebugRender( 2 )
+        settings.editorType = 2
       end
       if id == 0x33 then    -- 3
         GuiSetText( 'editor/settings.layer', 'trigger' )
         DebugRender( 4 )
+        settings.editorType = 3
       end
       if id == 0x2E then    -- Del
         local object = GuiGetText( 'editor/object.object_name' )
@@ -182,27 +206,36 @@ function onKey( id, isPressed )
         SelectObject( '' )
         UpdateGuiBySelectedObject()
       end
-      if id == 0x51 then    -- Q
-        TestInsertItem()
+      --if id == 0x51 then    -- Q
+      --  TestInsertItem(  )
+      --end
+      if id == 0x10 then    -- Shift
+        ToggleGrid()
       end
   end
   if id == 0x4C then
     LoadScript( 'data/scripts/clrscr.lua' )
   end
-end
+end --onKey
 
 -- Обработка кнопок мыши
 function onMouseKey( id, isPressed )
   local mode = {
     [0] = function()
       if isPressed then
-        local object = GetObjectUnderCursorByMode()
-        if #object > 0 then
-            SelectObject( object )
-            UpdateGuiBySelectedObject()
-            settings.editorMode = 1
+        if settings.editorType == 0 and GUI.templates.currentItem > 0 then
+          settings.editorMode = 20
+          settings.move.mouseStart.x = mousePos.x
+          settings.move.mouseStart.y = mousePos.y
         else
-            -- multiselect?
+          local object = GetObjectUnderCursorByMode()
+          if #object > 0 then
+              SelectObject( object )
+              UpdateGuiBySelectedObject()
+              settings.editorMode = 1
+          else
+              -- multiselect?
+          end
         end
       else
       end
@@ -286,9 +319,39 @@ function onMouseKey( id, isPressed )
         end
       end
     end,
+    [20] = function()
+      settings.editorMode = 0
+      TestInsertItem( mousePos.x, mousePos.y )
+    end,
+    [21] = function()
+      if isPressed then
+      else
+        settings.editorMode = 0
+        local cx, cy = GetCameraPos()
+        local x = settings.move.mouseStart.x - cx + settings.windowSize.x * 0.5
+        local y = settings.move.mouseStart.y - cy + settings.windowSize.y * 0.5
+        local newX = mousePos.x
+        local newY = mousePos.y
+        local left   = x < newX and x or newX
+        local right  = x < newX and newX or x
+        local top    = y < newY and y or newY
+        local bottom = y < newY and newY or y
+        local tileSize = GetTileSize()
+        left, top = GetTilePosByPixel( left, top )
+        right, bottom = GetTilePosByPixel( right, bottom )
+        local texture = GUI.templates.items[ GUI.templates.currentItem ].icon
+        for tx = left, right do
+        for ty = top, bottom do
+          x, y = GetPixelByTile( tx, ty )
+          TestInsertItem( x, y )
+          -- Render( 'sprite', x, y, 0, x + tileSize, y + tileSize, 0, texture, 'ffffff44' )
+        end
+        end
+      end
+    end, -- 21
   }
   mode[ settings.editorMode ]()
-end
+end --onMouseKey
 
 -- Обработка движения мыши
 function onMouseMove( x, y )
@@ -314,17 +377,25 @@ function onMouseMove( x, y )
         local newX = settings.move.objectStart.x + x - settings.move.mouseStart.x
         local newY = settings.move.objectStart.y + y - settings.move.mouseStart.y
         local tileSize = GetTileSize()
-        newX = math.floor( newX / tileSize ) * tileSize + 0.5 * tileSize
-        newY = math.floor( newY / tileSize ) * tileSize + 0.5 * tileSize
+        newX = math.floor( newX / tileSize ) * tileSize
+        newY = math.floor( newY / tileSize ) * tileSize
         ObjectSetPos( object, newX, newY )
         settings.objectMode3Moved = true
+      end,
+      [20] = function()
+        settings.editorMode = 21
+        local cx, cy = GetCameraPos()
+        settings.move.mouseStart.x = mousePos.x - settings.windowSize.x * 0.5 + cx
+        settings.move.mouseStart.y = mousePos.y - settings.windowSize.y * 0.5 + cy
+      end,
+      [21] = function()
       end,
     }
     mode[ settings.editorMode ]()
   end
   mousePos.x = x
   mousePos.y = y
-end
+end --onMouseMove
 
 -- Возвращает объект под курсором
 -- Если уже выбран какой-то объект, то берётся следующий за ним
@@ -364,7 +435,7 @@ function ToggleRenderable( guiName )
   else
     ObjectAttr( name, { renderable = false } )
   end
-end
+end --ToggleRenderable
 
 -- Чекбокс "Collision"
 function ToggleCollision( guiName )
@@ -380,7 +451,7 @@ function ToggleCollision( guiName )
   else
     ObjectAttr( name, { collision = false } )
   end
-end
+end --ToggleCollision
 
 -- Чекбокс "Collision:Static"
 function ToggleStatic( guiName )
@@ -390,7 +461,7 @@ function ToggleStatic( guiName )
   end
   local checked = GuiGetChecked( 'editor/object.is_static' )
   ObjectAttr( name, { collisionStatic = checked } )
-end
+end --ToggleStatic
 
 -- Чекбокс "Trigger"
 function ToggleTrigger( guiName )
@@ -405,12 +476,12 @@ function ToggleTrigger( guiName )
   else
     ObjectAttr( name, { trigger = false } )
   end
-end
+end --ToggleTrigger
 
 -- Возвращает текущий размер тайлов (из дропбокса)
 function GetTileSize()
   return GuiGetText( 'editor/world.tile_size' )
-end
+end --GetTileSize
 
 -- Кнопка "Apply"
 -- TODO: переделать
@@ -424,7 +495,7 @@ function TileApply( guiName )
   ToggleTrigger( 'editor/object.is_trigger' )
   UpdateGuiBySelectedObject()
   settings.editorMode = 2
-end
+end --TileApply
 
 -- Дропбокс "Layer"
 function ToggleLayer( guiName )
@@ -440,12 +511,13 @@ function ToggleLayer( guiName )
     flags = 4
   end
   DebugRender( flags )
-end
+end --ToggleLayer
 
 function UpdateDebug()
-  GuiSetText( 'editor/debug', settings.editorMode..':'..( settings.objectMode3Moved and 'true' or 'false' )..':mouse['..mousePos.x..'.'..mousePos.y..']' )
+  local cx, cy = GetCameraPos()
+  GuiSetText( 'editor/debug', settings.editorMode..':'..( settings.objectMode3Moved and 'true' or 'false' )..':mouse['..mousePos.x..'.'..mousePos.y..']cam['..settings.move.mouseStart.x..':'..settings.move.mouseStart.y..']' )
   SetTimer( 0.01, 'UpdateDebug' )
-end
+end --UpdateDebug
 
 function UpdateGuiBySelectedObject()
   local object = GetSelectedObject()
@@ -492,7 +564,7 @@ function UpdateGuiBySelectedObject()
     GuiSetText( 'editor/renderable.height', renderableSizeY )
   end
   GuiSetText( 'editor/object.object_name', object )
-end
+end --UpdateGuiBySelectedObject
 
 function ToggleRenderableSize()
   local object = GetSelectedObject()
@@ -502,20 +574,39 @@ function ToggleRenderableSize()
     local height  = GuiGetText( 'editor/renderable.height' )
     ObjectAttr( object, { renderableSize = width..' '..height } )
   end
-end
+end --ToggleRenderableSize
 
 function RenderGUI()
   settings.timer = settings.timer + 0.01
-  local a = -settings.timer * 6.0 - 0.1
-  local b = -settings.timer * 6.0 + 0.1
-  local x = 25
-  local y = 25
-  local r = 50
   Render( 'clrscr' )
+  if settings.showGrid then
+    GUI.grid.Render()
+  end
+  if settings.editorMode == 21 then -- multi-insert tiles
+    local cx, cy = GetCameraPos()
+    local x = settings.move.mouseStart.x - cx + settings.windowSize.x * 0.5
+    local y = settings.move.mouseStart.y - cy + settings.windowSize.y * 0.5
+    local newX = mousePos.x
+    local newY = mousePos.y
+    Render( 'rect', x, y, 0, newX, newY, 0, '00ff00ff' )
+    local left   = x < newX and x or newX
+    local right  = x < newX and newX or x
+    local top    = y < newY and y or newY
+    local bottom = y < newY and newY or y
+    local tileSize = GetTileSize()
+    left, top = GetTilePosByPixel( left, top )
+    right, bottom = GetTilePosByPixel( right, bottom )
+    local texture = GUI.templates.items[ GUI.templates.currentItem ].icon
+    for tx = left, right do
+    for ty = top, bottom do
+      x, y = GetPixelByTile( tx, ty )
+      Render( 'sprite', x, y, 0, x + tileSize, y + tileSize, 0, texture, 'ffffff44' )
+    end
+    end
+  end
   GUI.templates.Draw()
-
   SetTimer( 0.01, 'RenderGUI' )
-end
+end --RenderGUI
 
 function TestMouseOnGUI( x, y )
   if settings.editorMode == 12 then
@@ -549,22 +640,21 @@ function TestMouseOnGUI( x, y )
     end
   end
   return false
-end
+end --TestMouseOnGUI
 
 function tableLength( T )
   local count = 0
   for _ in pairs( T ) do count = count + 1 end
   return count
-end
+end --tableLength
 
-function TestInsertItem()
+function TestInsertItem( px, py )
   if GUI.templates.currentItem <= 0 or GUI.templates.currentItem > #GUI.templates.items then
     return false
   end
 
   local cameraX, cameraY = GetCameraPos()
   local tileSize = GetTileSize()
-  local name = 'test-wall'
   local attrs = GUI.templates.items[ GUI.templates.currentItem ].attr
   attrs.renderableSize = tileSize..' '..tileSize
   if attrs['collision'] ~= nil and attrs.collision then
@@ -577,15 +667,44 @@ function TestInsertItem()
   --attrs.collisionSize = ( tileSize * _collisionScale )..' '..( tileSize * _collisionScale )
   --attrs.triggerSize = ( tileSize * _triggerScale )..' '..( tileSize * _triggerScale )
 
-  local width, height = GetWindowSize()
-  local pos = {
-    x = cameraX + mousePos.x - width * 0.5,
-    y = cameraY + mousePos.y - height * 0.5
-  }
+  local x, y = GetTilePosByPixel( px, py )
+  -- local gridPos = GetGridByCoords( x * tileSize, y * tileSize )
+  local name = 'wall.'..px..'.'..py..'.'..settings.timer
 
-  ObjectRemove( name )
-  ObjectCreate( name, pos.x, pos.y, 0 )
+  --ObjectRemove( name )
+  ObjectCreate( name, x * tileSize, y * tileSize, 0 )
   ObjectAttr( name, attrs )
+end --TestInsertItem
+
+function GetTilePosUnderCursor()
+  local x, y = GetTilePosByPixel( mousePos.x, mousePos.y )
+  return x, y
+end
+
+function GetTilePosByPixel( px, py )
+  local x, y
+  local tileSize = GetTileSize()
+  local cameraX, cameraY = GetCameraPos()
+  x = math.floor( ( cameraX + px - settings.windowSize.x * 0.5 + 0.5 * tileSize ) / tileSize )
+  y = math.floor( ( cameraY + py - settings.windowSize.y * 0.5 + 0.5 * tileSize ) / tileSize )
+  return x, y
+end
+
+function GetPixelByTile( x, y )
+  local px, py
+  local tileSize = GetTileSize()
+  local cameraX, cameraY = GetCameraPos()
+  px = x * tileSize - cameraX + ( settings.windowSize.x - tileSize ) * 0.5
+  py = y * tileSize - cameraY + ( settings.windowSize.y - tileSize ) * 0.5
+  return px, py
+end
+
+function ToggleGrid()
+  settings.showGrid = not settings.showGrid
+end --ToggleGrid
+
+function GetGridByCoords( x, y )
+  local size = GetGridSize()
 end
 
 Init()

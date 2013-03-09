@@ -22,14 +22,16 @@ void testButton( g2Controller *controller )
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
   game = new Game();
-  Pos< Short> blocksPerGrid( 8, 8 );
+  float gridSize = 1024.0f;
   game->core->Init( 0, 0, false, "FlatGL" );
   game->core->keyboard.AddListener( Game::KeyboardProc );
   game->core->mouse.AddListener( Game::MouseKeyProc );
   game->core->mouse.AddMoveListener( Game::MouseMoveProc );
   Short gridsAroundObject = ( Short )  __config->GetNumber( "grids_preload_range", 0.0f );
-  if( !gridsAroundObject )
-    gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
+  if( !gridsAroundObject ) {
+    gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( max( __config->GetNumber( "gl_screen_width" ), __config->GetNumber( "gl_screen_height" ) ) / gridSize ) );
+  }
+    //gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
   __log.PrintInfo( Filelevel_DEBUG, "gridsAroundObject: %d", gridsAroundObject );
   game->world = new WorldGridManager( game->core->GetRootObject(), gridsAroundObject );
 
@@ -68,7 +70,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   obj = game->core->CreateObject( "player" );
   col = obj->EnableCollision();
-  //col->InitSquare( Vec3( 17.0f, 20.0f, 0.0f ) );
+  col->InitSquare( Vec3( 17.0f, 20.0f, 0.0f ) );
   /*
   polyPoints.clear();
   polyPoints.push_back( Vec2( -8.0f,  10.0f ) );
@@ -77,7 +79,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   polyPoints.push_back( Vec2(  8.0f,  10.0f ) );
   col->InitPolygon( polyPoints );
   */
-  col->InitCircle( 20.0f );
+  //col->InitCircle( 20.0f );
   col->SetPosition( Vec3( 65.0f, 30.0f, 0.0f ) );
   col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
   col->SetIsStatic( false );
@@ -436,6 +438,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     }
 
     //mouse tooltips
+    /*
     if( game->core->keyboard.IsPressed( VK_SHIFT ) )
     {
       game->gridTooltipUnderMouse.show = !game->gridTooltipUnderMouse.show;
@@ -488,6 +491,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         game->core->GetObject( str )->SetPosition( Vec3( pos ) * float( WORLD_GRID_BLOCK_SIZE ) * 2.0f - Vec3( 0, WORLD_GRID_BLOCK_SIZE, 0 ) * 2.0f * ( float( x ) - 9.0f ) );
       }
     }
+    */
 
     /*
     if( obj = game->core->GetObject( "/lifts/lift" ) )
@@ -539,6 +543,7 @@ Game::Game()
   LUAFUNC_GameExit          = Game::LUA_GameExit;
   LUAFUNC_GetMousePos       = Game::LUA_GetMousePos;
   LUAFUNC_GetCameraPos      = Game::LUA_GetCameraPos;
+  LUAFUNC_GetGridSize       = Game::LUA_GetGridSize;
   LUAFUNC_GetWindowSize     = Game::LUA_GetWindowSize;
   LUAFUNC_ObjectAddTrigger  = Game::LUA_ObjectAddTrigger;
   LUAFUNC_GuiAddTrigger     = Game::LUA_GuiAddTrigger;
@@ -918,37 +923,6 @@ void Game::LUA_ListenMouseMove( const std::string &funcName )
 }//LUA_ListenMouseMove
 
 
-
-/*
-=============
-  GetGridPosUnderCamera
-=============
-*/
-Vec3 Game::GetGridPosUnderCamera( float scale )
-{
-  Vec3 pos( this->core->GetCamera()->GetPosition() );
-  pos += Vec3( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE, 0 ) * scale * 0.5f;
-  pos /= float( WORLD_GRID_BLOCK_SIZE ) * scale;
-  pos = Vec3( Math::Floor( pos.x ), Math::Floor( pos.y ), 0.0f );
-  return pos;
-}//GetGridPosUnderCamera
-
-
-/*
-=============
-  GetGridPosUnderCursor
-=============
-*/
-Vec3 Game::GetGridPosUnderCursor()
-{
-  Vec3 pos( this->core->mouse.GetCursorPosition().x, this->core->mouse.GetCursorPosition().y, 0.0f );
-  pos += ( this->core->GetCamera()->GetPosition() - Vec3( this->core->GetWindowHalfSize().x, this->core->GetWindowHalfSize().y, 0.0f ) ) + Vec3( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE, 0 ) * 0.5f;
-  pos /= float( WORLD_GRID_BLOCK_SIZE );
-  pos = Vec3( Math::Floor( pos.x ), Math::Floor( pos.y ), 0.0f );
-  return pos;
-}//GetGridPosUnderCursor
-
-
 /*
 =============
   KeyboardProc
@@ -1028,6 +1002,17 @@ Vec2 Game::LUA_GetCameraPos()
     return Vec2( camera->GetPosition().x, camera->GetPosition().y );
   return Vec2Null;
 }//LUA_GetCameraPos
+
+
+/*
+=============
+  LUA_GetGridSize
+=============
+*/
+float Game::LUA_GetGridSize()
+{
+  return game->world->GetGridSize();
+}//LUA_GetGridSize
 
 
 /*
@@ -2026,7 +2011,7 @@ void Game::InitGui() {
   gui.type = OBJECT_GUI_TEXTFIELD;
   gui.position.x = 100;
   gui.position.y = 0;
-  gui.width = 200;
+  gui.width = 250;
   gui.label = "";
   obj->EnableGui( &gui );
 
