@@ -139,11 +139,11 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
 
       //Ќужна€ площадь всегда в левом-верхнем углу
       rect = Rect< Dword >( placeTo.left, placeTo.bottom + 1, iterRect.right, iterRect.bottom );
-      this->items.insert( std::make_pair< _MapKey, Rect< Dword > >( _MapKey( rect ), rect ) );
+	  this->items.insert( SquareAtlasMap::value_type( _MapKey( rect ), rect ) );
       __log.PrintInfo( Filelevel_DEBUG, "added right block: (%d, %d)-(%d, %d)", rect.left, rect.top, rect.right, rect.bottom );
 
       rect = Rect< Dword >( placeTo.right + 1, placeTo.top, iterRect.right, placeTo.bottom );
-      this->items.insert( std::make_pair< _MapKey, Rect< Dword > >( _MapKey( rect ), rect ) );
+	  this->items.insert( SquareAtlasMap::value_type( _MapKey( rect ), rect ) );
       __log.PrintInfo( Filelevel_DEBUG, "added right block: (%d, %d)-(%d, %d)", rect.left, rect.top, rect.right, rect.bottom );
 
       __log.PrintInfo( Filelevel_DEBUG, "deleted block: (%d, %d)-(%d, %d)", iterRect.left, iterRect.top, iterRect.right, iterRect.bottom );

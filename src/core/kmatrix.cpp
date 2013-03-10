@@ -88,8 +88,7 @@ Angles Mat3::ToAngles( Void ) const {
 
 	theta = -asin( sp );
 	cp = cos( theta );
-
-	if ( cp > 8192.0f * Math::FLT_EPSILON ) {
+	if ( cp > 8192.0f * Math::FLT_EPSILON_NUM ) {
 		angles.pitch	= Float( RAD2DEG( theta ) );
 		angles.yaw		= RAD2DEG( atan2( mat[ 0 ][ 1 ], mat[ 0 ][ 0 ] ) );
 		angles.roll		= RAD2DEG( atan2( mat[ 1 ][ 2 ], mat[ 2 ][ 2 ] ) );

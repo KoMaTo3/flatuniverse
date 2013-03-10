@@ -1,4 +1,6 @@
 README.md
+_UpgradeReport_Files/
+Backup/
 Debug/logs/
 Release/logs/
 Release/flatuniverse.exp
@@ -6,3 +8,6 @@ Release/flatuniverse.lib
 flatuniverse/Debug/
 flatuniverse/Release/
 flatuniverse.ncb
+flatuniverse.sdf
+UpgradeLog.htm
+UpgradeLog.XML

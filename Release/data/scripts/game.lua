@@ -180,6 +180,8 @@ function onKey( id, isPressed )
         DebugRender( 0 )
         settings.editorType = 0
         settings.editorMode = 0
+        SelectObject( '' )
+        UpdateGuiBySelectedObject()
       end
       if id == 0x31 then    -- 1
         GuiSetText( 'editor/settings.layer', 'renderable' )
@@ -300,6 +302,10 @@ function onMouseKey( id, isPressed )
           local num = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) ) + 1
           if num > 0 and num <= #GUI.templates.items then
             GUI.templates.currentItem = num
+            DebugRender( 0 )
+            settings.editorType = 0
+            SelectObject( '' )
+            UpdateGuiBySelectedObject()
           end
         end
       else
@@ -674,6 +680,9 @@ function TestInsertItem( px, py )
   --ObjectRemove( name )
   ObjectCreate( name, x * tileSize, y * tileSize, 0 )
   ObjectAttr( name, attrs )
+  if GUI.templates.items[ GUI.templates.currentItem ].creationScript ~= nil then
+    GUI.templates.items[ GUI.templates.currentItem ].creationScript( name )
+  end
 end --TestInsertItem
 
 function GetTilePosUnderCursor()

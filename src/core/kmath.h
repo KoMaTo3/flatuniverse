@@ -138,7 +138,7 @@ public:
   static const Float      M_SEC2MS;       // seconds to milliseconds multiplier
   static const Float      M_MS2SEC;       // milliseconds to seconds multiplier
   static const Float      INFINITY;       // huge number which should be larger than any valid number used
-  static const Float      FLT_EPSILON;    // smallest positive number such that 1.0+FLT_EPSILON != 1.0
+  static const Float      FLT_EPSILON_NUM;    // smallest positive number such that 1.0+FLT_EPSILON != 1.0
 
 private:
   union _flint {

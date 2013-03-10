@@ -1,7 +1,7 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flatuniverse", "flatuniverse\flatuniverse.vcproj", "{4B29FA67-8102-492C-BFB0-8C4AB624AB09}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Desktop
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flatuniverse", "flatuniverse\flatuniverse.vcxproj", "{4B29FA67-8102-492C-BFB0-8C4AB624AB09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

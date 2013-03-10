@@ -1,0 +1,929 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{f8683134-0085-4a32-a805-a76e92af67dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\math">
+      <UniqueIdentifier>{8cee92e2-2a98-4a28-b0ba-1b5f647da40c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\shaders">
+      <UniqueIdentifier>{a6a3ae6f-c9cf-4fbb-a29d-b7ef3e9e8610}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game">
+      <UniqueIdentifier>{7d461438-4c3a-494b-b569-ad7f08d6fa76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zlib">
+      <UniqueIdentifier>{8953ecc5-d160-42a6-80db-ba45c997bdcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="jpeglib">
+      <UniqueIdentifier>{e385756b-01b8-414e-bf5b-7c9499b42a9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pnglib">
+      <UniqueIdentifier>{0eba34bf-6fbc-4281-a341-9c90381ba45b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pcre">
+      <UniqueIdentifier>{10db4b72-975d-4cb1-8e92-1020322dc05f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lua">
+      <UniqueIdentifier>{076747c6-07e4-449a-9043-ecbc28f4f541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="glui2">
+      <UniqueIdentifier>{7b320568-6ce9-4a2d-8b6c-4151ffacbda0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\core\collision.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\collisionelement.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\collisionmgr.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\config.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\core.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\debugrenderer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\debugrendererobjects.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\file.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\filemanager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\font.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\imageloader.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\keyboard.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\memory.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\memoryreader.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\memorywriter.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\mouse.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\object.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\objectpointer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\objecttrigger.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\objecttriggermgr.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\renderable.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\singleton.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\squareatlas.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\state.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\stateaction.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\statemachine.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\textureatlas.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\timer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\tools.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\variable.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\kangles.cpp">
+      <Filter>core\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\klib.cpp">
+      <Filter>core\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\kmath.cpp">
+      <Filter>core\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\kmatrix.cpp">
+      <Filter>core\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\kvector.cpp">
+      <Filter>core\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\lua.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luastatecheck.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\main.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\worldgrid.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\worldgridmgr.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\worldsaver.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\adler32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\compress.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\crc32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\deflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\gzio.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\inffast.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\inflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\inftrees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\trees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\uncompr.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib\zutil.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\cdjpeg.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcapimin.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcapistd.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jccoefct.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jccolor.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcdctmgr.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jchuff.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcinit.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcmainct.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcmarker.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcmaster.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcomapi.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcparam.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcphuff.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcprepct.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jcsample.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jctrans.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdapimin.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdapistd.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdatadst.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdatasrc.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdcoefct.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdcolor.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jddctmgr.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdhuff.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdinput.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdmainct.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdmarker.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdmaster.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdmerge.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdphuff.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdpostct.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdsample.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jdtrans.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jerror.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jfdctflt.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jfdctfst.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jfdctint.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jidctflt.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jidctfst.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jidctint.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jidctred.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jmemansi.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jmemmgr.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jquant1.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jquant2.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\jutils.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\rdbmp.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\rdcolmap.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\rdgif.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\rdppm.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\rdrle.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\rdswitch.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\rdtarga.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\transupp.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\wrbmp.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\wrgif.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\wrppm.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\wrrle.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeglib\wrtarga.c">
+      <Filter>jpeglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\png.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngerror.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pnggccrd.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngget.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngmem.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngpread.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngread.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngrio.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngrtran.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngrutil.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngset.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngtrans.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngvcrd.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngwio.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngwrite.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngwtran.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pnglib\pngwutil.c">
+      <Filter>pnglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pcre\pcre_chartables.c">
+      <Filter>pcre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pcre\pcre_compile.c">
+      <Filter>pcre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pcre\pcre_exec.c">
+      <Filter>pcre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pcre\pcre_globals.c">
+      <Filter>pcre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pcre\pcre_maketables.c">
+      <Filter>pcre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pcre\pcre_newline.c">
+      <Filter>pcre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pcre\pcre_tables.c">
+      <Filter>pcre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lapi.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lauxlib.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lbaselib.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lcode.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\ldblib.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\ldebug.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\ldo.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\ldump.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lfunc.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lgc.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\linit.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\liolib.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\llex.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lmathlib.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lmem.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\loadlib.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lobject.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lopcodes.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\loslib.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lparser.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lstate.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lstring.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lstrlib.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\ltable.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\ltablib.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\ltm.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lundump.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lvm.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lzio.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\print.c">
+      <Filter>lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Button.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2CheckBox.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Config.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Console.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Controller.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Dialog.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2DropDown.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Images.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Label.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2LabelEdit.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Panel.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2ProgressBar.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2RadioGroup.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Slider.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Spinner.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2TextField.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Theme.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\g2Utilities.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\glui2.cpp">
+      <Filter>glui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glui2\stb_image.c">
+      <Filter>glui2</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\core\collision.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\collisionelement.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\collisionmgr.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\config.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\core.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\debugrenderer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\debugrendererobjects.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\externgl.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\file.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\filemanager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\font.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\imageloader.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\interngl.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\keyboard.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\memory.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\memoryreader.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\memorywriter.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\mouse.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\object.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\objectpointer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\objectpointerinterface.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\objecttrigger.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\objecttriggermgr.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\renderable.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\singleton.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\squareatlas.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\state.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\stateaction.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\statemachine.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\textureatlas.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\timer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\tools.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\variable.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\kangles.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\klib.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\kmath.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\kmatrix.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\ktypes.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\kvector.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\game.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\lua.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luastatecheck.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\worldgrid.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\worldgridmgr.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\worldsaver.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\cderror.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\cdjpeg.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jchuff.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jconfig.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jdct.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jdhuff.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jerror.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jinclude.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jmemsys.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jmorecfg.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jpegint.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jpeglib.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\jversion.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\jpeglib\transupp.h">
+      <Filter>jpeglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pnglib\png.h">
+      <Filter>pnglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pnglib\pngconf.h">
+      <Filter>pnglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pcre\config.h">
+      <Filter>pcre</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pcre\pcre.h">
+      <Filter>pcre</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pcre\pcre_internal.h">
+      <Filter>pcre</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pcre\ucp.h">
+      <Filter>pcre</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lapi.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lauxlib.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lcode.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\ldebug.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\ldo.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lfunc.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lgc.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\llex.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\llimits.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lmem.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lobject.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lopcodes.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lparser.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lstate.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lstring.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\ltable.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\ltm.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lua.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\luaconf.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lualib.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lundump.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lvm.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lua\lzio.h">
+      <Filter>lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Button.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2CheckBox.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Config.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Console.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Controller.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Dialog.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2DropDown.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Images.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Label.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2LabelEdit.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Panel.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2ProgressBar.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2RadioGroup.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Slider.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Spinner.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2TextField.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Theme.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\g2Utilities.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glui2\glui2.h">
+      <Filter>glui2</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Release\data\shaders\main.fs">
+      <Filter>core\shaders</Filter>
+    </None>
+    <None Include="..\Release\data\shaders\main.gs">
+      <Filter>core\shaders</Filter>
+    </None>
+    <None Include="..\Release\data\shaders\main.vs">
+      <Filter>core\shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>

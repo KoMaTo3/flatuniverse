@@ -14,7 +14,7 @@ const Float Math::M_RAD2DEG     = 180.0f / PI;
 const Float Math::M_SEC2MS      = 1000.0f;
 const Float Math::M_MS2SEC      = 0.001f;
 const Float Math::INFINITY      = 1e30f;
-const Float Math::FLT_EPSILON   = 1.192092896e-07f;
+const Float Math::FLT_EPSILON_NUM = 1.192092896e-07f;
 
 Bool Math::initialized          = false;
 Dword Math::iSqrt[ SQRT_TABLE_SIZE ];

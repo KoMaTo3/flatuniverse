@@ -1,0 +1,392 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4B29FA67-8102-492C-BFB0-8C4AB624AB09}</ProjectGuid>
+    <RootNamespace>flatuniverse</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;PCRE_DEFINITION;HAVE_CONFIG_H;DEBUGGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\core\collision.cpp" />
+    <ClCompile Include="..\src\core\collisionelement.cpp" />
+    <ClCompile Include="..\src\core\collisionmgr.cpp" />
+    <ClCompile Include="..\src\core\config.cpp" />
+    <ClCompile Include="..\src\core\core.cpp" />
+    <ClCompile Include="..\src\core\debugrenderer.cpp" />
+    <ClCompile Include="..\src\core\debugrendererobjects.cpp" />
+    <ClCompile Include="..\src\core\file.cpp" />
+    <ClCompile Include="..\src\core\filemanager.cpp" />
+    <ClCompile Include="..\src\core\font.cpp" />
+    <ClCompile Include="..\src\core\imageloader.cpp" />
+    <ClCompile Include="..\src\core\keyboard.cpp" />
+    <ClCompile Include="..\src\core\memory.cpp" />
+    <ClCompile Include="..\src\core\memoryreader.cpp" />
+    <ClCompile Include="..\src\core\memorywriter.cpp" />
+    <ClCompile Include="..\src\core\mouse.cpp" />
+    <ClCompile Include="..\src\core\object.cpp" />
+    <ClCompile Include="..\src\core\objectpointer.cpp" />
+    <ClCompile Include="..\src\core\objecttrigger.cpp" />
+    <ClCompile Include="..\src\core\objecttriggermgr.cpp" />
+    <ClCompile Include="..\src\core\renderable.cpp" />
+    <ClCompile Include="..\src\core\singleton.cpp" />
+    <ClCompile Include="..\src\core\squareatlas.cpp" />
+    <ClCompile Include="..\src\core\state.cpp" />
+    <ClCompile Include="..\src\core\stateaction.cpp" />
+    <ClCompile Include="..\src\core\statemachine.cpp" />
+    <ClCompile Include="..\src\core\textureatlas.cpp" />
+    <ClCompile Include="..\src\core\timer.cpp" />
+    <ClCompile Include="..\src\core\tools.cpp" />
+    <ClCompile Include="..\src\core\variable.cpp" />
+    <ClCompile Include="..\src\core\kangles.cpp" />
+    <ClCompile Include="..\src\core\klib.cpp" />
+    <ClCompile Include="..\src\core\kmath.cpp" />
+    <ClCompile Include="..\src\core\kmatrix.cpp" />
+    <ClCompile Include="..\src\core\kvector.cpp" />
+    <ClCompile Include="..\src\game\lua.cpp" />
+    <ClCompile Include="..\src\game\luastatecheck.cpp" />
+    <ClCompile Include="..\src\game\main.cpp" />
+    <ClCompile Include="..\src\game\worldgrid.cpp" />
+    <ClCompile Include="..\src\game\worldgridmgr.cpp" />
+    <ClCompile Include="..\src\game\worldsaver.cpp" />
+    <ClCompile Include="..\src\zlib\adler32.c" />
+    <ClCompile Include="..\src\zlib\compress.c" />
+    <ClCompile Include="..\src\zlib\crc32.c" />
+    <ClCompile Include="..\src\zlib\deflate.c" />
+    <ClCompile Include="..\src\zlib\gzio.c" />
+    <ClCompile Include="..\src\zlib\inffast.c" />
+    <ClCompile Include="..\src\zlib\inflate.c" />
+    <ClCompile Include="..\src\zlib\inftrees.c" />
+    <ClCompile Include="..\src\zlib\trees.c" />
+    <ClCompile Include="..\src\zlib\uncompr.c" />
+    <ClCompile Include="..\src\zlib\zutil.c" />
+    <ClCompile Include="..\src\jpeglib\cdjpeg.c" />
+    <ClCompile Include="..\src\jpeglib\jcapimin.c" />
+    <ClCompile Include="..\src\jpeglib\jcapistd.c" />
+    <ClCompile Include="..\src\jpeglib\jccoefct.c" />
+    <ClCompile Include="..\src\jpeglib\jccolor.c" />
+    <ClCompile Include="..\src\jpeglib\jcdctmgr.c" />
+    <ClCompile Include="..\src\jpeglib\jchuff.c" />
+    <ClCompile Include="..\src\jpeglib\jcinit.c" />
+    <ClCompile Include="..\src\jpeglib\jcmainct.c" />
+    <ClCompile Include="..\src\jpeglib\jcmarker.c" />
+    <ClCompile Include="..\src\jpeglib\jcmaster.c" />
+    <ClCompile Include="..\src\jpeglib\jcomapi.c" />
+    <ClCompile Include="..\src\jpeglib\jcparam.c" />
+    <ClCompile Include="..\src\jpeglib\jcphuff.c" />
+    <ClCompile Include="..\src\jpeglib\jcprepct.c" />
+    <ClCompile Include="..\src\jpeglib\jcsample.c" />
+    <ClCompile Include="..\src\jpeglib\jctrans.c" />
+    <ClCompile Include="..\src\jpeglib\jdapimin.c" />
+    <ClCompile Include="..\src\jpeglib\jdapistd.c" />
+    <ClCompile Include="..\src\jpeglib\jdatadst.c" />
+    <ClCompile Include="..\src\jpeglib\jdatasrc.c" />
+    <ClCompile Include="..\src\jpeglib\jdcoefct.c" />
+    <ClCompile Include="..\src\jpeglib\jdcolor.c" />
+    <ClCompile Include="..\src\jpeglib\jddctmgr.c" />
+    <ClCompile Include="..\src\jpeglib\jdhuff.c" />
+    <ClCompile Include="..\src\jpeglib\jdinput.c" />
+    <ClCompile Include="..\src\jpeglib\jdmainct.c" />
+    <ClCompile Include="..\src\jpeglib\jdmarker.c" />
+    <ClCompile Include="..\src\jpeglib\jdmaster.c" />
+    <ClCompile Include="..\src\jpeglib\jdmerge.c" />
+    <ClCompile Include="..\src\jpeglib\jdphuff.c" />
+    <ClCompile Include="..\src\jpeglib\jdpostct.c" />
+    <ClCompile Include="..\src\jpeglib\jdsample.c" />
+    <ClCompile Include="..\src\jpeglib\jdtrans.c" />
+    <ClCompile Include="..\src\jpeglib\jerror.c" />
+    <ClCompile Include="..\src\jpeglib\jfdctflt.c" />
+    <ClCompile Include="..\src\jpeglib\jfdctfst.c" />
+    <ClCompile Include="..\src\jpeglib\jfdctint.c" />
+    <ClCompile Include="..\src\jpeglib\jidctflt.c" />
+    <ClCompile Include="..\src\jpeglib\jidctfst.c" />
+    <ClCompile Include="..\src\jpeglib\jidctint.c" />
+    <ClCompile Include="..\src\jpeglib\jidctred.c" />
+    <ClCompile Include="..\src\jpeglib\jmemansi.c" />
+    <ClCompile Include="..\src\jpeglib\jmemmgr.c" />
+    <ClCompile Include="..\src\jpeglib\jquant1.c" />
+    <ClCompile Include="..\src\jpeglib\jquant2.c" />
+    <ClCompile Include="..\src\jpeglib\jutils.c" />
+    <ClCompile Include="..\src\jpeglib\rdbmp.c" />
+    <ClCompile Include="..\src\jpeglib\rdcolmap.c" />
+    <ClCompile Include="..\src\jpeglib\rdgif.c" />
+    <ClCompile Include="..\src\jpeglib\rdppm.c" />
+    <ClCompile Include="..\src\jpeglib\rdrle.c" />
+    <ClCompile Include="..\src\jpeglib\rdswitch.c" />
+    <ClCompile Include="..\src\jpeglib\rdtarga.c" />
+    <ClCompile Include="..\src\jpeglib\transupp.c" />
+    <ClCompile Include="..\src\jpeglib\wrbmp.c" />
+    <ClCompile Include="..\src\jpeglib\wrgif.c" />
+    <ClCompile Include="..\src\jpeglib\wrppm.c" />
+    <ClCompile Include="..\src\jpeglib\wrrle.c" />
+    <ClCompile Include="..\src\jpeglib\wrtarga.c" />
+    <ClCompile Include="..\src\pnglib\png.c" />
+    <ClCompile Include="..\src\pnglib\pngerror.c" />
+    <ClCompile Include="..\src\pnglib\pnggccrd.c" />
+    <ClCompile Include="..\src\pnglib\pngget.c" />
+    <ClCompile Include="..\src\pnglib\pngmem.c" />
+    <ClCompile Include="..\src\pnglib\pngpread.c" />
+    <ClCompile Include="..\src\pnglib\pngread.c" />
+    <ClCompile Include="..\src\pnglib\pngrio.c" />
+    <ClCompile Include="..\src\pnglib\pngrtran.c" />
+    <ClCompile Include="..\src\pnglib\pngrutil.c" />
+    <ClCompile Include="..\src\pnglib\pngset.c" />
+    <ClCompile Include="..\src\pnglib\pngtrans.c" />
+    <ClCompile Include="..\src\pnglib\pngvcrd.c" />
+    <ClCompile Include="..\src\pnglib\pngwio.c" />
+    <ClCompile Include="..\src\pnglib\pngwrite.c" />
+    <ClCompile Include="..\src\pnglib\pngwtran.c" />
+    <ClCompile Include="..\src\pnglib\pngwutil.c" />
+    <ClCompile Include="..\src\pcre\pcre_chartables.c" />
+    <ClCompile Include="..\src\pcre\pcre_compile.c" />
+    <ClCompile Include="..\src\pcre\pcre_exec.c" />
+    <ClCompile Include="..\src\pcre\pcre_globals.c" />
+    <ClCompile Include="..\src\pcre\pcre_maketables.c" />
+    <ClCompile Include="..\src\pcre\pcre_newline.c" />
+    <ClCompile Include="..\src\pcre\pcre_tables.c" />
+    <ClCompile Include="..\src\lua\lapi.c" />
+    <ClCompile Include="..\src\lua\lauxlib.c" />
+    <ClCompile Include="..\src\lua\lbaselib.c" />
+    <ClCompile Include="..\src\lua\lcode.c" />
+    <ClCompile Include="..\src\lua\ldblib.c" />
+    <ClCompile Include="..\src\lua\ldebug.c" />
+    <ClCompile Include="..\src\lua\ldo.c" />
+    <ClCompile Include="..\src\lua\ldump.c" />
+    <ClCompile Include="..\src\lua\lfunc.c" />
+    <ClCompile Include="..\src\lua\lgc.c" />
+    <ClCompile Include="..\src\lua\linit.c" />
+    <ClCompile Include="..\src\lua\liolib.c" />
+    <ClCompile Include="..\src\lua\llex.c" />
+    <ClCompile Include="..\src\lua\lmathlib.c" />
+    <ClCompile Include="..\src\lua\lmem.c" />
+    <ClCompile Include="..\src\lua\loadlib.c" />
+    <ClCompile Include="..\src\lua\lobject.c" />
+    <ClCompile Include="..\src\lua\lopcodes.c" />
+    <ClCompile Include="..\src\lua\loslib.c" />
+    <ClCompile Include="..\src\lua\lparser.c" />
+    <ClCompile Include="..\src\lua\lstate.c" />
+    <ClCompile Include="..\src\lua\lstring.c" />
+    <ClCompile Include="..\src\lua\lstrlib.c" />
+    <ClCompile Include="..\src\lua\ltable.c" />
+    <ClCompile Include="..\src\lua\ltablib.c" />
+    <ClCompile Include="..\src\lua\ltm.c" />
+    <ClCompile Include="..\src\lua\lundump.c" />
+    <ClCompile Include="..\src\lua\lvm.c" />
+    <ClCompile Include="..\src\lua\lzio.c" />
+    <ClCompile Include="..\src\lua\print.c" />
+    <ClCompile Include="..\src\glui2\g2Button.cpp" />
+    <ClCompile Include="..\src\glui2\g2CheckBox.cpp" />
+    <ClCompile Include="..\src\glui2\g2Config.cpp" />
+    <ClCompile Include="..\src\glui2\g2Console.cpp" />
+    <ClCompile Include="..\src\glui2\g2Controller.cpp" />
+    <ClCompile Include="..\src\glui2\g2Dialog.cpp" />
+    <ClCompile Include="..\src\glui2\g2DropDown.cpp" />
+    <ClCompile Include="..\src\glui2\g2Images.cpp" />
+    <ClCompile Include="..\src\glui2\g2Label.cpp" />
+    <ClCompile Include="..\src\glui2\g2LabelEdit.cpp" />
+    <ClCompile Include="..\src\glui2\g2Panel.cpp" />
+    <ClCompile Include="..\src\glui2\g2ProgressBar.cpp" />
+    <ClCompile Include="..\src\glui2\g2RadioGroup.cpp" />
+    <ClCompile Include="..\src\glui2\g2Slider.cpp" />
+    <ClCompile Include="..\src\glui2\g2Spinner.cpp" />
+    <ClCompile Include="..\src\glui2\g2TextField.cpp" />
+    <ClCompile Include="..\src\glui2\g2Theme.cpp" />
+    <ClCompile Include="..\src\glui2\g2Utilities.cpp" />
+    <ClCompile Include="..\src\glui2\glui2.cpp" />
+    <ClCompile Include="..\src\glui2\stb_image.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\core\collision.h" />
+    <ClInclude Include="..\src\core\collisionelement.h" />
+    <ClInclude Include="..\src\core\collisionmgr.h" />
+    <ClInclude Include="..\src\core\config.h" />
+    <ClInclude Include="..\src\core\core.h" />
+    <ClInclude Include="..\src\core\debugrenderer.h" />
+    <ClInclude Include="..\src\core\debugrendererobjects.h" />
+    <ClInclude Include="..\src\core\externgl.h" />
+    <ClInclude Include="..\src\core\file.h" />
+    <ClInclude Include="..\src\core\filemanager.h" />
+    <ClInclude Include="..\src\core\font.h" />
+    <ClInclude Include="..\src\core\imageloader.h" />
+    <ClInclude Include="..\src\core\interngl.h" />
+    <ClInclude Include="..\src\core\keyboard.h" />
+    <ClInclude Include="..\src\core\memory.h" />
+    <ClInclude Include="..\src\core\memoryreader.h" />
+    <ClInclude Include="..\src\core\memorywriter.h" />
+    <ClInclude Include="..\src\core\mouse.h" />
+    <ClInclude Include="..\src\core\object.h" />
+    <ClInclude Include="..\src\core\objectpointer.h" />
+    <ClInclude Include="..\src\core\objectpointerinterface.h" />
+    <ClInclude Include="..\src\core\objecttrigger.h" />
+    <ClInclude Include="..\src\core\objecttriggermgr.h" />
+    <ClInclude Include="..\src\core\renderable.h" />
+    <ClInclude Include="..\src\core\singleton.h" />
+    <ClInclude Include="..\src\core\squareatlas.h" />
+    <ClInclude Include="..\src\core\state.h" />
+    <ClInclude Include="..\src\core\stateaction.h" />
+    <ClInclude Include="..\src\core\statemachine.h" />
+    <ClInclude Include="..\src\core\textureatlas.h" />
+    <ClInclude Include="..\src\core\timer.h" />
+    <ClInclude Include="..\src\core\tools.h" />
+    <ClInclude Include="..\src\core\variable.h" />
+    <ClInclude Include="..\src\core\kangles.h" />
+    <ClInclude Include="..\src\core\klib.h" />
+    <ClInclude Include="..\src\core\kmath.h" />
+    <ClInclude Include="..\src\core\kmatrix.h" />
+    <ClInclude Include="..\src\core\ktypes.h" />
+    <ClInclude Include="..\src\core\kvector.h" />
+    <ClInclude Include="..\src\game\game.h" />
+    <ClInclude Include="..\src\game\lua.h" />
+    <ClInclude Include="..\src\game\luastatecheck.h" />
+    <ClInclude Include="..\src\game\worldgrid.h" />
+    <ClInclude Include="..\src\game\worldgridmgr.h" />
+    <ClInclude Include="..\src\game\worldsaver.h" />
+    <ClInclude Include="..\src\jpeglib\cderror.h" />
+    <ClInclude Include="..\src\jpeglib\cdjpeg.h" />
+    <ClInclude Include="..\src\jpeglib\jchuff.h" />
+    <ClInclude Include="..\src\jpeglib\jconfig.h" />
+    <ClInclude Include="..\src\jpeglib\jdct.h" />
+    <ClInclude Include="..\src\jpeglib\jdhuff.h" />
+    <ClInclude Include="..\src\jpeglib\jerror.h" />
+    <ClInclude Include="..\src\jpeglib\jinclude.h" />
+    <ClInclude Include="..\src\jpeglib\jmemsys.h" />
+    <ClInclude Include="..\src\jpeglib\jmorecfg.h" />
+    <ClInclude Include="..\src\jpeglib\jpegint.h" />
+    <ClInclude Include="..\src\jpeglib\jpeglib.h" />
+    <ClInclude Include="..\src\jpeglib\jversion.h" />
+    <ClInclude Include="..\src\jpeglib\transupp.h" />
+    <ClInclude Include="..\src\pnglib\png.h" />
+    <ClInclude Include="..\src\pnglib\pngconf.h" />
+    <ClInclude Include="..\src\pcre\config.h" />
+    <ClInclude Include="..\src\pcre\pcre.h" />
+    <ClInclude Include="..\src\pcre\pcre_internal.h" />
+    <ClInclude Include="..\src\pcre\ucp.h" />
+    <ClInclude Include="..\src\lua\lapi.h" />
+    <ClInclude Include="..\src\lua\lauxlib.h" />
+    <ClInclude Include="..\src\lua\lcode.h" />
+    <ClInclude Include="..\src\lua\ldebug.h" />
+    <ClInclude Include="..\src\lua\ldo.h" />
+    <ClInclude Include="..\src\lua\lfunc.h" />
+    <ClInclude Include="..\src\lua\lgc.h" />
+    <ClInclude Include="..\src\lua\llex.h" />
+    <ClInclude Include="..\src\lua\llimits.h" />
+    <ClInclude Include="..\src\lua\lmem.h" />
+    <ClInclude Include="..\src\lua\lobject.h" />
+    <ClInclude Include="..\src\lua\lopcodes.h" />
+    <ClInclude Include="..\src\lua\lparser.h" />
+    <ClInclude Include="..\src\lua\lstate.h" />
+    <ClInclude Include="..\src\lua\lstring.h" />
+    <ClInclude Include="..\src\lua\ltable.h" />
+    <ClInclude Include="..\src\lua\ltm.h" />
+    <ClInclude Include="..\src\lua\lua.h" />
+    <ClInclude Include="..\src\lua\luaconf.h" />
+    <ClInclude Include="..\src\lua\lualib.h" />
+    <ClInclude Include="..\src\lua\lundump.h" />
+    <ClInclude Include="..\src\lua\lvm.h" />
+    <ClInclude Include="..\src\lua\lzio.h" />
+    <ClInclude Include="..\src\glui2\g2Button.h" />
+    <ClInclude Include="..\src\glui2\g2CheckBox.h" />
+    <ClInclude Include="..\src\glui2\g2Config.h" />
+    <ClInclude Include="..\src\glui2\g2Console.h" />
+    <ClInclude Include="..\src\glui2\g2Controller.h" />
+    <ClInclude Include="..\src\glui2\g2Dialog.h" />
+    <ClInclude Include="..\src\glui2\g2DropDown.h" />
+    <ClInclude Include="..\src\glui2\g2Images.h" />
+    <ClInclude Include="..\src\glui2\g2Label.h" />
+    <ClInclude Include="..\src\glui2\g2LabelEdit.h" />
+    <ClInclude Include="..\src\glui2\g2Panel.h" />
+    <ClInclude Include="..\src\glui2\g2ProgressBar.h" />
+    <ClInclude Include="..\src\glui2\g2RadioGroup.h" />
+    <ClInclude Include="..\src\glui2\g2Slider.h" />
+    <ClInclude Include="..\src\glui2\g2Spinner.h" />
+    <ClInclude Include="..\src\glui2\g2TextField.h" />
+    <ClInclude Include="..\src\glui2\g2Theme.h" />
+    <ClInclude Include="..\src\glui2\g2Utilities.h" />
+    <ClInclude Include="..\src\glui2\glui2.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Release\data\shaders\main.fs" />
+    <None Include="..\Release\data\shaders\main.gs" />
+    <None Include="..\Release\data\shaders\main.vs" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
