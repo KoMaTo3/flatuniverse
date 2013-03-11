@@ -41,6 +41,46 @@ function GetObjectsTemplates()
       creationScript = function( name )
       end,
     },
+    -- Tile000
+    {
+      name = 'tile0/a',
+      icon = 'data/textures/tiles/tile000a.png',
+      attr = {
+        renderable = true, textureName = 'textures/tiles/tile000a.png',
+        collision = true, _collisionScale = 1, collisionStatic = true,
+        trigger = false,
+      },
+    },
+    -- Tile000
+    {
+      name = 'tile0/b',
+      icon = 'data/textures/tiles/tile000b.png',
+      attr = {
+        renderable = true, textureName = 'textures/tiles/tile000b.png',
+        collision = true, _collisionScale = 1, collisionStatic = true,
+        trigger = false,
+      },
+    },
+    -- Tile000
+    {
+      name = 'tile0/c',
+      icon = 'data/textures/tiles/tile000c.png',
+      attr = {
+        renderable = true, textureName = 'textures/tiles/tile000c.png',
+        collision = true, _collisionScale = 1, collisionStatic = true,
+        trigger = false,
+      },
+    },
+    -- Tile000
+    {
+      name = 'tile0/d',
+      icon = 'data/textures/tiles/tile000d.png',
+      attr = {
+        renderable = true, textureName = 'textures/tiles/tile000d.png',
+        collision = true, _collisionScale = 1, collisionStatic = true,
+        trigger = false,
+      },
+    },
     --
   }
 end

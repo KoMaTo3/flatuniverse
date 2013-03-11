@@ -242,6 +242,9 @@ void RenderableQuad::LoadFromBuffer( MemoryReader &reader )
   reader >> this->scale;
   reader >> tex;
 
+  if( !textureName.length() ) {
+    textureName = RENDERABLE_DEFAULT_TEXTURE;
+  }
   this->SetTexture( textureName, Vec2( tex.x, tex.y ), Vec2( tex.z, tex.w ) );
 }//LoadFromBuffer
 

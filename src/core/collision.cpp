@@ -299,6 +299,7 @@ bool Collision::TestIntersect( Collision& item )
   }
   else  //dynamic + dynamic
   {
+    __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => dynamic + dynamic" );
     item0 = this;
     item1 = &item;
     collisionSolved = true;
@@ -325,6 +326,10 @@ bool Collision::TestIntersect( Collision& item )
     {
       itemResolver0.resolveVector.y = halfIntersectPower.y;
       itemResolver1.resolveVector.y = -halfIntersectPower.y;
+    }
+    if( item0->collisionElement->GetType() == COLLISION_ELEMENT_TYPE_SQUARE && item0->collisionElement->GetType() == item1->collisionElement->GetType() ) {
+      itemResolver0.useAllAxices = 0;
+      itemResolver1.useAllAxices = 0;
     }
     item0->resolver.push_back( itemResolver0 );
     item1->resolver.push_back( itemResolver1 );
@@ -490,7 +495,7 @@ bool Collision::TestInPoint( const Vec2 &pos )
 */
 void Collision::ResolveCollision()
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Collision::ResolveCollision => %d", this->resolver.size() );
+  __log.PrintInfo( Filelevel_DEBUG, "Collision::ResolveCollision => %d", this->resolver.size() );
   if( !this->resolver.size() )
     return;
 
@@ -506,7 +511,7 @@ void Collision::ResolveCollision()
       result = &( *iter );
     }
   }
-  //__log.PrintInfo( Filelevel_DEBUG, ". power[%3.3f; %3.3f] vector[%3.3f; %3.3f]", result->power.x, result->power.y, result->resolveVector.x, result->resolveVector.y );
+  __log.PrintInfo( Filelevel_DEBUG, ". power[%3.3f; %3.3f] vector[%3.3f; %3.3f] useAllAxices[%d]", result->power.x, result->power.y, result->resolveVector.x, result->resolveVector.y, result->useAllAxices );
 
   Vec3 resolved( Vec3Null );
   if( result->useAllAxices ) {

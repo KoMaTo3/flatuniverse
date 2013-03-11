@@ -18,6 +18,7 @@ class RenderableQuad;
 typedef std::vector< RenderableQuad > CoreRenderableList; //список рендерейблов (точки пр€миком отправл€ютс€ шейдеру)
 typedef std::vector< GLushort > CoreRenderableListIndicies;   //индексный массив рендерейблов
 #define RENDERABLE_INDEX_UNDEFINED  ( 0xFFFF )
+#define RENDERABLE_DEFAULT_TEXTURE  ( "data/textures/null.png" )
 
 
 //“ипы рендерейбла (квад, спрайт, точка, лини€, меш, текст и т.д.)

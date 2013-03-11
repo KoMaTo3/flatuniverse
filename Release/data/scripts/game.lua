@@ -49,7 +49,7 @@ GUI = {
     },
     scroll = 0,
     maxScroll = 350,
-    itemSize = 64,
+    itemSize = 32,
     items = {},
     currentItem = 0,
     Draw = function()
@@ -114,6 +114,7 @@ function Init()
 
   GUI.templates.height = settings.windowSize.y - 10
   GUI.templates.items = GetObjectsTemplates()
+  GUI.templates.width = GUI.templates.itemSize + 25
 
   -- Ставим обработчики на всё: клаву, кнопки и движение мыши
   ListenKeyboard( 'onKey' )
@@ -208,9 +209,16 @@ function onKey( id, isPressed )
         SelectObject( '' )
         UpdateGuiBySelectedObject()
       end
-      --if id == 0x51 then    -- Q
-      --  TestInsertItem(  )
-      --end
+      if id == 0x51 then    -- Q: Prev template
+        if GUI.templates.currentItem > 1 then
+          GUI.templates.currentItem = GUI.templates.currentItem - 1
+        end
+      end
+      if id == 0x45 then    -- E: Next template
+        if GUI.templates.currentItem < #GUI.templates.items then
+          GUI.templates.currentItem = GUI.templates.currentItem + 1
+        end
+      end
       if id == 0x10 then    -- Shift
         ToggleGrid()
       end
