@@ -7,10 +7,14 @@
 -- 11: перемещение GUI.templates
 -- 12: скролл GUI.templates
 -- 20: промежуточный режим вставки тайла: нажал мышь и ждём отпускания или движения
+-- 21: вставка блока тайлов: рисование прямоугольной области
 ]]
 settings = {
     guiVisibility     = false,  -- отображение GUI
-    objectMode3Moved  = false,  -- bool если происходим перемещение объекта мышкой
+
+    objectMode3Moved  = false,  -- bool если происходит перемещение объекта мышкой
+    objectMode3StartPosition = { 0, 0 },  -- начальное положение обекта, до перемещения
+
     editorMode        = 0,      -- текущий режим редактора
     move              = {
       objectStart = {
@@ -26,6 +30,12 @@ settings = {
     windowSize = { x = 0, y = 0 },
     showGrid = false,
     editorType = 0, -- 0 - общий режим, 1 - рендерейблы, 2 - коллизии, 3 - триггеры
+    keys = {
+      isShift = false,
+      isCtrl  = false,
+      isAlt   = false,
+    },
+    buffer = {},  -- буфер действий для отмены
 }
 mousePos = {    -- экранная позиция курсора
     x = 0,
@@ -173,8 +183,12 @@ function onKey( id, isPressed )
         GameExit()
       end
       if id == 0x5A then    -- Z
-        settings.guiVisibility = not settings.guiVisibility
-        SetGuiVisibility( settings.guiVisibility )
+        if settings.keys.isCtrl then  -- Ctrl+Z
+          PopFromBuffer()
+        else
+          settings.guiVisibility = not settings.guiVisibility
+          SetGuiVisibility( settings.guiVisibility )
+        end
       end
       if id == 0xC0 then    -- ~
         GuiSetText( 'editor/settings.layer', 'default' )
@@ -203,11 +217,18 @@ function onKey( id, isPressed )
         local object = GuiGetText( 'editor/object.object_name' )
         if #object > 0 then
           ObjectRemove( object )
+          SelectObject( '' )
+          if settings.editorMode == 2 then
+            settings.editorMode = 0
+          end
         end
       end
       if id == 0x20 then    -- Space
         SelectObject( '' )
         UpdateGuiBySelectedObject()
+        if settings.editorMode == 2 then
+          settings.editorMode = 0
+        end
       end
       if id == 0x51 then    -- Q: Prev template
         if GUI.templates.currentItem > 1 then
@@ -221,6 +242,13 @@ function onKey( id, isPressed )
       end
       if id == 0x10 then    -- Shift
         ToggleGrid()
+        settings.keys.isShift = isPressed
+      end
+      if id == 0x11 then    -- Control
+        settings.keys.isCtrl = isPressed
+      end
+      if id == 0x12 then    -- Alt
+        settings.keys.isAlt = isPressed
       end
   end
   if id == 0x4C then
@@ -278,6 +306,18 @@ function onMouseKey( id, isPressed )
       else
         if settings.objectMode3Moved then
           settings.editorMode = 2
+          local x, y = ObjectGetPos( GetSelectedObject() )
+          settings.objectMode3Moved = false
+          if settings.objectMode3StartPosition[ 1 ] ~= x or settings.objectMode3StartPosition[ 2 ] ~= y then
+            local name = GetSelectedObject()
+            local oldX = settings.objectMode3StartPosition[ 1 ]
+            local oldY = settings.objectMode3StartPosition[ 2 ]
+            PushToBuffer( function()
+              end, function()
+                ObjectSetPos( name, oldX, oldY )
+              end
+            )
+          end
         else
           local object = GetObjectUnderCursorByMode()
           SelectObject( object )
@@ -335,7 +375,12 @@ function onMouseKey( id, isPressed )
     end,
     [20] = function()
       settings.editorMode = 0
-      TestInsertItem( mousePos.x, mousePos.y )
+      local name = TestInsertItem( mousePos.x, mousePos.y )
+      PushToBuffer( function()
+        end, function()
+          ObjectRemove( name )
+        end
+      )
     end,
     [21] = function()
       if isPressed then
@@ -354,13 +399,20 @@ function onMouseKey( id, isPressed )
         left, top = GetTilePosByPixel( left, top )
         right, bottom = GetTilePosByPixel( right, bottom )
         local texture = GUI.templates.items[ GUI.templates.currentItem ].icon
+        local names = {}
         for tx = left, right do
         for ty = top, bottom do
           x, y = GetPixelByTile( tx, ty )
-          TestInsertItem( x, y )
-          -- Render( 'sprite', x, y, 0, x + tileSize, y + tileSize, 0, texture, 'ffffff44' )
+          names[ #names + 1 ] = TestInsertItem( x, y )
         end
         end
+        PushToBuffer( function()
+          end, function()
+            for q = 1,#names do
+              ObjectRemove( names[ q ] )
+            end
+          end
+        )
       end
     end, -- 21
   }
@@ -393,6 +445,9 @@ function onMouseMove( x, y )
         local tileSize = GetTileSize()
         newX = math.floor( newX / tileSize ) * tileSize
         newY = math.floor( newY / tileSize ) * tileSize
+        if not settings.objectMode3Moved then
+          settings.objectMode3StartPosition = { oldX, oldY }
+        end
         ObjectSetPos( object, newX, newY )
         settings.objectMode3Moved = true
       end,
@@ -529,7 +584,7 @@ end --ToggleLayer
 
 function UpdateDebug()
   local cx, cy = GetCameraPos()
-  GuiSetText( 'editor/debug', settings.editorMode..':'..( settings.objectMode3Moved and 'true' or 'false' )..':mouse['..mousePos.x..'.'..mousePos.y..']cam['..settings.move.mouseStart.x..':'..settings.move.mouseStart.y..']' )
+  GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
   SetTimer( 0.01, 'UpdateDebug' )
 end --UpdateDebug
 
@@ -664,7 +719,7 @@ end --tableLength
 
 function TestInsertItem( px, py )
   if GUI.templates.currentItem <= 0 or GUI.templates.currentItem > #GUI.templates.items then
-    return false
+    return ''
   end
 
   local cameraX, cameraY = GetCameraPos()
@@ -691,6 +746,8 @@ function TestInsertItem( px, py )
   if GUI.templates.items[ GUI.templates.currentItem ].creationScript ~= nil then
     GUI.templates.items[ GUI.templates.currentItem ].creationScript( name )
   end
+
+  return name
 end --TestInsertItem
 
 function GetTilePosUnderCursor()
@@ -722,6 +779,21 @@ end --ToggleGrid
 
 function GetGridByCoords( x, y )
   local size = GetGridSize()
+end
+
+-- add action to buffer
+function PushToBuffer( action, cancelAction )
+  settings.buffer[ #settings.buffer + 1 ] = {
+    DoAction = action,
+    CancelAction = cancelAction,
+  }
+end
+
+function PopFromBuffer()
+  if #settings.buffer > 0 then
+    settings.buffer[ #settings.buffer ].CancelAction()
+    settings.buffer[ #settings.buffer ] = nil
+  end
 end
 
 Init()
