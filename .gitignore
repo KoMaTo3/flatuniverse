@@ -5,9 +5,12 @@ Debug/logs/
 Release/logs/
 Release/flatuniverse.exp
 Release/flatuniverse.lib
+Release/flatuniverse.pdb
 flatuniverse/Debug/
 flatuniverse/Release/
 flatuniverse.ncb
 flatuniverse.sdf
 UpgradeLog.htm
 UpgradeLog.XML
+flatuniverse.suo
+flatuniverse.v11.suo

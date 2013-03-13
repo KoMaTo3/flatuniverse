@@ -302,7 +302,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   sTimer.Update();
   game->world->Update( true );
-  game->lua->RunFile( "data/scripts/game.lua" );
+  game->lua->RunFile( "data/scripts/autorun.lua" );
   __log.PrintInfo( Filelevel_INFO, "Run" );
 
   /*
