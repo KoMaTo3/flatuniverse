@@ -14,6 +14,10 @@
 
 class Collision
 {
+public:
+  typedef void CollisionHandler( Collision* a, Collision* b );
+  typedef std::deque< CollisionHandler* > CollisionHandlerList;
+
 private:
   Vec3  *position;    //указывает на координаты объекта, дабы не дублировать код и ускорить расчеты
   Vec3  velocity;     //скорость
@@ -26,12 +30,14 @@ private:
   CollisionRect _rect;//рассчитанный контур объекта (квадрат)
 
   CollisionElement *collisionElement;
+  CollisionHandlerList *handlers;
 
   struct CollisionResolver
   {
-    Vec3 power;
-    Vec3 resolveVector;
-    bool useAllAxices;
+    Vec3        power;
+    Vec3        resolveVector;
+    bool        useAllAxices;
+    Collision   *target;
   };
   typedef std::deque< CollisionResolver > CollisionResolverList;
   CollisionResolverList resolver;
@@ -75,6 +81,7 @@ public:
 
   bool        Update          ( float dt );
   void        ResolveCollision();
+  void        AddHandler      ( CollisionHandler *handler );
 
   void        SaveToBuffer    ( MemoryWriter &writer );
   void        LoadFromBuffer  ( MemoryReader &reader );

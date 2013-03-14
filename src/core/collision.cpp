@@ -9,7 +9,8 @@ Vec3 __nullCollisionPosition( 0.0f, 0.0f, 0.0f );
 
 
 Collision::Collision( Vec3* objectPosition )
-:position( NULL ), velocity( 0.0f, 0.0f, 0.0f ), acceleration( 0.0f, 0.0f, 0.0f ), isStatic( true ), mass( 1.0f ), force( 0.0f, 0.0f, 0.0f ), collisionElement( NULL )
+:position( NULL ), velocity( 0.0f, 0.0f, 0.0f ), acceleration( 0.0f, 0.0f, 0.0f ), isStatic( true ), mass( 1.0f )
+, force( 0.0f, 0.0f, 0.0f ), collisionElement( NULL ), handlers( NULL )
 {
   this->position = objectPosition;
 }//constructor
@@ -19,6 +20,7 @@ Collision::Collision( Vec3* objectPosition )
 Collision::~Collision()
 {
   DEF_DELETE( collisionElement );
+  DEF_DELETE( this->handlers );
 }//destructor
 
 
@@ -331,6 +333,8 @@ bool Collision::TestIntersect( Collision& item )
       itemResolver0.useAllAxices = 0;
       itemResolver1.useAllAxices = 0;
     }
+    itemResolver0.target = item1;
+    itemResolver1.target = item0;
     item0->resolver.push_back( itemResolver0 );
     item1->resolver.push_back( itemResolver1 );
 
@@ -540,6 +544,14 @@ void Collision::ResolveCollision()
     this->velocity.y *= 0.5f;
   }
 
+  //call handlers
+  if( this->handlers && this->handlers->size() ) {
+    CollisionHandlerList::const_iterator iter, iterEnd = this->handlers->end();
+    for( iter = this->handlers->begin(); iter != iterEnd; ++iter ) {
+      ( *iter )( this, result->target );
+    }
+  }
+
   this->Update( 0.0f );
 }//ResolveCollision
 
@@ -688,5 +700,20 @@ void Collision::Render( float phase, const Vec3 &offset, bool isActive ) {
 #endif
 }//Render
 
+
+
+
+/*
+=============
+  AddHandler
+=============
+*/
+void Collision::AddHandler( CollisionHandler *handler ) {
+  if( !this->handlers ) {
+    this->handlers = new CollisionHandlerList;
+  }
+
+  this->handlers->push_back( handler );
+}//AddHandler
 
 
