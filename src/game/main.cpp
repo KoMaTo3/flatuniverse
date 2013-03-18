@@ -351,6 +351,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       currentFps = 0;
     }
 
+    /*
     if( game->core->keyboard.IsPressed( VK_LEFT ) || game->core->keyboard.IsPressed( VK_LETTER_A ) )
     {
       obj = game->core->GetObject( "player" );
@@ -391,6 +392,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     {
       //font->SetText( "Omfg, is work ÝO_oE" );
     }
+    */
 
     /*
     if( game->core->mouse.IsPressed( VK_RBUTTON ) )
@@ -571,6 +573,9 @@ Game::Game()
   LUAFUNC_GuiAttr           = Game::LUA_GuiAttr;
   LUAFUNC_LoadScript        = Game::LUA_LoadScript;
   LUAFUNC_ObjectAttr        = Game::LUA_ObjectAttr;
+  LUAFUNC_ListenCollision   = Game::LUA_ListenCollision;
+  LUAFUNC_SetObjectForce    = Game::LUA_SetObjectForce;
+  LUAFUNC_RemoveObjectForce = Game::LUA_RemoveObjectForce;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -2257,3 +2262,93 @@ void Game::InitGui() {
   controller = obj->EnableGui( &gui );
   game->dropDownLists[ controller ] = dropDownList;
 }//InitGui
+
+
+
+
+/*
+=============
+  LUA_ListenCollision
+=============
+*/
+void Game::LUA_ListenCollision( const std::string &funcName, const std::string &objectName ) {
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenCollision => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  Collision *collision = object->GetCollision();
+  if( !collision ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenCollision => object '%s' don't have collision", objectName.c_str() );
+    return;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ListenCollision => object['%s'] collision[x%p] function['%s']", object->GetNameFull().c_str(), collision, funcName.c_str() );
+
+  luaCollisionListenerStruct listener( collision, funcName );
+
+  game->luaCollisionListeners.push_back( listener );
+  collision->AddHandler( Game::CollisionProc );
+}//LUA_ListenCollision
+
+
+
+
+/*
+=============
+  CollisionProc
+=============
+*/
+void Game::CollisionProc( Collision *a, Collision *b ) {
+  Object *objectA = game->core->GetObjectByCollision( a );
+  if( !objectA ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::CollisionProc => object A by collision x%p not found", a );
+    return;
+  }
+  Object *objectB = game->core->GetObjectByCollision( b );
+  if( !objectB ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::CollisionProc => object B by collision x%p not found", b );
+    return;
+  }
+  if( !game->luaCollisionListeners.size() ) {
+    return;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Game::CollisionProc => a[x%p] b[x%p] objectA['%s'] objectB['%s']", a, b, objectA->GetNameFull().c_str(), objectB->GetNameFull().c_str() );
+  luaCollisionListenersList::iterator iter, iterEnd = game->luaCollisionListeners.end();
+  for( iter = game->luaCollisionListeners.begin(); iter != iterEnd; ++iter ) {
+    if( iter->object == a ) {
+      LUACALLBACK_ListenCollision( game->lua, iter->funcName, objectA->GetNameFull(), objectB->GetNameFull() );
+    }
+  }
+}//CollisionProc
+
+
+/*
+=============
+  LUA_SetObjectForce
+=============
+*/
+void Game::LUA_SetObjectForce( const std::string &objectName, int num, const Vec2& force )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SetObjectForce => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  object->SetForce( num, Vec3( force.x, force.y, 0.0f ) );
+}//LUA_SetObjectForce
+
+
+/*
+=============
+  LUA_RemoveObjectForce
+=============
+*/
+void Game::LUA_RemoveObjectForce( const std::string &objectName, int num )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_RemoveObjectForce => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  object->RemoveForce( num );
+}//LUA_RemoveObjectForce

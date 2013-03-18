@@ -38,6 +38,32 @@ public:
       luaMouseKeyListeners,
       luaMouseMoveListeners;
 
+  //lua-слушатели коллизий
+  class luaCollisionListenerStruct {
+  public:
+    Collision *object;
+    std::string funcName;
+
+    luaCollisionListenerStruct( const luaCollisionListenerStruct& setFrom )
+      :object( setFrom.object ), funcName( setFrom.funcName ) {
+    }
+
+    luaCollisionListenerStruct( Collision *setObject, const std::string &setFuncName )
+      :object( setObject ), funcName( setFuncName ) {
+    }
+
+    luaCollisionListenerStruct& operator=( const luaCollisionListenerStruct& setFrom ) {
+      this->funcName  = setFrom.funcName;
+      this->object    = setFrom.object;
+      return *this;
+    }
+
+  private:
+    luaCollisionListenerStruct(){}
+  };
+  typedef std::deque< luaCollisionListenerStruct > luaCollisionListenersList;
+  luaCollisionListenersList luaCollisionListeners;
+
   //триггеры
   struct GameObjectTrigger
   {
@@ -107,6 +133,9 @@ public:
   static void   LUA_GuiAttr           ( const std::string &guiName, const std::string &parameter, Variable &value, bool isSet );
   static void   LUA_LoadScript        ( const std::string &fileName );
   static void   LUA_ObjectAttr        ( const std::string &objectName, VariableAttributesList &setAttributes, VariableAttributesList &getAttributes );
+  static void   LUA_ListenCollision   ( const std::string &funcName, const std::string &objectName );
+  static void   LUA_SetObjectForce    ( const std::string &objectName, int num, const Vec2& force );
+  static void   LUA_RemoveObjectForce ( const std::string &objectName, int num );
 
   void Update();
   void UpdateLuaTimers();
@@ -117,6 +146,7 @@ public:
   static void   MouseMoveProc         ( const Vec2 &pos );
   static void   OnRemoveTrigger       ( ObjectTrigger *trigger );
   static void   GuiProc               ( Object *obj );
+  static void   CollisionProc         ( Collision *a, Collision *b );
 
   //debug/test
 };

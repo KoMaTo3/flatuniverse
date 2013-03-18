@@ -30,8 +30,10 @@ ObjectByCollision::ObjectByCollision()
 ObjectByCollision::ObjectByCollision( Object *setObject, Collision *setCollision )
 :object( setObject ), collision( setCollision )
 {
-  if( setObject )
+  if( setObject ) {
+    __log.PrintInfo( Filelevel_DEBUG, "ObjectByCollision => PointerAdd[x%p]", &this->object );
     setObject->PointerAdd( &this->object );
+  }
 }//constructor
 
 ObjectByCollision::ObjectByCollision( const ObjectByCollision& copyFrom )
@@ -63,8 +65,10 @@ ObjectByTrigger::ObjectByTrigger()
 ObjectByTrigger::ObjectByTrigger( Object *setObject, ObjectTrigger *setTrigger )
 :object( setObject ), trigger( setTrigger )
 {
-  if( setObject )
+  if( setObject ) {
+    __log.PrintInfo( Filelevel_DEBUG, "ObjectByTrigger => PointerAdd[x%p]", &this->object );
     setObject->PointerAdd( &this->object );
+  }
 }//constructor
 
 ObjectByTrigger::ObjectByTrigger( const ObjectByTrigger& copyFrom )
@@ -94,8 +98,10 @@ ObjectByGui::ObjectByGui()
 ObjectByGui::ObjectByGui( Object *setObject, g2Controller *setGui )
 :object( setObject ), gui( setGui )
 {
-  if( setObject )
+  if( setObject ) {
+    __log.PrintInfo( Filelevel_DEBUG, "ObjectByGui => PointerAdd[x%p]", &this->object );
     setObject->PointerAdd( &this->object );
+  }
 }//constructor
 
 ObjectByGui::ObjectByGui( const ObjectByGui& copyFrom )
@@ -154,7 +160,7 @@ Object::Object()
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 {
   this->gui.type = OBJECT_GUI_UNKNOWN;
-  __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%X]", this );
+  __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%p]", this );
 }//constructor
 
 
@@ -170,7 +176,7 @@ Object::Object( const std::string &objectName, Object* parentObject )
   }
   else
     this->nameFull = "/" + this->name;
-  __log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%X] parent[x%X] nameFull['%s']", this, this->_parent, this->nameFull.c_str() );
+  __log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%p] parent[x%p] nameFull['%s']", this, this->_parent, this->nameFull.c_str() );
 }//constructor
 
 
@@ -178,17 +184,17 @@ Object::Object( const std::string &objectName, Object* parentObject )
 
 Object::~Object()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%X] name['%s'] pointers[%d]", this, this->GetNameFull().c_str(), this->pointers.size() );
+  __log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%p] name['%s'] pointers[%d]", this, this->GetNameFull().c_str(), this->pointers.size() );
   //if( !this->_parent )
   //  __log.PrintInfo( Filelevel_DEBUG, "is a root object" );
 
   if( this->pointers.size() )
   {
-    __log.PrintInfo( Filelevel_DEBUG, ". object[x%X] name['%s'] pointers[%d]", this, this->GetNameFull().c_str(), this->pointers.size() );
+    __log.PrintInfo( Filelevel_DEBUG, ". object[x%p] name['%s'] pointers[%d]", this, this->GetNameFull().c_str(), this->pointers.size() );
     ObjectPointers::iterator iter, iterEnd = this->pointers.end();
     for( iter = this->pointers.begin(); iter != iterEnd; ++iter )
     {
-      __log.PrintInfo( Filelevel_DEBUG, ". pointer[x%X]", *iter );
+      __log.PrintInfo( Filelevel_DEBUG, ". pointer[x%p]", *iter );
       ( *iter )->SetValid( false );
     }
   }
@@ -239,7 +245,7 @@ void Object::ClearChilds( bool forceDelete )
       __log.PrintInfo( Filelevel_DEBUG, ". iteration +1" );
       for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
       {
-        __log.PrintInfo( Filelevel_DEBUG, ".   child[x%X]", *iter );
+        __log.PrintInfo( Filelevel_DEBUG, ".   child[x%p]", *iter );
         if( !( *iter )->IsLockedToDelete() )
         {
           __log.PrintInfo( Filelevel_DEBUG, ". deleted '%s'", ( *iter )->GetNameFull().c_str() );
@@ -308,7 +314,7 @@ const std::string& Object::GetParentNameFull()
 */
 void Object::AttachChildObject( Object* newChild )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Object::AttachChildObject => this[x%X] child[x%X]", this, newChild );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::AttachChildObject => this[x%p] child[x%p]", this, newChild );
   if( newChild && !this->IsChild( newChild ) )
   {
     //__log.PrintInfo( Filelevel_DEBUG, "Object::AttachChildObject => '%s' now is child of '%s'", newChild->GetNameFull().c_str(), this->GetNameFull().c_str() );
@@ -330,7 +336,7 @@ void Object::AttachChildObject( Object* newChild )
 */
 void Object::UnAttachThisFromParent()
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Object::UnAttachThisFromParent => this[x%X]", this );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::UnAttachThisFromParent => this[x%p]", this );
   if( !this->_parent )
     return;
   this->_parent->UnAttachChildObject( this );
@@ -348,7 +354,7 @@ void Object::UnAttachThisFromParent()
 */
 void Object::UnAttachChildObject( Object* child )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Object::UnAttachChildObject => this[x%X] child[x%X]", this, child );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::UnAttachChildObject => this[x%p] child[x%p]", this, child );
   if( !child )
     return;
   if( this->_childs && this->IsChild( child ) )
@@ -447,7 +453,7 @@ Renderable* Object::EnableRenderable( RenderableType renderType )
       this->renderable.type = renderType;
 
       GLshort index = -1;
-      __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%X = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
+      __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%p = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
       if( this->_renderableFreeIndicies->size() )
       {
         index = *this->_renderableFreeIndicies->rbegin();
@@ -519,7 +525,7 @@ RenderableQuad* Object::EnableRenderableGUI()
   this->_RecalculatePosition();
   float zIndex = this->position.z;
   GLshort index = -1;
-  __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%X = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
+  __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%p = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
   if( this->_renderableFreeIndicies->size() )
   {
     index = *this->_renderableFreeIndicies->rbegin();
@@ -581,7 +587,7 @@ bool Object::DisableRenderable()
   for( iter = this->_renderableIndicies->begin(); iter != iterEnd; ++iter )
     if( *iter == this->renderable.num )
     {
-      __log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%X", *iter, this->_renderableFreeIndicies );
+      __log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%p", *iter, this->_renderableFreeIndicies );
       this->_renderableFreeIndicies->push_back( *iter );
       this->_renderableIndicies->erase( iter );
       break;
@@ -640,8 +646,10 @@ Collision* Object::EnableCollision()
   this->collision = new Collision( &this->positionSrc );
   __collisionList->push_back( this->collision );
 
+  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableCollision => ObjectByCollision( x%p, x%p )", this, this->collision );
   ObjectByCollision *byCollision = new ObjectByCollision( this, this->collision );
   __objectByCollision->push_back( byCollision);
+  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableCollision => object['%s'] collision[x%p]", this->GetNameFull().c_str(), this->collision );
 
   //__objectByCollision->push_back( ObjectByCollision( this, this->collision ) );
   /*
@@ -722,7 +730,7 @@ g2Controller* Object::EnableGui( const GuiConstructor *info )
 {
   if( this->gui.guiController && this->gui.type != OBJECT_GUI_UNKNOWN || !info ) {
     this->gui.guiController->SetVisibility( true );
-    //__log.PrintInfo( Filelevel_ERROR, "Object::EnableGui => unknown type x%X or already enabled[x%X]", info.type, this->gui.guiController );
+    //__log.PrintInfo( Filelevel_ERROR, "Object::EnableGui => unknown type x%p or already enabled[x%p]", info.type, this->gui.guiController );
     return this->gui.guiController;
   }
 
@@ -872,7 +880,7 @@ g2Controller* Object::EnableGui( const GuiConstructor *info )
     }//checkbox
     */
     default: {
-      __log.PrintInfo( Filelevel_ERROR, "Object::EnableGui => unknown type x%X", info->type );
+      __log.PrintInfo( Filelevel_ERROR, "Object::EnableGui => unknown type x%p", info->type );
       return NULL;
     }
   }//switch
@@ -1306,7 +1314,7 @@ Object* Object::GetObjectInPoint( const Vec2& pos )
 */
 void Object::PointerAdd( ObjectPointer *pointer )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Object::PointerAdd => this[x%X] pointer[x%X]", this, pointer );
+  __log.PrintInfo( Filelevel_DEBUG, "Object::PointerAdd => this[x%p] pointer[x%p]", this, pointer );
   bool pointerExists = false;
   ObjectPointers::iterator iter, iterEnd = this->pointers.end();
   for( iter = this->pointers.begin(); iter != iterEnd; ++iter )
@@ -1339,7 +1347,7 @@ void Object::PointerRemove( ObjectPointer *pointer )
       break;
     }
   if( !removed )
-    __log.PrintInfo( Filelevel_WARNING, "Object::PointerRemove => pointer[x%X] not found in list of object[x%X]", pointer, this );
+    __log.PrintInfo( Filelevel_WARNING, "Object::PointerRemove => pointer[x%p] not found in list of object[x%p]", pointer, this );
 }//PointerRemove
 
 
@@ -1365,7 +1373,7 @@ ObjectTrigger* Object::EnableTrigger()
   ObjectByTrigger *byTrigger = new ObjectByTrigger( this, this->trigger );
   __objectByTrigger->push_back( byTrigger );
 
-  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableTrigger => x%X", this->trigger );
+  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableTrigger => x%p", this->trigger );
 
   return this->trigger;
 }//EnableTrigger
@@ -1461,7 +1469,7 @@ void Object::_GuiCallback( g2Controller *controller )
   __log.PrintInfo( Filelevel_DEBUG, "Object::_GuiCallback => controller[x%p] objects[%d]", controller, __objectByGui->size() );
   ObjectByGuiList::iterator iter, iterEnd = __objectByGui->end();
   for( iter = __objectByGui->begin(); iter != iterEnd; ++iter ) if( !controller->GetDisabled() ) {
-    __log.PrintInfo( Filelevel_DEBUG, ". controller[x%X] function['%s']", ( *iter )->gui, ( *iter )->object.GetObject< Object >()->GetNameFull().c_str() );
+    __log.PrintInfo( Filelevel_DEBUG, ". controller[x%p] function['%s']", ( *iter )->gui, ( *iter )->object.GetObject< Object >()->GetNameFull().c_str() );
     if( ( *iter )->gui == controller && ( *iter )->object.GetValid() && ( *iter )->object.GetObject< Object >()->gui.funCallback ) {
       ( ( Object* ) ( *iter )->object.GetObject() )->gui.funCallback( ( *iter )->object.GetObject< Object >() );
     }

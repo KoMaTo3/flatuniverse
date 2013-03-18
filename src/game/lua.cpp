@@ -51,6 +51,9 @@ LUAFUNCPROC_GetSelectedObject *LUAFUNC_GetSelectedObject    = NULL;
 LUAFUNCPROC_GuiAttr           *LUAFUNC_GuiAttr              = NULL;
 LUAFUNCPROC_LoadScript        *LUAFUNC_LoadScript           = NULL;
 LUAFUNCPROC_ObjectAttr        *LUAFUNC_ObjectAttr           = NULL;
+LUAFUNCPROC_ListenCollision   *LUAFUNC_ListenCollision      = NULL;
+LUAFUNCPROC_SetObjectForce    *LUAFUNC_SetObjectForce       = NULL;
+LUAFUNCPROC_RemoveObjectForce *LUAFUNC_RemoveObjectForce    = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -136,6 +139,10 @@ bool Lua::Init()
   lua_register( this->luaState, "LoadScript",       Lua::LUA_LoadScript );
   lua_register( this->luaState, "ObjectAttr",       Lua::LUA_ObjectAttr );
   lua_register( this->luaState, "Render",           Lua::LUA_Render );
+  lua_register( this->luaState, "ListenCollision",  Lua::LUA_ListenCollision );
+  lua_register( this->luaState, "GetTime",          Lua::LUA_GetTime );
+  lua_register( this->luaState, "SetObjectForce",   Lua::LUA_SetObjectForce );
+  lua_register( this->luaState, "RemoveObjectForce",Lua::LUA_RemoveObjectForce );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -1575,3 +1582,111 @@ int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
   __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => unknown error" );
   return 0;
 }//GetColor
+
+
+
+/*
+=============
+  LUACALLBACK_ListenCollision
+=============
+*/
+void LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName )
+{
+  Lua::LUACALLBACK_ListenCollision( lua, funcName, objectName, targetName );
+}//LUACALLBACK_ListenCollision
+
+
+
+/*
+=============
+  LUACALLBACK_ListenCollision
+=============
+*/
+void Lua::LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName ) {
+  LuaStateCheck state( lua->luaState );
+  lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
+  if( !lua_isfunction( lua->luaState, -1 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenCollision => '%s' is not a function", funcName.c_str() );
+    lua_pop( lua->luaState, 1 );  //stack:
+  }
+
+  lua_pushstring( lua->luaState, objectName.c_str() ); //stack: funcName objectName
+  lua_pushstring( lua->luaState, targetName.c_str() ); //stack: funcName objectName targetName
+  if( lua_pcall( lua->luaState, 2, 0, 0 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenCollision => error by calling function '%s'", funcName.c_str() );
+    return;
+  }
+}//LUACALLBACK_ListenCollision
+
+
+
+/*
+=============
+  LUA_ListenCollision
+=============
+*/
+int Lua::LUA_ListenCollision( lua_State *lua ) {
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenCollision => not enough parameters" );
+    return 0;
+  }
+  std::string objectName  = lua_tostring( lua, 1 );
+  std::string funcName    = lua_tostring( lua, 2 );
+  LUAFUNC_ListenCollision( objectName, funcName );
+  return 0;
+}//LUA_ListenCollision
+
+
+
+/*
+=============
+  LUA_GetTime
+=============
+*/
+int Lua::LUA_GetTime( lua_State *lua )
+{
+  lua_pushnumber( lua, sTimer.GetTime() );
+  return 1;
+}//LUA_GetTime
+
+
+
+/*
+=============
+  LUA_SetObjectForce
+=============
+*/
+int Lua::LUA_SetObjectForce( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 3 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetObjectForce => not enough parameters" );
+    return 0;
+  }
+  std::string objectName = lua_tostring( lua, 1 );
+  int num = lua_tointeger( lua, 2 );
+  Vec2 force( ( float ) lua_tonumber( lua, 3 ), ( float ) lua_tonumber( lua, 4 ) );
+  LUAFUNC_SetObjectForce( objectName, num, force );
+  return 0;
+}//LUA_SetObjectForce
+
+
+
+/*
+=============
+  LUA_RemoveObjectForce
+=============
+*/
+int Lua::LUA_RemoveObjectForce( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_RemoveObjectForce => not enough parameters" );
+    return 0;
+  }
+  std::string objectName = lua_tostring( lua, 1 );
+  int num = lua_tointeger( lua, 2 );
+  LUAFUNC_RemoveObjectForce( objectName, num );
+  return 0;
+}//LUA_RemoveObjectForce

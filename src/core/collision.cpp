@@ -335,6 +335,7 @@ bool Collision::TestIntersect( Collision& item )
     }
     itemResolver0.target = item1;
     itemResolver1.target = item0;
+    __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => item0[x%p] item1[x%p]", item0, item1 );
     item0->resolver.push_back( itemResolver0 );
     item1->resolver.push_back( itemResolver1 );
 
@@ -395,6 +396,7 @@ bool Collision::TestIntersect( Collision& item )
     itemResolver0.power = intersectPower;
     itemResolver0.resolveVector = Vec3Null;
     itemResolver0.useAllAxices = false;
+    itemResolver0.target = item1;
     if( item0->collisionElement->GetType() == COLLISION_ELEMENT_TYPE_SQUARE && item1->collisionElement->GetType() == COLLISION_ELEMENT_TYPE_SQUARE ) {
       if( item0->_rect.leftTop.x < item1->_rect.leftTop.x ) //двигаем влево
         itemResolver0.resolveVector.x = -intersectPower.x;
