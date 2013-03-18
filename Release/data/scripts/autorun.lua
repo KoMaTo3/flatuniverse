@@ -62,7 +62,7 @@ end -- CollisionPlayer
 
 --[[ PlayerControl ]]
 function PlayerControl( id, isPressed )
-  if id == 0x26 then  -- Up
+  if id == 0x26 or id == 0x57 then  -- Up
     if isPressed then --(
       local curTime = GetTime()
       if curTime - playerState.onGroundTime < 0.1 then  -- do jump
@@ -78,7 +78,7 @@ function PlayerControl( id, isPressed )
     end --)
   end
 
-  if id == 0x25 then  -- Left
+  if id == 0x25 or id == 0x41 then  -- Left
     if isPressed then
       SetObjectForce( 'player', 4, -150, 0 )
     else
@@ -86,7 +86,7 @@ function PlayerControl( id, isPressed )
     end
   end
 
-  if id == 0x27 then  -- Right
+  if id == 0x27 or id == 0x44 then  -- Right
     if isPressed then
       SetObjectForce( 'player', 2, 150, 0 )
     else

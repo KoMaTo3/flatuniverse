@@ -1491,9 +1491,9 @@ Object* Core::GetObjectByTrigger( ObjectTrigger *trigger )
 Object* Core::GetObjectByCollision( Collision *collision )
 {
   ObjectByCollisionList::iterator iterCollision, iterEndCollision = __objectByCollision->end();
-  __log.PrintInfo( Filelevel_DEBUG, "Core::GetObjectByCollision => count[%d]", __objectByCollision->size() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Core::GetObjectByCollision => count[%d]", __objectByCollision->size() );
   for( iterCollision = __objectByCollision->begin(); iterCollision != iterEndCollision; ++iterCollision ) {
-    __log.PrintInfo( Filelevel_DEBUG, "Core::GetObjectByCollision => match collision[x%p] with[x%p]", collision, ( *iterCollision )->collision );
+    //__log.PrintInfo( Filelevel_DEBUG, "Core::GetObjectByCollision => match collision[x%p] with[x%p]", collision, ( *iterCollision )->collision );
     if( ( *iterCollision )->object.GetValid() && ( *iterCollision )->collision == collision )
       return ( *iterCollision )->object.GetObject< Object >();
   }
