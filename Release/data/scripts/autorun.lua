@@ -38,6 +38,9 @@ function Main()
   ListenKeyboard( 'PlayerControl' )
   ListenCollision( 'CollisionPlayer', 'player' )
 
+  -- reset bricks
+  ObjectAttr( 'wall.356.148.8.6799999999999', { textureName = 'temp/brick2.png' } )
+
 end -- Main
 Main()
 
@@ -50,6 +53,10 @@ function CollisionPlayer( player, target )
   LogWrite( (y + rectY/2)..' : '..( ty - tRectY/2 ) )
   if y + rectY/2 <= ty - tRectY/2 then
     playerState.onGroundTime = GetTime()
+  elseif y - rectY/2 >= ty + tRectY/2 then
+    if target == 'wall.356.148.8.6799999999999' then
+      ObjectAttr( target, { textureName = 'temp/brick3.png' } )
+    end
   end
 end -- CollisionPlayer
 
@@ -101,7 +108,7 @@ end -- PlayerDoLongJump
 function PlayerEndLongJump( timerId )
   playerState.isHoldJump = false
   if playerState.PlayerEndLongJumpTimer ~= -1 then
-    StopTimer( playerState.PlayerEndLongJumpTimer )
+    -- StopTimer( playerState.PlayerEndLongJumpTimer )
     playerState.PlayerEndLongJumpTimer = -1
   end
 end -- PlayerEndLongJump
