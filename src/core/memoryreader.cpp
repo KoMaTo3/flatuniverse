@@ -123,12 +123,13 @@ void MemoryReader::SeekFromStart( Dword pos )
   SeekFromCur
 ----------
 */
-void MemoryReader::SeekFromCur( Dword pos )
+void MemoryReader::SeekFromCur( long dpos )
 {
-  if( this->curPos + pos > this->curLength )
+  if( this->curPos + dpos > this->curLength ) {
     return;
+  }
 
-  this->curPos += pos;
+  this->curPos += dpos;
 }//SeekFromCur
 
 

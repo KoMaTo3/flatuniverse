@@ -576,6 +576,9 @@ Game::Game()
   LUAFUNC_ListenCollision   = Game::LUA_ListenCollision;
   LUAFUNC_SetObjectForce    = Game::LUA_SetObjectForce;
   LUAFUNC_RemoveObjectForce = Game::LUA_RemoveObjectForce;
+  LUAFUNC_ObjectHasTag      = Game::LUA_ObjectHasTag;
+  LUAFUNC_ObjectAddTag      = Game::LUA_ObjectAddTag;
+  LUAFUNC_ObjectRemoveTag   = Game::LUA_ObjectRemoveTag;
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -2352,3 +2355,51 @@ void Game::LUA_RemoveObjectForce( const std::string &objectName, int num )
   }
   object->RemoveForce( num );
 }//LUA_RemoveObjectForce
+
+
+/*
+=============
+  LUA_ObjectHasTag
+=============
+*/
+bool Game::LUA_ObjectHasTag( const std::string &objectName, const std::string &tag )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectHasTag => object '%s' not found", objectName.c_str() );
+    return false;
+  }
+  return object->IsHasTag( tag );
+}//LUA_ObjectHasTag
+
+
+/*
+=============
+  LUA_ObjectHasTag
+=============
+*/
+void  Game::LUA_ObjectAddTag( const std::string &objectName, const std::string &tag )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAddTag => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  return object->AddTag( tag );
+}//LUA_ObjectAddTag
+
+
+/*
+=============
+  LUA_ObjectRemoveTag
+=============
+*/
+void  Game::LUA_ObjectRemoveTag( const std::string &objectName, const std::string &tag )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectRemoveTag => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  return object->RemoveTag( tag );
+}//LUA_ObjectRemoveTag

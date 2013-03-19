@@ -5,6 +5,9 @@
 #include <deque>
 
 
+//Версия файла сохранений
+const Dword WOLDSAVER_FILE_VERSION = 0x00000001;
+
 class WorldSaver
 {
 public:

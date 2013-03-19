@@ -29,7 +29,7 @@ public:
   size_t  Read          ( void *dest, Dword len, Dword numBlocks );
   void    Free          ();
   void    SeekFromStart ( Dword pos );
-  void    SeekFromCur   ( Dword pos );
+  void    SeekFromCur   ( long dpos );
   inline
     int   GetCurPos     () { return this->curPos; }
 

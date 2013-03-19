@@ -58,6 +58,9 @@ typedef void  LUAFUNCPROC_ListenCollision   ( const std::string &objectName, con
 typedef float LUAFUNCPROC_GetTime           ();
 typedef void  LUAFUNCPROC_SetObjectForce    ( const std::string &name, int forceNum, const Vec2 &force );
 typedef void  LUAFUNCPROC_RemoveObjectForce ( const std::string &name, int forceNum );
+typedef bool  LUAFUNCPROC_ObjectHasTag      ( const std::string &name, const std::string &tag );
+typedef void  LUAFUNCPROC_ObjectAddTag      ( const std::string &name, const std::string &tag );
+typedef void  LUAFUNCPROC_ObjectRemoveTag   ( const std::string &name, const std::string &tag );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -101,6 +104,9 @@ extern LUAFUNCPROC_ObjectAttr       *LUAFUNC_ObjectAttr;
 extern LUAFUNCPROC_ListenCollision  *LUAFUNC_ListenCollision;
 extern LUAFUNCPROC_SetObjectForce   *LUAFUNC_SetObjectForce;
 extern LUAFUNCPROC_RemoveObjectForce        *LUAFUNC_RemoveObjectForce;
+extern LUAFUNCPROC_ObjectHasTag     *LUAFUNC_ObjectHasTag;
+extern LUAFUNCPROC_ObjectAddTag     *LUAFUNC_ObjectAddTag;
+extern LUAFUNCPROC_ObjectRemoveTag  *LUAFUNC_ObjectRemoveTag;
 
 
 //callbacks
@@ -176,6 +182,9 @@ public:
   static int LUA_GetTime          ( lua_State *lua );
   static int LUA_SetObjectForce   ( lua_State *lua );
   static int LUA_RemoveObjectForce( lua_State *lua );
+  static int LUA_ObjectHasTag     ( lua_State *lua );
+  static int LUA_ObjectAddTag     ( lua_State *lua );
+  static int LUA_ObjectRemoveTag  ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );

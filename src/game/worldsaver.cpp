@@ -209,6 +209,7 @@ void WorldSaver::SaveToFile( const std::string& fileName )
   if( f.Open( fileName, File_mode_WRITE ) )
     return;
 
+  f.Write( &WOLDSAVER_FILE_VERSION, sizeof( WOLDSAVER_FILE_VERSION ) );
   f.Write( this->worldData.getData(), this->worldData.getLength() );
 
   memory header;
@@ -259,15 +260,22 @@ void WorldSaver::LoadFromFile( const std::string& fileName )
 
   Dword headerLength, worldDataLength;
   MemoryReader headerReader( data );
+  Dword version;
+  headerReader >> version;
+  if( version != WOLDSAVER_FILE_VERSION ) {
+    __log.PrintInfo( Filelevel_ERROR, "WorldSaver::LoadFromFile => file '%s' has bad version of data (x%X), needed version x%X", fileName.c_str(), version, WOLDSAVER_FILE_VERSION );
+    return;
+  }
+
   headerReader.SeekFromStart( data.getLength() - sizeof( headerLength ) );
   headerReader >> headerLength;
   __log.PrintInfo( Filelevel_DEBUG, ". headerLength[%d]", headerLength );
-  worldDataLength = data.getLength() - sizeof( headerLength ) - headerLength;
-  headerReader.SeekFromStart( worldDataLength );
+  worldDataLength = data.getLength() - sizeof( headerLength ) - headerLength - sizeof( WOLDSAVER_FILE_VERSION );
+  headerReader.SeekFromStart( worldDataLength + sizeof( WOLDSAVER_FILE_VERSION ) );
   __log.PrintInfo( Filelevel_DEBUG, ". worldDataLength[%d]", worldDataLength );
 
   this->worldData.alloc( worldDataLength );
-  memcpy( this->worldData.getData(), data.getData(), worldDataLength );
+  memcpy( this->worldData.getData(), data.getData() + sizeof( WOLDSAVER_FILE_VERSION ), worldDataLength );
 
   //свободные блоки
   this->freeBlocks.clear();

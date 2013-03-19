@@ -12,6 +12,7 @@
 #include "objectpointer.h"
 #include "objectpointerinterface.h"
 #include "objecttriggermgr.h"
+#include "tags.h"
 #include "glui2/g2Theme.h"
 #include "glui2/g2Spinner.h"
 
@@ -89,7 +90,7 @@ enum ObjectGuiType {
 
 
 
-class Object: public IObjectPointer
+class Object: public IObjectPointer, public ITags
 {
 public:
   typedef std::list< Object* > ObjectChilds;
@@ -157,6 +158,7 @@ private:
   Collision       *collision;
   ObjectPointers  pointers;   //перечень указателей на этот объект. объект обязан делать их невалидными перед своим уничтожением
   ObjectTrigger   *trigger;
+  Tags            *tags;    //список тегов
 
   struct {
     g2Controller  *guiController;
@@ -247,4 +249,8 @@ public:
     Object*           SetLockToDelete     ( bool lock ) { this->_isLockedToDelete = lock; return this; }
   inline
     bool              IsLockedToDelete    () { return this->_isLockedToDelete; }
+
+  bool                IsHasTag            ( const std::string& tag ) const;
+  void                AddTag              ( const std::string& tag );
+  void                RemoveTag           ( const std::string& tag );
 };

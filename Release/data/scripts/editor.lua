@@ -694,12 +694,14 @@ function TestMouseOnGUI( x, y )
   return false
 end --TestMouseOnGUI
 
+--[[ tableLength ]]
 function tableLength( T )
   local count = 0
   for _ in pairs( T ) do count = count + 1 end
   return count
 end --tableLength
 
+--[[ EditorInsertItemByTemplate ]]
 function EditorInsertItemByTemplate( px, py )
   if GUI.templates.currentItem <= 0 or GUI.templates.currentItem > #GUI.templates.items then
     return ''
@@ -708,6 +710,7 @@ function EditorInsertItemByTemplate( px, py )
   local cameraX, cameraY = GetCameraPos()
   local tileSize = GetTileSize()
   local attrs = GUI.templates.items[ GUI.templates.currentItem ].attr
+  local tags = GUI.templates.items[ GUI.templates.currentItem ].tags
   attrs.renderableSize = tileSize..' '..tileSize
   if attrs['collision'] ~= nil and attrs.collision then
     local size = tileSize
@@ -730,9 +733,16 @@ function EditorInsertItemByTemplate( px, py )
     GUI.templates.items[ GUI.templates.currentItem ].creationScript( name )
   end
 
+  if tags ~= nil then
+    for q = 1,#tags do
+      ObjectAddTag( name, tags[ q ] )
+    end
+  end
+
   return name
 end --EditorInsertItemByTemplate
 
+--[[ ToggleGrid ]]
 function ToggleGrid()
   settings.showGrid = not settings.showGrid
 end --ToggleGrid

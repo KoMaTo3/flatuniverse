@@ -14,6 +14,7 @@ local playerState = {
 --[[ Main ]]
 function Main()
   LoadScript( 'data/scripts/editor.lua' )
+  LoadScript( 'data/scripts/testoop.lua' )
   EditorInit()
 
   --[[
@@ -40,21 +41,17 @@ function Main()
 
   -- reset bricks
   ObjectAttr( 'wall.356.148.8.6799999999999', { textureName = 'temp/brick2.png' } )
+  ObjectAddTag( 'player', 'test' )
 
 end -- Main
 Main()
 
 --[[ CollisionPlayer ]]
 function CollisionPlayer( player, target )
-  local tx, ty    = ObjectGetPos( target )
-  local x, y      = ObjectGetPos( player )
-  local _, tRectY = ObjectAttr( target, { 'collisionSize' } )
-  local _, rectY  = ObjectAttr( player, { 'collisionSize' } )
-  LogWrite( (y + rectY/2)..' : '..( ty - tRectY/2 ) )
-  if y + rectY/2 <= ty - tRectY/2 then
+  if IsObjectUpperThis( player, target ) then
     playerState.onGroundTime = GetTime()
-  elseif y - rectY/2 >= ty + tRectY/2 then
-    if target == 'wall.356.148.8.6799999999999' then
+  elseif IsObjectUnderThis( player, target ) then
+    if ObjectHasTag( target, 'brick-breakable' ) then
       ObjectAttr( target, { textureName = 'temp/brick3.png' } )
     end
   end
@@ -112,3 +109,28 @@ function PlayerEndLongJump( timerId )
     playerState.PlayerEndLongJumpTimer = -1
   end
 end -- PlayerEndLongJump
+
+--[[ IsObjectUnderThis ]]
+function IsObjectUnderThis( object, target )
+  local _, ty    = ObjectGetPos( target )
+  local _, y      = ObjectGetPos( object )
+  local _, tRectY = ObjectAttr( target, { 'collisionSize' } )
+  local _, rectY  = ObjectAttr( object, { 'collisionSize' } )
+  local tRectYd2 = tRectY / 2
+  local rectYd2 = rectY / 2
+  --if y + rectYd2 <= ty - tRectYd2 then
+  if y - rectYd2 >= ty + tRectYd2 then return true end
+  return false
+end -- IsObjectUnderThis
+
+--[[ IsObjectUpperThis ]]
+function IsObjectUpperThis( object, target )
+  local _, ty    = ObjectGetPos( target )
+  local _, y      = ObjectGetPos( object )
+  local _, tRectY = ObjectAttr( target, { 'collisionSize' } )
+  local _, rectY  = ObjectAttr( object, { 'collisionSize' } )
+  local tRectYd2 = tRectY / 2
+  local rectYd2 = rectY / 2
+  if y + rectYd2 <= ty - tRectYd2 then return true end
+  return false
+end -- IsObjectUpperThis

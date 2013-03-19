@@ -136,6 +136,9 @@ public:
   static void   LUA_ListenCollision   ( const std::string &funcName, const std::string &objectName );
   static void   LUA_SetObjectForce    ( const std::string &objectName, int num, const Vec2& force );
   static void   LUA_RemoveObjectForce ( const std::string &objectName, int num );
+  static bool   LUA_ObjectHasTag      ( const std::string &objectName, const std::string &tag );
+  static void   LUA_ObjectAddTag      ( const std::string &objectName, const std::string &tag );
+  static void   LUA_ObjectRemoveTag   ( const std::string &objectName, const std::string &tag );
 
   void Update();
   void UpdateLuaTimers();

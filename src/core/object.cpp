@@ -158,6 +158,7 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 Object::Object()
 :name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
+,tags( NULL )
 {
   this->gui.type = OBJECT_GUI_UNKNOWN;
   __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%p]", this );
@@ -167,6 +168,7 @@ Object::Object()
 Object::Object( const std::string &objectName, Object* parentObject )
 :name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
+,tags( NULL )
 {
   this->gui.type = OBJECT_GUI_UNKNOWN;
   if( this->_parent )
@@ -205,6 +207,8 @@ Object::~Object()
   this->DisableGui();
   this->ClearChilds();
   this->UnAttachThisFromParent();
+
+  DEF_DELETE( this->tags );
 
   __log.PrintInfo( Filelevel_DEBUG, "Object x%p deleted", this );
 }//destructor
@@ -1162,6 +1166,13 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   if( isTrigger )
     this->GetTrigger()->SaveToBuffer( writer );
 
+  //tags
+  if( !this->tags ) {
+    writer << ( Dword ) 0;
+  } else {
+    this->tags->SaveToBuffer( writer );
+  }
+
   Dword childsCount = ( this->_childs ? this->_childs->size() : 0 );
 
   writer << childsCount;
@@ -1217,6 +1228,16 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
   if( isTrigger )
     this->EnableTrigger()->LoadFromBuffer( reader );
 
+  //tags
+  Dword tagsCount;
+  reader >> tagsCount;
+  if( tagsCount ) {
+    reader.SeekFromCur( -1 * long( sizeof( tagsCount ) ) );
+    this->tags = new Tags();
+    this->tags->LoadFromBuffer( reader );
+  }
+
+  //childs
   Dword childsCount;
   reader >> childsCount;
   if( childsCount ) //TODO: надо допиливать подгрузку дочерних объектов
@@ -1476,3 +1497,45 @@ void Object::_GuiCallback( g2Controller *controller )
   }
   __log.PrintInfo( Filelevel_DEBUG, "Object::_GuiCallback => done" );
 }//_GuiCallback
+
+
+
+
+
+/*
+=============
+  IsHasTag
+=============
+*/
+bool Object::IsHasTag( const std::string& tag ) const {
+  return ( this->tags && this->tags->IsHasTag( tag ) ? true : false );
+}//HasTag
+
+
+
+/*
+=============
+  AddTag
+=============
+*/
+void Object::AddTag( const std::string& tag ) {
+  if( !this->tags ) {
+    this->tags = new Tags();
+  }
+  this->tags->AddTag( tag );
+}//AddTag
+
+
+
+
+/*
+=============
+  RemoveTag
+=============
+*/
+void Object::RemoveTag( const std::string& tag ) {
+  if( !this->tags ) {
+    return;
+  }
+  this->tags->RemoveTag( tag );
+}//RemoveTag

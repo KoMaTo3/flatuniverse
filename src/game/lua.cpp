@@ -54,6 +54,9 @@ LUAFUNCPROC_ObjectAttr        *LUAFUNC_ObjectAttr           = NULL;
 LUAFUNCPROC_ListenCollision   *LUAFUNC_ListenCollision      = NULL;
 LUAFUNCPROC_SetObjectForce    *LUAFUNC_SetObjectForce       = NULL;
 LUAFUNCPROC_RemoveObjectForce *LUAFUNC_RemoveObjectForce    = NULL;
+LUAFUNCPROC_ObjectHasTag      *LUAFUNC_ObjectHasTag         = NULL;
+LUAFUNCPROC_ObjectAddTag      *LUAFUNC_ObjectAddTag         = NULL;
+LUAFUNCPROC_ObjectRemoveTag   *LUAFUNC_ObjectRemoveTag      = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -143,6 +146,9 @@ bool Lua::Init()
   lua_register( this->luaState, "GetTime",          Lua::LUA_GetTime );
   lua_register( this->luaState, "SetObjectForce",   Lua::LUA_SetObjectForce );
   lua_register( this->luaState, "RemoveObjectForce",Lua::LUA_RemoveObjectForce );
+  lua_register( this->luaState, "ObjectHasTag",     Lua::LUA_ObjectHasTag );
+  lua_register( this->luaState, "ObjectAddTag",     Lua::LUA_ObjectAddTag );
+  lua_register( this->luaState, "ObjectRemoveTag",  Lua::LUA_ObjectRemoveTag );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -1690,3 +1696,64 @@ int Lua::LUA_RemoveObjectForce( lua_State *lua )
   LUAFUNC_RemoveObjectForce( objectName, num );
   return 0;
 }//LUA_RemoveObjectForce
+
+
+
+/*
+=============
+  LUA_ObjectHasTag
+=============
+*/
+int Lua::LUA_ObjectHasTag( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectHasTag => not enough parameters" );
+    return 0;
+  }
+  std::string objectName = lua_tostring( lua, 1 );
+  std::string tag = lua_tostring( lua, 2 );
+  bool res = LUAFUNC_ObjectHasTag( objectName, tag );
+  lua_pushboolean( lua, ( int ) res );
+  return 1;
+}//LUA_ObjectHasTag
+
+
+
+/*
+=============
+  LUA_ObjectAddTag
+=============
+*/
+int Lua::LUA_ObjectAddTag( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAddTag => not enough parameters" );
+    return 0;
+  }
+  std::string objectName = lua_tostring( lua, 1 );
+  std::string tag = lua_tostring( lua, 2 );
+  LUAFUNC_ObjectAddTag( objectName, tag );
+  return 0;
+}//LUA_ObjectAddTag
+
+
+
+/*
+=============
+  LUA_ObjectRemoveTag
+=============
+*/
+int Lua::LUA_ObjectRemoveTag( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectRemoveTag => not enough parameters" );
+    return 0;
+  }
+  std::string objectName = lua_tostring( lua, 1 );
+  std::string tag = lua_tostring( lua, 2 );
+  LUAFUNC_ObjectRemoveTag( objectName, tag );
+  return 0;
+}//LUA_ObjectRemoveTag
