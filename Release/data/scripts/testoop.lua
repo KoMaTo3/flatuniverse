@@ -3,8 +3,8 @@ local setmetatable = setmetatable
 function tmpInit()
   local tmp = {}
   local obj = {}
-  setmetatable( obj, tmp )
+  --setmetatable( obj, tmp )
 end
 tmpInit()
 
-Alert( 'ok' )
+-- Alert( 'ok' )

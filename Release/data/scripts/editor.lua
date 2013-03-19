@@ -86,8 +86,9 @@ GUI = {
       -- Render( 'scissorEnable', GUI.templates.x, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 0 ), GUI.templates.x + GUI.templates.width - 15, settings.windowSize.y - 16 )
       Render( 'scissorEnable', GUI.templates.x + 1, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 1 ), GUI.templates.x + GUI.templates.width - 17, settings.windowSize.y - ( GUI.templates.y + 17 ) )
       i = 0
-      -- for key,item in pairs( GUI.templates.items ) do
-      table.foreach( GUI.templates.items, GUI.templates.DrawItem )
+      for key, item in pairs( GUI.templates.items ) do
+        GUI.templates.DrawItem( key, item )
+      end
       if GUI.templates.currentItem > 0 and GUI.templates.currentItem <= #GUI.templates.items then
         y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + ( GUI.templates.currentItem - 1 ) * ( GUI.templates.itemSize + 5 ) + 20
         Render( 'rect', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, '00ff00ff' )

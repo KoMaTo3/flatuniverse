@@ -94,15 +94,14 @@ bool Lua::Init()
     return false;
   }
 
-  this->luaState = lua_open();
+  this->luaState = luaL_newstate();
   //luaL_openlibs( this->luaState );
   //luaopen_math( this->luaState );
-  lua_pushcfunction( this->luaState, luaopen_math );
-  lua_pcall( this->luaState, 0, 0, 0 );
-  lua_pushcfunction( this->luaState, luaopen_string );
-  lua_pcall( this->luaState, 0, 0, 0 );
-  lua_pushcfunction( this->luaState, luaopen_table );
-  lua_pcall( this->luaState, 0, 0, 0 );
+  //luaL_openlibs( this->luaState );
+  this->LoadLibs();
+  //luaopen_math( this->luaState );
+  //luaopen_string( this->luaState );
+  //luaopen_table( this->luaState );
 
   lua_register( this->luaState, "Alert",            Lua::LUA_Alert );
   lua_register( this->luaState, "ObjectRemove",     Lua::LUA_ObjectRemove );
@@ -166,6 +165,40 @@ bool Lua::Init()
 
 /*
 =============
+  LoadLibs
+=============
+*/
+void Lua::LoadLibs() {
+  if( !this->luaState ) {
+    return;
+  }
+
+  static const luaL_Reg loadedlibs[] = {
+    {"_G", luaopen_base},
+    //{LUA_LOADLIBNAME, luaopen_package},
+    //{LUA_COLIBNAME, luaopen_coroutine},
+    {LUA_TABLIBNAME, luaopen_table},
+    //{LUA_IOLIBNAME, luaopen_io},
+    //{LUA_OSLIBNAME, luaopen_os},
+    {LUA_STRLIBNAME, luaopen_string},
+    {LUA_BITLIBNAME, luaopen_bit32},
+    {LUA_MATHLIBNAME, luaopen_math},
+    //{LUA_DBLIBNAME, luaopen_debug},
+    {NULL, NULL}
+  };
+
+  //luaL_openlibs
+  const luaL_Reg *lib;
+  for( lib = loadedlibs; lib->func; lib++ ) {
+    luaL_requiref( this->luaState, lib->name, lib->func, 1 );
+    lua_pop( this->luaState, 1 );
+  }
+}//LoadLibs
+
+
+
+/*
+=============
   Destroy
 =============
 */
@@ -205,6 +238,7 @@ bool Lua::RunFile( const std::string &fileName )
     return false;
   }
 
+  __log.PrintInfo( Filelevel_DEBUG, "Lua::RunFile => file '%s'...", fileName.c_str() );
   if( luaL_dostring( this->luaState, data.getData() ) )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::RunFile( '%s' ) => luaL_dostring failed:\n%s", fileName.c_str(), lua_tostring( this->luaState, -1 ) );
