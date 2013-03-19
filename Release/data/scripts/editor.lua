@@ -658,6 +658,7 @@ function RenderGUI()
     end
   end
   GUI.templates.Draw()
+  GUIRendererRender() -- additional GUI from gui.lua
   SetTimer( 0.01, 'RenderGUI' )
 end --RenderGUI
 
