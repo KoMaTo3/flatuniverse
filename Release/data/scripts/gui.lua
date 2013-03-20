@@ -66,13 +66,18 @@ function GUIButton:Render( dx, dy )
   local y0 = self.rect.top + dy
   local x1 = self.rect.right + dx
   local y1 = self.rect.bottom + dy
-  local color = self.colors[ ( self.state == 1 and self.isHover ) and 1 or 0 ]
-  Render( 'sprite', x0, y0 + 1, 0, x1, y1, 0, 'data/temp/blank.png', color.middle )
+  local isPushed = ( self.state == 1 and self.isHover ) and true or false
+  local color = self.colors[ isPushed and 1 or 0 ]
+  if isPushed then
+    dx = dx + 1
+    dy = dy + 1
+  end
+  Render( 'sprite', x0, y0, 0, x1, y1, 0, 'data/temp/blank.png', color.middle )
   Render( 'line', x0, y0, 0, x1, y0, 0, color.light )
   Render( 'line', x0, y0, 0, x0, y1, 0, color.light )
   Render( 'line', x0, y1, 0, x1, y1, 0, color.dark )
   Render( 'line', x1, y0, 0, x1, y1, 0, color.dark )
-  Render( 'text', x0+2,y0+2,0, self.text, '000000ff' )
+  Render( 'text', x0+2 + ( ( self.state == 1 and self.isHover ) and -1 or 0 ),y0+2 + ( ( self.state == 1 and self.isHover ) and -1 or 0 ),0, self.text, '000000ff' )
   -- childs
   for key, item in pairs( self.childs ) do
     item:Render( dx + self.rect.left, dy + self.rect.top )
