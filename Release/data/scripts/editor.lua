@@ -1,25 +1,25 @@
 --[[
 
-Р’РёР·СѓР°Р»СЊРЅС‹Р№ СЂРµРґР°РєС‚РѕСЂ
+Визуальный редактор
 
 settings.editorMode:
 -- 0: none, default
--- 1: РЅР°Р¶Р°Р» Р›РљРњ Рё СЃРјРѕС‚СЂРёРј, Р±СѓРґРµС‚ Р»Рё РґРІРёРіР°С‚СЊ РјС‹С€СЊСЋ
--- 2: РІС‹Р±СЂР°РЅ РѕР±СЉРµРєС‚
--- 3: РїРµСЂРµРјРµС‰РµРЅРёРµ РІС‹Р±СЂР°РЅРЅРѕРіРѕ РѕР±СЉРµРєС‚Р°
--- 10: mouseover РЅР° GUI.templates
--- 11: РїРµСЂРµРјРµС‰РµРЅРёРµ GUI.templates
--- 12: СЃРєСЂРѕР»Р» GUI.templates
--- 20: РїСЂРѕРјРµР¶СѓС‚РѕС‡РЅС‹Р№ СЂРµР¶РёРј РІСЃС‚Р°РІРєРё С‚Р°Р№Р»Р°: РЅР°Р¶Р°Р» РјС‹С€СЊ Рё Р¶РґС‘Рј РѕС‚РїСѓСЃРєР°РЅРёСЏ РёР»Рё РґРІРёР¶РµРЅРёСЏ
--- 21: РІСЃС‚Р°РІРєР° Р±Р»РѕРєР° С‚Р°Р№Р»РѕРІ: СЂРёСЃРѕРІР°РЅРёРµ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРѕР№ РѕР±Р»Р°СЃС‚Рё
+-- 1: нажал ЛКМ и смотрим, будет ли двигать мышью
+-- 2: выбран объект
+-- 3: перемещение выбранного объекта
+-- 10: mouseover на GUI.templates
+-- 11: перемещение GUI.templates
+-- 12: скролл GUI.templates
+-- 20: промежуточный режим вставки тайла: нажал мышь и ждём отпускания или движения
+-- 21: вставка блока тайлов: рисование прямоугольной области
 ]]
 settings = {
-    guiVisibility     = false,  -- РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ GUI
+    guiVisibility     = false,  -- отображение GUI
 
-    objectMode3Moved  = false,  -- bool РµСЃР»Рё РїСЂРѕРёСЃС…РѕРґРёС‚ РїРµСЂРµРјРµС‰РµРЅРёРµ РѕР±СЉРµРєС‚Р° РјС‹С€РєРѕР№
-    objectMode3StartPosition = { 0, 0 },  -- РЅР°С‡Р°Р»СЊРЅРѕРµ РїРѕР»РѕР¶РµРЅРёРµ РѕР±РµРєС‚Р°, РґРѕ РїРµСЂРµРјРµС‰РµРЅРёСЏ
+    objectMode3Moved  = false,  -- bool если происходит перемещение объекта мышкой
+    objectMode3StartPosition = { 0, 0 },  -- начальное положение обекта, до перемещения
 
-    editorMode        = 0,      -- С‚РµРєСѓС‰РёР№ СЂРµР¶РёРј СЂРµРґР°РєС‚РѕСЂР°
+    editorMode        = 0,      -- текущий режим редактора
     move              = {
       objectStart = {
         x = 0,
@@ -33,15 +33,15 @@ settings = {
     timer = 0.0,
     windowSize = { x = 0, y = 0 },
     showGrid = false,
-    editorType = 0, -- 0 - РѕР±С‰РёР№ СЂРµР¶РёРј, 1 - СЂРµРЅРґРµСЂРµР№Р±Р»С‹, 2 - РєРѕР»Р»РёР·РёРё, 3 - С‚СЂРёРіРіРµСЂС‹
+    editorType = 0, -- 0 - общий режим, 1 - рендерейблы, 2 - коллизии, 3 - триггеры
     keys = {
       isShift = false,
       isCtrl  = false,
       isAlt   = false,
     },
-    buffer = {},  -- Р±СѓС„РµСЂ РґРµР№СЃС‚РІРёР№ РґР»СЏ РѕС‚РјРµРЅС‹
+    buffer = {},  -- буфер действий для отмены
 }
-mousePos = {    -- СЌРєСЂР°РЅРЅР°СЏ РїРѕР·РёС†РёСЏ РєСѓСЂСЃРѕСЂР°
+mousePos = {    -- экранная позиция курсора
     x = 0,
     y = 0,
 }
@@ -119,7 +119,7 @@ GUI = {
 }
 
 
--- РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
+-- Инициализация
 function EditorInit()
   LoadScript( 'data/scripts/math.lua' )
   LoadScript( 'data/scripts/objecttemplates.lua' )
@@ -128,17 +128,19 @@ function EditorInit()
   settings.windowSize.x = x
   settings.windowSize.y = y
 
-  -- РќР°СЃС‚СЂР°РёРІР°РµРј Р±Р»РѕРє СЃ С€Р°Р±Р»РѕРЅР°РјРё
+  -- Настраиваем блок с шаблонами
   GUI.templates.height = settings.windowSize.y - 10
   GUI.templates.items = GetObjectsTemplates()
   GUI.templates.width = GUI.templates.itemSize + 25
 
-  -- РЎС‚Р°РІРёРј РѕР±СЂР°Р±РѕС‚С‡РёРєРё РЅР° РІСЃС‘: РєР»Р°РІСѓ, РєРЅРѕРїРєРё Рё РґРІРёР¶РµРЅРёРµ РјС‹С€Рё
+  -- Ставим обработчики на всё: клаву, кнопки и движение мыши
   ListenKeyboard( 'OnEditorKey' )
-  ListenMouseKey( 'OnEditorMouseKey' )
-  ListenMouseMove( 'OnEditorMouseMove' )
+  -- ListenMouseKey( 'OnEditorMouseKey' )
+  -- ListenMouseMove( 'OnEditorMouseMove' )
+  GUIRenderer.OnClickDefault = OnEditorMouseKey
+  GUIRenderer.OnMouseMoveDefault = OnEditorMouseMove
 
-  -- РЎС‚Р°РІРёРј РѕР±СЂР°Р±РѕС‚С‡РёРєРё С‡РµРєР±РѕРєСЃРѕРІ Рё РєРЅРѕРїРѕРє СЂРµРґР°РєС‚РѕСЂР°
+  -- Ставим обработчики чекбоксов и кнопок редактора
   GuiAddTrigger( 'editor/settings.layer', 'ToggleLayer' )
   GuiAddTrigger( 'editor/object.is_renderable', 'ToggleRenderable' )
   GuiAddTrigger( 'editor/object.is_collision', 'ToggleCollision' )
@@ -148,7 +150,7 @@ function EditorInit()
   GuiAddTrigger( 'editor/renderable.width', 'ToggleRenderableSize' )
   GuiAddTrigger( 'editor/renderable.height', 'ToggleRenderableSize' )
 
-  -- РїРѕРєР°Р·С‹РІР°РµРј GUI
+  -- показываем GUI
   settings.guiVisibility = true
   SetGuiVisibility( settings.guiVisibility )
 
@@ -159,7 +161,7 @@ function EditorInit()
 end --EditorInit
 
 
--- РћР±СЂР°Р±РѕС‚РєР° РєРЅРѕРїРѕРє РєР»Р°РІС‹
+-- Обработка кнопок клавы
 function OnEditorKey( id, isPressed )
   if isPressed then
       if id == 0x1B then    -- Esc
@@ -236,7 +238,7 @@ function OnEditorKey( id, isPressed )
   end
 end --OnEditorKey
 
--- РћР±СЂР°Р±РѕС‚РєР° РєРЅРѕРїРѕРє РјС‹С€Рё
+-- Обработка кнопок мыши
 function OnEditorMouseKey( id, isPressed )
   local mode = {
     [0] = function()
@@ -399,7 +401,7 @@ function OnEditorMouseKey( id, isPressed )
   mode[ settings.editorMode ]()
 end --OnEditorMouseKey
 
--- РћР±СЂР°Р±РѕС‚РєР° РґРІРёР¶РµРЅРёСЏ РјС‹С€Рё
+-- Обработка движения мыши
 function OnEditorMouseMove( x, y )
   if TestMouseOnGUI( x, y ) then
   else
@@ -447,8 +449,8 @@ function OnEditorMouseMove( x, y )
 end --OnEditorMouseMove
 
 
--- Р’РѕР·РІСЂР°С‰Р°РµС‚ РѕР±СЉРµРєС‚ РїРѕРґ РєСѓСЂСЃРѕСЂРѕРј
--- Р•СЃР»Рё СѓР¶Рµ РІС‹Р±СЂР°РЅ РєР°РєРѕР№-С‚Рѕ РѕР±СЉРµРєС‚, С‚Рѕ Р±РµСЂС‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёР№ Р·Р° РЅРёРј
+-- Возвращает объект под курсором
+-- Если уже выбран какой-то объект, то берётся следующий за ним
 function GetObjectUnderCursorByMode()
     local mx, my = GetMousePos()
     local cx, cy = GetCameraPos()
@@ -471,7 +473,7 @@ function GetObjectUnderCursorByMode()
     return name
 end --GetObjectUnderCursorByMode
 
--- Р§РµРєР±РѕРєСЃ "Renderable"
+-- Чекбокс "Renderable"
 function ToggleRenderable( guiName )
   local name = GetSelectedObject()
   if #name < 1 then
@@ -487,7 +489,7 @@ function ToggleRenderable( guiName )
   end
 end --ToggleRenderable
 
--- Р§РµРєР±РѕРєСЃ "Collision"
+-- Чекбокс "Collision"
 function ToggleCollision( guiName )
   local name = GetSelectedObject()
   if #name < 1 then
@@ -503,7 +505,7 @@ function ToggleCollision( guiName )
   end
 end --ToggleCollision
 
--- Р§РµРєР±РѕРєСЃ "Collision:Static"
+-- Чекбокс "Collision:Static"
 function ToggleStatic( guiName )
   local name = GetSelectedObject()
   if #name < 1 then
@@ -513,7 +515,7 @@ function ToggleStatic( guiName )
   ObjectAttr( name, { collisionStatic = checked } )
 end --ToggleStatic
 
--- Р§РµРєР±РѕРєСЃ "Trigger"
+-- Чекбокс "Trigger"
 function ToggleTrigger( guiName )
   local name = GetSelectedObject()
   if #name < 1 then
@@ -528,13 +530,13 @@ function ToggleTrigger( guiName )
   end
 end --ToggleTrigger
 
--- Р’РѕР·РІСЂР°С‰Р°РµС‚ С‚РµРєСѓС‰РёР№ СЂР°Р·РјРµСЂ С‚Р°Р№Р»РѕРІ (РёР· РґСЂРѕРїР±РѕРєСЃР°)
+-- Возвращает текущий размер тайлов (из дропбокса)
 function GetTileSize()
   return GuiGetText( 'editor/world.tile_size' )
 end --GetTileSize
 
--- РљРЅРѕРїРєР° "Apply"
--- TODO: РїРµСЂРµРґРµР»Р°С‚СЊ
+-- Кнопка "Apply"
+-- TODO: переделать
 function TileApply( guiName )
   local name = GuiGetText( 'editor/object.object_name' )
   local cameraX, cameraY = GetCameraPos()
@@ -547,7 +549,7 @@ function TileApply( guiName )
   settings.editorMode = 2
 end --TileApply
 
--- Р”СЂРѕРїР±РѕРєСЃ "Layer"
+-- Дропбокс "Layer"
 function ToggleLayer( guiName )
   local layer = GuiGetText( 'editor/settings.layer' )
   local flags = 0

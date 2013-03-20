@@ -1561,6 +1561,19 @@ int Lua::LUA_Render( lua_State *lua ) {
   } else if( operation == "scissorDisable" ) {
     __debugRender->SciccorDisable();
     __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+  } else if( operation == "text" ) {
+    if( parmsCount < 6 ) {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
+    } else {
+      Vec4 color( Vec4One );
+      Lua::GetColor( lua, 6, color );
+      __debugRender->Text(
+          Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
+          color,
+          lua_tostring( lua, 5 )
+          );
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+    }
   } else {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => unknown shape '%s'", operation.c_str() );
   }

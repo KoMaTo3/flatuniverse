@@ -15,7 +15,6 @@ local playerState = {
 function Main()
   LoadScript( 'data/scripts/gui.lua' )
   LoadScript( 'data/scripts/editor.lua' )
-  LoadScript( 'data/scripts/testoop.lua' )
   EditorInit()
 
   --[[

@@ -5,6 +5,9 @@ GUIWindow = {}
 GUIRenderer = {
   GUIElements = {},
   activeItem = nil,
+  focusedItem = nil,
+  OnClickDefault = nil,
+  OnMouseMoveDefault = nil,
 
   RenderEnable = function()
     SetTimer( 0.1, 'GUIRendererRender' )
@@ -17,7 +20,7 @@ GUIRenderer = {
 -- Button
 --
 --[[ GUIButton:Create ]]
-function GUIButton:Create( x0, y0, x1, y1, setColor, parent )
+function GUIButton:Create( x0, y0, x1, y1, setText, setOnClickHandler, parent )
   local obj = {
     childs = {},
     rect = {
@@ -28,6 +31,9 @@ function GUIButton:Create( x0, y0, x1, y1, setColor, parent )
     },
     state = 0,  -- 0:free, 1:press, 2:hover, 3:press+out
     color = setColor,
+    isHover = false,
+    OnClickHandler = setOnClickHandler,
+    text = setText,
     colors = {
       [0] = {
         light = 'ffffffff',
@@ -36,7 +42,7 @@ function GUIButton:Create( x0, y0, x1, y1, setColor, parent )
       },
       [1] = {
         light = '888888ff',
-        middle = 'aaaaaaff',
+        middle = 'ccccccff',
         dark = 'ffffffff',
       },
     },
@@ -60,12 +66,13 @@ function GUIButton:Render( dx, dy )
   local y0 = self.rect.top + dy
   local x1 = self.rect.right + dx
   local y1 = self.rect.bottom + dy
-  Render( 'sprite', x0, y0 + 1, 0, x1, y1, 0, 'data/temp/blank.png', self.colors[ self.state ].middle )
-  Render( 'line', x0, y0, 0, x1, y0, 0, self.colors[ self.state ].light )
-  Render( 'line', x0, y0, 0, x0, y1, 0, self.colors[ self.state ].light )
-  Render( 'line', x0, y1, 0, x1, y1, 0, self.colors[ self.state ].dark )
-  Render( 'line', x1, y0, 0, x1, y1, 0, self.colors[ self.state ].dark )
-  -- Render( 'sprite', self.rect.left + dx, self.rect.top + dy, 0, self.rect.right + dx, self.rect.bottom + dy, 0, 'data/temp/blank.png', self.color )
+  local color = self.colors[ ( self.state == 1 and self.isHover ) and 1 or 0 ]
+  Render( 'sprite', x0, y0 + 1, 0, x1, y1, 0, 'data/temp/blank.png', color.middle )
+  Render( 'line', x0, y0, 0, x1, y0, 0, color.light )
+  Render( 'line', x0, y0, 0, x0, y1, 0, color.light )
+  Render( 'line', x0, y1, 0, x1, y1, 0, color.dark )
+  Render( 'line', x1, y0, 0, x1, y1, 0, color.dark )
+  Render( 'text', x0+2,y0+2,0, self.text, '000000ff' )
   -- childs
   for key, item in pairs( self.childs ) do
     item:Render( dx + self.rect.left, dy + self.rect.top )
@@ -81,6 +88,9 @@ function GUIButton:TestInRect( x, y, dx, dy )
   if x >= self.rect.left + dx and x <= self.rect.right + dx and
      y >= self.rect.top + dy and y <= self.rect.bottom + dy then
     result = true
+    self.isHover = true
+  else
+    self.isHover = false
   end
   -- childs
   for key, item in pairs( self.childs ) do
@@ -97,27 +107,26 @@ function GUIButton:TestInRect( x, y, dx, dy )
 end -- GUIButton:TestInRect
 
 function GUIButton:OnClick( id, isPressed )
-  if isPressed then
-    if self.state == 0 then
-      self.state = 1
+  if self.isHover then
+    if isPressed then
+      GUIRenderer.focusedItem = self
+      if self.state == 0 then
+        self.state = 1
+      end
+    else
+      GUIRenderer.focusedItem = nil
+      if self.state == 1 then
+        self.state = 0
+        if self.OnClickHandler ~= nil then
+          self.OnClickHandler()
+        end
+      end
     end
   else
-    if self.state == 1 then
-      self.state = 0
-    end
-    -- при отпускании 
-    for id, item in pairs( GUIRenderer.GUIElements ) do
-      item:Reset()
-    end
+    GUIRenderer.focusedItem = nil
+    self.state = 0
   end
 end -- GUIButton:OnClick
-
-function GUIButton:Reset()
-  self.state = 0
-  for key, item in pairs( self.childs ) do
-    item:Reset()
-  end
-end -- GUIButton:Reset
 
 
 
@@ -125,7 +134,7 @@ end -- GUIButton:Reset
 -- Checkbox
 --
 --[[ GUICheckbox:Create ]]
-function GUICheckbox:Create( x0, y0, setChecked, parent )
+function GUICheckbox:Create( x0, y0, setText, setChecked, parent )
   local obj = {
     childs = {},
     rect = {
@@ -137,6 +146,8 @@ function GUICheckbox:Create( x0, y0, setChecked, parent )
     state = 0,  -- 0:free, 1:press, 2:hover, 3:press+out
     color = setColor,
     checked = setChecked,
+    isHover = false,
+    text = setText,
   }
   self.__index = self
   local res = setmetatable( obj, self )
@@ -154,6 +165,10 @@ function GUICheckbox:Render( dx, dy )
     dy = 0
   end
   Render( 'sprite', self.rect.left + dx, self.rect.top + dy, 0, self.rect.right + dx, self.rect.bottom + dy, 0, self.checked and 'data/textures/gui/checkbox-checked.png' or 'data/textures/gui/checkbox.png', 'ffffffff' )
+  if self.state == 1 and self.isHover then
+    Render( 'rect', self.rect.left + dx + 1, self.rect.top + dy, 0, self.rect.right + dx, self.rect.bottom + dy, 0, '444466ff' )
+  end
+  Render( 'text', self.rect.right + dx + 2, self.rect.top + dy, 0, self.text, '000000ff' )
 end -- GUICheckbox:Render
 
 function GUICheckbox:TestInRect( x, y, dx, dy )
@@ -165,33 +180,32 @@ function GUICheckbox:TestInRect( x, y, dx, dy )
   if x >= self.rect.left + dx and x <= self.rect.right + dx and
      y >= self.rect.top + dy and y <= self.rect.bottom + dy then
     GUIRenderer.activeItem = self
+    self.isHover = true
     do return true end
   end
+  self.isHover = false
   return false
 end -- GUICheckbox:TestInRect
 
 function GUICheckbox:OnClick( id, isPressed )
-  if isPressed then
-    if self.state == 0 then
-      self.state = 1
-    end
-  else
-    if self.state == 1 then
-      self.state = 0
-      self.checked = not self.checked
-      for id, item in pairs( GUIRenderer.GUIElements ) do
-        item:Reset()
+  if self.isHover then
+    if isPressed then
+      GUIRenderer.focusedItem = self
+      if self.state == 0 then
+        self.state = 1
+      end
+    else
+      GUIRenderer.focusedItem = nil
+      if self.state == 1 then
+        self.state = 0
+        self.checked = not self.checked
       end
     end
+  else
+    GUIRenderer.focusedItem = nil
+    self.state = 0
   end
 end -- GUICheckbox:OnClick
-
-function GUICheckbox:Reset()
-  self.state = 0
-  for key, item in pairs( self.childs ) do
-    item:Reset()
-  end
-end -- GUICheckbox:Reset
 
 
 
@@ -200,6 +214,7 @@ end -- GUICheckbox:Reset
 --
 function GUIInit()
   ListenMouseKey( 'GUIMouseKey' )
+  ListenMouseMove( 'GUIMouseMove' )
 end
 
 --[[ GUIRendererRender ]]
@@ -211,27 +226,51 @@ function GUIRendererRender()
   --SetTimer( 0.1, 'GUIRendererRender' )
 end -- GUIRendererRender
 
-local but0 = GUIButton:Create( 20, 0, 70, 30, '444488ff' )
+local but0 = GUIButton:Create( 20, 0, 67, 62, 'Butt0', function() Alert(0) end )
+local but1 = GUIButton:Create( 110, 20, 155, 35, 'Butt1', function() Alert(1) end )
 -- local but1 = GUIButton:Create( 5, 5, 65, 35, '884444ff', but0 )
-local cb0 = GUICheckbox:Create( 5, 5, false, but0 )
-local cb1 = GUICheckbox:Create( 20, 5, false, but0 )
-local cb2 = GUICheckbox:Create( 35, 5, true, but0 )
+local cb0 = GUICheckbox:Create( 5, 15, 'cb0', false, but0 )
+local cb1 = GUICheckbox:Create( 5, 30, 'cb1', false, but0 )
+local cb2 = GUICheckbox:Create( 5, 45, 'cb2', true, but0 )
 -- GUIRenderer.RenderEnable()
 
 --[[ GUIMouseKey ]]
 function GUIMouseKey( id, isPressed )
+  if GUIRenderer.focusedItem ~= nil then --(
+    GUIRenderer.focusedItem:OnClick( id, isPress )
+  else --) (
+    local inRect = false
+    GUIRenderer.activeItem = nil
+    for id, item in pairs( GUIRenderer.GUIElements ) do --(
+      if item:TestInRect( mousePos.x, mousePos.y ) then --(
+        inRect = true
+        if GUIRenderer.activeItem ~= nil then
+          GUIRenderer.activeItem:OnClick( id, isPressed )
+          -- Alert( GUIRenderer.activeItem.rect.left )
+        end
+        do break end
+      end --) if
+    end --) for id,item
+    if not inRect and GUIRenderer.OnClickDefault ~= nil then
+      GUIRenderer.OnClickDefault( id, isPressed )
+    end
+  end --) ~GUIRenderer.focusedItem
+end -- GUIMouseKey
+
+--[[ GUIMouseMove ]]
+function GUIMouseMove( x, y )
+  mousePos.x = x
+  mousePos.y = y
   local inRect = false
-  GUIRenderer.activeItem = nil
   for id, item in pairs( GUIRenderer.GUIElements ) do --(
-    if item:TestInRect( mousePos.x, mousePos.y ) then --(
+    if item:TestInRect( x, y ) then --(
       inRect = true
-      if GUIRenderer.activeItem ~= nil then
-        GUIRenderer.activeItem:OnClick( id, isPressed )
-        -- Alert( GUIRenderer.activeItem.rect.left )
-      end
       do break end
     end --) if
   end --) for id,item
-end -- GUIMouseKey
+  if not inRect and GUIRenderer.OnMouseMoveDefault ~= nil then
+    GUIRenderer.OnMouseMoveDefault( x, y )
+  end
+end -- GUIMouseMove
 
 GUIInit()

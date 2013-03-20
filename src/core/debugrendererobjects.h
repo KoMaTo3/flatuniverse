@@ -88,3 +88,19 @@ public:
 
   virtual void Render();
 };
+
+
+
+
+class DebugRendererText: public DebugRendererObject {
+public:
+  DebugRendererText( const Vec3& setPos, const Vec4& setColor, const std::string &setText );
+  virtual ~DebugRendererText();
+
+  virtual void Render();
+
+private:
+  Vec3  pos;
+  Vec4  color;
+  std::string text;
+};

@@ -22,6 +22,7 @@ public:
   void  Rect  ( const Vec3& leftTop, const Vec3& rightBottom, const Vec4& color );
   void  SciccorEnable ( const Vec2& leftTop, const Vec2& rightBottom );
   void  SciccorDisable();
+  void  Text  ( const Vec3& pos, const Vec4& color, const std::string &text );
 
 private:
   ObjectsList pipeline;

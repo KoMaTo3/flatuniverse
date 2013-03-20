@@ -105,3 +105,15 @@ void DebugRenderer::SciccorDisable() {
   DebugRendererScissorDisable *item = new DebugRendererScissorDisable();
   this->pipeline.push_back( item );
 }//SciccorDisable
+
+
+
+/*
+=============
+  Text
+=============
+*/
+void DebugRenderer::Text( const Vec3& pos, const Vec4& color, const std::string &text ) {
+  DebugRendererText *item = new DebugRendererText( pos, color, text );
+  this->pipeline.push_back( item );
+}//Text
