@@ -19,8 +19,8 @@ CoreRenderableList *__coreGUI = NULL;                                 //список р
 CoreRenderableListIndicies  *__coreGUIIndicies = NULL;                //индексы рендерейблов GUI
 CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободные индексы рендерейблов GUI
 
-GuiList *__guiList  = NULL; //Glui2 элементы
-Glui2   *__coreGlui = NULL; //указатель на объект Glui2
+//GuiList *__guiList  = NULL; //Glui2 элементы
+//Glui2   *__coreGlui = NULL; //указатель на объект Glui2
 //
 
 ConfigFile* __config = NULL;
@@ -50,8 +50,8 @@ Core::Core()
   this->debug.renderTrigger     = false;
   this->debug.selectedObject    = NULL;
 
-  this->gui.context = NULL;
-  this->gui.show    = true;
+  //this->gui.context = NULL;
+  //this->gui.show    = true;
 }//constructor
 
 
@@ -74,7 +74,7 @@ bool Core::Destroy()
   //DEF_DELETE( this->_rootGUIObject );
   DEF_DELETE( this->collisionManager );
   DEF_DELETE( this->triggerManager );
-  DEF_DELETE( this->gui.context );
+  //DEF_DELETE( this->gui.context );
   DEF_DELETE( __coreRenderableList );
   DEF_DELETE( __coreRenderableListIndicies );
   DEF_DELETE( __coreRenderableListFreeIndicies );
@@ -86,8 +86,8 @@ bool Core::Destroy()
   DEF_DELETE( __triggerList );
   DEF_DELETE( __objectByCollision );
   DEF_DELETE( __objectByTrigger );
-  DEF_DELETE( __objectByGui );
-  DEF_DELETE( __guiList );
+  //DEF_DELETE( __objectByGui );
+  //DEF_DELETE( __guiList );
 
   return true;
 }//Destroy
@@ -230,8 +230,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   this->triggerManager    = new ObjectTriggerManager();
   __objectByCollision     = new ObjectByCollisionList();
   __objectByTrigger       = new ObjectByTriggerList();
-  __objectByGui           = new ObjectByGuiList();
-  __guiList               = new GuiList();
+  //__objectByGui           = new ObjectByGuiList();
+  //__guiList               = new GuiList();
   //
 
   this->_window.windowToWorld.Set( 100.0f / float( screenWidth ), 100.0f / float( screenHeight ), 1.0f );
@@ -244,10 +244,11 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   }
   //MessageBox(0,"ok",0,0);
 
-  this->gui.context = new Glui2( "g2Blue.cfg", NULL, NULL, Core::_GluiKeyboardFunc, NULL, Core::_GluiMouseFunc, Core::_GluiHoverFunc );
-  this->gui.context->WindowWidth  = this->_window.windowSize.width;
-  this->gui.context->WindowHeight = this->_window.windowSize.height;
-  __coreGlui = this->gui.context;
+  //this->gui.context = new Glui2( "g2Blue.cfg", NULL, NULL, Core::_GluiKeyboardFunc, NULL, Core::_GluiMouseFunc, Core::_GluiHoverFunc );
+  GL_CHECK_ERROR;
+  //this->gui.context->WindowWidth  = this->_window.windowSize.width;
+  //this->gui.context->WindowHeight = this->_window.windowSize.height;
+  //__coreGlui = this->gui.context;
 
   this->SetState( CORE_STATE_RUN );
   return true;
@@ -272,8 +273,6 @@ bool Core::_InitGraphics()
     //__log.PrintInfo( Filelevel_CRITICALERROR, "Core::InitGraphics => GetDC" );
   this->_InitPixelFormat();
   this->_InitPalette();
-
-  const char* version = ( const char* ) ::glGetString( GL_VERSION );
   //__log.PrintInfo( Filelevel_INFO, "OpenGL version: %s", ( version ? version : "unknown" ) );
 
 #if defined(GL_VERSION_4_1)
@@ -286,9 +285,13 @@ bool Core::_InitGraphics()
     this->SetState( CORE_STATE_EXIT );
     return false;
   }
-    //__log.PrintInfo( Filelevel_CRITICALERROR, "Core::InitGraphics => wglCreateContext" );
+
+  //__log.PrintInfo( Filelevel_CRITICALERROR, "Core::InitGraphics => wglCreateContext" );
   ::wglMakeCurrent( this->_window.dc, this->_window.glRC );
   this->_InitViewport();
+
+  const char* version = ( const char* ) ::glGetString( GL_VERSION );
+  GL_CHECK_ERROR;
 
   //check variable parameters
   //GLint i = 0;
@@ -303,8 +306,11 @@ bool Core::_InitGraphics()
 
   //shaders
   this->_shaders.vertex   = glCreateShader( GL_VERTEX_SHADER );
+  GL_CHECK_ERROR;
   this->_shaders.geometry = glCreateShader( GL_GEOMETRY_SHADER );
+  GL_CHECK_ERROR;
   this->_shaders.fragment = glCreateShader( GL_FRAGMENT_SHADER );
+  GL_CHECK_ERROR;
   memory
     memShaderVertex,
     memShaderGeometry,
@@ -323,22 +329,36 @@ bool Core::_InitGraphics()
   const GLchar* sourceShaderGeometry  = memShaderGeometry.getData();
   const GLchar* sourceShaderFragment  = memShaderFragment.getData();
   glShaderSource( this->_shaders.vertex,    1, ( const GLchar** ) &sourceShaderVertex, &lengthShaderVertex );
+  GL_CHECK_ERROR;
   glShaderSource( this->_shaders.geometry,  1, ( const GLchar** ) &sourceShaderGeometry, &lengthShaderGeometry );
+  GL_CHECK_ERROR;
   glShaderSource( this->_shaders.fragment,  1, ( const GLchar** ) &sourceShaderFragment, &lengthShaderFragment );
+  GL_CHECK_ERROR;
   glCompileShader( this->_shaders.vertex );
+  GL_CHECK_ERROR;
   glCompileShader( this->_shaders.geometry );
+  GL_CHECK_ERROR;
   glCompileShader( this->_shaders.fragment );
-  if( this->_CheckShaderError( "Vertex shader", this->_shaders.vertex ) )
+  GL_CHECK_ERROR;
+  if( this->_CheckShaderError( "Vertex shader", this->_shaders.vertex ) ) {
     this->SetState( CORE_STATE_EXIT );
-  if( this->_CheckShaderError( "Geometry shader", this->_shaders.geometry ) )
+  }
+  if( this->_CheckShaderError( "Geometry shader", this->_shaders.geometry ) ) {
     this->SetState( CORE_STATE_EXIT );
-  if( this->_CheckShaderError( "Fragment shader", this->_shaders.fragment ) )
+  }
+  if( this->_CheckShaderError( "Fragment shader", this->_shaders.fragment ) ) {
     this->SetState( CORE_STATE_EXIT );
+  }
   this->_shaders.programm = glCreateProgram();
+  GL_CHECK_ERROR;
   glAttachShader( this->_shaders.programm, this->_shaders.vertex );
+  GL_CHECK_ERROR;
   glAttachShader( this->_shaders.programm, this->_shaders.geometry );
+  GL_CHECK_ERROR;
   glAttachShader( this->_shaders.programm, this->_shaders.fragment );
+  GL_CHECK_ERROR;
   glLinkProgram( this->_shaders.programm );
+  GL_CHECK_ERROR;
 
   //this->_shaders.locVertexPos = glGetAttribLocation( this->_shaders.programm, "vertexPosition_local" );
 
@@ -365,8 +385,10 @@ bool Core::_InitGraphics()
   */
 
   this->_shaders.matrModelLoc = glGetUniformLocation( this->_shaders.programm, "matModel" );
+  GL_CHECK_ERROR;
   __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => matrModelLoc[ %d ]", this->_shaders.matrModelLoc );
   this->_shaders.matrProjectionLoc = glGetUniformLocation( this->_shaders.programm, "matProj" );
+  GL_CHECK_ERROR;
   __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => matrProjectionLoc[ %d ]", this->_shaders.matrProjectionLoc );
 
   glGenBuffers( 1, &this->_buffers.vbo );
@@ -382,8 +404,10 @@ bool Core::_InitGraphics()
   {
     GLint texSize;
     glGetIntegerv( GL_MAX_TEXTURE_SIZE, &texSize );
+    GL_CHECK_ERROR;
     texSize = min( texSize, 1024 );
     __textureAtlas->Init( Size( texSize, texSize ), 1 );
+    GL_CHECK_ERROR;
   }
 
   return true;
@@ -404,9 +428,11 @@ bool Core::_CheckShaderError( const std::string& text, GLuint shader )
     return true;
   Int maxLength, logLength = 0;
   glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &maxLength );
+  GL_CHECK_ERROR;
   char *log = new Char[ maxLength + 1 ];
   log[ maxLength ] = 0;
   glGetShaderInfoLog( shader, maxLength, &logLength, log );
+  GL_CHECK_ERROR;
   if( log[ 0 ] )
   {
     std::string tmpLog = log;
@@ -452,6 +478,7 @@ void Core::_InitExtensions()
 {
   //GL extensions
   this->_extensions = tools::Explode( std::string( ( const char* ) glGetString( GL_EXTENSIONS ) ), " " );
+  GL_CHECK_ERROR;
   //__log.PrintInfo( Filelevel_INFO, "OpenGL extensions:\n. %s\n", Implode( this->_extensions, "\n. " ).c_str() );
 
   /* WGL extensions */
@@ -605,6 +632,7 @@ void Core::_InitViewport()
   glLoadIdentity();
   glOrtho( 0.0, 100.0, 100.0, 0.0, -10.0, 10.0 ); // -10.0f - ближайшая к зрителю точка
   glMatrixMode( GL_MODELVIEW );
+  GL_CHECK_ERROR;
   //*/
 
   /* position viewer */
@@ -686,6 +714,7 @@ void Core::_InitViewport()
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
   glDisableClientState( GL_COLOR_ARRAY );
   glDisableClientState( GL_VERTEX_ARRAY);
+  GL_CHECK_ERROR;
 }//_InitViewport
 
 
@@ -878,6 +907,7 @@ bool Core::Redraw()
   }
 
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //GL_STENCIL_BUFFER_BIT
+  GL_CHECK_ERROR;
 
   //glUseProgram( this->_shaders.programm );
   //glBegin( GL_QUADS );
@@ -887,6 +917,7 @@ bool Core::Redraw()
 
   if( __coreRenderableList->size() || __coreGUI->size() )
   {
+    __log.PrintInfo( Filelevel_DEBUG, "this->_shaders.programm = x%X", this->_shaders.programm );
     glUseProgram( this->_shaders.programm );
     GL_CHECK_ERROR;
     glEnableClientState( GL_VERTEX_ARRAY );
@@ -903,6 +934,7 @@ bool Core::Redraw()
     //renderableListsIterEnd = renderableLists.end();
 
     __textureAtlas->Bind();
+    GL_CHECK_ERROR;
 
     glEnableVertexAttribArray( 0 );
     glEnableVertexAttribArray( 1 );
@@ -999,7 +1031,14 @@ bool Core::Redraw()
     //End Основной мир
 
     //editor gui
-    if( this->gui.context && this->gui.show ) {
+    //if( this->gui.context && this->gui.show )
+    if( true )
+    {
+      glMatrixMode( GL_PROJECTION );
+      glLoadIdentity();
+      glOrtho( 0.0, this->_window.windowSize.width, this->_window.windowSize.height, 0.0, -10.0, 10.0 ); // -10.0f - ближайшая к зрителю точка
+      glMatrixMode( GL_MODELVIEW );
+
       //debug-render
       if( this->GetCamera() && ( this->debug.renderRenderable|| this->debug.renderCollision || this->debug.renderTrigger ) ) {
         glUseProgram( 0 );
@@ -1055,19 +1094,6 @@ bool Core::Redraw()
           Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
           for( iter = __collisionList->begin(); iter != iterEnd; ++iter ) {
             ( *iter )->Render( alpha, camera, this->debug.selectedObject && this->debug.selectedObject->GetCollision() == *iter );
-            /*
-            pos = ( *iter )->GetPosition() - camera;
-            size = ( *iter )->GetSize() * 0.5f;
-            if( this->debug.selectedObject && this->debug.selectedObject->GetCollision() == *iter ) {
-              glColor4f( 1.0f, 0.0f, 0.0f, Math::Sqrt16( alpha ) );
-            } else {
-              glColor4f( 0.0f, 1.0f, 0.0f, alpha );
-            }
-            glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
-            glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
-            glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
-            glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
-            */
           }
         }//collisions
 
@@ -1097,10 +1123,8 @@ bool Core::Redraw()
         glEnable( GL_DEPTH_TEST );
       }
 
-      glUseProgram( 0 );
-      this->gui.context->Render();
-
       if( __debugRender ) {
+        glUseProgram( 0 );
         __debugRender->Render();
       }
 
@@ -1248,6 +1272,7 @@ LRESULT Core::Signal( DWORD code, LPARAM lParam, WPARAM wParam, void *pointer )
 bool Core::Update()
 {
   //__log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
+  GL_CHECK_ERROR;
   sTimer.Update();
   this->keyboard.Update();
   this->mouse.Update();
@@ -1519,6 +1544,7 @@ Object* Core::GetObjectByRenderableIndex( GLushort index )
   GetObjectByGui
 =============
 */
+/*
 Object* Core::GetObjectByGui( g2Controller *controller )
 {
   ObjectByGuiList::iterator iterGui, iterEndGui = __objectByGui->end();
@@ -1527,6 +1553,7 @@ Object* Core::GetObjectByGui( g2Controller *controller )
       return ( *iterGui )->object.GetObject< Object >();
   return NULL;
 }//GetObjectByGui
+*/
 
 
 
@@ -1774,12 +1801,14 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
     case WM_KEYDOWN:
     {
       __log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d[x%X] => %d mods[%d]", wParam, wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
+      /*
       if( core->gui.show ) {
         Glui2::__KeyboardFunc( Keyboard::KeyCodeToGlut( wParam ), core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }
       if( !core->gui.show || !Glui2::__KeyboardInteracted ) {
+      */
         core->keyboard.DoPress( wParam );
-      }
+      //}
       return 0;
     }
 
@@ -1791,70 +1820,83 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 
     case WM_MOUSEMOVE:
     {
+      /*
       if( core->gui.show ) {
         Glui2::__HoverFunc( core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }
+      */
       core->mouse.MoveCursor( Vec2( float( LOWORD( lParam ) ), float( HIWORD( lParam ) ) ) );
       return 0;
     }
 
     case WM_LBUTTONDOWN:
+      /*
       if( core->gui.show ) {
         Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }
       if( !core->gui.show || !Glui2::__MouseInteracted ) {
+      */
         core->mouse.DoPress( VK_LBUTTON );
-      }
+      //}
       return 0;
     break;
 
     case WM_LBUTTONUP:
+      /*
       if( core->gui.show ) {
         Glui2::__MouseFunc( GLUT_LEFT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }
       if( !core->gui.show || !Glui2::__MouseInteracted ) {
+      */
         core->mouse.DoRelease( VK_LBUTTON );
-      }
+      //}
       return 0;
     break;
 
     case WM_RBUTTONDOWN:
-      if( core->gui.show ) {
+      /*if( core->gui.show ) {
         Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }
       if( !core->gui.show || !Glui2::__MouseInteracted ) {
+      */
         core->mouse.DoPress( VK_RBUTTON );
-      }
+      //}
       return 0;
     break;
 
     case WM_RBUTTONUP:
+      /*
       if( core->gui.show ) {
         Glui2::__MouseFunc( GLUT_RIGHT_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }
       if( !core->gui.show || !Glui2::__MouseInteracted ) {
+      */
         core->mouse.DoRelease( VK_RBUTTON );
-      }
+      //}
       return 0;
     break;
 
     case WM_MBUTTONDOWN:
+      /*
       if( core->gui.show ) {
         Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_DOWN, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }
       if( !core->gui.show || !Glui2::__MouseInteracted ) {
+      */
         core->mouse.DoPress( VK_MBUTTON );
-      }
+      //}
       return 0;
     break;
 
     case WM_MBUTTONUP:
+      /*
       if( core->gui.show ) {
         Glui2::__MouseFunc( GLUT_MIDDLE_BUTTON, GLUT_UP, core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
       }
       if( !core->gui.show || !Glui2::__MouseInteracted ) {
+      */
         core->mouse.DoRelease( VK_MBUTTON );
-      }
+      //}
       return 0;
     break;
 

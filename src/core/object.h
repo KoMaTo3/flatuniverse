@@ -13,14 +13,14 @@
 #include "objectpointerinterface.h"
 #include "objecttriggermgr.h"
 #include "tags.h"
-#include "glui2/g2Theme.h"
-#include "glui2/g2Spinner.h"
+//#include "glui2/g2Theme.h"
+//#include "glui2/g2Spinner.h"
 
 
 
 class Object;
-class g2Controller;
-typedef std::deque< g2Controller* > GuiList;
+//class g2Controller;
+//typedef std::deque< g2Controller* > GuiList;
 typedef std::deque< std::string > stdDequeString;
 
 
@@ -57,6 +57,7 @@ typedef std::deque< ObjectByTrigger* > ObjectByTriggerList;
 extern ObjectByTriggerList *__objectByTrigger;
 
 //object by gui
+/*
 struct ObjectByGui
 {
   ObjectPointer object;
@@ -86,6 +87,7 @@ enum ObjectGuiType {
 
   //OBJECT_GUI_DIALOG   = 5
 };
+*/
 
 
 
@@ -104,6 +106,7 @@ public:
   };
   typedef std::deque< ObjectForce > ObjectForceList;
 
+  /*
   class GuiConstructor { //конструктор создания glui-объектов
   public:
     ObjectGuiType type;
@@ -142,6 +145,7 @@ public:
       //this->dialogType = g2DialogType_Notification;
     }
   };
+  */
 
 protected:
   Vec3            position;     //рассчитанная позиция объекта в сцене. звук это, скрипт, частица или меш, главная координата - эта. её может модифицировать физдвижок, напрямую
@@ -160,11 +164,13 @@ private:
   ObjectTrigger   *trigger;
   Tags            *tags;    //список тегов
 
+  /*
   struct {
     g2Controller  *guiController;
     ObjectGuiType type;
     void          (*funCallback)( Object* object );
   } gui;
+  */
 
   bool            _isLockedToDelete;  //запрет на удаление объекта посредством Core::ClearScene
 
@@ -187,7 +193,7 @@ protected:
 
 protected:
   void                _RecalculatePosition();
-  static void         _GuiCallback( g2Controller *controller );
+  //static void         _GuiCallback( g2Controller *controller );
 
 public:
   Object();
@@ -230,11 +236,13 @@ public:
   inline
     bool              IsTrigger           () { return this->trigger != NULL; }
 
+  /*
   g2Controller*       EnableGui           ( const GuiConstructor *info );
   void                DisableGui          ();
   g2Controller*       GetGui              ();
   inline
   ObjectGuiType       GetGuiType          () { return this->gui.type; }
+  */
 
   void                Update              ( float dt );
 

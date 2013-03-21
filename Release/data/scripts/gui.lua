@@ -43,7 +43,7 @@ function GUIButton:Create( x0, y0, x1, y1, setText, setOnClickHandler, parent )
       [1] = {
         light = '888888ff',
         middle = 'ccccccff',
-        dark = 'ffffffff',
+        dark = 'ddddddff',
       },
     },
   }
@@ -77,7 +77,7 @@ function GUIButton:Render( dx, dy )
   Render( 'line', x0, y0, 0, x0, y1, 0, color.light )
   Render( 'line', x0, y1, 0, x1, y1, 0, color.dark )
   Render( 'line', x1, y0, 0, x1, y1, 0, color.dark )
-  Render( 'text', x0+2 + ( ( self.state == 1 and self.isHover ) and -1 or 0 ),y0+2 + ( ( self.state == 1 and self.isHover ) and -1 or 0 ),0, self.text, '000000ff' )
+  Render( 'text', x0+2 + ( ( self.state == 1 and self.isHover ) and 1 or 0 ),y0+2 + ( ( self.state == 1 and self.isHover ) and 1 or 0 ),0, self.text, '000000ff' )
   -- childs
   for key, item in pairs( self.childs ) do
     item:Render( dx + self.rect.left, dy + self.rect.top )
@@ -233,11 +233,9 @@ end -- GUIRendererRender
 
 local but0 = GUIButton:Create( 20, 0, 67, 62, 'Butt0', function() Alert(0) end )
 local but1 = GUIButton:Create( 110, 20, 155, 35, 'Butt1', function() Alert(1) end )
--- local but1 = GUIButton:Create( 5, 5, 65, 35, '884444ff', but0 )
 local cb0 = GUICheckbox:Create( 5, 15, 'cb0', false, but0 )
 local cb1 = GUICheckbox:Create( 5, 30, 'cb1', false, but0 )
 local cb2 = GUICheckbox:Create( 5, 45, 'cb2', true, but0 )
--- GUIRenderer.RenderEnable()
 
 --[[ GUIMouseKey ]]
 function GUIMouseKey( id, isPressed )

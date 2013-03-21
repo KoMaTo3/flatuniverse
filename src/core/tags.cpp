@@ -90,14 +90,14 @@ void Tags::SaveToBuffer( MemoryWriter &writer )
 */
 void Tags::LoadFromBuffer( MemoryReader &reader )
 {
-  int i;
+  Dword dw;
   Dword count;
   std::string tag;
 
   reader >> count;
 
   this->tags.clear();
-  for( i = 0; i < count; ++i ) {
+  for( dw = 0; dw < count; ++dw ) {
     reader >> tag;
     this->AddTag( tag );
   }//for i

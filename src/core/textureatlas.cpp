@@ -48,17 +48,41 @@ bool TextureAtlas::Init( const Size& maxTextureSize, Byte borderSize )
     *alpha = 0;
 
   glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+  GL_CHECK_ERROR;
   glGenTextures( 1, &this->textureId );
+  GL_CHECK_ERROR;
   glBindTexture( GL_TEXTURE_2D, this->textureId );
+  GL_CHECK_ERROR;
 
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+  GL_CHECK_ERROR;
 
   glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
+  GL_CHECK_ERROR;
   //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
   return true;
 }//Init
+
+
+
+
+/*
+=============
+  CheckGLError
+=============
+*/
+bool TextureAtlas::CheckGLError( int line, const std::string& fileName )
+{
+  GLenum error = glGetError();
+  if( error )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "OpenGL error at %s:%d: x%X [%d]", fileName.c_str(), line, error, error );
+    return true;
+  }
+  return false;
+}//CheckGLError
 
 
 
@@ -69,8 +93,11 @@ bool TextureAtlas::Init( const Size& maxTextureSize, Byte borderSize )
 */
 void TextureAtlas::Bind()
 {
+  GL_CHECK_ERROR;
   glEnable      ( GL_TEXTURE_2D );
+  GL_CHECK_ERROR;
   glBindTexture ( GL_TEXTURE_2D, this->textureId );
+  GL_CHECK_ERROR;
 }//Bind
 
 
@@ -84,6 +111,7 @@ void TextureAtlas::Unbind()
 {
   glDisable     ( GL_TEXTURE_2D );
   glBindTexture ( GL_TEXTURE_2D, NULL );
+  GL_CHECK_ERROR;
 }//Unbind
 
 
@@ -96,20 +124,25 @@ void TextureAtlas::Unbind()
 */
 Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const Vec4& textureCoords )
 {
+  GL_CHECK_ERROR;
   TextureAtlasItem *item = this->IsTextureLoaded( textureFileName );
   if( item )
   {
     Vec3 leftTop, rightBottom;
     leftTop = Vec3( textureCoords.x, textureCoords.y, 0.0f ) * item->matTransform;
     rightBottom = Vec3( textureCoords.z, textureCoords.w, 0.0f ) * item->matTransform;
+    __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => existing texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
     return Vec4( leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
   }
   else
   {
+    GL_CHECK_ERROR;
     TextureAtlasItem *item = this->LoadTexture( textureFileName );
+    GL_CHECK_ERROR;
     Vec3 tex0( textureCoords.x, textureCoords.y, 0 ), tex1( textureCoords.z, textureCoords.w, 0 );
     tex0 *= item->matTransform;
     tex1 *= item->matTransform;
+    __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => loaded texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), tex0.x, tex0.y, tex1.x, tex1.y );
     return Vec4( tex0.x, tex0.y, tex1.x, tex1.y );
   }
 }//GetTextureCoords
@@ -256,6 +289,7 @@ Vec2 TextureAtlas::GetTextureSize( const std::string& textureFileName )
 */
 TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& textureFileName )
 {
+  GL_CHECK_ERROR;
   ImageLoader image;
   if( !image.LoadFromFile( textureFileName ) )
   {
@@ -305,13 +339,16 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
   item->matInvTransform = matInvScale * matInvTranslate;
 
   //размещение картинки в текстуре
+  GL_CHECK_ERROR;
   this->Bind();
   Dword *dst = ( Dword* ) this->textureData.getData(),
     *src = ( Dword* ) image.GetImageData();
   for( Dword y = 0; y < image.GetImageSize()->height; ++y )
     memcpy( dst + ( item->rect.top + y ) * this->size.width + item->rect.left, src + y * image.GetImageSize()->width, image.GetImageSize()->width * 4 );
   glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
+  GL_CHECK_ERROR;
   this->Unbind();
+  GL_CHECK_ERROR;
 
   this->textures.push_back( item );
   return item;

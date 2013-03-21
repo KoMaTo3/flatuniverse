@@ -20,7 +20,7 @@ out FragData
 {
   vec4 colorVertex;
   vec2 texCoord;
-};
+} fragOut;
 
 void main()
 {
@@ -46,23 +46,31 @@ void main()
   );
   vec2 half_size = vert[ 0 ].size * 0.5;
 
-  colorVertex = vert[ 0 ].colorV;
+  fragOut.colorVertex = vert[ 0 ].colorV;
 
   gl_Position = matrix * vec4( -half_size.x, -half_size.y, 0.0, 1 );
   gl_PrimitiveID = gl_PrimitiveIDIn;
-  texCoord = vert[ 0 ].texcoord.xy;
+  //texCoord = vert[ 0 ].texcoord.xy;
+  //texCoord = vec2(0,0);
+  fragOut.texCoord = vert[ 0 ].texcoord.xy;
   EmitVertex();
   gl_Position = matrix * vec4( -half_size.x, half_size.y, 0.0, 1 );
   gl_PrimitiveID = gl_PrimitiveIDIn;
-  texCoord = vert[ 0 ].texcoord.xw;
+  //texCoord = vert[ 0 ].texcoord.xw;
+  //texCoord = vec2(0,1);
+  fragOut.texCoord = vert[ 0 ].texcoord.xw;
   EmitVertex();
   gl_Position = matrix * vec4( half_size.x, -half_size.y, 0.0, 1 );
   gl_PrimitiveID = gl_PrimitiveIDIn;
-  texCoord = vert[ 0 ].texcoord.zy;
+  //texCoord = vert[ 0 ].texcoord.zy;
+  //texCoord = vec2(1,0);
+  fragOut.texCoord = vert[ 0 ].texcoord.zy;
   EmitVertex();
   gl_Position = matrix * vec4( half_size.x, half_size.y, 0.0, 1 );
   gl_PrimitiveID = gl_PrimitiveIDIn;
-  texCoord = vert[ 0 ].texcoord.zw;
+  //texCoord = vert[ 0 ].texcoord.zw;
+  //texCoord = vec2(1,1);
+  fragOut.texCoord = vert[ 0 ].texcoord.zw;
   EmitVertex();
   EndPrimitive();
 }

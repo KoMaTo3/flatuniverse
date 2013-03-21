@@ -6,7 +6,7 @@
 
 #include "../gl/gl3.h"
 #include "../gl/gl.h"
-#include "glui2/glui2.h"
+//#include "glui2/glui2.h"
 #include "object.h"
 #include "font.h"
 #include "renderable.h"
@@ -26,7 +26,7 @@
 //
 extern CoreRenderableList *__coreRenderableList;
 extern CoreRenderableList *__coreGUI;
-extern GuiList *__guiList;
+//extern GuiList *__guiList;
 //
 
 /*
@@ -77,10 +77,12 @@ private:
   //Object                      *_rootGUIObject;  //корневой объект GUI
 
   //gui
+  /*
   struct {
     Glui2                   *context;
     bool                    show;
   } gui;
+  */
 
   struct shaders
   {
@@ -156,14 +158,16 @@ public:
   Object* getObjectInPoint    ( const Vec2& pos );
   Object* GetObjectByTrigger  ( ObjectTrigger *trigger );
   Object* GetObjectByCollision( Collision *collision );
-  Object* GetObjectByGui      ( g2Controller *controller );
+  //Object* GetObjectByGui      ( g2Controller *controller );
   Object* GetObjectByRenderableIndex  ( GLushort index );
   Object* GetCollisionInPoint ( const Vec2& pos, const std::string &afterObject );
   Object* GetTriggerInPoint   ( const Vec2& pos, const std::string &afterObject );
   Object* GetRenderableInPoint( const Vec2& pos, const std::string &afterObject );
   void    ClearScene          ();
+  /*
   inline
   void    SetGuiVisibility    ( bool setShow ) { this->gui.show = setShow; }
+  */
 
   bool    LoadExtension       ( const std::string &name, void** function );
   bool    IsExtensionExist    ( const std::string extensionName );

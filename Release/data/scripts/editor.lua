@@ -141,6 +141,7 @@ function EditorInit()
   GUIRenderer.OnMouseMoveDefault = OnEditorMouseMove
 
   -- Ставим обработчики чекбоксов и кнопок редактора
+  --[[
   GuiAddTrigger( 'editor/settings.layer', 'ToggleLayer' )
   GuiAddTrigger( 'editor/object.is_renderable', 'ToggleRenderable' )
   GuiAddTrigger( 'editor/object.is_collision', 'ToggleCollision' )
@@ -149,10 +150,11 @@ function EditorInit()
   GuiAddTrigger( 'editor/object.tile_apply', 'TileApply' )
   GuiAddTrigger( 'editor/renderable.width', 'ToggleRenderableSize' )
   GuiAddTrigger( 'editor/renderable.height', 'ToggleRenderableSize' )
+  ]]
 
   -- показываем GUI
   settings.guiVisibility = true
-  SetGuiVisibility( settings.guiVisibility )
+  --SetGuiVisibility( settings.guiVisibility )
 
   UpdateGuiBySelectedObject()
 
@@ -172,11 +174,11 @@ function OnEditorKey( id, isPressed )
           PopFromBuffer()
         else
           settings.guiVisibility = not settings.guiVisibility
-          SetGuiVisibility( settings.guiVisibility )
+          --SetGuiVisibility( settings.guiVisibility )
         end
       end
       if id == 0xC0 then    -- ~
-        GuiSetText( 'editor/settings.layer', 'default' )
+        --GuiSetText( 'editor/settings.layer', 'default' )
         DebugRender( 0 )
         settings.editorType = 0
         settings.editorMode = 0
@@ -184,22 +186,22 @@ function OnEditorKey( id, isPressed )
         UpdateGuiBySelectedObject()
       end
       if id == 0x31 then    -- 1
-        GuiSetText( 'editor/settings.layer', 'renderable' )
+        --GuiSetText( 'editor/settings.layer', 'renderable' )
         DebugRender( 1 )
         settings.editorType = 1
       end
       if id == 0x32 then    -- 2
-        GuiSetText( 'editor/settings.layer', 'collision' )
+        --GuiSetText( 'editor/settings.layer', 'collision' )
         DebugRender( 2 )
         settings.editorType = 2
       end
       if id == 0x33 then    -- 3
-        GuiSetText( 'editor/settings.layer', 'trigger' )
+        --GuiSetText( 'editor/settings.layer', 'trigger' )
         DebugRender( 4 )
         settings.editorType = 3
       end
       if id == 0x2E then    -- Del
-        local object = GuiGetText( 'editor/object.object_name' )
+        local object = GetSelectedObject() -- GuiGetText( 'editor/object.object_name' )
         if #object > 0 then
           ObjectRemove( object )
           SelectObject( '' )
@@ -459,21 +461,22 @@ function GetObjectUnderCursorByMode()
       x = cx + mx - width * 0.5,
       y = cy + my - height * 0.5
     }
-    local layer = GuiGetText( 'editor/settings.layer' )
+    -- local layer = 'default' -- GuiGetText( 'editor/settings.layer' )
     local name = GetSelectedObject()
-    if layer == 'renderable' then
+    if settings.editorType == 1 then
       name = GetObjectByPoint( 1, pos.x, pos.y, name )
     end
-    if layer == 'collision' then
+    if settings.editorType == 2 then
       name = GetObjectByPoint( 2, pos.x, pos.y, name )
     end
-    if layer == 'trigger' then
+    if settings.editorType == 3 then
       name = GetObjectByPoint( 3, pos.x, pos.y, name )
     end
     return name
 end --GetObjectUnderCursorByMode
 
 -- Чекбокс "Renderable"
+--[[
 function ToggleRenderable( guiName )
   local name = GetSelectedObject()
   if #name < 1 then
@@ -529,14 +532,16 @@ function ToggleTrigger( guiName )
     ObjectAttr( name, { trigger = false } )
   end
 end --ToggleTrigger
+]]
 
 -- Возвращает текущий размер тайлов (из дропбокса)
 function GetTileSize()
-  return GuiGetText( 'editor/world.tile_size' )
+  return 32 --GuiGetText( 'editor/world.tile_size' )
 end --GetTileSize
 
 -- Кнопка "Apply"
 -- TODO: переделать
+--[[
 function TileApply( guiName )
   local name = GuiGetText( 'editor/object.object_name' )
   local cameraX, cameraY = GetCameraPos()
@@ -548,18 +553,19 @@ function TileApply( guiName )
   UpdateGuiBySelectedObject()
   settings.editorMode = 2
 end --TileApply
+]]
 
 -- Дропбокс "Layer"
 function ToggleLayer( guiName )
-  local layer = GuiGetText( 'editor/settings.layer' )
+  -- local layer = GuiGetText( 'editor/settings.layer' )
   local flags = 0
-  if layer == 'renderable' then
+  if settings.editorType == 1 then
     flags = 1
   end
-  if layer == 'collision' then
+  if settings.editorType == 2 then
     flags = 2
   end
-  if layer == 'trigger' then
+  if settings.editorType == 3 then
     flags = 4
   end
   DebugRender( flags )
@@ -570,11 +576,12 @@ end --ToggleLayer
 --
 function EditorUpdateDebug()
   local cx, cy = GetCameraPos()
-  GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
+  --GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
   SetTimer( 0.01, 'EditorUpdateDebug' )
 end -- EditorUpdateDebug
 
 function UpdateGuiBySelectedObject()
+--[[
   local object = GetSelectedObject()
   elements = {
     'editor/object.object_name',
@@ -619,8 +626,10 @@ function UpdateGuiBySelectedObject()
     GuiSetText( 'editor/renderable.height', renderableSizeY )
   end
   GuiSetText( 'editor/object.object_name', object )
+  ]]
 end --UpdateGuiBySelectedObject
 
+--[[
 function ToggleRenderableSize()
   local object = GetSelectedObject()
   if #object < 1 then
@@ -630,6 +639,7 @@ function ToggleRenderableSize()
     ObjectAttr( object, { renderableSize = width..' '..height } )
   end
 end --ToggleRenderableSize
+]]
 
 function RenderGUI()
   settings.timer = settings.timer + 0.01

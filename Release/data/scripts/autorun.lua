@@ -40,8 +40,6 @@ function Main()
   ListenCollision( 'CollisionPlayer', 'player' )
 
   -- reset bricks
-  ObjectAttr( 'wall.356.148.8.6799999999999', { textureName = 'temp/brick2.png' } )
-  ObjectAddTag( 'player', 'test' )
 
 end -- Main
 Main()

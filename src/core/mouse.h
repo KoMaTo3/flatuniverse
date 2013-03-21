@@ -18,6 +18,7 @@ private:
     Vec3    spriteOffset;
     ObjectPointer *sprite;
     Vec2    pixelsToTexels;
+    bool    isHardware;
   } cursor;
   MoveListenerList  moveListeners;
 
@@ -28,9 +29,10 @@ public:
   virtual ~Mouse();
 
   void  Init                    ( const Size& newWindowSize );
-  void  SetCursor               ( const std::string& imageFileName, Object* object );
+  void  SetCursor               ( const std::string& imageFileName, Object* object, bool setIsHardware = false );
   void  MoveCursor              ( const Vec2& newPosition );
   const Vec2& GetCursorPosition ();
+  void  DestroyCursor           ();
 
   void  AddMoveListener         ( MoveListener *listenerProc );
   void  RemoveMoveListener      ( MoveListener *listenerProc );

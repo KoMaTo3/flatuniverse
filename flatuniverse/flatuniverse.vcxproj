@@ -260,26 +260,6 @@
     <ClCompile Include="..\src\pcre\pcre_maketables.c" />
     <ClCompile Include="..\src\pcre\pcre_newline.c" />
     <ClCompile Include="..\src\pcre\pcre_tables.c" />
-    <ClCompile Include="..\src\glui2\g2Button.cpp" />
-    <ClCompile Include="..\src\glui2\g2CheckBox.cpp" />
-    <ClCompile Include="..\src\glui2\g2Config.cpp" />
-    <ClCompile Include="..\src\glui2\g2Console.cpp" />
-    <ClCompile Include="..\src\glui2\g2Controller.cpp" />
-    <ClCompile Include="..\src\glui2\g2Dialog.cpp" />
-    <ClCompile Include="..\src\glui2\g2DropDown.cpp" />
-    <ClCompile Include="..\src\glui2\g2Images.cpp" />
-    <ClCompile Include="..\src\glui2\g2Label.cpp" />
-    <ClCompile Include="..\src\glui2\g2LabelEdit.cpp" />
-    <ClCompile Include="..\src\glui2\g2Panel.cpp" />
-    <ClCompile Include="..\src\glui2\g2ProgressBar.cpp" />
-    <ClCompile Include="..\src\glui2\g2RadioGroup.cpp" />
-    <ClCompile Include="..\src\glui2\g2Slider.cpp" />
-    <ClCompile Include="..\src\glui2\g2Spinner.cpp" />
-    <ClCompile Include="..\src\glui2\g2TextField.cpp" />
-    <ClCompile Include="..\src\glui2\g2Theme.cpp" />
-    <ClCompile Include="..\src\glui2\g2Utilities.cpp" />
-    <ClCompile Include="..\src\glui2\glui2.cpp" />
-    <ClCompile Include="..\src\glui2\stb_image.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\collision.h" />
@@ -372,27 +352,9 @@
     <ClInclude Include="..\src\pcre\pcre.h" />
     <ClInclude Include="..\src\pcre\pcre_internal.h" />
     <ClInclude Include="..\src\pcre\ucp.h" />
-    <ClInclude Include="..\src\glui2\g2Button.h" />
-    <ClInclude Include="..\src\glui2\g2CheckBox.h" />
-    <ClInclude Include="..\src\glui2\g2Config.h" />
-    <ClInclude Include="..\src\glui2\g2Console.h" />
-    <ClInclude Include="..\src\glui2\g2Controller.h" />
-    <ClInclude Include="..\src\glui2\g2Dialog.h" />
-    <ClInclude Include="..\src\glui2\g2DropDown.h" />
-    <ClInclude Include="..\src\glui2\g2Images.h" />
-    <ClInclude Include="..\src\glui2\g2Label.h" />
-    <ClInclude Include="..\src\glui2\g2LabelEdit.h" />
-    <ClInclude Include="..\src\glui2\g2Panel.h" />
-    <ClInclude Include="..\src\glui2\g2ProgressBar.h" />
-    <ClInclude Include="..\src\glui2\g2RadioGroup.h" />
-    <ClInclude Include="..\src\glui2\g2Slider.h" />
-    <ClInclude Include="..\src\glui2\g2Spinner.h" />
-    <ClInclude Include="..\src\glui2\g2TextField.h" />
-    <ClInclude Include="..\src\glui2\g2Theme.h" />
-    <ClInclude Include="..\src\glui2\g2Utilities.h" />
-    <ClInclude Include="..\src\glui2\glui2.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Release\data\shaders\main-test.fs" />
     <None Include="..\Release\data\shaders\main.fs" />
     <None Include="..\Release\data\shaders\main.gs" />
     <None Include="..\Release\data\shaders\main.vs" />

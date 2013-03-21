@@ -11,6 +11,7 @@ Mouse::Mouse()
   this->cursor.position.Set( 0.0f, 0.0f );
   this->cursor.size.Set( 1.0f, 1.0f );
   this->cursor.sprite = NULL;
+  this->cursor.isHardware = false;
 }//constructor
 
 
@@ -41,7 +42,7 @@ void Mouse::Init( const Size& newWindowSize )
   SetCursor
 =============
 */
-void Mouse::SetCursor( const std::string& imageFileName, Object* object )
+void Mouse::SetCursor( const std::string& imageFileName, Object* object, bool setIsHardware )
 {
   if( !object )
   {
@@ -50,6 +51,7 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object )
   }
   DEF_DELETE( this->cursor.sprite );
   this->cursor.sprite = new ObjectPointer( object );
+  this->cursor.isHardware = setIsHardware;
 
   ImageLoader image;
   image.LoadFromFile( imageFileName );
@@ -60,13 +62,32 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object )
   if( this->cursor.sprite->GetValid() )
   {
     this->cursor.sprite->GetObject< Object >()->SetPosition( Vec3( 0.0f, 0.0f, 9.0f ) );
-    RenderableQuad *render = this->cursor.sprite->GetObject< Object >()->EnableRenderableGUI();
-    render->SetSize( Vec2( this->cursor.size.x * this->cursor.pixelsToTexels.x, this->cursor.size.y * this->cursor.pixelsToTexels.y ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    render->SetTexture( imageFileName, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+    if( this->cursor.isHardware ) {
+    } else {
+      RenderableQuad *render = this->cursor.sprite->GetObject< Object >()->EnableRenderableGUI();
+      render->SetSize( Vec2( this->cursor.size.x * this->cursor.pixelsToTexels.x, this->cursor.size.y * this->cursor.pixelsToTexels.y ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
+      render->SetTexture( imageFileName, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+    }
   }
 
   ShowCursor( false );
 }//SetCursor
+
+
+
+
+/*
+=============
+  DestroyCursor
+=============
+*/
+void Mouse::DestroyCursor() {
+  if( this->cursor.sprite && this->cursor.sprite->GetValid() ) {
+    this->cursor.sprite->GetObject< Object >()->DisableRenderable();
+    ShowCursor( true );
+  }
+}//DestroyCursor
+
 
 
 

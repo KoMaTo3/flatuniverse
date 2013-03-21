@@ -27,28 +27,28 @@ LUAFUNCPROC_GetCameraPos      *LUAFUNC_GetCameraPos         = NULL;
 LUAFUNCPROC_GetGridSize       *LUAFUNC_GetGridSize          = NULL;
 LUAFUNCPROC_GetWindowSize     *LUAFUNC_GetWindowSize        = NULL;
 LUAFUNCPROC_ObjectAddTrigger  *LUAFUNC_ObjectAddTrigger     = NULL;
-LUAFUNCPROC_GuiAddTrigger     *LUAFUNC_GuiAddTrigger        = NULL;
+//LUAFUNCPROC_GuiAddTrigger     *LUAFUNC_GuiAddTrigger        = NULL;
 LUAFUNCPROC_SetCamera         *LUAFUNC_SetCamera            = NULL;
 LUAFUNCPROC_GetCamera         *LUAFUNC_GetCamera            = NULL;
 LUAFUNCPROC_ClearScene        *LUAFUNC_ClearScene           = NULL;
 LUAFUNCPROC_GetRandomSeed     *LUAFUNC_GetRandomSeed        = NULL;
-LUAFUNCPROC_GuiGetText        *LUAFUNC_GuiGetText           = NULL;
-LUAFUNCPROC_GuiSetText        *LUAFUNC_GuiSetText           = NULL;
+//LUAFUNCPROC_GuiGetText        *LUAFUNC_GuiGetText           = NULL;
+//LUAFUNCPROC_GuiSetText        *LUAFUNC_GuiSetText           = NULL;
 LUAFUNCPROC_ObjectEnableRenderable  *LUAFUNC_ObjectEnableRenderable   = NULL;
 LUAFUNCPROC_ObjectDisableRenderable *LUAFUNC_ObjectDisableRenderable  = NULL;
 LUAFUNCPROC_ObjectEnableCollision   *LUAFUNC_ObjectEnableCollision    = NULL;
 LUAFUNCPROC_ObjectDisableCollision  *LUAFUNC_ObjectDisableCollision   = NULL;
 LUAFUNCPROC_ObjectEnableTrigger     *LUAFUNC_ObjectEnableTrigger      = NULL;
 LUAFUNCPROC_ObjectDisableTrigger    *LUAFUNC_ObjectDisableTrigger     = NULL;
-LUAFUNCPROC_GuiGetChecked     *LUAFUNC_GuiGetChecked        = NULL;
+//LUAFUNCPROC_GuiGetChecked     *LUAFUNC_GuiGetChecked        = NULL;
 LUAFUNCPROC_GetCollisionStatic*LUAFUNC_GetCollisionStatic   = NULL;
 LUAFUNCPROC_SetCollisionStatic*LUAFUNC_SetCollisionStatic   = NULL;
 LUAFUNCPROC_DebugRender       *LUAFUNC_DebugRender          = NULL;
 LUAFUNCPROC_GetObjectByPoint  *LUAFUNC_GetObjectByPoint     = NULL;
-LUAFUNCPROC_SetGuiVisibility  *LUAFUNC_SetGuiVisibility     = NULL;
+//LUAFUNCPROC_SetGuiVisibility  *LUAFUNC_SetGuiVisibility     = NULL;
 LUAFUNCPROC_SelectObject      *LUAFUNC_SelectObject         = NULL;
 LUAFUNCPROC_GetSelectedObject *LUAFUNC_GetSelectedObject    = NULL;
-LUAFUNCPROC_GuiAttr           *LUAFUNC_GuiAttr              = NULL;
+//LUAFUNCPROC_GuiAttr           *LUAFUNC_GuiAttr              = NULL;
 LUAFUNCPROC_LoadScript        *LUAFUNC_LoadScript           = NULL;
 LUAFUNCPROC_ObjectAttr        *LUAFUNC_ObjectAttr           = NULL;
 LUAFUNCPROC_ListenCollision   *LUAFUNC_ListenCollision      = NULL;
@@ -119,25 +119,25 @@ bool Lua::Init()
   lua_register( this->luaState, "GetGridSize",      Lua::LUA_GetGridSize );
   lua_register( this->luaState, "GetWindowSize",    Lua::LUA_GetWindowSize );
   lua_register( this->luaState, "ObjectAddTrigger", Lua::LUA_ObjectAddTrigger );
-  lua_register( this->luaState, "GuiAddTrigger",    Lua::LUA_GuiAddTrigger );
+  //lua_register( this->luaState, "GuiAddTrigger",    Lua::LUA_GuiAddTrigger );
   lua_register( this->luaState, "SetCamera",        Lua::LUA_SetCamera );
-  lua_register( this->luaState, "SetGuiVisibility", Lua::LUA_SetGuiVisibility );
+  //lua_register( this->luaState, "SetGuiVisibility", Lua::LUA_SetGuiVisibility );
   lua_register( this->luaState, "GetCamera",        Lua::LUA_GetCamera );
   lua_register( this->luaState, "ClearScene",       Lua::LUA_ClearScene );
   lua_register( this->luaState, "GetRandomSeed",    Lua::LUA_GetRandomSeed );
-  lua_register( this->luaState, "GuiGetText",       Lua::LUA_GuiGetText );
-  lua_register( this->luaState, "GuiSetText",       Lua::LUA_GuiSetText );
+  //lua_register( this->luaState, "GuiGetText",       Lua::LUA_GuiGetText );
+  //lua_register( this->luaState, "GuiSetText",       Lua::LUA_GuiSetText );
   lua_register( this->luaState, "ObjectRenderable", Lua::LUA_ObjectRenderable );
   lua_register( this->luaState, "ObjectCollision",  Lua::LUA_ObjectCollision );
   lua_register( this->luaState, "ObjectTrigger",    Lua::LUA_ObjectTrigger );
-  lua_register( this->luaState, "GuiGetChecked",    Lua::LUA_GuiGetChecked );
+  //lua_register( this->luaState, "GuiGetChecked",    Lua::LUA_GuiGetChecked );
   lua_register( this->luaState, "CollisionGetStatic", Lua::LUA_GetCollisionStatic );
   lua_register( this->luaState, "CollisionSetStatic", Lua::LUA_SetCollisionStatic );
   lua_register( this->luaState, "DebugRender",      Lua::LUA_DebugRender );
   lua_register( this->luaState, "GetObjectByPoint", Lua::LUA_GetObjectByPoint );
   lua_register( this->luaState, "SelectObject",     Lua::LUA_SelectObject );
   lua_register( this->luaState, "GetSelectedObject",Lua::LUA_GetSelectedObject );
-  lua_register( this->luaState, "GuiAttr",          Lua::LUA_GuiAttr );
+  //lua_register( this->luaState, "GuiAttr",          Lua::LUA_GuiAttr );
   lua_register( this->luaState, "LoadScript",       Lua::LUA_LoadScript );
   lua_register( this->luaState, "ObjectAttr",       Lua::LUA_ObjectAttr );
   lua_register( this->luaState, "Render",           Lua::LUA_Render );
@@ -917,6 +917,7 @@ int Lua::LUA_ObjectAddTrigger( lua_State *lua )
   LUA_GuiAddTrigger
 =============
 */
+/*
 int Lua::LUA_GuiAddTrigger( lua_State *lua )
 {
   int parmsCount = lua_gettop( lua ); //число параметров
@@ -930,6 +931,7 @@ int Lua::LUA_GuiAddTrigger( lua_State *lua )
   LUAFUNC_GuiAddTrigger( objectName, funcName );
   return 0;
 }//LUA_ObjectAddTrigger
+*/
 
 
 
@@ -968,6 +970,7 @@ void Lua::LUACALLBACK_ObjectTrigger( Lua *lua, const std::string &funcName, cons
   LUACALLBACK_GuiTrigger
 =============
 */
+/*
 void Lua::LUACALLBACK_GuiTrigger( Lua *lua, const std::string &funcName, const std::string &objectName )
 {
   LuaStateCheck state( lua->luaState );
@@ -988,6 +991,7 @@ void Lua::LUACALLBACK_GuiTrigger( Lua *lua, const std::string &funcName, const s
     return;
   }
 }//LUACALLBACK_GuiTrigger
+*/
 
 
 
@@ -1010,10 +1014,12 @@ void LUACALLBACK_ObjectTrigger( Lua *lua, const std::string &funcName, const std
   LUACALLBACK_GuiTrigger
 =============
 */
+/*
 void LUACALLBACK_GuiTrigger( Lua *lua, const std::string &funcName, const std::string &objectName )
 {
   Lua::LUACALLBACK_GuiTrigger( lua, funcName, objectName );
 }//LUACALLBACK_GuiTrigger
+*/
 
 
 
@@ -1042,6 +1048,7 @@ int Lua::LUA_SetCamera( lua_State *lua )
   LUA_SetGuiVisibility
 =============
 */
+/*
 int Lua::LUA_SetGuiVisibility( lua_State *lua )
 {
   int parmsCount = lua_gettop( lua ); //число параметров
@@ -1054,6 +1061,7 @@ int Lua::LUA_SetGuiVisibility( lua_State *lua )
   LUAFUNC_SetGuiVisibility( show );
   return 0;
 }//LUA_SetGuiVisibility
+*/
 
 
 
@@ -1123,6 +1131,7 @@ int Lua::LUA_LoadScript( lua_State *lua )
   LUA_GuiGetText
 =============
 */
+/*
 int Lua::LUA_GuiGetText( lua_State *lua )
 {
   int parmsCount = lua_gettop( lua ); //число параметров
@@ -1137,6 +1146,7 @@ int Lua::LUA_GuiGetText( lua_State *lua )
   lua_pushstring( lua, text.c_str() );
   return 1;
 }//LUA_GuiGetText
+*/
 
 
 
@@ -1145,6 +1155,7 @@ int Lua::LUA_GuiGetText( lua_State *lua )
   LUA_GuiSetText
 =============
 */
+/*
 int Lua::LUA_GuiSetText( lua_State *lua )
 {
   int parmsCount = lua_gettop( lua ); //число параметров
@@ -1159,6 +1170,7 @@ int Lua::LUA_GuiSetText( lua_State *lua )
 
   return 0;
 }//LUA_GuiSetText
+*/
 
 
 
@@ -1167,6 +1179,7 @@ int Lua::LUA_GuiSetText( lua_State *lua )
   LUA_GuiAttr
 =============
 */
+/*
 int Lua::LUA_GuiAttr( lua_State *lua )
 {
   int parmsCount = lua_gettop( lua ); //число параметров
@@ -1222,6 +1235,7 @@ int Lua::LUA_GuiAttr( lua_State *lua )
 
   return res;
 }//LUA_GuiAttr
+*/
 
 
 
@@ -1391,6 +1405,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
   LUA_GuiGetChecked
 =============
 */
+/*
 int Lua::LUA_GuiGetChecked( lua_State *lua )
 {
   int parmsCount = lua_gettop( lua ); //число параметров
@@ -1406,6 +1421,7 @@ int Lua::LUA_GuiGetChecked( lua_State *lua )
   lua_pushboolean( lua, checked );
   return 1;
 }//LUA_GuiGetChecked
+*/
 
 
 

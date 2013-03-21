@@ -13,20 +13,17 @@ extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
 
 File __log;
 
-void testButton( g2Controller *controller )
-{
-  __log.PrintInfo( Filelevel_DEBUG, "testButton: x%p", controller );
-  //MessageBox( 0, "ok", 0, 0 );
-}
-
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
   game = new Game();
   float gridSize = 1024.0f;
+  game->core->CheckGLError( __LINE__, __FILE__ );
   game->core->Init( 0, 0, false, "FlatGL" );
+  game->core->CheckGLError( __LINE__, __FILE__ );
   game->core->keyboard.AddListener( Game::KeyboardProc );
   game->core->mouse.AddListener( Game::MouseKeyProc );
   game->core->mouse.AddMoveListener( Game::MouseMoveProc );
+  game->core->CheckGLError( __LINE__, __FILE__ );
   Short gridsAroundObject = ( Short )  __config->GetNumber( "grids_preload_range", 0.0f );
   if( !gridsAroundObject ) {
     gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( max( __config->GetNumber( "gl_screen_width" ), __config->GetNumber( "gl_screen_height" ) ) / gridSize ) );
@@ -42,12 +39,15 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   float worldAlpha = ( isDebug ? 0.1f : 1.0f );
   //CollisionElementPolygon::PointList polyPoints;
 
+  game->core->CheckGLError( __LINE__, __FILE__ );
   game->lua->Init();
 
   game->core->CreateObject( "gui" )->SetLockToDelete( true );
 
+  game->core->CheckGLError( __LINE__, __FILE__ );
   game->world->LoadFromFile( "data/temp/testworld.fu" );
 
+  game->core->CheckGLError( __LINE__, __FILE__ );
   game->core->mouse.SetCursor( "data/temp/cursor_hw.png", game->core->CreateObject( "mouse-cursor", game->core->GetObject( "gui" ) )->SetLockToDelete( true ) );
   //__log.PrintInfo( Filelevel_DEBUG, "test: %s", core->GetObject( "gui" )->GetNameFull().c_str() );
   //game->core->CreateObject( "bottom-block", game->core->GetObject( "gui" ) )->SetPosition( Vec3( 50.0f, 85.0f, 2.0f ) )->EnableRenderableGUI()->SetSize( Vec2( 100.0f, 30.0f ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha * 0.5f ) )
@@ -550,27 +550,27 @@ Game::Game()
   LUAFUNC_GetGridSize       = Game::LUA_GetGridSize;
   LUAFUNC_GetWindowSize     = Game::LUA_GetWindowSize;
   LUAFUNC_ObjectAddTrigger  = Game::LUA_ObjectAddTrigger;
-  LUAFUNC_GuiAddTrigger     = Game::LUA_GuiAddTrigger;
+  //LUAFUNC_GuiAddTrigger     = Game::LUA_GuiAddTrigger;
   LUAFUNC_SetCamera         = Game::LUA_SetCamera;
   LUAFUNC_GetCamera         = Game::LUA_GetCamera;
   LUAFUNC_ClearScene        = Game::LUA_ClearScene;
-  LUAFUNC_GuiGetText        = Game::LUA_GuiGetText;
-  LUAFUNC_GuiSetText        = Game::LUA_GuiSetText;
+  //LUAFUNC_GuiGetText        = Game::LUA_GuiGetText;
+  //LUAFUNC_GuiSetText        = Game::LUA_GuiSetText;
   LUAFUNC_ObjectEnableRenderable  = Game::LUA_ObjectEnableRenderable;
   LUAFUNC_ObjectDisableRenderable = Game::LUA_ObjectDisableRenderable;
   LUAFUNC_ObjectEnableCollision   = Game::LUA_ObjectEnableCollision;
   LUAFUNC_ObjectDisableCollision  = Game::LUA_ObjectDisableCollision;
   LUAFUNC_ObjectEnableTrigger     = Game::LUA_ObjectEnableTrigger;
   LUAFUNC_ObjectDisableTrigger    = Game::LUA_ObjectDisableTrigger;
-  LUAFUNC_GuiGetChecked     = Game::LUA_GuiGetChecked;
+  //LUAFUNC_GuiGetChecked     = Game::LUA_GuiGetChecked;
   LUAFUNC_GetCollisionStatic= Game::LUA_GetCollisionStatic;
   LUAFUNC_SetCollisionStatic= Game::LUA_SetCollisionStatic;
   LUAFUNC_DebugRender       = Game::LUA_DebugRender;
   LUAFUNC_GetObjectByPoint  = Game::LUA_GetObjectByPoint;
-  LUAFUNC_SetGuiVisibility  = Game::LUA_SetGuiVisibility;
+  //LUAFUNC_SetGuiVisibility  = Game::LUA_SetGuiVisibility;
   LUAFUNC_SelectObject      = Game::LUA_SelectObject;
   LUAFUNC_GetSelectedObject = Game::LUA_GetSelectedObject;
-  LUAFUNC_GuiAttr           = Game::LUA_GuiAttr;
+  //LUAFUNC_GuiAttr           = Game::LUA_GuiAttr;
   LUAFUNC_LoadScript        = Game::LUA_LoadScript;
   LUAFUNC_ObjectAttr        = Game::LUA_ObjectAttr;
   LUAFUNC_ListenCollision   = Game::LUA_ListenCollision;
@@ -1059,6 +1059,7 @@ void Game::LUA_ObjectTrigger_Handler( ObjectTrigger *trigger, Collision *collisi
   ObjectTrigger call this (ObjectTriggerHandler)
 =============
 */
+/*
 void Game::LUA_GuiTrigger_Handler( Object *guiObject )
 {
   GuiTriggerList::iterator iter, iterEnd = game->guiTriggers.end();
@@ -1066,6 +1067,7 @@ void Game::LUA_GuiTrigger_Handler( Object *guiObject )
     if( iter->object == guiObject )
       LUACALLBACK_GuiTrigger( game->lua, iter->funcName, guiObject->GetNameFull() );
 }
+*/
 
 
 
@@ -1111,6 +1113,7 @@ void Game::LUA_ObjectAddTrigger( const std::string &triggerName, const std::stri
   LUA_GuiAddTrigger
 =============
 */
+/*
 void Game::LUA_GuiAddTrigger( const std::string &objectName, const std::string &funcName )
 {
   Object *guiObject = game->core->GetObject( objectName );
@@ -1120,9 +1123,6 @@ void Game::LUA_GuiAddTrigger( const std::string &objectName, const std::string &
     return;
   }
 
-  /*
-  trigger->AddHandler( Game::LUA_ObjectTrigger_Handler );
-  */
   game->guiTriggers.push_back( GuiTrigger() );
   GuiTrigger *guiTrigger = &( *game->guiTriggers.rbegin() );
   guiTrigger->funcName  = funcName;
@@ -1130,6 +1130,7 @@ void Game::LUA_GuiAddTrigger( const std::string &objectName, const std::string &
 
   __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GuiAddTrigger => guiName[%s] funcName[%s]", objectName.c_str(), funcName.c_str() );
 }//LUA_GuiAddTrigger
+*/
 
 
 
@@ -1212,19 +1213,12 @@ void Game::LUA_ClearScene()
   Обработка событий всяких gui-объектов
 =============
 */
+/*
 void Game::GuiProc( Object *obj )
 {
   LUA_GuiTrigger_Handler( obj );
-  /*
-  __log.PrintInfo( Filelevel_DEBUG, "Game::GuiProc => triggers[%d]", game->guiTriggers.size() );
-  GuiTriggerList::iterator iter, iterEnd = game->guiTriggers.end();
-  for( iter = game->guiTriggers.begin(); iter != iterEnd; ++iter ) {
-    if( iter->object == obj ) {
-      Game::LUA_GuiTrigger_Handler( obj );
-    }
-  }
-  */
 }//GuiProc
+*/
 
 
 
@@ -1233,6 +1227,7 @@ void Game::GuiProc( Object *obj )
   LUA_GuiGetText
 =============
 */
+/*
 std::string Game::LUA_GuiGetText( const std::string &guiName )
 {
   Object *object = game->core->GetObject( guiName );
@@ -1273,7 +1268,7 @@ std::string Game::LUA_GuiGetText( const std::string &guiName )
   __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiGetText => object '%s' don't have text", guiName.c_str() );
   return "";
 }//LUA_GuiGetText
-
+*/
 
 
 /*
@@ -1281,6 +1276,7 @@ std::string Game::LUA_GuiGetText( const std::string &guiName )
   LUA_GuiSetText
 =============
 */
+/*
 void Game::LUA_GuiSetText( const std::string &guiName, const std::string &text )
 {
   Object *object = game->core->GetObject( guiName );
@@ -1327,7 +1323,7 @@ void Game::LUA_GuiSetText( const std::string &guiName, const std::string &text )
 
   __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiSetText => object '%s' don't have text", guiName.c_str() );
 }//LUA_GuiSetText
-
+*/
 
 
 /*
@@ -1335,6 +1331,7 @@ void Game::LUA_GuiSetText( const std::string &guiName, const std::string &text )
   LUA_GuiGetChecked
 =============
 */
+/*
 bool Game::LUA_GuiGetChecked( const std::string &guiName )
 {
   Object *object = game->core->GetObject( guiName );
@@ -1360,6 +1357,7 @@ bool Game::LUA_GuiGetChecked( const std::string &guiName )
   __log.PrintInfo( Filelevel_WARNING, "Game::LUA_GuiGetChecked => object '%s' is not checkbox", guiName.c_str() );
   return false;
 }//LUA_GuiGetChecked
+*/
 
 
 /*
@@ -1436,10 +1434,12 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
   LUA_SetGuiVisibility
 =============
 */
+/*
 void Game::LUA_SetGuiVisibility( int show )
 {
   game->core->SetGuiVisibility( show ? true : false );
 }//LUA_SetGuiVisibility
+*/
 
 
 /*
@@ -1479,6 +1479,7 @@ std::string Game::LUA_GetSelectedObject()
   LUA_GuiAttr
 =============
 */
+/*
 void Game::LUA_GuiAttr( const std::string &guiName, const std::string &parameter, Variable &value, bool isSet )
 {
   Object *object = game->core->GetObject( guiName );
@@ -1634,6 +1635,7 @@ void Game::LUA_GuiAttr( const std::string &guiName, const std::string &parameter
     //checked
   }
 }//LUA_GuiAttr
+*/
 
 /*
 =============
@@ -2014,8 +2016,9 @@ void Game::InitGui() {
       left = windowWidth - width,
       y = 0
       ;
-  Object::GuiConstructor gui;
+  //Object::GuiConstructor gui;
 
+  /*
   obj = game->core->CreateObject( "debug", guiRoot );
   gui.Reset();
   gui.type = OBJECT_GUI_TEXTFIELD;
@@ -2264,6 +2267,7 @@ void Game::InitGui() {
   gui.funCallback = Game::GuiProc;
   controller = obj->EnableGui( &gui );
   game->dropDownLists[ controller ] = dropDownList;
+  */
 }//InitGui
 
 

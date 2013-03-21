@@ -45,6 +45,7 @@ public:
   Vec4                GetInvTextureCoords   ( const std::string& textureFileName, const Vec4& textureCoords );
   const std::string&  GetTextureNameByCoords( Vec2 texCoords );
   TextureAtlasItem*   IsTextureLoaded       ( const std::string& textureFileName );
+  bool                CheckGLError          ( int line, const std::string& fileName );
 
   //debug
   void              __Dump( const std::string& fileName );

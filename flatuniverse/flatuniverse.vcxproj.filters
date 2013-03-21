@@ -28,9 +28,6 @@
     <Filter Include="lua">
       <UniqueIdentifier>{076747c6-07e4-449a-9043-ecbc28f4f541}</UniqueIdentifier>
     </Filter>
-    <Filter Include="glui2">
-      <UniqueIdentifier>{7b320568-6ce9-4a2d-8b6c-4151ffacbda0}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\collision.cpp">
@@ -441,66 +438,6 @@
     <ClCompile Include="..\src\pcre\pcre_tables.c">
       <Filter>pcre</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Button.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2CheckBox.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Config.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Console.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Controller.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Dialog.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2DropDown.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Images.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Label.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2LabelEdit.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Panel.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2ProgressBar.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2RadioGroup.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Slider.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Spinner.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2TextField.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Theme.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\g2Utilities.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\glui2.cpp">
-      <Filter>glui2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\glui2\stb_image.c">
-      <Filter>glui2</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\tags.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -803,63 +740,6 @@
     <ClInclude Include="..\src\pcre\ucp.h">
       <Filter>pcre</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Button.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2CheckBox.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Config.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Console.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Controller.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Dialog.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2DropDown.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Images.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Label.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2LabelEdit.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Panel.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2ProgressBar.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2RadioGroup.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Slider.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Spinner.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2TextField.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Theme.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\g2Utilities.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glui2\glui2.h">
-      <Filter>glui2</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\tags.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -944,6 +824,9 @@
       <Filter>core\shaders</Filter>
     </None>
     <None Include="..\Release\data\shaders\main.vs">
+      <Filter>core\shaders</Filter>
+    </None>
+    <None Include="..\Release\data\shaders\main-test.fs">
       <Filter>core\shaders</Filter>
     </None>
   </ItemGroup>
