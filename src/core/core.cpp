@@ -1771,17 +1771,6 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
       break;
     }
 
-    case WM_PAINT:
-      if( core )
-      {
-        PAINTSTRUCT ps;
-        BeginPaint( hWnd, &ps );
-        core->Redraw();
-        EndPaint( hWnd, &ps );
-        return 0;
-      }
-    break;
-
     case WM_ACTIVATE:
       core->Signal( 1, !HIWORD( wParam ) );
       return 0;
