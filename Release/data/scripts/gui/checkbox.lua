@@ -31,7 +31,6 @@ function GUICheckbox:Create( x0, y0, setText, setChecked, parent )
       bottom = y0 + 12,
     },
     state = 0,  -- 0:free, 1:press, 2:hover, 3:press+out
-    color = setColor,
     checked = setChecked,
     isHover = false,
     text = setText,

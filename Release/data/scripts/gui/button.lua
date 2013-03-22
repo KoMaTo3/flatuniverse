@@ -30,7 +30,6 @@ function GUIButton:Create( x0, y0, width, height, setText, setOnClickHandler, pa
       bottom = y0 + height,
     },
     state = 0,  -- 0:free, 1:press, 2:hover, 3:press+out
-    color = setColor,
     isHover = false,
     OnClickHandler = setOnClickHandler,
     text = setText,
