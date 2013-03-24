@@ -37,4 +37,5 @@ public:
   void  SetText           ( const std::string setText );
   void  ClearText         ();
   Font* SetScale          ( const Vec2& setScale );
+  float GetTextWidth      ( const std::string &text );
 };

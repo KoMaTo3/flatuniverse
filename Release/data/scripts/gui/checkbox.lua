@@ -19,9 +19,21 @@ function GUICheckbox:GetText()
 end -- GUICheckbox:GetText
 
 
+--[[ GUICheckbox:SetEnabled ]]
+function GUICheckbox:SetEnabled( setIsEnabled )
+  self.isEnabled = setIsEnabled
+end -- GUICheckbox:SetEnabled
+
+
+--[[ GUICheckbox:SetIsChecked ]]
+function GUICheckbox:SetIsChecked( setIsChecked )
+  self.checked = setIsChecked
+end -- GUICheckbox:SetIsChecked
+
+
 
 --[[ GUICheckbox:Create ]]
-function GUICheckbox:Create( x0, y0, setText, setChecked, parent )
+function GUICheckbox:Create( x0, y0, setText, setChecked, parent, setIsEnabled )
   local obj = {
     childs = {},
     rect = {
@@ -34,6 +46,7 @@ function GUICheckbox:Create( x0, y0, setText, setChecked, parent )
     checked = setChecked,
     isHover = false,
     text = setText,
+    isEnabled = setIsEnabled == nil and true or setIsEnabled,
   }
   self.__index = self
   local res = setmetatable( obj, self )
@@ -50,11 +63,18 @@ function GUICheckbox:Render( dx, dy )
     dx = 0
     dy = 0
   end
-  Render( 'sprite', self.rect.left + dx, self.rect.top + dy, 0, self.rect.right + dx, self.rect.bottom + dy, 0, self.checked and 'data/textures/gui/checkbox-checked.png' or 'data/textures/gui/checkbox.png', 'ffffffff' )
+  Render(
+    'sprite',
+    self.rect.left + dx, self.rect.top + dy, 0,
+    self.rect.right + dx, self.rect.bottom + dy, 0,
+    self.checked and 'data/textures/gui/checkbox-checked.png' or 'data/textures/gui/checkbox.png',
+    self.isEnabled and 'ffffffff' or 'ffffff44'
+    )
   if self.state == 1 and self.isHover then
-    Render( 'rect', self.rect.left + dx + 1, self.rect.top + dy, 0, self.rect.right + dx, self.rect.bottom + dy, 0, '444466ff' )
+    Render( 'rect', self.rect.left + dx, self.rect.top + dy + 1, 0, self.rect.right + dx - 1, self.rect.bottom + dy, 0, '444466ff' )
   end
-  Render( 'text', self.rect.right + dx + 2, self.rect.top + dy, 0, self.text, '000000ff' )
+  local textColor = self.isEnabled and '000000ff' or '00000044'
+  Render( 'text', self.rect.right + dx + 2, self.rect.top + dy, 0, self.text, textColor )
 end -- GUICheckbox:Render
 
 function GUICheckbox:TestInRect( x, y, dx, dy )
@@ -86,6 +106,9 @@ function GUICheckbox:TestInRect( x, y, dx, dy )
 end -- GUICheckbox:TestInRect
 
 function GUICheckbox:OnClick( id, isPressed )
+  if not self.isEnabled then
+    do return end
+  end
   if self.isHover then
     if isPressed then
       GUIRenderer.focusedItem = self

@@ -228,3 +228,24 @@ void Font::ClearText()
     this->font.text = "";
   }
 }//ClearText
+
+
+
+
+/*
+=============
+  GetTextWidth
+=============
+*/
+float Font::GetTextWidth( const std::string &text ) {
+  if( !this->font.isProportional ) {
+    Vec2 textureSize = __textureAtlas->GetTextureSize( this->font.fontName );
+    return float( textureSize.x / 16.0f * text.size() );
+  }
+  float width = 0.0f;
+  Dword length = text.size();
+  for( Dword q = 0; q < length; ++q ) {
+    width += this->font.proportions[ text[ q ] ].width;
+  }
+  return width;
+}//GetTextWidth

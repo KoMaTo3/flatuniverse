@@ -1,7 +1,13 @@
 #pragma once
 
 #include "klib.h"
+#include "font.h"
 #include <deque>
+#include <unordered_map>
+
+
+#define DEBUG_RENDERER_DEFAULT_FONT ( "data/temp/font_default.tga" )
+#define DEBUG_RENDERER_DEFAULT_FONT_PROPORTIONS ( "data/temp/font_default.flw" )
 
 
 class DebugRendererObject;
@@ -23,8 +29,11 @@ public:
   void  SciccorEnable ( const Vec2& leftTop, const Vec2& rightBottom );
   void  SciccorDisable();
   void  Text  ( const Vec3& pos, const Vec4& color, const std::string &text );
+  float GetTextWidh( const std::string &text, const std::string &fontProportionsFileName );
 
 private:
   ObjectsList pipeline;
+  typedef std::unordered_map< std::string, Font* > FontWidthsList;
+  FontWidthsList fonts;
 
 };

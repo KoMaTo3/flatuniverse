@@ -1655,7 +1655,7 @@ void Game::LUA_LoadScript( const std::string &fileName )
 */
 void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList &setAttributes, VariableAttributesList &getAttributes )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectAttr: %d", setAttributes.size() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectAttr: %d", setAttributes.size() );
 
   Object *object = game->core->GetObject( objectName );
   if( !object ) {
@@ -1669,7 +1669,7 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
   ObjectTrigger   *trigger;
   //set
   for( iter = setAttributes.begin(); iter != iterEnd; ++iter ) {
-    __log.PrintInfo( Filelevel_DEBUG, ". set %s = '%s'", ( *iter )->name.c_str(), ( *iter )->value.GetString().c_str() );
+    //__log.PrintInfo( Filelevel_DEBUG, ". set %s = '%s'", ( *iter )->name.c_str(), ( *iter )->value.GetString().c_str() );
 
     const std::string &name = ( *iter )->name;
     const Variable &value   = ( *iter )->value;
@@ -1677,30 +1677,30 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
     //object
     if( name == "renderable" ) {
       if( value.GetBoolean() ) {
-        __log.PrintInfo( Filelevel_DEBUG, ". EnableRenderable['%s']", object->GetNameFull().c_str() );
+        //__log.PrintInfo( Filelevel_DEBUG, ". EnableRenderable['%s']", object->GetNameFull().c_str() );
         object->EnableRenderable( RENDERABLE_TYPE_QUAD );
       } else {
-        __log.PrintInfo( Filelevel_DEBUG, ". DisableRenderable['%s']", object->GetNameFull().c_str() );
+        //__log.PrintInfo( Filelevel_DEBUG, ". DisableRenderable['%s']", object->GetNameFull().c_str() );
         object->DisableRenderable();
       }
       continue;
     }//renderable
     if( name == "collision" ) {
       if( value.GetBoolean() ) {
-        __log.PrintInfo( Filelevel_DEBUG, ". EnableCollision['%s']", object->GetNameFull().c_str() );
+        //__log.PrintInfo( Filelevel_DEBUG, ". EnableCollision['%s']", object->GetNameFull().c_str() );
         object->EnableCollision();
       } else {
-        __log.PrintInfo( Filelevel_DEBUG, ". DisableCollision['%s']", object->GetNameFull().c_str() );
+        //__log.PrintInfo( Filelevel_DEBUG, ". DisableCollision['%s']", object->GetNameFull().c_str() );
         object->DisableCollision();
       }
       continue;
     }//collision
     if( name == "trigger" ) {
       if( value.GetBoolean() ) {
-        __log.PrintInfo( Filelevel_DEBUG, ". EnableTrigger['%s']", object->GetNameFull().c_str() );
+        //__log.PrintInfo( Filelevel_DEBUG, ". EnableTrigger['%s']", object->GetNameFull().c_str() );
         object->EnableTrigger();
       } else {
-        __log.PrintInfo( Filelevel_DEBUG, ". DisableTrigger['%s']", object->GetNameFull().c_str() );
+        //__log.PrintInfo( Filelevel_DEBUG, ". DisableTrigger['%s']", object->GetNameFull().c_str() );
         object->DisableTrigger();
       }
       continue;
@@ -1878,7 +1878,7 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
   //get
   iterEnd = getAttributes.end();
   for( iter = getAttributes.begin(); iter != iterEnd; ++iter ) {
-    __log.PrintInfo( Filelevel_DEBUG, ". get '%s'", ( *iter )->name.c_str() );
+    //__log.PrintInfo( Filelevel_DEBUG, ". get '%s'", ( *iter )->name.c_str() );
 
     const std::string &name = ( *iter )->name;
     Variable &value         = ( *iter )->value;
@@ -2319,7 +2319,7 @@ void Game::CollisionProc( Collision *a, Collision *b ) {
   if( !game->luaCollisionListeners.size() ) {
     return;
   }
-  __log.PrintInfo( Filelevel_DEBUG, "Game::CollisionProc => a[x%p] b[x%p] objectA['%s'] objectB['%s']", a, b, objectA->GetNameFull().c_str(), objectB->GetNameFull().c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::CollisionProc => a[x%p] b[x%p] objectA['%s'] objectB['%s']", a, b, objectA->GetNameFull().c_str(), objectB->GetNameFull().c_str() );
   luaCollisionListenersList::iterator iter, iterEnd = game->luaCollisionListeners.end();
   for( iter = game->luaCollisionListeners.begin(); iter != iterEnd; ++iter ) {
     if( iter->object == a ) {

@@ -116,3 +116,25 @@ void DebugRenderer::Text( const Vec3& pos, const Vec4& color, const std::string 
   DebugRendererText *item = new DebugRendererText( pos, color, text );
   this->pipeline.push_back( item );
 }//Text
+
+
+
+
+/*
+=============
+  GetTextWidh
+=============
+*/
+float DebugRenderer::GetTextWidh( const std::string &text, const std::string &fontProportionsFileName ) {
+  float width = 0.0f;
+  FontWidthsList::iterator iter = this->fonts.find( fontProportionsFileName );
+  Font *font;
+  if( iter == this->fonts.end() ) {
+    font = new Font();
+    font->SetFont( DEBUG_RENDERER_DEFAULT_FONT, fontProportionsFileName );
+    this->fonts.insert( make_pair( fontProportionsFileName, font ) );
+  } else {
+    font = iter->second;
+  }
+  return font->GetTextWidth( text );
+}//GetTextWidh

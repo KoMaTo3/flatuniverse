@@ -1,40 +1,44 @@
-GUILabel = {}
+GUIEdit = {}
 
 
---[[ GUILabel:GetType ]]
-function GUILabel:GetType()
-  return 'Label'
-end -- GUILabel:GetType
+--[[ GUIEdit:GetType ]]
+function GUIEdit:GetType()
+  return 'Edit'
+end -- GUIEdit:GetType
 
 
---[[ GUILabel:SetText ]]
-function GUILabel:SetText( setText )
+--[[ GUIEdit:SetText ]]
+function GUIEdit:SetText( setText )
   self.text = setText
-end -- GUILabel:SetText
+end -- GUIEdit:SetText
 
 
---[[ GUILabel:GetText ]]
-function GUILabel:GetText()
+--[[ GUIEdit:GetText ]]
+function GUIEdit:GetText()
   return self.text
-end -- GUILabel:GetText
+end -- GUIEdit:GetText
 
 
---[[ GUILabel:Create ]]
-function GUILabel:Create( x0, y0, width, height, setText, parent )
+--[[ GUIEdit:Create ]]
+function GUIEdit:Create( x0, y0, width, setText, parent )
   local obj = {
     childs = {},
     rect = {
       left = x0,
       top = y0,
       right = x0 + width,
-      bottom = y0 + height,
+      bottom = y0 + 16,
     },
     isHover = false,
     text = setText,
     colors = {
       border = 'aaaaaaff',
       inner = 'eeeeeeff',
+      cursor = '060606ff',
     },
+    cursorPos = #setText,
+    cursorPosPixel = 0,
+    state = 0, -- 0:free, 1:edit
   }
   self.__index = self
   local res = setmetatable( obj, self )
@@ -43,10 +47,11 @@ function GUILabel:Create( x0, y0, width, height, setText, parent )
   else
     parent.childs[ #parent.childs + 1 ] = obj
   end
+  res.cursorPosPixel = Render( 'getTextWidth', setText )
   return res
-end -- GUILabel:Create
+end -- GUIEdit:Create
 
-function GUILabel:Render( dx, dy )
+function GUIEdit:Render( dx, dy )
   if dx == nil then
     dx = 0
     dy = 0
@@ -58,13 +63,16 @@ function GUILabel:Render( dx, dy )
   Render( 'sprite', x0, y0, 0, x1, y1, 0, 'data/temp/blank.png', self.colors.inner )
   Render( 'rect', x0, y0, 0, x1, y1, 0, self.colors.border )
   Render( 'text', x0 + 4,y0, 0, self.text, '000000ff' )
+  if self.state == 1 then -- cursor
+    Render( 'line', x0 + self.cursorPosPixel + 4, y0 + 1, 0, x0 + self.cursorPosPixel + 4, y1 - 1, 0, self.colors.cursor )
+  end
   -- childs
   for key, item in pairs( self.childs ) do
     item:Render( dx + self.rect.left, dy + self.rect.top )
   end
-end -- GUILabel:Render
+end -- GUIEdit:Render
 
-function GUILabel:TestInRect( x, y, dx, dy )
+function GUIEdit:TestInRect( x, y, dx, dy )
   if dx == nil then
     dx = 0
     dy = 0
@@ -91,4 +99,20 @@ function GUILabel:TestInRect( x, y, dx, dy )
     do return true end
   end
   return false
-end -- GUILabel:TestInRect
+end -- GUIEdit:TestInRect
+
+function GUIEdit:OnClick( id, isPressed )
+  if self.isHover then
+    if isPressed then
+      GUIRenderer.focusedItem = self
+      if self.state == 0 then
+        self.state = 1
+      end
+    end
+  else
+    if isPressed then
+      GUIRenderer.focusedItem = nil
+      self.state = 0
+    end
+  end
+end -- GUIEdit:OnClick

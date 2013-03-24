@@ -129,7 +129,7 @@ function IsObjectUpperThis( object, target )
   local _, rectY  = ObjectAttr( object, { 'collisionSize' } )
   local tRectYd2 = tRectY / 2
   local rectYd2 = rectY / 2
-  if y + rectYd2 <= ty - tRectYd2 then return true end
+  if y + rectYd2 <= ty - tRectYd2 + 1 then return true end
   return false
 end -- IsObjectUpperThis
 

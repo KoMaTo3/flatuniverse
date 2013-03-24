@@ -902,7 +902,7 @@ bool Core::Redraw()
 {
   if( !this->_window.glRC )
   {
-    __log.PrintInfo( Filelevel_ERROR, "Core::Redraw => glRC is NULL" );
+    //__log.PrintInfo( Filelevel_ERROR, "Core::Redraw => glRC is NULL" );
     return false;
   }
 
@@ -917,7 +917,7 @@ bool Core::Redraw()
 
   if( __coreRenderableList->size() || __coreGUI->size() )
   {
-    __log.PrintInfo( Filelevel_DEBUG, "this->_shaders.programm = x%X", this->_shaders.programm );
+    //__log.PrintInfo( Filelevel_DEBUG, "this->_shaders.programm = x%X", this->_shaders.programm );
     glUseProgram( this->_shaders.programm );
     GL_CHECK_ERROR;
     glEnableClientState( GL_VERTEX_ARRAY );

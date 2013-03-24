@@ -52,6 +52,7 @@ GUI = {
     width = 100,
     height = 100,
   },
+  elements = {},
   templates = {
     x = 5,
     y = 5,
@@ -103,10 +104,11 @@ GUI = {
   grid = {
     Render = function()
       local tileSize = GetTileSize()
+      local offsetX, offsetY = GetTileOffset()
       local cameraX, cameraY = GetCameraPos()
       local sx, sy
-      sx = ( math.floor( settings.windowSize.x * 0.5 - cameraX ) ) % tileSize + tileSize * 0.5
-      sy = ( math.floor( settings.windowSize.y * 0.5 - cameraY ) ) % tileSize + tileSize * 0.5
+      sx = ( math.floor( settings.windowSize.x * 0.5 - cameraX ) ) % tileSize + tileSize * 0.5 + offsetX
+      sy = ( math.floor( settings.windowSize.y * 0.5 - cameraY ) ) % tileSize + tileSize * 0.5 + offsetY
       local halfTileSize = tileSize * 0.5
       for x = 0, settings.windowSize.x, tileSize do
         Render( 'line', sx + x, 0, 0, sx + x, settings.windowSize.y, 0, '00FF0044' )
@@ -139,6 +141,61 @@ function EditorInit()
   -- ListenMouseMove( 'OnEditorMouseMove' )
   GUIRenderer.OnClickDefault = OnEditorMouseKey
   GUIRenderer.OnMouseMoveDefault = OnEditorMouseMove
+
+  -- GUI
+  GUI.elements.labelDebug = GUILabel:Create( 0, 0, settings.windowSize.x, 20, 'debug' )
+
+  -- settings block
+  GUI.elements.windowSettings = GUILabel:Create( settings.windowSize.x - 220, 0, 220, 200, 'Settings' )
+
+  --grid size
+  GUILabel:Create( 0, 40, 0, 0, 'Grid:', GUI.elements.windowSettings )
+  local list = {}
+  table.insert( list, '8' )
+  table.insert( list, '16' )
+  table.insert( list, '24' )
+  table.insert( list, '32' )
+  table.insert( list, '48' )
+  table.insert( list, '64' )
+  table.insert( list, '128' )
+  table.insert( list, '256' )
+  table.insert( list, '512' )
+  GUI.elements.gridSize = GUISelect:Create( 55, 40, 40, 3, list, nil, GUI.elements.windowSettings )
+
+  --grid offset
+  GUILabel:Create( 95, 40, 0, 0, 'offset', GUI.elements.windowSettings )
+  local list = {}
+  for q = 0,32,4 do
+    table.insert( list, q )
+  end
+  GUI.elements.gridOffsetX = GUISelect:Create( 150, 40, 30, 1, list, nil, GUI.elements.windowSettings )
+  GUI.elements.gridOffsetY = GUISelect:Create( 180, 40, 30, 1, list, nil, GUI.elements.windowSettings )
+
+  -- layer
+  GUILabel:Create( 0, 20, 0, 0, 'Layer:', GUI.elements.windowSettings )
+  local list = {}
+  table.insert( list, 'default' )
+  table.insert( list, 'renderable' )
+  table.insert( list, 'collision' )
+  table.insert( list, 'trigger' )
+  GUI.elements.layer = GUISelect:Create( 55, 20, 90, 1, list, function( obj )
+    local val = obj:GetValue()
+    if val > 1 then
+      DebugRender( math.pow( 2, val - 2 ) )
+      settings.editorType = val - 1
+    else
+      DebugRender( 0 )
+      settings.editorType = 0
+    end
+  end, GUI.elements.windowSettings )
+
+  -- object block
+  GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 65, 'Object' )
+  GUI.elements.isRenderable = GUICheckbox:Create( 5, 20, 'Renderable', false, GUI.elements.windowObject, false )
+  GUI.elements.isCollision  = GUICheckbox:Create( 5, 35, 'Collision', false, GUI.elements.windowObject, false )
+  GUI.elements.isTrigger    = GUICheckbox:Create( 5, 50, 'Trigger', false, GUI.elements.windowObject, false )
+
+  GUIEdit:Create( 200, 50, 100, 'Test text...!' )
 
   -- Ставим обработчики чекбоксов и кнопок редактора
   --[[
@@ -379,7 +436,6 @@ function OnEditorMouseKey( id, isPressed )
         local right  = x < newX and newX or x
         local top    = y < newY and y or newY
         local bottom = y < newY and newY or y
-        local tileSize = GetTileSize()
         left, top = GetTilePosByPixel( left, top )
         right, bottom = GetTilePosByPixel( right, bottom )
         local texture = GUI.templates.items[ GUI.templates.currentItem ].icon
@@ -427,8 +483,9 @@ function OnEditorMouseMove( x, y )
         local newX = settings.move.objectStart.x + x - settings.move.mouseStart.x
         local newY = settings.move.objectStart.y + y - settings.move.mouseStart.y
         local tileSize = GetTileSize()
-        newX = math.floor( newX / tileSize ) * tileSize
-        newY = math.floor( newY / tileSize ) * tileSize
+        local offsetX, offsetY = GetTileOffset()
+        newX = math.floor( newX / tileSize ) * tileSize + offsetX
+        newY = math.floor( newY / tileSize ) * tileSize + offsetY
         if not settings.objectMode3Moved then
           settings.objectMode3StartPosition = { oldX, oldY }
         end
@@ -536,7 +593,12 @@ end --ToggleTrigger
 
 -- Возвращает текущий размер тайлов (из дропбокса)
 function GetTileSize()
-  return 32 --GuiGetText( 'editor/world.tile_size' )
+  return GUI.elements.gridSize:GetText()
+end --GetTileSize
+
+-- Возвращает текущее смещение сетки (из дропбокса)
+function GetTileOffset()
+  return GUI.elements.gridOffsetX:GetText(), GUI.elements.gridOffsetY:GetText()
 end --GetTileSize
 
 -- Кнопка "Apply"
@@ -581,22 +643,29 @@ function EditorUpdateDebug()
 end -- EditorUpdateDebug
 
 function UpdateGuiBySelectedObject()
---[[
   local object = GetSelectedObject()
-  elements = {
-    'editor/object.object_name',
+  local elements = {
+    -- 'editor/object.object_name',
+    GUI.elements.isRenderable,
     'editor/object.is_renderable',
-    'editor/renderable.texture_name',
-    'editor/object.is_collision',
-    'editor/object.is_static',
-    'editor/object.is_trigger',
-    'editor/renderable.width',
-    'editor/renderable.height',
+    -- 'editor/renderable.texture_name',
+    -- 'editor/object.is_collision',
+    -- 'editor/object.is_static',
+    -- 'editor/object.is_trigger',
+    -- 'editor/renderable.width',
+    -- 'editor/renderable.height',
   }
   if #object < 1 then
-    for i=1,#elements do
-      GuiAttr( elements[ i ], 'enabled', false )
-      GuiAttr( elements[ i ], 'checked', false )
+    for key, element in pairs( elements ) do
+      -- elements[ i ]:SetText( false )
+      GUI.elements.isRenderable:SetEnabled( false )
+      GUI.elements.isRenderable:SetIsChecked( false )
+      GUI.elements.isCollision:SetEnabled( false )
+      GUI.elements.isCollision:SetIsChecked( false )
+      GUI.elements.isTrigger:SetEnabled( false )
+      GUI.elements.isTrigger:SetIsChecked( false )
+      -- GuiAttr( elements[ i ], 'enabled', false )
+      -- GuiAttr( elements[ i ], 'checked', false )
     end
   else
     local isRenderable
@@ -612,6 +681,13 @@ function UpdateGuiBySelectedObject()
           'textureName',
           'renderableSize',
         } )
+    GUI.elements.isRenderable:SetEnabled( true )
+    GUI.elements.isRenderable:SetIsChecked( isRenderable )
+    GUI.elements.isCollision:SetEnabled( true )
+    GUI.elements.isCollision:SetIsChecked( isCollision )
+    GUI.elements.isTrigger:SetEnabled( true )
+    GUI.elements.isTrigger:SetIsChecked( isTrigger )
+    --[[
     GuiAttr( 'editor/object.is_renderable', 'enabled', true )
     GuiAttr( 'editor/object.is_collision', 'enabled', true )
     GuiAttr( 'editor/object.is_trigger', 'enabled', true )
@@ -624,9 +700,9 @@ function UpdateGuiBySelectedObject()
     GuiSetText( 'editor/renderable.texture_name', textureName )
     GuiSetText( 'editor/renderable.width', renderableSizeX )
     GuiSetText( 'editor/renderable.height', renderableSizeY )
+    ]]
   end
-  GuiSetText( 'editor/object.object_name', object )
-  ]]
+  -- GuiSetText( 'editor/object.object_name', object )
 end --UpdateGuiBySelectedObject
 
 --[[
@@ -659,6 +735,7 @@ function RenderGUI()
     local top    = y < newY and y or newY
     local bottom = y < newY and newY or y
     local tileSize = GetTileSize()
+    local offsetX, offsetY = GetTileOffset()
     left, top = GetTilePosByPixel( left, top )
     right, bottom = GetTilePosByPixel( right, bottom )
     local texture = GUI.templates.items[ GUI.templates.currentItem ].icon
@@ -671,7 +748,7 @@ function RenderGUI()
   end
   GUI.templates.Draw()
   GUIRendererRender() -- additional GUI from gui.lua
-  SetTimer( 0.01, 'RenderGUI' )
+  SetTimer( 1/30, 'RenderGUI' )
 end --RenderGUI
 
 function TestMouseOnGUI( x, y )
@@ -723,6 +800,7 @@ function EditorInsertItemByTemplate( px, py )
 
   local cameraX, cameraY = GetCameraPos()
   local tileSize = GetTileSize()
+  local offsetX, offsetY = GetTileOffset()
   local attrs = GUI.templates.items[ GUI.templates.currentItem ].attr
   local tags = GUI.templates.items[ GUI.templates.currentItem ].tags
   attrs.renderableSize = tileSize..' '..tileSize
@@ -741,7 +819,7 @@ function EditorInsertItemByTemplate( px, py )
   local name = 'wall.'..px..'.'..py..'.'..settings.timer
 
   --ObjectRemove( name )
-  ObjectCreate( name, x * tileSize, y * tileSize, 0 )
+  ObjectCreate( name, x * tileSize + offsetX, y * tileSize + offsetY, 0 )
   ObjectAttr( name, attrs )
   if GUI.templates.items[ GUI.templates.currentItem ].creationScript ~= nil then
     GUI.templates.items[ GUI.templates.currentItem ].creationScript( name )

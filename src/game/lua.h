@@ -13,6 +13,8 @@ extern "C" {
 #include "core/file.h"
 #include <string>
 
+#define DEBU
+
 class Lua;
 
 typedef bool  LUAFUNCPROC_RemoveObject      ( const std::string &name );

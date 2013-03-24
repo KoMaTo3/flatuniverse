@@ -131,7 +131,7 @@ Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const V
     Vec3 leftTop, rightBottom;
     leftTop = Vec3( textureCoords.x, textureCoords.y, 0.0f ) * item->matTransform;
     rightBottom = Vec3( textureCoords.z, textureCoords.w, 0.0f ) * item->matTransform;
-    __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => existing texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
+    //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => existing texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
     return Vec4( leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
   }
   else
@@ -142,7 +142,7 @@ Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const V
     Vec3 tex0( textureCoords.x, textureCoords.y, 0 ), tex1( textureCoords.z, textureCoords.w, 0 );
     tex0 *= item->matTransform;
     tex1 *= item->matTransform;
-    __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => loaded texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), tex0.x, tex0.y, tex1.x, tex1.y );
+    //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => loaded texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), tex0.x, tex0.y, tex1.x, tex1.y );
     return Vec4( tex0.x, tex0.y, tex1.x, tex1.y );
   }
 }//GetTextureCoords
@@ -276,7 +276,7 @@ Vec2 TextureAtlas::GetTextureSize( const std::string& textureFileName )
     return Vec2( 0.0f, 0.0f );
   }
 
-  __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureSize => texture['%s'] size[%d; %d]", textureFileName.c_str(), texture->rect.right - texture->rect.left + 1, texture->rect.bottom - texture->rect.top + 1 );
+  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureSize => texture['%s'] size[%d; %d]", textureFileName.c_str(), texture->rect.right - texture->rect.left + 1, texture->rect.bottom - texture->rect.top + 1 );
   return Vec2( texture->rect.right - texture->rect.left + 1.0f, texture->rect.bottom - texture->rect.top + 1.0f );
 }//GetTextureSize
 
@@ -304,7 +304,7 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
     return NULL;
   }
 
-  __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::LoadTexture => load new texture from file '%s'", textureFileName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::LoadTexture => load new texture from file '%s'", textureFileName.c_str() );
 
   TextureAtlasItem *item = new TextureAtlasItem();
   Rect< Dword > fullRect;
@@ -332,8 +332,8 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
   matInvTranslate[ 0 ][ 3 ] = -translate.x;
   matInvTranslate[ 1 ][ 3 ] = -translate.y;
 
-  __log.PrintInfo( Filelevel_DEBUG, "matrix translate: [ %3.3f; %3.3f ]", translate.x, translate.y );
-  __log.PrintInfo( Filelevel_DEBUG, "matrix scale: [ %3.3f; %3.3f ]", scale.x, scale.y );
+  //__log.PrintInfo( Filelevel_DEBUG, "matrix translate: [ %3.3f; %3.3f ]", translate.x, translate.y );
+  //__log.PrintInfo( Filelevel_DEBUG, "matrix scale: [ %3.3f; %3.3f ]", scale.x, scale.y );
 
   item->matTransform = matTranslate * matScale;
   item->matInvTransform = matInvScale * matInvTranslate;

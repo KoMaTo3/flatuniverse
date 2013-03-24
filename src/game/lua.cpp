@@ -1258,7 +1258,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
   int res = 0;
   VariableAttributesList setAttrs, getAttrs;
   if( lua_istable( lua, 2 ) ) {
-    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => start:" );
+    //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => start:" );
 
     lua_pushvalue( lua, -1 );
     lua_pushnil( lua );
@@ -1269,7 +1269,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
 
       if( lua_isnumber( lua, -1 ) ) { //get parameter
         if( lua_isstring( lua, -2 ) ) {
-          __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => get '%s'", lua_tostring( lua, -2 ) );
+          //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => get '%s'", lua_tostring( lua, -2 ) );
           attr = new VariableAttribute();
           attr->name = lua_tostring( lua, -2 );
           getAttrs.push_back( attr );
@@ -1304,7 +1304,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
               setAttrs.push_front( attr );
             else
               setAttrs.push_back( attr );
-            __log.PrintInfo( Filelevel_DEBUG, ". '%s' => '%s'", attr->name.c_str(), attr->value.GetString().c_str() );
+            //__log.PrintInfo( Filelevel_DEBUG, ". '%s' => '%s'", attr->name.c_str(), attr->value.GetString().c_str() );
           }
 
         } else {
@@ -1320,46 +1320,46 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
     LUAFUNC_ObjectAttr( objectName, setAttrs, getAttrs );
 
     if( getAttrs.size() ) { //return parameters
-      __log.PrintInfo( Filelevel_DEBUG, ". getAttrs[%d]", getAttrs.size() );
+      //__log.PrintInfo( Filelevel_DEBUG, ". getAttrs[%d]", getAttrs.size() );
       VariableAttributesList::iterator iter, iterEnd = getAttrs.end();
       VariableAttribute *var;
       for( iter = getAttrs.begin(); iter != iterEnd; ++iter ) {
         var = *iter;
-        __log.PrintInfo( Filelevel_DEBUG, ". type[%d]", var->value.GetType() );
+        //__log.PrintInfo( Filelevel_DEBUG, ". type[%d]", var->value.GetType() );
         switch( ( *iter )->value.GetType() ) {
           case VariableType_NUMBER: {
-            __log.PrintInfo( Filelevel_DEBUG, ". number[%3.3f]", var->value.GetNumber() );
+            //__log.PrintInfo( Filelevel_DEBUG, ". number[%3.3f]", var->value.GetNumber() );
             lua_pushnumber( lua, var->value.GetNumber() );
             ++res;
             break;
           }
           case VariableType_STRING: {
-            __log.PrintInfo( Filelevel_DEBUG, ". string['%s']", var->value.GetString().c_str() );
+            //__log.PrintInfo( Filelevel_DEBUG, ". string['%s']", var->value.GetString().c_str() );
             lua_pushstring( lua, var->value.GetString().c_str() );
             ++res;
             break;
           }
           case VariableType_BOOLEAN: {
-            __log.PrintInfo( Filelevel_DEBUG, ". bool[%d]", var->value.GetBoolean() );
+            //__log.PrintInfo( Filelevel_DEBUG, ". bool[%d]", var->value.GetBoolean() );
             lua_pushboolean( lua, var->value.GetBoolean() );
             ++res;
             break;
           }
           case VariableType_NULL: {
-            __log.PrintInfo( Filelevel_DEBUG, ". null" );
+            //__log.PrintInfo( Filelevel_DEBUG, ". null" );
             lua_pushnil( lua );
             ++res;
             break;
           }
           case VariableType_VEC2: {
-            __log.PrintInfo( Filelevel_DEBUG, ". vec2[%3.3f; %3.3f]", var->value.GetVec2().x, var->value.GetVec2().y );
+            //__log.PrintInfo( Filelevel_DEBUG, ". vec2[%3.3f; %3.3f]", var->value.GetVec2().x, var->value.GetVec2().y );
             lua_pushnumber( lua, var->value.GetVec2().x );
             lua_pushnumber( lua, var->value.GetVec2().y );
             res += 2;
             break;
           }
           case VariableType_VEC3: {
-            __log.PrintInfo( Filelevel_DEBUG, ". vec3[%3.3f; %3.3f; %3.3f]", var->value.GetVec3().x, var->value.GetVec3().y, var->value.GetVec3().z );
+            //__log.PrintInfo( Filelevel_DEBUG, ". vec3[%3.3f; %3.3f; %3.3f]", var->value.GetVec3().x, var->value.GetVec3().y, var->value.GetVec3().z );
             lua_pushnumber( lua, var->value.GetVec3().x );
             lua_pushnumber( lua, var->value.GetVec3().y );
             lua_pushnumber( lua, var->value.GetVec3().z );
@@ -1367,7 +1367,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
             break;
           }
           case VariableType_VEC4: {
-            __log.PrintInfo( Filelevel_DEBUG, ". vec4[%3.3f; %3.3f; %3.3f; %3.3f]", var->value.GetVec4().x, var->value.GetVec4().y, var->value.GetVec4().z, var->value.GetVec4().w );
+            //__log.PrintInfo( Filelevel_DEBUG, ". vec4[%3.3f; %3.3f; %3.3f; %3.3f]", var->value.GetVec4().x, var->value.GetVec4().y, var->value.GetVec4().z, var->value.GetVec4().w );
             lua_pushnumber( lua, var->value.GetVec4().x );
             lua_pushnumber( lua, var->value.GetVec4().y );
             lua_pushnumber( lua, var->value.GetVec4().z );
@@ -1520,28 +1520,31 @@ int Lua::LUA_Render( lua_State *lua ) {
     return 0;
   }
   std::string operation = lua_tostring( lua, 1 );
+  int result = 0;
 
   if( operation == "clrscr" ) {
     __debugRender->Clrscr();
-    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+    //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
   } else if( operation == "line" ) {
     if( parmsCount < 8 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
       Vec4 color;
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
       Lua::GetColor( lua, 8, color );
       __debugRender->Line(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
           Vec3( ( Float ) lua_tonumber( lua, 5 ), ( Float ) lua_tonumber( lua, 6 ), ( Float ) lua_tonumber( lua, 7 ) ),
           color
           );
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+      //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
   } else if( operation == "sprite" ) {
     if( parmsCount < 8 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
       Vec4 color( Vec4One );
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
       Lua::GetColor( lua, 9, color );
       __debugRender->Sprite(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
@@ -1549,20 +1552,21 @@ int Lua::LUA_Render( lua_State *lua ) {
           lua_tostring( lua, 8 ),
           color
           );
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+      //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
   } else if( operation == "rect" ) {
     if( parmsCount < 8 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
       Vec4 color( Vec4One );
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
       Lua::GetColor( lua, 8, color );
       __debugRender->Rect(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
           Vec3( ( Float ) lua_tonumber( lua, 5 ), ( Float ) lua_tonumber( lua, 6 ), ( Float ) lua_tonumber( lua, 7 ) ),
           color
           );
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+      //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
   } else if( operation == "scissorEnable" ) {
     if( parmsCount < 5 ) {
@@ -1572,29 +1576,39 @@ int Lua::LUA_Render( lua_State *lua ) {
           Vec2( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ) ),
           Vec2( ( Float ) lua_tonumber( lua, 4 ), ( Float ) lua_tonumber( lua, 5 ) )
           );
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+      //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
   } else if( operation == "scissorDisable" ) {
     __debugRender->SciccorDisable();
-    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+    //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
   } else if( operation == "text" ) {
     if( parmsCount < 6 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
       Vec4 color( Vec4One );
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
       Lua::GetColor( lua, 6, color );
       __debugRender->Text(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
           color,
           lua_tostring( lua, 5 )
           );
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+      //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
+    }
+  } else if( operation == "getTextWidth" ) {
+    if( parmsCount < 2 ) {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
+    } else {
+      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
+      float width = __debugRender->GetTextWidh( lua_tostring( lua, 2 ), DEBUG_RENDERER_DEFAULT_FONT_PROPORTIONS );
+      lua_pushnumber( lua, width );
+      result = 1;
     }
   } else {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => unknown shape '%s'", operation.c_str() );
   }
 
-  return 0;
+  return result;
 }//LUA_Render
 
 
@@ -1612,7 +1626,7 @@ int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
   }
 
   if( lua_istable( lua, stackIndex ) ) {  //{R,G,B,A}
-    __log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by table" );
+    //__log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by table" );
     lua_pushvalue( lua, -1 );
     lua_pushnil( lua );
     float f[ 4 ];
@@ -1626,12 +1640,16 @@ int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
     }
     color.Set( f[ 0 ], f[ 1 ], f[ 2 ], f[ 3 ] );
     return 1;
+  } else if( lua_isstring( lua, stackIndex ) ) {  //"RRGGBBAA" in hex
+    //__log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by string" );
+    color = tools::StringToColor( lua_tostring( lua, stackIndex ) );
+    return 1;
   } else if( lua_isnumber( lua, stackIndex ) ) {  //R,G,B,A
     if( parmsCount < stackIndex + 3 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => by 4 float => not enough parameters" );
       return 0;
     }
-    __log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by 4 float" );
+    //__log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by 4 float" );
     color.Set(
       ( float ) lua_tonumber( lua, stackIndex ),
       ( float ) lua_tonumber( lua, stackIndex + 1 ),
@@ -1639,10 +1657,6 @@ int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
       ( float ) lua_tonumber( lua, stackIndex + 3 )
     );
     return 4;
-  } else if( lua_isstring( lua, stackIndex ) ) {  //"RRGGBBAA" in hex
-    __log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by string" );
-    color = tools::StringToColor( lua_tostring( lua, stackIndex ) );
-    return 1;
   } else {
     __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => unknown type" );
     return 0;

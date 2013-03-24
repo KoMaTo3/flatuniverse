@@ -272,10 +272,10 @@ bool Collision::TestIntersect( Collision& item )
     return false;
   }
   if( !this->collisionElement->TestIntersect( *item.collisionElement, &intersectPower ) ) {
-    __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => no intersect" );
+    //__log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => no intersect" );
     return false;
   }
-  __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => intersect, solving" );
+  //__log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => intersect, solving" );
   Vec3 halfIntersectPower = intersectPower * 0.5f;
 
   /*
@@ -301,7 +301,7 @@ bool Collision::TestIntersect( Collision& item )
   }
   else  //dynamic + dynamic
   {
-    __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => dynamic + dynamic" );
+    //__log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => dynamic + dynamic" );
     item0 = this;
     item1 = &item;
     collisionSolved = true;
@@ -335,7 +335,7 @@ bool Collision::TestIntersect( Collision& item )
     }
     itemResolver0.target = item1;
     itemResolver1.target = item0;
-    __log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => item0[x%p] item1[x%p]", item0, item1 );
+    //__log.PrintInfo( Filelevel_DEBUG, "Collision::TestIntersect => item0[x%p] item1[x%p]", item0, item1 );
     item0->resolver.push_back( itemResolver0 );
     item1->resolver.push_back( itemResolver1 );
 
@@ -412,7 +412,7 @@ bool Collision::TestIntersect( Collision& item )
       itemResolver0.resolveVector = intersectPower;
       itemResolver0.useAllAxices = true;
       item0->resolver.push_back( itemResolver0 );
-      __log.PrintInfo( Filelevel_DEBUG, "testz: %3.1f; %3.1f", itemResolver0.resolveVector.x, itemResolver0.resolveVector.y );
+      //__log.PrintInfo( Filelevel_DEBUG, "testz: %3.1f; %3.1f", itemResolver0.resolveVector.x, itemResolver0.resolveVector.y );
     }
     /*
     if( intersectPower.x )
@@ -501,7 +501,7 @@ bool Collision::TestInPoint( const Vec2 &pos )
 */
 void Collision::ResolveCollision()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Collision::ResolveCollision => %d", this->resolver.size() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Collision::ResolveCollision => %d", this->resolver.size() );
   if( !this->resolver.size() )
     return;
 
@@ -517,7 +517,7 @@ void Collision::ResolveCollision()
       result = &( *iter );
     }
   }
-  __log.PrintInfo( Filelevel_DEBUG, ". power[%3.3f; %3.3f] vector[%3.3f; %3.3f] useAllAxices[%d]", result->power.x, result->power.y, result->resolveVector.x, result->resolveVector.y, result->useAllAxices );
+  //__log.PrintInfo( Filelevel_DEBUG, ". power[%3.3f; %3.3f] vector[%3.3f; %3.3f] useAllAxices[%d]", result->power.x, result->power.y, result->resolveVector.x, result->resolveVector.y, result->useAllAxices );
 
   Vec3 resolved( Vec3Null );
   if( result->useAllAxices ) {

@@ -29,9 +29,15 @@ function GUISelect:GetValue()
 end -- GUISelect:GetValue
 
 
+--[[ GUISelect:SetEnabled ]]
+function GUISelect:SetEnabled( setIsEnabled )
+  self.isEnabled = setIsEnabled
+end -- GUISelect:SetEnabled
+
+
 --[[ GUISelect:Create ]]
-function GUISelect:Create( x0, y0, width, setValue, setValuesList, setOnChangeHandler, parent )
-  local defaultHeight = 20;
+function GUISelect:Create( x0, y0, width, setValue, setValuesList, setOnChangeHandler, parent, setIsEnabled )
+  local defaultHeight = 16
   local obj = {
     childs = {},
     rect = {
@@ -49,7 +55,8 @@ function GUISelect:Create( x0, y0, width, setValue, setValuesList, setOnChangeHa
     valueHover = nil,
     colors = {
       light = 'ffffffff',
-      middle = 'ddddddff',
+      middle0 = 'eeeeeeff',
+      middle1 = 'd1d1d1ff',
       dark = '888888ff',
       default = {
         bg = 'eeeeeeff',
@@ -64,6 +71,7 @@ function GUISelect:Create( x0, y0, width, setValue, setValuesList, setOnChangeHa
         text = 'ffffffff',
       },
     },
+    isEnabled = setIsEnabled == nil and true or setIsEnabled,
   }
   self.__index = self
   local res = setmetatable( obj, self )
@@ -85,20 +93,22 @@ function GUISelect:Render( dx, dy )
   local x1 = self.rect.right + dx
   local y1 = self.rect.bottom + dy
 
-  Render( 'sprite', x0, y0, 0, x1, y1, 0, 'data/temp/blank.png', self.colors.middle )
+  Render( 'sprite', x0, y0, 0, x1, ( y0 + y1 ) / 2, 0, 'data/temp/blank.png', self.colors.middle0 )
+  Render( 'sprite', x0, ( y0 + y1 ) / 2, 0, x1, y1, 0, 'data/temp/blank.png', self.colors.middle1 )
   Render( 'line', x0, y0, 0, x1, y0, 0, self.colors.light )
   Render( 'line', x0, y0, 0, x0, y1, 0, self.colors.light )
   Render( 'line', x0, y1, 0, x1, y1, 0, self.colors.dark )
   Render( 'line', x1, y0, 0, x1, y1, 0, self.colors.dark )
-  Render( 'text', x0 + 2,y0 + 2, 0, self.values[ self.value ], '000000ff' )
+  Render( 'text', x0 + 3,y0, 0, self.values[ self.value ], '000000ff' )
+  Render( 'sprite', x1 - 10, y0 + 7, 0, x1 - 3, y0 + 11, 0, 'data/textures/gui/select.png', 'ffffffff' )
 
   if self.state == 1 then
     local y = y1 + 1, color
     for value,name in pairs( self.values ) do
       color = ( self.valueHover == value ) and self.colors.focus or ( ( self.value == value ) and self.colors.current or self.colors.default )
-      Render( 'sprite', x0, y, 0, x1, y + self.rect.height, 0, 'data/temp/blank.png', color.bg )
+      Render( 'sprite', x0, y - 1, 0, x1, y + self.rect.height - 1, 0, 'data/temp/blank.png', color.bg )
       Render( 'line', x0, y + self.rect.height - 1, 0, x1, y + self.rect.height - 1, 0, self.colors.dark )
-      Render( 'text', x0 + 5, y + 2, 0, name, color.text )
+      Render( 'text', x0 + 5, y, 0, name, color.text )
       y = y + self.rect.height
     end
   end

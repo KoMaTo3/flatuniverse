@@ -19,8 +19,14 @@ function GUIButton:GetText()
 end -- GUIButton:GetText
 
 
+--[[ GUIButton:SetEnabled ]]
+function GUIButton:SetEnabled( setIsEnabled )
+  self.isEnabled = setIsEnabled
+end -- GUIButton:SetEnabled
+
+
 --[[ GUIButton:Create ]]
-function GUIButton:Create( x0, y0, width, height, setText, setOnClickHandler, parent )
+function GUIButton:Create( x0, y0, width, height, setText, setOnClickHandler, parent, setIsEnabled )
   local obj = {
     childs = {},
     rect = {
@@ -45,6 +51,7 @@ function GUIButton:Create( x0, y0, width, height, setText, setOnClickHandler, pa
         dark = 'eeeeeeff',
       },
     },
+    isEnabled = setIsEnabled == nil and true or setIsEnabled,
   }
   self.__index = self
   local res = setmetatable( obj, self )
