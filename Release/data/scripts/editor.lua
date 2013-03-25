@@ -151,6 +151,7 @@ function EditorInit()
 
   --grid size
   GUILabel:Create( 0, 40, 0, 0, 'Grid:', GUI.elements.windowSettings )
+  GUI.elements.showGrid = GUICheckbox:Create( 40, 42, '', false, ToggleGrid, GUI.elements.windowSettings, true )
   local list = {}
   table.insert( list, '8' )
   table.insert( list, '16' )
@@ -161,7 +162,7 @@ function EditorInit()
   table.insert( list, '128' )
   table.insert( list, '256' )
   table.insert( list, '512' )
-  GUI.elements.gridSize = GUISelect:Create( 55, 40, 40, 3, list, nil, GUI.elements.windowSettings )
+  GUI.elements.gridSize = GUISelect:Create( 55, 40, 40, 3, list, OnChangeTileSize, GUI.elements.windowSettings )
 
   --grid offset
   GUILabel:Create( 95, 40, 0, 0, 'offset', GUI.elements.windowSettings )
@@ -179,24 +180,15 @@ function EditorInit()
   table.insert( list, 'renderable' )
   table.insert( list, 'collision' )
   table.insert( list, 'trigger' )
-  GUI.elements.layer = GUISelect:Create( 55, 20, 90, 1, list, function( obj )
-    local val = obj:GetValue()
-    if val > 1 then
-      DebugRender( math.pow( 2, val - 2 ) )
-      settings.editorType = val - 1
-    else
-      DebugRender( 0 )
-      settings.editorType = 0
-    end
-  end, GUI.elements.windowSettings )
+  GUI.elements.layer = GUISelect:Create( 55, 20, 90, 1, list, OnChangeLayer, GUI.elements.windowSettings )
 
   -- object block
   GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 80, 'Object' )
   GUILabel:Create( 1, 18, 0, 0, 'Name:', GUI.elements.windowObject )
   GUI.elements.objectName   = GUIEdit:Create( 50, 18, 165, '', function( obj ) Alert( obj:GetText() ) end, GUI.elements.windowObject )
-  GUI.elements.isRenderable = GUICheckbox:Create( 5, 35, 'Renderable', false, GUI.elements.windowObject, false )
-  GUI.elements.isCollision  = GUICheckbox:Create( 5, 50, 'Collision', false, GUI.elements.windowObject, false )
-  GUI.elements.isTrigger    = GUICheckbox:Create( 5, 65, 'Trigger', false, GUI.elements.windowObject, false )
+  GUI.elements.isRenderable = GUICheckbox:Create( 5, 35, 'Renderable', false, nil, GUI.elements.windowObject, false )
+  GUI.elements.isCollision  = GUICheckbox:Create( 5, 50, 'Collision', false, OnChangeIsCollision, GUI.elements.windowObject, false )
+  GUI.elements.isTrigger    = GUICheckbox:Create( 5, 65, 'Trigger', false, nil, GUI.elements.windowObject, false )
 
   -- GUIEdit:Create( 200, 50, 100, 'test123', function() Alert(2) end )
 
@@ -242,6 +234,8 @@ function OnEditorKey( id, isPressed )
         DebugRender( 0 )
         settings.editorType = 0
         settings.editorMode = 0
+        GUI.elements.layer:SetText( 'default' )
+        OnChangeLayer( GUI.elements.layer )
         SelectObject( '' )
         UpdateGuiBySelectedObject()
       end
@@ -249,16 +243,22 @@ function OnEditorKey( id, isPressed )
         --GuiSetText( 'editor/settings.layer', 'renderable' )
         DebugRender( 1 )
         settings.editorType = 1
+        GUI.elements.layer:SetText( 'renderable' )
+        OnChangeLayer( GUI.elements.layer )
       end
       if id == 0x32 then    -- 2
         --GuiSetText( 'editor/settings.layer', 'collision' )
         DebugRender( 2 )
         settings.editorType = 2
+        GUI.elements.layer:SetText( 'collision' )
+        OnChangeLayer( GUI.elements.layer )
       end
       if id == 0x33 then    -- 3
         --GuiSetText( 'editor/settings.layer', 'trigger' )
         DebugRender( 4 )
         settings.editorType = 3
+        GUI.elements.layer:SetText( 'trigger' )
+        OnChangeLayer( GUI.elements.layer )
       end
       if id == 0x2E then    -- Del
         local object = GetSelectedObject() -- GuiGetText( 'editor/object.object_name' )
@@ -276,6 +276,7 @@ function OnEditorKey( id, isPressed )
         if settings.editorMode == 2 then
           settings.editorMode = 0
         end
+        GUI.templates.currentItem = 0
       end
       if id == 0x51 then    -- Q: Prev template
         if GUI.templates.currentItem > 1 then
@@ -844,6 +845,7 @@ end --EditorInsertItemByTemplate
 --[[ ToggleGrid ]]
 function ToggleGrid()
   settings.showGrid = not settings.showGrid
+  GUI.elements.showGrid:SetIsChecked( settings.showGrid )
 end --ToggleGrid
 
 
@@ -863,3 +865,41 @@ function PopFromBuffer()
     settings.buffer[ #settings.buffer ] = nil
   end
 end -- PopFromBuffer
+
+--[[ OnChangeIsCollision ]]
+function OnChangeIsCollision( isCollisionGuiElement )
+  local object = GetSelectedObject()
+  local checked = isCollisionGuiElement:GetIsChecked()
+  local tileSize = GetTileSize()
+  ObjectAttr( object, { collision = checked } )
+  if checked then
+    ObjectAttr( object, { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
+  end
+end
+
+--[[ OnChangeLayer ]]
+function OnChangeLayer( obj )
+  local val = obj:GetValue()
+  if val > 1 then
+    DebugRender( math.pow( 2, val - 2 ) )
+    settings.editorType = val - 1
+  else
+    DebugRender( 0 )
+    settings.editorType = 0
+  end
+end -- OnChangeLayer
+
+--[[ OnChangeTileSize ]]
+function OnChangeTileSize( tileSizeGuiElement )
+  local tileSize = tileSizeGuiElement:GetText()
+  local object = GetSelectedObject()
+  if #object > 0 then --(
+    if settings.editorType == 1 then
+      ObjectAttr( object, { renderableSize = string.format( '%d %d', tileSize, tileSize ) } )
+    elseif settings.editorType == 2 then
+      ObjectAttr( object, { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
+    elseif settings.editorType == 3 then
+      ObjectAttr( object, { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
+    end
+  end --)
+end -- OnChangeTileSize

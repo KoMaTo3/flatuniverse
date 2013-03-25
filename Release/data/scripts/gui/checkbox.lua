@@ -31,9 +31,15 @@ function GUICheckbox:SetIsChecked( setIsChecked )
 end -- GUICheckbox:SetIsChecked
 
 
+--[[ GUICheckbox:GetIsChecked ]]
+function GUICheckbox:GetIsChecked()
+  return self.checked
+end -- GUICheckbox:GetIsChecked
+
+
 
 --[[ GUICheckbox:Create ]]
-function GUICheckbox:Create( x0, y0, setText, setChecked, parent, setIsEnabled )
+function GUICheckbox:Create( x0, y0, setText, setChecked, setOnChangeHandler, parent, setIsEnabled )
   local obj = {
     childs = {},
     rect = {
@@ -48,6 +54,7 @@ function GUICheckbox:Create( x0, y0, setText, setChecked, parent, setIsEnabled )
     hoverPos = { x = 0, y = 0 },
     text = setText,
     isEnabled = setIsEnabled == nil and true or setIsEnabled,
+    OnChange = setOnChangeHandler,
   }
   self.__index = self
   local res = setmetatable( obj, self )
@@ -123,6 +130,9 @@ function GUICheckbox:OnClick( id, isPressed )
       if self.state == 1 then
         self.state = 0
         self.checked = not self.checked
+        if self.OnChange ~= nil then
+          self.OnChange( self )
+        end
       end
     end
   else
