@@ -45,6 +45,7 @@ function GUICheckbox:Create( x0, y0, setText, setChecked, parent, setIsEnabled )
     state = 0,  -- 0:free, 1:press, 2:hover, 3:press+out
     checked = setChecked,
     isHover = false,
+    hoverPos = { x = 0, y = 0 },
     text = setText,
     isEnabled = setIsEnabled == nil and true or setIsEnabled,
   }
@@ -87,6 +88,8 @@ function GUICheckbox:TestInRect( x, y, dx, dy )
      y >= self.rect.top + dy and y <= self.rect.bottom + dy then
     result = true
     self.isHover = true
+    self.hoverPos.x = x - ( self.rect.left + dx )
+    self.hoverPos.y = y - ( self.rect.top + dy )
   else
     self.isHover = false
   end

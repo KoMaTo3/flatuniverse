@@ -191,12 +191,14 @@ function EditorInit()
   end, GUI.elements.windowSettings )
 
   -- object block
-  GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 65, 'Object' )
-  GUI.elements.isRenderable = GUICheckbox:Create( 5, 20, 'Renderable', false, GUI.elements.windowObject, false )
-  GUI.elements.isCollision  = GUICheckbox:Create( 5, 35, 'Collision', false, GUI.elements.windowObject, false )
-  GUI.elements.isTrigger    = GUICheckbox:Create( 5, 50, 'Trigger', false, GUI.elements.windowObject, false )
+  GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 80, 'Object' )
+  GUILabel:Create( 1, 18, 0, 0, 'Name:', GUI.elements.windowObject )
+  GUI.elements.objectName   = GUIEdit:Create( 50, 18, 165, '', function( obj ) Alert( obj:GetText() ) end, GUI.elements.windowObject )
+  GUI.elements.isRenderable = GUICheckbox:Create( 5, 35, 'Renderable', false, GUI.elements.windowObject, false )
+  GUI.elements.isCollision  = GUICheckbox:Create( 5, 50, 'Collision', false, GUI.elements.windowObject, false )
+  GUI.elements.isTrigger    = GUICheckbox:Create( 5, 65, 'Trigger', false, GUI.elements.windowObject, false )
 
-  GUIEdit:Create( 200, 50, 100, '', function() Alert(2) end )
+  -- GUIEdit:Create( 200, 50, 100, 'test123', function() Alert(2) end )
 
   -- Ставим обработчики чекбоксов и кнопок редактора
   --[[
@@ -285,7 +287,7 @@ function OnEditorKey( id, isPressed )
           GUI.templates.currentItem = GUI.templates.currentItem + 1
         end
       end
-      if id == 0x10 then    -- Shift
+      if id == 0x47 then    -- G: toggle showing grid
         ToggleGrid()
         settings.keys.isShift = isPressed
       end
@@ -659,6 +661,8 @@ function UpdateGuiBySelectedObject()
   if #object < 1 then
     for key, element in pairs( elements ) do
       -- elements[ i ]:SetText( false )
+      GUI.elements.objectName:SetEnabled( false )
+      GUI.elements.objectName:SetText( '' )
       GUI.elements.isRenderable:SetEnabled( false )
       GUI.elements.isRenderable:SetIsChecked( false )
       GUI.elements.isCollision:SetEnabled( false )
@@ -682,6 +686,8 @@ function UpdateGuiBySelectedObject()
           'textureName',
           'renderableSize',
         } )
+    GUI.elements.objectName:SetEnabled( true )
+    GUI.elements.objectName:SetText( object )
     GUI.elements.isRenderable:SetEnabled( true )
     GUI.elements.isRenderable:SetIsChecked( isRenderable )
     GUI.elements.isCollision:SetEnabled( true )
@@ -817,7 +823,7 @@ function EditorInsertItemByTemplate( px, py )
 
   local x, y = GetTilePosByPixel( px, py )
   -- local gridPos = GetGridByCoords( x * tileSize, y * tileSize )
-  local name = 'wall.'..px..'.'..py..'.'..settings.timer
+  local name = 'wall.'..px..'.'..py..'.'..string.format( '%f', settings.timer )
 
   --ObjectRemove( name )
   ObjectCreate( name, x * tileSize + offsetX, y * tileSize + offsetY, 0 )

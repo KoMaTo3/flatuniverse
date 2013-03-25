@@ -49,6 +49,7 @@ function GUISelect:Create( x0, y0, width, setValue, setValuesList, setOnChangeHa
     },
     state = 0,  -- 0:free, 1:press, 2:hover, 3:press+out
     isHover = false,
+    hoverPos = { x = 0, y = 0 },
     OnChangeHandler = setOnChangeHandler,
     value = setValue,
     values = setValuesList,
@@ -137,6 +138,8 @@ function GUISelect:TestInRect( x, y, dx, dy )
      y >= self.rect.top + dy and y <= self.rect.bottom + dy then
     result = true
     self.isHover = true
+    self.hoverPos.x = x - ( self.rect.left + dx )
+    self.hoverPos.y = y - ( self.rect.top + dy )
   else
     self.isHover = false
   end

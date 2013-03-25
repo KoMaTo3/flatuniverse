@@ -30,6 +30,7 @@ function GUILabel:Create( x0, y0, width, height, setText, parent )
       bottom = y0 + height,
     },
     isHover = false,
+    hoverPos = { x = 0, y = 0 },
     text = setText,
     colors = {
       border = 'aaaaaaff',
@@ -74,6 +75,8 @@ function GUILabel:TestInRect( x, y, dx, dy )
      y >= self.rect.top + dy and y <= self.rect.bottom + dy then
     result = true
     self.isHover = true
+    self.hoverPos.x = x - ( self.rect.left + dx )
+    self.hoverPos.y = y - ( self.rect.top + dy )
   else
     self.isHover = false
   end
