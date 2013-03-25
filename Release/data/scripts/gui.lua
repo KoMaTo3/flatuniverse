@@ -6,6 +6,7 @@ GUIRenderer = {
   focusedItem = nil,
   OnClickDefault = nil,
   OnMouseMoveDefault = nil,
+  OnKeyboardDefault = nil,
 
   RenderEnable = function()
     SetTimer( 0.1, 'GUIRendererRender' )
@@ -24,6 +25,7 @@ function GUIInit()
   LoadScript( 'data/scripts/gui/label.lua' )
   LoadScript( 'data/scripts/gui/select.lua' )
   LoadScript( 'data/scripts/gui/edit.lua' )
+  ListenKeyboard( 'GUIKeyboard' )
   ListenMouseKey( 'GUIMouseKey' )
   ListenMouseMove( 'GUIMouseMove' )
 end
@@ -84,5 +86,20 @@ function GUIMouseMove( x, y )
 
   -- labelDebug:SetText( GUIRenderer.activeItem == nil and '-' or GUIRenderer.activeItem:GetType() )
 end -- GUIMouseMove
+
+--[[ GUIKeyboard ]]
+function GUIKeyboard( id, isPressed )
+  if GUIRenderer.focusedItem ~= nil then
+    if GUIRenderer.focusedItem.OnKeyboard ~= nil then
+      if GUIRenderer.focusedItem:OnKeyboard( id, isPressed ) == false and GUIRenderer.OnKeyboardDefault ~= nil then
+        GUIRenderer.OnKeyboardDefault( id, isPressed )
+      end
+    end
+  else
+    if GUIRenderer.OnKeyboardDefault ~= nil then
+      GUIRenderer.OnKeyboardDefault( id, isPressed )
+    end
+  end
+end -- GUIKeyboard
 
 GUIInit()

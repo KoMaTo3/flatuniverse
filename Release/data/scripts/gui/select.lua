@@ -231,3 +231,12 @@ function GUISelect:OnClick( id, isPressed )
   end
   ]]
 end -- GUISelect:OnClick
+
+function GUISelect:OnKeyboard( id, isPressed )
+  if id == 0x1B then  -- Escape
+    GUIRenderer.focusedItem = nil
+    self.state = 0
+    return true
+  end
+  return false
+end -- OnKeyboard

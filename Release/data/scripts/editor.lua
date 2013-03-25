@@ -136,11 +136,12 @@ function EditorInit()
   GUI.templates.width = GUI.templates.itemSize + 25
 
   -- Ставим обработчики на всё: клаву, кнопки и движение мыши
-  ListenKeyboard( 'OnEditorKey' )
+  -- ListenKeyboard( 'OnEditorKey' )
   -- ListenMouseKey( 'OnEditorMouseKey' )
   -- ListenMouseMove( 'OnEditorMouseMove' )
   GUIRenderer.OnClickDefault = OnEditorMouseKey
   GUIRenderer.OnMouseMoveDefault = OnEditorMouseMove
+  GUIRenderer.OnKeyboardDefault = OnEditorKey
 
   -- GUI
   GUI.elements.labelDebug = GUILabel:Create( 0, 0, settings.windowSize.x, 20, 'debug' )
@@ -195,7 +196,7 @@ function EditorInit()
   GUI.elements.isCollision  = GUICheckbox:Create( 5, 35, 'Collision', false, GUI.elements.windowObject, false )
   GUI.elements.isTrigger    = GUICheckbox:Create( 5, 50, 'Trigger', false, GUI.elements.windowObject, false )
 
-  GUIEdit:Create( 200, 50, 100, 'Test text...!' )
+  GUIEdit:Create( 200, 50, 100, '', function() Alert(2) end )
 
   -- Ставим обработчики чекбоксов и кнопок редактора
   --[[

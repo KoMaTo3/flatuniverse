@@ -57,6 +57,9 @@ end -- CollisionPlayer
 
 --[[ PlayerControl ]]
 function PlayerControl( id, isPressed )
+  if GUIRenderer.focusedItem ~= nil then
+    return
+  end
   if id == 0x26 or id == 0x57 then  -- Up
     if isPressed then --(
       local curTime = GetTime()
