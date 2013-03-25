@@ -233,10 +233,41 @@ function GUISelect:OnClick( id, isPressed )
 end -- GUISelect:OnClick
 
 function GUISelect:OnKeyboard( id, isPressed )
-  if id == 0x1B then  -- Escape
-    GUIRenderer.focusedItem = nil
-    self.state = 0
-    return true
+  if isPressed then
+    if id == 0x1B then  -- Escape
+      GUIRenderer.focusedItem = nil
+      self.state = 0
+      return true
+    elseif id == 0x28 then  -- Down
+      if self.valueHover < #self.values then
+        self.valueHover = self.valueHover + 1
+      end
+    elseif id == 0x26 then  -- Up
+      if self.valueHover > 1 then
+        self.valueHover = self.valueHover - 1
+      end
+    elseif id == 0x24 then  -- Home
+      self.valueHover = 1
+    elseif id == 0x23 then  -- End
+      self.valueHover = #self.values
+    elseif id == 0x21 then  -- Page Up
+      self.valueHover = math.max( self.valueHover - 5, 1 )
+    elseif id == 0x22 then  -- Page Down
+      self.valueHover = math.min( self.valueHover + 5, #self.values )
+    elseif id == 0x0d then  -- Enter
+      if self.values[ self.valueHover ] ~= nil then
+        local oldValue = self.value
+        self.value = self.valueHover
+        GUIRenderer.focusedItem = nil
+        self.state = 0
+        if self.value ~= oldValue and self.OnChangeHandler ~= nil then
+          self.OnChangeHandler( self )
+        end
+      else
+        GUIRenderer.focusedItem = nil
+        self.state = 0
+      end
+    end
   end
   return false
 end -- OnKeyboard
