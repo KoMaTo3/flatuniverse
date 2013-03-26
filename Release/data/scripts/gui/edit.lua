@@ -338,6 +338,34 @@ function GUIEdit:OnKeyboard( id, isPressed )
           self.cursorPos = #self.text
           self.selection = -self.cursorPos
           self:UpdateCursor()
+        elseif id == 67 then  -- Ctrl+C
+          local text = ''
+          if self.selection == 0 then
+            text = self.text
+          else
+            local selectionStartPos = self.cursorPos + self.selection
+            local selectionLeft = math.min( self.cursorPos, selectionStartPos )
+            local selectionRight = math.max( self.cursorPos, selectionStartPos )
+            text = self.text:sub( selectionLeft + 1, selectionRight )
+          end
+          SetClipboard( text )
+        elseif id == 0x56 then  -- Ctrl+V
+          local text = GetClipboard()
+          -- self.text = text
+          if #text > 0 and self.selection ~= 0 then
+            self.text = ( self.selection > 0 and self.text:sub( 1, self.cursorPos )..self.text:sub( self.cursorPos + self.selection + 1 ) or self.text:sub( 1, self.cursorPos + self.selection )..self.text:sub( self.cursorPos + 1 ) )
+            if self.selection < 0 then
+              self.cursorPos = self.cursorPos + self.selection
+              self.selection = 0
+              self:UpdateCursor()
+            else
+              self.selection = 0
+              self:UpdateCursor()
+            end
+          end
+          self.text = self.text:sub( 1, self.cursorPos )..text..self.text:sub( self.cursorPos + 1 )
+          self.cursorPos = self.cursorPos + #text
+          self:UpdateCursor()
         end
       else
         local char = ''

@@ -148,6 +148,8 @@ bool Lua::Init()
   lua_register( this->luaState, "ObjectHasTag",     Lua::LUA_ObjectHasTag );
   lua_register( this->luaState, "ObjectAddTag",     Lua::LUA_ObjectAddTag );
   lua_register( this->luaState, "ObjectRemoveTag",  Lua::LUA_ObjectRemoveTag );
+  lua_register( this->luaState, "SetClipboard",     Lua::LUA_SetClipboard );
+  lua_register( this->luaState, "GetClipboard",     Lua::LUA_GetClipboard );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -1834,3 +1836,55 @@ int Lua::LUA_ObjectRemoveTag( lua_State *lua )
   LUAFUNC_ObjectRemoveTag( objectName, tag );
   return 0;
 }//LUA_ObjectRemoveTag
+
+
+
+/*
+=============
+  LUA_SetClipboard
+=============
+*/
+int Lua::LUA_SetClipboard( lua_State *lua ) {
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetClipboard => not enough parameters" );
+    return 0;
+  }
+  std::string text = lua_tostring( lua, 1 );
+
+#ifdef WIN32
+  const size_t length = text.size() + 1;
+  HGLOBAL hMem = GlobalAlloc( GMEM_MOVEABLE, length );
+  memcpy( GlobalLock( hMem ), text.c_str(), length );
+  GlobalUnlock( hMem );
+  OpenClipboard( NULL );
+  EmptyClipboard();
+  SetClipboardData( CF_TEXT, hMem );
+  CloseClipboard();
+#endif
+
+  return 0;
+}//LUA_SetClipboard
+
+
+
+/*
+=============
+  LUA_GetClipboard
+=============
+*/
+int Lua::LUA_GetClipboard( lua_State *lua ) {
+  std::string text = "";
+
+#ifdef WIN32
+  OpenClipboard( NULL );
+  HANDLE hClipboard = GetClipboardData( CF_TEXT );
+  HANDLE hMem = GlobalLock( hClipboard );
+  text = ( char* ) hClipboard;
+  GlobalUnlock( hClipboard );
+#endif
+
+  lua_pushstring( lua, text.c_str() );
+
+  return 1;
+}//LUA_GetClipboard

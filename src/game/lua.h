@@ -187,6 +187,8 @@ public:
   static int LUA_ObjectHasTag     ( lua_State *lua );
   static int LUA_ObjectAddTag     ( lua_State *lua );
   static int LUA_ObjectRemoveTag  ( lua_State *lua );
+  static int LUA_SetClipboard     ( lua_State *lua );
+  static int LUA_GetClipboard     ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );
