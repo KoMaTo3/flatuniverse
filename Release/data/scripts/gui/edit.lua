@@ -1,34 +1,35 @@
 GUIEdit = {}
 
 
---[[ GUIEdit:GetType ]]
+--[[ GetType ]]
 function GUIEdit:GetType()
   return 'Edit'
-end -- GUIEdit:GetType
+end -- GetType
 
 
---[[ GUIEdit:SetText ]]
+--[[ SetText ]]
 function GUIEdit:SetText( setText )
   self.text = setText
   self.selection = 0
   self.cursorPos = 0
+  self.contentRenderOffset = 0
   self:UpdateCursor()
-end -- GUIEdit:SetText
+end -- SetText
 
 
---[[ GUIEdit:GetText ]]
+--[[ GetText ]]
 function GUIEdit:GetText()
   return self.text
-end -- GUIEdit:GetText
+end -- GetText
 
 
---[[ GUIEdit:SetEnabled ]]
+--[[ SetEnabled ]]
 function GUIEdit:SetEnabled( setIsEnabled )
   self.isEnabled = setIsEnabled
-end -- GUIEdit:SetEnabled
+end -- SetEnabled
 
 
---[[ GUIEdit:Create ]]
+--[[ Create ]]
 function GUIEdit:Create( x0, y0, width, setText, setOnChangeHandler, parent, setIsEnabled )
   local obj = {
     childs = {},
@@ -70,6 +71,7 @@ function GUIEdit:Create( x0, y0, width, setText, setOnChangeHandler, parent, set
       [191] = '/',
       [192] = '`',
       [219] = '[',
+      [220] = '\\',
       [221] = ']',
       [222] = '\'',
     },
@@ -92,6 +94,7 @@ function GUIEdit:Create( x0, y0, width, setText, setOnChangeHandler, parent, set
       [191] = '?',
       [192] = '~',
       [219] = '{',
+      [220] = '|',
       [221] = '}',
       [222] = '"',
     },
@@ -106,8 +109,10 @@ function GUIEdit:Create( x0, y0, width, setText, setOnChangeHandler, parent, set
   end
   res.cursorPosPixel = Render( 'getTextWidth', setText )
   return res
-end -- GUIEdit:Create
+end -- Create
 
+
+--[[ Render ]]
 function GUIEdit:Render( dx, dy )
   if dx == nil then
     dx = 0
@@ -127,10 +132,19 @@ function GUIEdit:Render( dx, dy )
   Render( 'sprite', x0, y0, 0, x1, y1, 0, 'data/temp/blank.png', self.colors.inner )
   Render( 'rect', x0, y0, 0, x1, y1, 0, self.colors.border )
   Render( 'scissorEnable', x0, settings.windowSize.y - y1 + 2, x1 - 2, settings.windowSize.y - y0 )
-  if self.selection ~= 0 then -- selection
-    Render( 'sprite', x0 + self.cursorPosPixel + 2 + self.contentRenderOffset, y0 + 1, 0, x0 + self.cursorPosPixel + 2 + self.contentRenderOffset + ( self.selection > 0 and self.selectionWidth or -self.selectionWidth ), y1 - 1, 0, 'data/temp/blank.png', self.colors.selection )
+  if self.selection ~= 0 then -- selection: background
+    Render( 'sprite', x0 + self.cursorPosPixel + 1 + self.contentRenderOffset, y0 + 1, 0, x0 + self.cursorPosPixel + 1 + self.contentRenderOffset + ( self.selection > 0 and self.selectionWidth or -self.selectionWidth ), y1 - 1, 0, 'data/temp/blank.png', self.colors.selection )
   end
   Render( 'text', x0 + 2 + self.contentRenderOffset,y0, 0, self.text, '000000ff' )
+  if self.selection ~= 0 then -- selection: highlight text
+    local selectionStartPos = self.cursorPos + self.selection
+    local selectionLeft = math.min( self.cursorPos, selectionStartPos )
+    local selectionRight = math.max( self.cursorPos, selectionStartPos )
+    local selectionLeftPixel = Render( 'getTextWidth', self.text:sub( 1, selectionLeft ) )
+    local selectedText = self.text:sub( selectionLeft + 1, selectionRight )
+    --local selectionWidthPixel = Render( 'getTextWidth', selectedText )
+    Render( 'text', x0 + self.contentRenderOffset + selectionLeftPixel + 2,y0, 0, selectedText, 'ffffffff' )
+  end
   if self.state > 0 then -- cursor
     Render( 'line', cursorX + self.contentRenderOffset, y0 + 1, 0, cursorX + self.contentRenderOffset, y1 - 1, 0, cursorColor )
   end
@@ -139,8 +153,10 @@ function GUIEdit:Render( dx, dy )
   for key, item in pairs( self.childs ) do
     item:Render( dx + self.rect.left, dy + self.rect.top )
   end
-end -- GUIEdit:Render
+end -- Render
 
+
+--[[ TestInRect ]]
 function GUIEdit:TestInRect( x, y, dx, dy )
   if not self.isEnabled then
     do return false end
@@ -159,6 +175,7 @@ function GUIEdit:TestInRect( x, y, dx, dy )
     if self.state == 2 then -- select my mouse
       -- Alert(2)
       -- calculate cursor position
+      LogWrite( self.hoverPos.x )
       local x
       local oldX = self.contentRenderOffset
       local oldCursorPos = self.cursorPos
@@ -192,8 +209,9 @@ function GUIEdit:TestInRect( x, y, dx, dy )
     do return true end
   end
   return false
-end -- GUIEdit:TestInRect
+end -- TestInRect
 
+--[[ OnClick ]]
 function GUIEdit:OnClick( id, isPressed )
   if not self.isEnabled then
     do return false end
@@ -230,8 +248,10 @@ function GUIEdit:OnClick( id, isPressed )
       self.state = 1
     end
   end
-end -- GUIEdit:OnClick
+end -- OnClick
 
+
+--[[OnKeyboard ]]
 function GUIEdit:OnKeyboard( id, isPressed )
   if id == 0x1B then  -- Escape
     GUIRenderer.focusedItem = nil
@@ -408,6 +428,8 @@ function GUIEdit:OnKeyboard( id, isPressed )
   return false
 end -- OnKeyboard
 
+
+--[[ UpdateCursor ]]
 function GUIEdit:UpdateCursor()
   self.cursorPosPixel = Render( 'getTextWidth', self.text:sub( 1, self.cursorPos ) )
   -- Alert(self.selection)
