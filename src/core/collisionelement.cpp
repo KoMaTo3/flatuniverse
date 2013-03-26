@@ -76,6 +76,7 @@ void CollisionElementSquare::__Dump() {
 =============
 */
 void CollisionElementSquare::SetSize( const Vec3 &setSize ) {
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::SetSize => size[%3.1f; %3.1f; %3.1f;]", setSize.x, setSize.y, setSize.z );
   this->size = setSize;
 }//SetSize
 
@@ -192,6 +193,7 @@ void CollisionElementSquare::_Render( const Vec3 &offset ) {
 */
 void CollisionElementSquare::SaveToBuffer( MemoryWriter &writer ) {
   writer << this->size;
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::SaveToBuffer => squareSize[%3.1f; %3.1f; %3.1f;]", this->size.x, this->size.y, this->size.z );
 }//SaveToBuffer
 
 

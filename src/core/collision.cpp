@@ -133,9 +133,12 @@ Collision* Collision::InitSquare( const Vec3& newSize )
     CollisionElementSquare *item = new CollisionElementSquare( this->position, &this->_rect );
     this->collisionElement = item;
     item->SetSize( newSize );
+    __log.PrintInfo( Filelevel_DEBUG, "Collision::InitSquare => size[%3.1f; %3.1f; %3.1f;]", newSize.x, newSize.y, newSize.z );
   } else if( this->collisionElement->GetType() != COLLISION_ELEMENT_TYPE_SQUARE ) {
     __log.PrintInfo( Filelevel_ERROR, "Collision::InitSquare => this already initialized by type %d", this->collisionElement->GetType() );
     return this;
+  } else {
+    ( ( CollisionElementSquare* ) this->collisionElement )->SetSize( newSize );
   }
   this->size = newSize;
   return this;
@@ -571,7 +574,7 @@ void Collision::SaveToBuffer( MemoryWriter &writer )
 {
   writer << this->GetVelocity();
   writer << this->GetAcceleration();
-  writer << this->GetSize();
+  //writer << this->GetSize();
   writer << this->IsStatic();
   writer << this->GetMass();
   writer << this->GetForce();
@@ -602,8 +605,8 @@ void Collision::LoadFromBuffer( MemoryReader &reader )
   reader >> v3;
   this->SetAcceleration( v3 );
 
-  reader >> v3;
-  this->InitSquare( v3 );
+  //reader >> v3;
+  //this->InitSquare( v3 );
 
   reader >> b;
   this->SetIsStatic( b );
@@ -618,6 +621,7 @@ void Collision::LoadFromBuffer( MemoryReader &reader )
   switch( cet ) {
     case COLLISION_ELEMENT_TYPE_SQUARE:
       reader >> v3;
+      __log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => squareSize[%3.1f; %3.1f; %3.1f;]", v3.x, v3.y, v3.z );
       this->InitSquare( v3 );
       break;
     case COLLISION_ELEMENT_TYPE_CIRCLE:

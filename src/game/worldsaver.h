@@ -6,7 +6,7 @@
 
 
 //Версия файла сохранений
-const Dword WOLDSAVER_FILE_VERSION = 0x00000001;
+const Dword WOLDSAVER_FILE_VERSION = 0x00000002;
 
 class WorldSaver
 {

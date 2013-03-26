@@ -8,6 +8,7 @@
 #include "memory.h"
 #include "klib.h"
 #include "file.h"
+#include "tools.h"
 #include <string>
 
 class MemoryReader
@@ -17,6 +18,7 @@ private:
   Dword   curPos,
           curLength;
   char    *curData;  //либо указатель на data либо на внешний блок
+  DISALLOW_COPY_AND_ASSIGN( MemoryReader );
 
 public:
   MemoryReader();
