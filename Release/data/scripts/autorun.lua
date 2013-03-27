@@ -46,13 +46,6 @@ function Main()
 
   -- reset bricks
 
-  local tmp0 = function()
-    Alert(2)
-    return 3
-  end
-  LogWrite(string.dump( tmp0 ))
-  GameExit()
-
 end -- Main
 Main()
 
@@ -80,7 +73,7 @@ function PlayerControl( id, isPressed )
       local curTime = GetTime()
       if curTime - playerState.onGroundTime < 0.1 then  -- do jump
         local vx, _ = ObjectAttr( 'player', { 'collisionVelocity' } )
-        ObjectAttr( 'player', { collisionVelocity = vx..' '..( -250 )  } )
+        ObjectAttr( 'player', { collisionVelocity = vx..' '..( -300 )  } )
         playerState.isHoldJump = true
         SetTimer( 0.1, 'PlayerDoLongJump' )
         playerState.PlayerEndLongJumpTimer = SetTimer( 0.5, 'PlayerEndLongJump' )
@@ -93,7 +86,7 @@ function PlayerControl( id, isPressed )
 
   if id == 0x25 or id == 0x41 then  -- Left
     if isPressed then
-      SetObjectForce( 'player', 4, -150, 0 )
+      SetObjectForce( 'player', 4, -200, 0 )
     else
       RemoveObjectForce( 'player', 4 )
     end
@@ -101,7 +94,7 @@ function PlayerControl( id, isPressed )
 
   if id == 0x27 or id == 0x44 then  -- Right
     if isPressed then
-      SetObjectForce( 'player', 2, 150, 0 )
+      SetObjectForce( 'player', 2, 200, 0 )
     else
       RemoveObjectForce( 'player', 2 )
     end
@@ -194,8 +187,9 @@ function PushMushroom( object )
   local itemName = object..'-mushroom-'..string.format( '%f', GetTime() )
   local brickX, brickY = ObjectGetPos( object )
   ObjectCreate( itemName, brickX, brickY, -0.1 )
-  ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '16 16' } )
-  animation[ 'timer'..SetTimer( 0.1, 'DoAnimationMushroom' ) ] = { step = 1, time = 0, object = itemName }
+  ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '32 32' } )
+  animation[ 'timer'..SetTimer( 0.1, 'DoAnimationMushroom' ) ] = { step = 1, time = 0, object = itemName, tile = object }
+  ObjectRemoveTag( object, 'has-mushroom' )
 end -- PushMushroom
 
 --[[ DoAnimationMushroom ]]
@@ -211,11 +205,12 @@ function DoAnimationMushroom( timerId )
     anim.time = anim.time + 1
     local x, y = ObjectGetPos( anim.object )
     ObjectSetPos( anim.object, x, y - 1 )
-    if anim.time < 16 then
-      animation[ 'timer'..SetTimer( 1/30, 'DoAnimationMushroom' ) ] = anim
+    if anim.time < 32 then
+      animation[ 'timer'..SetTimer( 1/40, 'DoAnimationMushroom' ) ] = anim
     else
+      ObjectAddTag( anim.tile, 'has-mushroom' )
       animation[ keyByTimer ] = nil
-      ObjectAttr( anim.object, { collision = true, collisionSize = '16 16', collisionVelocity = '80 0', collisionAcceleration = '0 400', collisionStatic = false } )
+      ObjectAttr( anim.object, { collision = true, collisionSize = '32 32', collisionVelocity = '150 0', collisionAcceleration = '0 400', collisionStatic = false } )
       ObjectAddTag( anim.object, 'mushroom' )
       ListenCollision( 'CollisionMushroom', anim.object )
     end
@@ -225,6 +220,8 @@ end -- DoAnimationMushroom
 function CollisionMushroom( mushroom, target )
   if ObjectHasTag( target, 'player' ) then
     ObjectRemove( mushroom )
+    local cx, cy, rx, ry = ObjectAttr( target, { 'collisionSize', 'renderableSize' } )
+    ObjectAttr( target, { collisionSize = string.format( '%f %f', cx * 1.2, cy * 1.2 ), renderableSize = string.format( '%f %f', rx * 1.2, ry * 1.2 ) } )
     do return false end
   end
   if IsObjectRightThis( mushroom, target ) or IsObjectLeftThis( mushroom, target ) then
