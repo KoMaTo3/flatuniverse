@@ -11,6 +11,10 @@ local playerState = {
   PlayerEndLongJumpTimer = -1,
 }
 
+-- Списки анимаций, привязанных к таймерам
+local animation = {
+}
+
 --[[ Main ]]
 function Main()
   LoadScript( 'data/scripts/gui.lua' )
@@ -38,8 +42,16 @@ function Main()
   -- Alert( '', r..':'..g..':'..b..':'..a )
   ListenKeyboard( 'PlayerControl' )
   ListenCollision( 'CollisionPlayer', 'player' )
+  ObjectAddTag( 'player', 'player' )
 
   -- reset bricks
+
+  local tmp0 = function()
+    Alert(2)
+    return 3
+  end
+  LogWrite(string.dump( tmp0 ))
+  GameExit()
 
 end -- Main
 Main()
@@ -51,6 +63,9 @@ function CollisionPlayer( player, target )
   elseif IsObjectUnderThis( player, target ) then
     if ObjectHasTag( target, 'brick-breakable' ) then
       ObjectAttr( target, { textureName = 'temp/brick3.png' } )
+    end
+    if ObjectHasTag( target, 'has-mushroom' ) then
+      PushMushroom( target )
     end
   end
 end -- CollisionPlayer
@@ -136,6 +151,30 @@ function IsObjectUpperThis( object, target )
   return false
 end -- IsObjectUpperThis
 
+--[[ IsObjectRightThis ]]
+function IsObjectRightThis( object, target )
+  local tx, _    = ObjectGetPos( target )
+  local x, _      = ObjectGetPos( object )
+  local tRectX, _ = ObjectAttr( target, { 'collisionSize' } )
+  local rectX, _  = ObjectAttr( object, { 'collisionSize' } )
+  local tRectXd2 = tRectX / 2
+  local rectXd2 = rectX / 2
+  if x + rectXd2 <= tx - tRectXd2 + 1 then return true end
+  return false
+end -- IsObjectRightThis
+
+--[[ IsObjectLeftThis ]]
+function IsObjectLeftThis( object, target )
+  local tx, _    = ObjectGetPos( target )
+  local x, _      = ObjectGetPos( object )
+  local tRectX, _ = ObjectAttr( target, { 'collisionSize' } )
+  local rectX, _  = ObjectAttr( object, { 'collisionSize' } )
+  local tRectXd2 = tRectX / 2
+  local rectXd2 = rectX / 2
+  if x - rectXd2 >= tx + tRectXd2 then return true end
+  return false
+end -- IsObjectLeftThis
+
 function pairsByKeys( t, f )
   local a = {}
   for n in pairs( t ) do table.insert( a, n ) end
@@ -148,4 +187,48 @@ function pairsByKeys( t, f )
     end
   end
   return iter
+end -- pairsByKeys
+
+--[[ PushMushroom ]]
+function PushMushroom( object )
+  local itemName = object..'-mushroom-'..string.format( '%f', GetTime() )
+  local brickX, brickY = ObjectGetPos( object )
+  ObjectCreate( itemName, brickX, brickY, -0.1 )
+  ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '16 16' } )
+  animation[ 'timer'..SetTimer( 0.1, 'DoAnimationMushroom' ) ] = { step = 1, time = 0, object = itemName }
+end -- PushMushroom
+
+--[[ DoAnimationMushroom ]]
+function DoAnimationMushroom( timerId )
+  local keyByTimer = 'timer'..timerId
+  if animation[ keyByTimer ] == nil then
+    do return false end
+  end
+
+  local anim = animation[ keyByTimer ]
+
+  if anim.step == 1 then
+    anim.time = anim.time + 1
+    local x, y = ObjectGetPos( anim.object )
+    ObjectSetPos( anim.object, x, y - 1 )
+    if anim.time < 16 then
+      animation[ 'timer'..SetTimer( 1/30, 'DoAnimationMushroom' ) ] = anim
+    else
+      animation[ keyByTimer ] = nil
+      ObjectAttr( anim.object, { collision = true, collisionSize = '16 16', collisionVelocity = '80 0', collisionAcceleration = '0 400', collisionStatic = false } )
+      ObjectAddTag( anim.object, 'mushroom' )
+      ListenCollision( 'CollisionMushroom', anim.object )
+    end
+  end
+end -- DoAnimationMushroom
+
+function CollisionMushroom( mushroom, target )
+  if ObjectHasTag( target, 'player' ) then
+    ObjectRemove( mushroom )
+    do return false end
+  end
+  if IsObjectRightThis( mushroom, target ) or IsObjectLeftThis( mushroom, target ) then
+    local vx, vy = ObjectAttr( mushroom, { 'collisionVelocity' } )
+    ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
+  end
 end

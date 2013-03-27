@@ -167,7 +167,7 @@ function EditorInit()
   --grid offset
   GUILabel:Create( 95, 40, 0, 0, 'offset', GUI.elements.windowSettings )
   local list = {}
-  for q = 0,64,4 do
+  for q = 0,32,4 do
     table.insert( list, q )
   end
   GUI.elements.gridOffsetX = GUISelect:Create( 150, 40, 30, 1, list, nil, GUI.elements.windowSettings )

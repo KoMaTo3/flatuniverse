@@ -345,6 +345,12 @@ int Lua::LUA_ObjectRemove( lua_State *lua )
 */
 int Lua::LUA_GetObjectPos( lua_State *lua )
 {
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GetObjectPos => not enough parameters" );
+    return 0;
+  }
+
   std::string objectName = lua_tostring( lua, 1 );
   Vec2 pos = LUAFUNC_GetObjectPos( objectName );
   lua_pushnumber( lua, pos.x );
@@ -422,6 +428,12 @@ int Lua::LUA_LogWrite( lua_State *lua )
 */
 int Lua::LUA_SetTimer( lua_State *lua )
 {
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetTimer => not enough parameters" );
+    return 0;
+  }
+
   float period          = ( float ) lua_tonumber( lua, 1 );
   std::string funcName  = lua_tostring( lua, 2 );
 
@@ -1532,7 +1544,6 @@ int Lua::LUA_Render( lua_State *lua ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
       Vec4 color;
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
       Lua::GetColor( lua, 8, color );
       __debugRender->Line(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
@@ -1546,7 +1557,6 @@ int Lua::LUA_Render( lua_State *lua ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
       Vec4 color( Vec4One );
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
       Lua::GetColor( lua, 9, color );
       __debugRender->Sprite(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
@@ -1561,7 +1571,6 @@ int Lua::LUA_Render( lua_State *lua ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
       Vec4 color( Vec4One );
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
       Lua::GetColor( lua, 8, color );
       __debugRender->Rect(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
@@ -1588,7 +1597,6 @@ int Lua::LUA_Render( lua_State *lua ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
       Vec4 color( Vec4One );
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
       Lua::GetColor( lua, 6, color );
       __debugRender->Text(
           Vec3( ( Float ) lua_tonumber( lua, 2 ), ( Float ) lua_tonumber( lua, 3 ), ( Float ) lua_tonumber( lua, 4 ) ),
@@ -1601,7 +1609,6 @@ int Lua::LUA_Render( lua_State *lua ) {
     if( parmsCount < 2 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
-      __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => %s", operation.c_str() );
       float width = __debugRender->GetTextWidh( lua_tostring( lua, 2 ), DEBUG_RENDERER_DEFAULT_FONT_PROPORTIONS );
       lua_pushnumber( lua, width );
       result = 1;

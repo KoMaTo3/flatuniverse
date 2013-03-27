@@ -85,5 +85,18 @@ function GetObjectsTemplates()
       },
     },
     --
+    {
+      name = 'question0',
+      icon = 'data/textures/tiles/question0.png',
+      attr = {
+        renderable = true, textureName = 'textures/tiles/question0.png',
+        collision = true, _collisionScale = 1, collisionStatic = true,
+        trigger = false,
+      },
+      tags = {
+        'has-mushroom',
+      },
+    },
+    --
   }
 end
