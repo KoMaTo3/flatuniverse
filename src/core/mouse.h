@@ -19,6 +19,7 @@ private:
     ObjectPointer *sprite;
     Vec2    pixelsToTexels;
     bool    isHardware;
+    HCURSOR hCursor;
   } cursor;
   MoveListenerList  moveListeners;
 
@@ -36,4 +37,9 @@ public:
 
   void  AddMoveListener         ( MoveListener *listenerProc );
   void  RemoveMoveListener      ( MoveListener *listenerProc );
+
+private:
+  HCURSOR _CreateCursorFromMemory ( Byte *buffer, const Size *size, COLORREF clrTransparent, DWORD xHotspot, DWORD yHotspot );
+  void    ResetCursor           ();
+  void    _GetMaskBitmaps       ( HBITMAP hSourceBitmap, COLORREF clrTransparent, HBITMAP &hAndMaskBitmap, HBITMAP &hXorMaskBitmap );
 };
