@@ -1539,7 +1539,7 @@ int Lua::LUA_Render( lua_State *lua ) {
   if( operation == "clrscr" ) {
     __debugRender->Clrscr();
     //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
-  } else if( operation == "line" ) {
+  } else if( operation == "line" ) { //x0, y0, z0, x1, y1, z1, color
     if( parmsCount < 8 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
@@ -1552,7 +1552,7 @@ int Lua::LUA_Render( lua_State *lua ) {
           );
       //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
-  } else if( operation == "sprite" ) {
+  } else if( operation == "sprite" ) { //x0, y0, z0, x1, y1, z1, texture, color
     if( parmsCount < 8 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
@@ -1566,7 +1566,7 @@ int Lua::LUA_Render( lua_State *lua ) {
           );
       //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
-  } else if( operation == "rect" ) {
+  } else if( operation == "rect" ) { //x0, y0, z0, x1, y1, z1, color
     if( parmsCount < 8 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
@@ -1579,7 +1579,7 @@ int Lua::LUA_Render( lua_State *lua ) {
           );
       //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
-  } else if( operation == "scissorEnable" ) {
+  } else if( operation == "scissorEnable" ) { //x0, y0, x1, y1
     if( parmsCount < 5 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
@@ -1592,7 +1592,7 @@ int Lua::LUA_Render( lua_State *lua ) {
   } else if( operation == "scissorDisable" ) {
     __debugRender->SciccorDisable();
     //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
-  } else if( operation == "text" ) {
+  } else if( operation == "text" ) { //x, y, z, text, color
     if( parmsCount < 6 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
@@ -1605,7 +1605,7 @@ int Lua::LUA_Render( lua_State *lua ) {
           );
       //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_Render => '%s'", operation.c_str() );
     }
-  } else if( operation == "getTextWidth" ) {
+  } else if( operation == "getTextWidth" ) { //text
     if( parmsCount < 2 ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters for '%s'", operation.c_str() );
     } else {
