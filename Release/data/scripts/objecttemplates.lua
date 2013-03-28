@@ -217,6 +217,8 @@ function GetObjectsTemplates()
       icon = 'data/textures/tiles/bricks/tube0-right.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/bricks/tube0-right.png',
+        collision = true, _collisionScale = 1, collisionStatic = true,
+        trigger = false,
       },
     },
     -- Clouds0

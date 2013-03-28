@@ -58,7 +58,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->core->CreateObject( "camera", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   game->core->CreateObject( "active-object", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
-  game->world->AddActiveObject( game->core->GetObject( "defaults/active-object" ) );
+  //game->world->AddActiveObject( game->core->GetObject( "defaults/active-object" ) );
 
   obj = game->core->CreateObject( "test-bg-2" );
   obj->SetPosition( Vec3( 50.0f, 50.0f, -9.0f ) );
@@ -747,7 +747,10 @@ void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos )
   } else {
     obj = game->core->CreateObject( name );
     obj->SetPosition( pos );
-    game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
+    obj->Update( 0.0f );
+    WorldGrid::WorldGridPosition gridPos = game->world->GetGridPositionByObject( *obj );
+    __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => gridPos[%d; %d]", gridPos.x, gridPos.y );
+    game->world->AttachObjectToGrid( gridPos, obj );
   }
   __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => object['%s'] parent['%s']", obj->GetNameFull().c_str(), obj->GetParentNameFull().c_str() );
 

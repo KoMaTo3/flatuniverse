@@ -100,7 +100,7 @@ void WorldGridManager::Update( bool forceLoadGrids )
       //for( int q =  )
     }//iter
 
-    //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => grids to unload %d", greedsToUnload.size() );
+    __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => grids to unload %d", greedsToUnload.size() );
     iterGrid = greedsToUnload.begin();
 
     while( iterGrid != greedsToUnload.end() )
