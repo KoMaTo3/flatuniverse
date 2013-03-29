@@ -328,11 +328,24 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //g2Button* MyButton = game->core->gui->AddButton( 5, 5, "Hello, World!", testButton );
   //g2TextField *it = game->core->gui->AddTextField( 100, 100, "test" );
   //MyButton = game->core->gui->AddButton( 5, 30, "test2", testButton );
+  float renderTime = 0.0f, renderPeriod = 1.0f / 60.0f;
 
   while( game->core->Update() )
   {
     //__log.PrintInfo( Filelevel_DEBUG, "=> core->Redraw" );
-    game->core->Redraw();
+    if( true ) { //max FPS
+      game->core->Redraw();
+      ++currentFps;
+    } else { //limited FPS
+      renderTime += sTimer.GetDeltaF();
+      if( renderTime >= renderPeriod ) {
+        while( renderTime >= renderPeriod ) {
+          renderTime -= renderPeriod;
+        }
+        game->core->Redraw();
+        ++currentFps;
+      }
+    }
 
     //__log.PrintInfo( Filelevel_DEBUG, "=> world->Update" );
     game->world->Update();
@@ -430,7 +443,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         RenderableQuad *quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
         quad->SetColor( Vec4( ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, 0.1f ) );
         quad->SetRotation( ( rand() % 3600 ) / 10.0f );
-        quad->SetPosition( Vec3( ( rand() % 1000 ) / 10.0f, ( rand() % 1000 ) / 10.0f, 0.0f ) );
+        quad->SetPosition( Vec3( ( rand() % 1000 ) / 10.0f, ( rand() % 1000 ) / 10.0f, ( rand() % 10 - 5 ) / 10.0f ) );
+        obj->SetPosition( Vec3( ( rand() % 10000 - 5000 ) / 25.0f, ( rand() % 10000 - 5000 ) / 25.0f, 0.0f ) );
         quad->SetSize( Vec2( ( rand() % 500 ) / 10.0f, ( rand() % 500 ) / 10.0f ) );
         quad->SetTexture( "data/temp/null.png" );
         //obj->EnableCollision();
@@ -510,8 +524,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       }
     }
       //obj->SetPosition( Vec3( -20.0f, 50.0f + Math::Sin16( rot * 5.0f ) * 50.0f, 0.0f ) );
-
-    ++currentFps;
 
     sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), __worldGridList->size() );
     game->core->SetWindowTitle( tempChar );
