@@ -24,6 +24,7 @@ Renderable::~Renderable()
 RenderableQuad* RenderableQuad::SetPosition( const Vec3& newPosition )
 {
   this->position = newPosition;
+  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetPosition => pos[%3.1f; %3.1f]", newPosition.x, newPosition.y );
   //this->isChanged = true;
   return this;
 }//SetPosition

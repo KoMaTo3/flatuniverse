@@ -55,7 +55,9 @@ function CollisionPlayer( player, target )
     playerState.onGroundTime = GetTime()
   elseif IsObjectUnderThis( player, target ) then
     if ObjectHasTag( target, 'brick-breakable' ) then
-      ObjectAttr( target, { textureName = 'temp/brick3.png' } )
+      local x, y = ObjectAttr( target, { 'position' } )
+      animation[ 'timer'..SetTimer( 0.01, 'DoAnimationBrickDisplace' ) ] = { step = 1, time = 0, timeMax = 8, object = target, pos = { x = x, y = y } }
+      -- ObjectAttr( target, { textureName = 'temp/brick3.png' } )
     end
     if ObjectHasTag( target, 'has-mushroom' ) then
       PushMushroom( target )
@@ -229,3 +231,24 @@ function CollisionMushroom( mushroom, target )
     ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
   end
 end
+
+--[[ DoAnimationBrickDisplace ]]
+function DoAnimationBrickDisplace( timerId )
+  local keyByTimer = 'timer'..timerId
+  if animation[ keyByTimer ] == nil then
+    do return false end
+  end
+
+  local anim = animation[ keyByTimer ]
+
+  if anim.step == 1 then
+    anim.time = anim.time + 1
+    if anim.time < anim.timeMax then
+      ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y - math.sin( anim.time / anim.timeMax * 3.14 ) * 10 ) } )
+      animation[ 'timer'..SetTimer( 1/60, 'DoAnimationBrickDisplace' ) ] = anim
+    else
+      ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y ) } )
+      animation[ keyByTimer ] = nil
+    end
+  end
+end -- DoAnimationBrickDisplace
