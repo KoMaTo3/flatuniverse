@@ -6,6 +6,8 @@ Release/logs/
 Release/flatuniverse.exp
 Release/flatuniverse.lib
 Release/flatuniverse.pdb
+Release/flatuniverse.exe
+Release/data/temp/*.fu
 flatuniverse/Debug/
 flatuniverse/Release/
 flatuniverse.ncb
