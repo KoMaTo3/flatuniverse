@@ -208,7 +208,7 @@ bool WorldGrid::GetGridDump( FU_OUT memory& dump )
   LoadFromDump
 =============
 */
-bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject )
+bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword version )
 {
   __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::LoadFromDump => dump length %d byte(s) rootObject[x%X]", dump.getLength(), rootObject );
   MemoryReader reader( dump );
@@ -222,7 +222,7 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject )
   {
     //object = new Object( name, ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName.c_str() ) ) );
     object = new Object();
-    object->LoadFromBuffer( reader, rootObject );
+    object->LoadFromBuffer( reader, rootObject, version );
 
     //this->objects.push_back( ObjectPointerType() );
     //this->objects.rbegin()->Init( object );

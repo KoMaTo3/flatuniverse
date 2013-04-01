@@ -227,7 +227,7 @@ void ObjectTrigger::SaveToBuffer( MemoryWriter &writer )
   LoadFromBuffer
 =============
 */
-void ObjectTrigger::LoadFromBuffer( MemoryReader &reader )
+void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const Dword version )
 {
   Vec3 v3;
 
@@ -236,5 +236,5 @@ void ObjectTrigger::LoadFromBuffer( MemoryReader &reader )
 
   DEF_DELETE( this->triggerRect );
   this->triggerRect = new Collision( this->position );
-  this->triggerRect->LoadFromBuffer( reader );
+  this->triggerRect->LoadFromBuffer( reader, "", version );
 }//LoadFromBuffer

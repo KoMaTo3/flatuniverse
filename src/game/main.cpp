@@ -70,7 +70,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   obj = game->core->CreateObject( "player" );
   col = obj->EnableCollision();
-  col->InitSquare( Vec3( 17.0f, 20.0f, 0.0f ) );
+  col->InitSquare( Vec3( 14.0f, 20.0f, 0.0f ) );
   /*
   polyPoints.clear();
   polyPoints.push_back( Vec2( -8.0f,  10.0f ) );
@@ -332,8 +332,10 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   while( game->core->Update() )
   {
+    game->Update();
+
     //__log.PrintInfo( Filelevel_DEBUG, "=> core->Redraw" );
-    if( true ) { //max FPS
+    if( false ) { //max FPS
       game->core->Redraw();
       ++currentFps;
     } else { //limited FPS
@@ -350,7 +352,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     //__log.PrintInfo( Filelevel_DEBUG, "=> world->Update" );
     game->world->Update();
     //__log.PrintInfo( Filelevel_DEBUG, "=> game->Update" );
-    game->Update();
 
     t += sTimer.GetDeltaF();
     rot += sTimer.GetDeltaF();
@@ -582,6 +583,10 @@ Game::Game()
   LUAFUNC_ObjectHasTag      = Game::LUA_ObjectHasTag;
   LUAFUNC_ObjectAddTag      = Game::LUA_ObjectAddTag;
   LUAFUNC_ObjectRemoveTag   = Game::LUA_ObjectRemoveTag;
+
+  Collision::SetInitCollisionHandler( Game::LUA_ListenCollision );
+  Collision::SetDefaultCollisionHandler( Game::CollisionProc );
+  Collision::SetCollisionListenerList( &this->luaCollisionListeners );
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor

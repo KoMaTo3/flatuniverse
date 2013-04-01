@@ -39,29 +39,6 @@ public:
       luaMouseMoveListeners;
 
   //lua-слушатели коллизий
-  class luaCollisionListenerStruct {
-  public:
-    Collision *object;
-    std::string funcName;
-
-    luaCollisionListenerStruct( const luaCollisionListenerStruct& setFrom )
-      :object( setFrom.object ), funcName( setFrom.funcName ) {
-    }
-
-    luaCollisionListenerStruct( Collision *setObject, const std::string &setFuncName )
-      :object( setObject ), funcName( setFuncName ) {
-    }
-
-    luaCollisionListenerStruct& operator=( const luaCollisionListenerStruct& setFrom ) {
-      this->funcName  = setFrom.funcName;
-      this->object    = setFrom.object;
-      return *this;
-    }
-
-  private:
-    luaCollisionListenerStruct(){}
-  };
-  typedef std::deque< luaCollisionListenerStruct > luaCollisionListenersList;
   luaCollisionListenersList luaCollisionListeners;
 
   //триггеры

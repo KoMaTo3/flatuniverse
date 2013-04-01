@@ -251,11 +251,12 @@ void WorldSaver::SaveToFile( const std::string& fileName )
   LoadFromFile
 =============
 */
-void WorldSaver::LoadFromFile( const std::string& fileName )
+Dword WorldSaver::LoadFromFile( const std::string& fileName )
 {
   memory data;
-  if( !__fileManager->GetFile( fileName, data ) )
-    return;
+  if( !__fileManager->GetFile( fileName, data ) ) {
+    return 0;
+  }
   __log.PrintInfo( Filelevel_DEBUG, "WorldSaver::LoadFromFile => '%s'", fileName.c_str() );
 
   Dword headerLength, worldDataLength;
@@ -263,8 +264,8 @@ void WorldSaver::LoadFromFile( const std::string& fileName )
   Dword version;
   headerReader >> version;
   if( version != WOLDSAVER_FILE_VERSION ) {
-    __log.PrintInfo( Filelevel_ERROR, "WorldSaver::LoadFromFile => file '%s' has bad version of data (x%X), needed version x%X", fileName.c_str(), version, WOLDSAVER_FILE_VERSION );
-    return;
+    __log.PrintInfo( Filelevel_WARNING, "WorldSaver::LoadFromFile => file '%s' has bad version of data (x%X), needed version x%X", fileName.c_str(), version, WOLDSAVER_FILE_VERSION );
+    //return 0;
   }
 
   headerReader.SeekFromStart( data.getLength() - sizeof( headerLength ) );
@@ -311,4 +312,6 @@ void WorldSaver::LoadFromFile( const std::string& fileName )
     }
     this->grids.push_back( grid );
   }
+
+  return version;
 }//LoadFromFile
