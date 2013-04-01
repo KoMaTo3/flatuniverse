@@ -43,6 +43,10 @@ function Main()
   ListenKeyboard( 'PlayerControl' )
   ListenCollision( 'CollisionPlayer', 'player' )
   ObjectAddTag( 'player', 'player' )
+  ObjectRemove( 'camera-mario-style' )
+  ObjectCreate( 'camera-mario-style', 0, 0, 0 )
+  SetCamera( 'camera-mario-style' )
+  SetTimer( 1/60, 'UpdateCamera' )
 
   -- reset bricks
 
@@ -228,4 +232,12 @@ function CollisionMushroom( mushroom, target )
     local vx, vy = ObjectAttr( mushroom, { 'collisionVelocity' } )
     ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
   end
+end
+
+function UpdateCamera()
+  local camera = GetCamera( 'camera-mario-style' )
+  local _, cy = ObjectGetPos( camera )
+  local px, _ = ObjectGetPos( 'player' )
+  ObjectSetPos( camera, math.max( px, 0 ), cy )
+  SetTimer( 0, 'UpdateCamera' )
 end

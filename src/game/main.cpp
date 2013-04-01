@@ -333,6 +333,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   while( game->core->Update() )
   {
     //__log.PrintInfo( Filelevel_DEBUG, "=> core->Redraw" );
+    game->Update();
+
     if( true ) { //max FPS
       game->core->Redraw();
       ++currentFps;
@@ -350,7 +352,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     //__log.PrintInfo( Filelevel_DEBUG, "=> world->Update" );
     game->world->Update();
     //__log.PrintInfo( Filelevel_DEBUG, "=> game->Update" );
-    game->Update();
 
     t += sTimer.GetDeltaF();
     rot += sTimer.GetDeltaF();
@@ -656,8 +657,10 @@ Vec2 Game::LUA_GetObjectPos( const std::string &name )
 void Game::LUA_SetObjectPos( const std::string &name, const Vec2 &pos )
 {
   Object *obj = game->core->GetObject( name );
-  if( obj )
+  if( obj ) {
     obj->SetPosition2D( pos );
+    obj->Update( 0.0f );
+  }
 }//LUA_SetObjectPos
 
 
