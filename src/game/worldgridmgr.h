@@ -16,7 +16,7 @@
 #include "worldsaver.h"
 
 
-#define WORLD_GRID_UPDATE_INTERVAL    ( 1.0f / 60.0f )    //период обновления состояния гридов
+#define WORLD_GRID_UPDATE_INTERVAL    ( 1.0f / 10.0f )    //период обновления состояния гридов
 
 
 

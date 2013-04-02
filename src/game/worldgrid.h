@@ -42,6 +42,9 @@ public:
     WorldGridPosition( Short newX, Short newY )
       :x( newX ), y( newY )
     { }
+    bool operator != ( const WorldGridPosition &with ) {
+      return this->x != with.x || this->y != with.y;
+    }
   };
 
 private:
@@ -62,6 +65,8 @@ public:
         GetPosition () { return this->position; }
   bool  GetGridDump ( FU_OUT memory& dump );
   bool  LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion );
+  bool  GetFirstMovableObject( WorldGridObjectList::iterator &iter );
+  bool  GetNextMovableObject( WorldGridObjectList::iterator &iter );
 
   void  Update();
 };

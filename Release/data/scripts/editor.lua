@@ -40,6 +40,7 @@ settings = {
       isAlt   = false,
     },
     buffer = {},  -- буфер действий для отмены
+    gridSize = GetGridSize(),
 }
 mousePos = {    -- экранная позиция курсора
     x = 0,
@@ -116,6 +117,14 @@ GUI = {
       end
       for y = 0, settings.windowSize.y, tileSize do
         Render( 'line', 0, sy + y, 0, settings.windowSize.x, sy + y, 0, '00FF0044' )
+      end
+      for gx = 0,1 do
+        local x = ( math.floor( cameraX / settings.gridSize ) + gx ) * settings.gridSize - cameraX + settings.windowSize.x * 0.5
+        Render( 'line', x, 0, 0, x, settings.windowSize.y, 0, 'FF0000FF' )
+      end
+      for gy = 0,1 do
+        local y = ( math.floor( cameraY / settings.gridSize ) + gy ) * settings.gridSize - cameraY + settings.windowSize.y * 0.5
+        Render( 'line', 0, y, 0, settings.windowSize.x, y, 0, 'FF0000FF' )
       end
     end,
   }, -- grid
@@ -653,7 +662,8 @@ end --ToggleLayer
 --
 function EditorUpdateDebug()
   local cx, cy = GetCameraPos()
-  --GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
+  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ) ) )
+  -- GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
   SetTimer( 0.01, 'EditorUpdateDebug' )
 end -- EditorUpdateDebug
 

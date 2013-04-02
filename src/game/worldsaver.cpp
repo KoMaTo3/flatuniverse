@@ -311,7 +311,7 @@ Dword WorldSaver::LoadFromFile( const std::string& fileName )
     if( version >= 0x00000004 ) {
       headerReader >> grid->version;
     } else {
-      grid->version = 0;
+      grid->version = version;
     }
     headerReader >> grid->x;
     headerReader >> grid->y;

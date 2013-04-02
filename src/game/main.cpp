@@ -52,8 +52,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //__log.PrintInfo( Filelevel_DEBUG, "test: %s", core->GetObject( "gui" )->GetNameFull().c_str() );
   //game->core->CreateObject( "bottom-block", game->core->GetObject( "gui" ) )->SetPosition( Vec3( 50.0f, 85.0f, 2.0f ) )->EnableRenderableGUI()->SetSize( Vec2( 100.0f, 30.0f ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha * 0.5f ) )
   //  ->SetTexture( "data/temp/ui-bg-0.png" );
-  game->core->CreateObject( "tooltips" )->SetLockToDelete( true );
-  game->core->CreateObject( "mouse-grid", game->core->GetObject( "tooltips" ) );
+  //game->core->CreateObject( "tooltips" )->SetLockToDelete( true );
+  //game->core->CreateObject( "mouse-grid", game->core->GetObject( "tooltips" ) );
   game->core->CreateObject( "defaults" )->SetLockToDelete( true );
   game->core->CreateObject( "camera", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   game->core->CreateObject( "active-object", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );

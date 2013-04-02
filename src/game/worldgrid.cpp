@@ -265,3 +265,45 @@ void WorldGrid::Update()
     }
   } while( changed );
 }//Update
+
+
+
+/*
+=============
+  GetFirstMovableObject
+=============
+*/
+bool WorldGrid::GetFirstMovableObject( WorldGridObjectList::iterator &iter ) {
+  WorldGridObjectList::iterator iterEnd = this->objects.end();
+  Object *object;
+  for( iter = this->objects.begin(); iter != iterEnd; ++iter ) {
+    if( ( *iter )->GetValid() ) {
+      object = ( *iter )->GetObject< Object >();
+      if( object->GetCollision() && !object->GetCollision()->IsStatic() ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}//GetFirstMovableObject
+
+
+
+/*
+=============
+  GetNextMovableObject
+=============
+*/
+bool WorldGrid::GetNextMovableObject( WorldGridObjectList::iterator &iter ) {
+  WorldGridObjectList::iterator iterEnd = this->objects.end();
+  Object *object;
+  for( ++iter; iter != iterEnd; ++iter ) {
+    if( ( *iter )->GetValid() ) {
+      object = ( *iter )->GetObject< Object >();
+      if( object->GetCollision() && !object->GetCollision()->IsStatic() ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}//GetNextMovableObject

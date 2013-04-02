@@ -45,8 +45,8 @@ function Main()
   ObjectAddTag( 'player', 'player' )
   ObjectRemove( 'camera-mario-style' )
   ObjectCreate( 'camera-mario-style', 0, 0, 0 )
-  SetCamera( 'camera-mario-style' )
-  SetTimer( 1/60, 'UpdateCamera' )
+  -- SetCamera( 'camera-mario-style' )
+  -- SetTimer( 1/60, 'UpdateCamera' )
 
   -- reset bricks
 
@@ -240,7 +240,7 @@ function CollisionMushroom( mushroom, target, flags, vx, vy )
     ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
   elseif bit32.band( flags, 4 ) == 4 then -- stay on target
     if ObjectHasTag( target, 'push-bottom' ) then
-      ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', vx, -100 ) } )
+      ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', vx, -150 ) } )
     end
   end
   --[[

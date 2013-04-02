@@ -36,8 +36,9 @@ void WorldGridManager::Update( bool forceLoadGrids )
 
     //Update grids
     WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
-    for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
+    for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid ) {
       ( *iterGrid )->Update();
+    }
 
     WorldGridObjectList::iterator iter, iterEnd;
     Short x, y;
@@ -110,11 +111,44 @@ void WorldGridManager::Update( bool forceLoadGrids )
       iterGrid = greedsToUnload.begin();
     }
 
+    iterGridEnd = __worldGridList->end();
+    bool  finded,
+          keepChecking = true;
+    Object *object;
+    for( iterGrid = __worldGridList->begin(); keepChecking && iterGrid != iterGridEnd; ++iterGrid ) {
+      WorldGrid::WorldGridPosition gridPos( ( *iterGrid )->GetPosition() );
+      for( finded = ( *iterGrid )->GetFirstMovableObject( iter ); keepChecking && finded; finded = ( *iterGrid )->GetNextMovableObject( iter ) ) {
+        object = ( *iter )->GetObject< Object >();
+        WorldGrid::WorldGridPosition pos( this->GetGridPositionByObject( *object ) );
+        if( pos != gridPos ) {
+          __log.PrintInfo( Filelevel_WARNING, "WorldGridManager::Update => move object '%s' from grid[%d; %d] to grid[%d; %d]", object->GetNameFull().c_str(), gridPos.x, gridPos.y, pos.x, pos.y );
+          ( *iterGrid )->DetachObject( object );
+          this->LoadGrid( pos )->AttachObject( object );
+          keepChecking = false;
+          break;
+        }
+      }//for
+    }//for
+    //Проверка на выход объектов за пределы гридов: проверяем все динамические коллизии
     /*
-    WorldGridList::iterator iter, iterEnd = __worldGridList->end();
-    for( iter = __worldGridList->begin(); iter != iterEnd; ++iter )
-    {
-    }//for __worldGridList
+    if( __objectByCollision && __objectByCollision->size() ) {
+      ObjectByCollisionList::iterator iter, iterTmp, iterEnd;
+      bool needRepear;
+      do {
+        needRepear = false;
+        iterEnd = __objectByCollision->end();
+        Object *object;
+        Vec3 pos;
+        for( iter = __objectByCollision->begin(); iter != iterEnd; ++iter ) {
+          if( ( *iter )->object.GetValid() ) {
+            object = ( *iter )->object.GetObject< Object >();
+            if( object->GetCollision() && !object->GetCollision()->IsStatic() ) {
+              pos = object->GetPosition();
+            }
+          }
+        }
+      } while( needRepear );
+    }
     */
 
     this->currentTime -= WORLD_GRID_UPDATE_INTERVAL;
