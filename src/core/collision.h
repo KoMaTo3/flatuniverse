@@ -45,7 +45,7 @@ typedef std::deque< luaCollisionListenerStruct > luaCollisionListenersList;
 class Collision
 {
 public:
-  typedef void CollisionHandler( Collision* a, Collision* b );
+  typedef void CollisionHandler( Collision* a, Collision* b, Byte flags, const Vec3 &velocity );
   typedef void CollisionHandlerInit( const std::string &funcName, const std::string &objectName );
   typedef std::deque< CollisionHandler* > CollisionHandlerList;
 

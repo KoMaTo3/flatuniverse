@@ -527,6 +527,8 @@ void Collision::ResolveCollision()
   //__log.PrintInfo( Filelevel_DEBUG, ". power[%3.3f; %3.3f] vector[%3.3f; %3.3f] useAllAxices[%d]", result->power.x, result->power.y, result->resolveVector.x, result->resolveVector.y, result->useAllAxices );
 
   Vec3 resolved( Vec3Null );
+  Byte flags = 0;
+  Vec3 oldVelocity( this->GetVelocity() );
   if( result->useAllAxices ) {
     //Vec3 coeffVec = result->resolveVector;
     //coeffVec.Normalize();
@@ -536,16 +538,18 @@ void Collision::ResolveCollision()
     //  this->velocity.y = 0.0f;
     //}
   } else {
-    if( result->power.x < result->power.y ) //смещаем по x
+    if( result->power.x < result->power.y ) { //смещаем по x
       result->resolveVector.y = 0.0f;
-    else  //смещаем по y
-    {
+      flags |= ( result->resolveVector.x < 0.0f ? 8 : 2 );
+    } else { //смещаем по y
       result->resolveVector.x = 0.0f;
-      if( result->resolveVector.y < 0.0f && this->velocity.y > 0.0f )
+      if( result->resolveVector.y < 0.0f && this->velocity.y > 0.0f ) {
         this->velocity.y = 0.0f;
-      else
-      if( result->resolveVector.y > 0.0f && this->velocity.y < 0.0f )
+        flags |= 4;
+      } else if( result->resolveVector.y > 0.0f && this->velocity.y < 0.0f ) {
         this->velocity.y = 0.0f;
+        flags |= 1;
+      }
     }
   }
   this->SetPositionBy( result->resolveVector );
@@ -557,7 +561,7 @@ void Collision::ResolveCollision()
   if( this->handlers && this->handlers->size() ) {
     CollisionHandlerList::const_iterator iter, iterEnd = this->handlers->end();
     for( iter = this->handlers->begin(); iter != iterEnd; ++iter ) {
-      ( *iter )( this, result->target );
+      ( *iter )( this, result->target, flags, oldVelocity );
     }
   }
 

@@ -13,7 +13,7 @@ WorldGridList *__worldGridList = NULL;
   [in] rootObject: объект, в котором будет храниться грид
 */
 WorldGrid::WorldGrid( const WorldGrid::WorldGridPosition &newPosition )
-:position( newPosition )
+:position( newPosition ), version( 0 )
 {
   WorldGridList::iterator iter, iterEnd = __worldGridList->end();
 
@@ -208,11 +208,12 @@ bool WorldGrid::GetGridDump( FU_OUT memory& dump )
   LoadFromDump
 =============
 */
-bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword version )
+bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion )
 {
   __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::LoadFromDump => dump length %d byte(s) rootObject[x%X]", dump.getLength(), rootObject );
   MemoryReader reader( dump );
   Dword q = 0, objectsNum;
+  this->version = fileVersion;
   reader >> objectsNum;
   __log.PrintInfo( Filelevel_DEBUG, ". %d objects in dump", objectsNum );
 
@@ -222,7 +223,7 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dwor
   {
     //object = new Object( name, ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName.c_str() ) ) );
     object = new Object();
-    object->LoadFromBuffer( reader, rootObject, version );
+    object->LoadFromBuffer( reader, rootObject, this->version );
 
     //this->objects.push_back( ObjectPointerType() );
     //this->objects.rbegin()->Init( object );

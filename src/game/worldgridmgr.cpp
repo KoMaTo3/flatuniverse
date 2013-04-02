@@ -268,8 +268,9 @@ WorldGrid* WorldGridManager::LoadGrid( const WorldGrid::WorldGridPosition& gridP
   grid = new WorldGrid( gridPos );
 
   memory gridData;
-  if( this->worldSaver.LoadGrid( gridPos.x, gridPos.y, gridData ) ) {
-    grid->LoadFromDump( gridData, this->rootGridObject, this->version );
+  Dword gridVersion = 0;
+  if( this->worldSaver.LoadGrid( gridPos.x, gridPos.y, gridData, gridVersion ) ) {
+    grid->LoadFromDump( gridData, this->rootGridObject, gridVersion );
   }
 
   __worldGridList->push_back( grid );

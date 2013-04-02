@@ -1677,7 +1677,7 @@ void Game::LUA_ListenCollision( const std::string &funcName, const std::string &
   CollisionProc
 =============
 */
-void Game::CollisionProc( Collision *a, Collision *b ) {
+void Game::CollisionProc( Collision *a, Collision *b, Byte flags, const Vec3 &velocity ) {
   Object *objectA = game->core->GetObjectByCollision( a );
   if( !objectA ) {
     __log.PrintInfo( Filelevel_ERROR, "Game::CollisionProc => object A by collision x%p not found", a );
@@ -1695,7 +1695,7 @@ void Game::CollisionProc( Collision *a, Collision *b ) {
   luaCollisionListenersList::iterator iter, iterEnd = game->luaCollisionListeners.end();
   for( iter = game->luaCollisionListeners.begin(); iter != iterEnd; ++iter ) {
     if( iter->object == a ) {
-      LUACALLBACK_ListenCollision( game->lua, iter->funcName, objectA->GetNameFull(), objectB->GetNameFull() );
+      LUACALLBACK_ListenCollision( game->lua, iter->funcName, objectA->GetNameFull(), objectB->GetNameFull(), flags, velocity );
     }
   }
 }//CollisionProc

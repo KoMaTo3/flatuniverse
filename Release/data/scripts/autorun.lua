@@ -54,7 +54,16 @@ end -- Main
 Main()
 
 --[[ CollisionPlayer ]]
-function CollisionPlayer( player, target )
+function CollisionPlayer( player, target, flags, vx, vy )
+  if ObjectHasTag( target, 'no-reset-player-velocity' ) then
+    ObjectAttr( player, { collisionVelocity = vx..' '..vy } )
+  end
+  if ObjectHasTag( target, 'mushroom' ) then
+    ObjectRemove( target )
+    local cx, cy, rx, ry = ObjectAttr( player, { 'collisionSize', 'renderableSize' } )
+    ObjectAttr( player, { collisionSize = string.format( '%f %f', cx * 1.2, cy * 1.2 ), renderableSize = string.format( '%f %f', rx * 1.2, ry * 1.2 ) } )
+    do return false end
+  end
   if IsObjectUpperThis( player, target ) then
     playerState.onGroundTime = GetTime()
   elseif IsObjectUnderThis( player, target ) then
@@ -218,23 +227,23 @@ function DoAnimationMushroom( timerId )
       animation[ keyByTimer ] = nil
       ObjectAttr( anim.object, { collision = true, collisionSize = '32 32', collisionVelocity = '150 0', collisionAcceleration = '0 400', collisionStatic = false } )
       ObjectAddTag( anim.object, 'mushroom' )
+      ObjectAddTag( anim.object, 'no-reset-player-velocity' )
       ListenCollision( 'CollisionMushroom', anim.object )
     end
   end
 end -- DoAnimationMushroom
 
 --[[ CollisionMushroom ]]
-function CollisionMushroom( mushroom, target )
-  if ObjectHasTag( target, 'player' ) then
-    ObjectRemove( mushroom )
-    local cx, cy, rx, ry = ObjectAttr( target, { 'collisionSize', 'renderableSize' } )
-    ObjectAttr( target, { collisionSize = string.format( '%f %f', cx * 1.2, cy * 1.2 ), renderableSize = string.format( '%f %f', rx * 1.2, ry * 1.2 ) } )
-    do return false end
+function CollisionMushroom( mushroom, target, flags, vx, vy )
+  if bit32.band( flags, 2 ) == 2 or bit32.band( flags, 8 ) == 8 then
+    ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
   end
+  --[[
   if IsObjectRightThis( mushroom, target ) or IsObjectLeftThis( mushroom, target ) then
     local vx, vy = ObjectAttr( mushroom, { 'collisionVelocity' } )
     ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
   end
+  ]]
 end -- CollisionMushroom
 
 --[[ UpdateCamera ]]

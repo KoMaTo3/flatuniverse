@@ -99,7 +99,7 @@ public:
   static void   MouseKeyProc          ( Dword keyId, bool isPressed );
   static void   MouseMoveProc         ( const Vec2 &pos );
   static void   OnRemoveTrigger       ( ObjectTrigger *trigger );
-  static void   CollisionProc         ( Collision *a, Collision *b );
+  static void   CollisionProc         ( Collision *a, Collision *b, Byte flags, const Vec3 &velocity );
 
   //debug/test
 };

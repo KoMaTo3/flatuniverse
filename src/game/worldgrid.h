@@ -47,6 +47,7 @@ public:
 private:
   WorldGridPosition         position;   //координаты мира
   WorldGridObjectList       objects;    //все объекты грида
+  Dword                     version;    //версия
   //WorldGridObjectList activeObjects;    //список активных объектов, запрещающих гриду выгрузиться. грид должен сам следить за этим списком при добавлении/удалении объектов
 
 public:
@@ -60,7 +61,7 @@ public:
   const WorldGridPosition&
         GetPosition () { return this->position; }
   bool  GetGridDump ( FU_OUT memory& dump );
-  bool  LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword version );
+  bool  LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion );
 
   void  Update();
 };

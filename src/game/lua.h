@@ -118,7 +118,7 @@ void LUACALLBACK_ListenMouseKey   ( Lua *lua, const std::string &funcName, Dword
 void LUACALLBACK_ListenMouseMove  ( Lua *lua, const std::string &funcName, const Vec2 &pos );
 void LUACALLBACK_ObjectTrigger    ( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger );
 //void LUACALLBACK_GuiTrigger       ( Lua *lua, const std::string &funcName, const std::string &objectName );
-void LUACALLBACK_ListenCollision  ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName );
+void LUACALLBACK_ListenCollision  ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, Byte flags, const Vec3 &velocity );
 
 
 
@@ -197,7 +197,7 @@ public:
   static void LUACALLBACK_ListenMouseMove ( Lua *lua, const std::string &funcName, const Vec2 &pos );
   static void LUACALLBACK_ObjectTrigger   ( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger );
   //static void LUACALLBACK_GuiTrigger      ( Lua *lua, const std::string &funcName, const std::string &objectName );
-  static void LUACALLBACK_ListenCollision ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName );
+  static void LUACALLBACK_ListenCollision ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, Byte flags, const Vec3 &velocity );
 
 private:
   static int  GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color );

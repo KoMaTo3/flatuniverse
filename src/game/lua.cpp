@@ -1682,9 +1682,9 @@ int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
   LUACALLBACK_ListenCollision
 =============
 */
-void LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName )
+void LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, Byte flags, const Vec3 &velocity )
 {
-  Lua::LUACALLBACK_ListenCollision( lua, funcName, objectName, targetName );
+  Lua::LUACALLBACK_ListenCollision( lua, funcName, objectName, targetName, flags, velocity );
 }//LUACALLBACK_ListenCollision
 
 
@@ -1694,7 +1694,7 @@ void LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, const s
   LUACALLBACK_ListenCollision
 =============
 */
-void Lua::LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName ) {
+void Lua::LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, Byte flags, const Vec3 &velocity ) {
   LuaStateCheck state( lua->luaState );
   lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
   if( !lua_isfunction( lua->luaState, -1 ) ) {
@@ -1704,7 +1704,10 @@ void Lua::LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, co
 
   lua_pushstring( lua->luaState, objectName.c_str() ); //stack: funcName objectName
   lua_pushstring( lua->luaState, targetName.c_str() ); //stack: funcName objectName targetName
-  if( lua_pcall( lua->luaState, 2, 0, 0 ) ) {
+  lua_pushinteger( lua->luaState, flags ); //stack: funcName objectName targetName flags
+  lua_pushnumber( lua->luaState, velocity.x ); //stack: funcName objectName targetName flags velocity.x
+  lua_pushnumber( lua->luaState, velocity.y ); //stack: funcName objectName targetName flags velocity.x velocity.y
+  if( lua_pcall( lua->luaState, 5, 0, 0 ) ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenCollision => error by calling function '%s'", funcName.c_str() );
     return;
   }
