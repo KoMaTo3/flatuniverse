@@ -247,7 +247,7 @@ public:
   void                Update              ( float dt );
 
   void                SaveToBuffer        ( MemoryWriter &writer );
-  void                LoadFromBuffer      ( MemoryReader &reader, Object *rootObject );
+  void                LoadFromBuffer      ( MemoryReader &reader, Object *rootObject, const Dword version );
 
   Object*             GetObject           ( const std::string& name, Object *parent = NULL );
 

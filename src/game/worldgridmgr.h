@@ -31,6 +31,7 @@ private:
   float               gridSize;           //размер грида в пикселях
   Short               gridsAroundObject;  //число гридов, которые должны быть активны, в каждую сторону от объекта
   WorldSaver          worldSaver;         //хранилище мира
+  Dword               version;            //версия загруженного файла
 
 public:
   WorldGridManager( Object* newRootGridObject, Short setGridsAroundObject = 2, float setGridSize = 1024.0f );

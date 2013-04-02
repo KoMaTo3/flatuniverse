@@ -24,6 +24,7 @@ Renderable::~Renderable()
 RenderableQuad* RenderableQuad::SetPosition( const Vec3& newPosition )
 {
   this->position = newPosition;
+  //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetPosition => pos[%3.1f; %3.1f]", newPosition.x, newPosition.y );
   //this->isChanged = true;
   return this;
 }//SetPosition
@@ -208,16 +209,16 @@ Vec2 RenderableQuad::GetMiddleTextureCoords()
 */
 void RenderableQuad::SaveToBuffer( MemoryWriter &writer )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SaveToBuffer => texture['%s']", this->info->textureName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SaveToBuffer => texture['%s']", this->info->textureName.c_str() );
   writer << this->info->textureName;
-  __log.PrintInfo( Filelevel_DEBUG, ". pos: sizeof[%d]", sizeof( this->GetPosition() ) );
+  //__log.PrintInfo( Filelevel_DEBUG, ". pos: sizeof[%d]", sizeof( this->GetPosition() ) );
   writer << this->GetPosition();
-  __log.PrintInfo( Filelevel_DEBUG, ". rot" );
+  //__log.PrintInfo( Filelevel_DEBUG, ". rot" );
   writer << this->GetRotation();
   writer << this->GetColor();
   writer << this->GetSize();
   writer << this->GetScale();
-  __log.PrintInfo( Filelevel_DEBUG, ". atlas..." );
+  //__log.PrintInfo( Filelevel_DEBUG, ". atlas..." );
   writer << __textureAtlas->GetInvTextureCoords( this->info->textureName, this->GetTexCoords() );
 }//SaveToBuffer
 

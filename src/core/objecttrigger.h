@@ -57,7 +57,7 @@ public:
   void  AddOnRemoveHandler      ( ObjectTriggerOnRemoveHandler handler );
 
   void  SaveToBuffer            ( MemoryWriter &writer );
-  void  LoadFromBuffer          ( MemoryReader &reader );
+  void  LoadFromBuffer          ( MemoryReader &reader, const Dword version );
 
 private:
   void  _TouchHandlers( Collision *collision, bool isInTrigger );

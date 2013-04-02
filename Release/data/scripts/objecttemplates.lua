@@ -18,6 +18,9 @@ function GetObjectsTemplates()
         collision = true, _collisionScale = 1, collisionStatic = true,
         trigger = false,
       },
+      tags = {
+        'brick-breakable',
+      },
     },
     --
     {

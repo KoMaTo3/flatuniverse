@@ -954,8 +954,8 @@ bool Core::Redraw()
         matrTranslate.Identity();
         matrScale[ 0 ][ 0 ] = 1.0f;
         matrScale[ 1 ][ 1 ] = 1.0f;
-        matrTranslate[ 3 ][ 0 ] = -objCamera->GetPosition().x + this->_window.windowCenter.x;
-        matrTranslate[ 3 ][ 1 ] = -objCamera->GetPosition().y + this->_window.windowCenter.y;
+        matrTranslate[ 3 ][ 0 ] = float( long( -objCamera->GetPosition().x + this->_window.windowCenter.x ) );
+        matrTranslate[ 3 ][ 1 ] = float( -objCamera->GetPosition().y + this->_window.windowCenter.y );
         matrTranslate[ 3 ][ 2 ] = -objCamera->GetPosition().z;
         matrix = matrScale * matrTranslate;
         glUniformMatrix4fv( this->_shaders.matrModelLoc, 1, false, &matrix[ 0 ][ 0 ] );

@@ -1169,7 +1169,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   LoadFromBuffer
 =============
 */
-void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
+void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dword version )
 {
   bool isRenderable, isCollision, isTrigger;
   std::string tmpName, parentName;
@@ -1186,24 +1186,26 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject )
   this->name = tmpName;
   this->_parent = ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName ) );
 
-  if( this->_parent )
-  {
+  if( this->_parent ) {
     this->nameFull = ( this->_parent->_parent ? this->_parent->GetNameFull() + "/" : "" ) + this->name;
     this->_parent->AttachChildObject( this );
-  }
-  else
+  } else {
     this->nameFull = "/" + this->name;
+  }
 
   this->SetPosition( position );
 
-  if( isRenderable )
+  if( isRenderable ) {
     ( ( RenderableQuad* ) this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->LoadFromBuffer( reader );
+  }
 
-  if( isCollision )
-    this->EnableCollision()->LoadFromBuffer( reader );
+  if( isCollision ) {
+    this->EnableCollision()->LoadFromBuffer( reader, this->nameFull, version );
+  }
 
-  if( isTrigger )
-    this->EnableTrigger()->LoadFromBuffer( reader );
+  if( isTrigger ) {
+    this->EnableTrigger()->LoadFromBuffer( reader, version );
+  }
 
   //tags
   Dword tagsCount;

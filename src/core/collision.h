@@ -12,10 +12,41 @@
 
 
 
+class Collision;
+
+//lua-слушатели коллизий
+class luaCollisionListenerStruct {
+public:
+  Collision *object;
+  std::string funcName;
+
+  luaCollisionListenerStruct( const luaCollisionListenerStruct& setFrom )
+    :object( setFrom.object ), funcName( setFrom.funcName ) {
+  }
+
+  luaCollisionListenerStruct( Collision *setObject, const std::string &setFuncName )
+    :object( setObject ), funcName( setFuncName ) {
+  }
+
+  luaCollisionListenerStruct& operator=( const luaCollisionListenerStruct& setFrom ) {
+    this->funcName  = setFrom.funcName;
+    this->object    = setFrom.object;
+    return *this;
+  }
+
+private:
+  luaCollisionListenerStruct(){}
+};
+typedef std::deque< luaCollisionListenerStruct > luaCollisionListenersList;
+
+
+
+
 class Collision
 {
 public:
   typedef void CollisionHandler( Collision* a, Collision* b );
+  typedef void CollisionHandlerInit( const std::string &funcName, const std::string &objectName );
   typedef std::deque< CollisionHandler* > CollisionHandlerList;
 
 private:
@@ -31,6 +62,9 @@ private:
 
   CollisionElement *collisionElement;
   CollisionHandlerList *handlers;
+  static CollisionHandlerInit *InitCollisionHandler;
+  static luaCollisionListenersList *collisionLintenersList;
+  static CollisionHandler *defaultCollisionHandler;
 
   struct CollisionResolver
   {
@@ -84,7 +118,10 @@ public:
   void        AddHandler      ( CollisionHandler *handler );
 
   void        SaveToBuffer    ( MemoryWriter &writer );
-  void        LoadFromBuffer  ( MemoryReader &reader );
+  void        LoadFromBuffer  ( MemoryReader &reader, const std::string &thisObjectName, const Dword version );
+  static inline void SetInitCollisionHandler( CollisionHandlerInit setHandler ) { Collision::InitCollisionHandler = setHandler; }
+  static inline void SetCollisionListenerList( luaCollisionListenersList *setList ) { Collision::collisionLintenersList = setList; }
+  static inline void SetDefaultCollisionHandler( CollisionHandler *setHandler ) { Collision::defaultCollisionHandler = setHandler; }
 
   void        Render          ( float phase, const Vec3 &offset, bool isActive );
 

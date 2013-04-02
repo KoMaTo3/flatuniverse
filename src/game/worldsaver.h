@@ -6,7 +6,7 @@
 
 
 //Версия файла сохранений
-const Dword WOLDSAVER_FILE_VERSION = 0x00000002;
+const Dword WOLDSAVER_FILE_VERSION = 0x00000003;
 
 class WorldSaver
 {
@@ -34,6 +34,6 @@ public:
   void  FreeGrid        ( Short x, Short y );
   void  AllocFreeBlocks ( Dword blocksCount );
 
-  void  LoadFromFile    ( const std::string& fileName );
+  Dword LoadFromFile    ( const std::string& fileName );
   void  SaveToFile      ( const std::string& fileName );
 };
