@@ -19,8 +19,26 @@ function GUILabel:GetText()
 end -- GUILabel:GetText
 
 
+--[[ GUILabel:SetPosition ]]
+function GUILabel:SetPosition( x, y )
+  local width = self.rect.right - self.rect.left
+  local height = self.rect.bottom - self.rect.top
+  self.rect.left = x
+  self.rect.top = y
+  self.rect.right = x + width
+  self.rect.bottom = y + height
+end -- GUILabel:SetPosition
+
+
+--[[ GUILabel:CropByTextWidth ]]
+function GUILabel:CropByTextWidth()
+  local width = Render( 'getTextWidth', self.text )
+  self.rect.right = self.rect.left + width + 8
+end -- GUILabel:CropByTextWidth
+
+
 --[[ GUILabel:Create ]]
-function GUILabel:Create( x0, y0, width, height, setText, parent )
+function GUILabel:Create( x0, y0, width, height, setText, parent, setOnMouseMove )
   local obj = {
     childs = {},
     rect = {
@@ -36,6 +54,7 @@ function GUILabel:Create( x0, y0, width, height, setText, parent )
       border = 'aaaaaaff',
       inner = 'eeeeeeff',
     },
+    OnMouseMove = setOnMouseMove,
   }
   self.__index = self
   local res = setmetatable( obj, self )
@@ -91,6 +110,9 @@ function GUILabel:TestInRect( x, y, dx, dy )
   end
   if result then
     GUIRenderer.activeItem = self
+    if self.OnMouseMove ~= nil then
+      self.OnMouseMove( self )
+    end
     do return true end
   end
   return false

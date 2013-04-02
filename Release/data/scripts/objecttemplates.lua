@@ -1,17 +1,8 @@
 function GetObjectsTemplates()
   return {
-    {
-      name = 'brick0',
-      icon = 'data/temp/brick0.png',
-      attr = {
-        renderable = true, textureName = 'temp/brick0.png',
-        collision = true, _collisionScale = 1, collisionStatic = true,
-        trigger = false,
-      },
-    },
     --
     {
-      name = 'brick0',
+      name = 'Кирпич, бьётся головой',
       icon = 'data/textures/tiles/bricks/brick0.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/bricks/brick0.png',
@@ -24,7 +15,7 @@ function GetObjectsTemplates()
     },
     --
     {
-      name = 'brick1',
+      name = 'Блок',
       icon = 'data/textures/tiles/bricks/brick1.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/bricks/brick1.png',
@@ -34,20 +25,7 @@ function GetObjectsTemplates()
     },
     --
     {
-      name = 'brick2',
-      icon = 'data/temp/brick2.png',
-      attr = {
-        renderable = true, textureName = 'temp/brick2.png',
-        collision = true, _collisionScale = 1, collisionStatic = true,
-        trigger = false,
-      },
-      tags = {
-        'brick-breakable',
-      },
-    },
-    --
-    {
-      name = 'brick3',
+      name = 'Блок',
       icon = 'data/temp/brick3.png',
       attr = {
         renderable = true, textureName = 'temp/brick3.png',
@@ -57,7 +35,7 @@ function GetObjectsTemplates()
     },
     --
     {
-      name = 'enemy0',
+      name = 'Моб: ворона',
       icon = 'data/temp/enemy0.png',
       attr = {
         renderable = true, textureName = 'temp/enemy0.png',
@@ -69,7 +47,7 @@ function GetObjectsTemplates()
     },
     -- Tile000
     {
-      name = 'tile0/a',
+      name = 'Тайл: заросшие кирпичи 1/4',
       icon = 'data/textures/tiles/tile000a.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000a.png',
@@ -79,7 +57,7 @@ function GetObjectsTemplates()
     },
     -- Tile000
     {
-      name = 'tile0/b',
+      name = 'Тайл: заросшие кирпичи 2/4',
       icon = 'data/textures/tiles/tile000b.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000b.png',
@@ -89,7 +67,7 @@ function GetObjectsTemplates()
     },
     -- Tile000
     {
-      name = 'tile0/c',
+      name = 'Тайл: заросшие кирпичи 3/4',
       icon = 'data/textures/tiles/tile000c.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000c.png',
@@ -99,7 +77,7 @@ function GetObjectsTemplates()
     },
     -- Tile000
     {
-      name = 'tile0/d',
+      name = 'Тайл: заросшие кирпичи 4/4',
       icon = 'data/textures/tiles/tile000d.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000d.png',
@@ -109,7 +87,7 @@ function GetObjectsTemplates()
     },
     -- Question-brick
     {
-      name = 'question0',
+      name = 'Блок-триггер спавнит грибы при ударе головой',
       icon = 'data/textures/tiles/question0.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/question0.png',
@@ -122,7 +100,7 @@ function GetObjectsTemplates()
     },
     -- Grass-0
     {
-      name = 'grass0-left',
+      name = 'Трава: фоновая светлая левая часть',
       icon = 'data/textures/tiles/grass/grass0-left.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/grass/grass0-left.png',
@@ -130,7 +108,7 @@ function GetObjectsTemplates()
     },
     -- Grass-0
     {
-      name = 'grass0-middle',
+      name = 'Трава: фоновая светлая средняя часть',
       icon = 'data/textures/tiles/grass/grass0-middle.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/grass/grass0-middle.png',
@@ -138,7 +116,7 @@ function GetObjectsTemplates()
     },
     -- Grass-0
     {
-      name = 'grass0-right',
+      name = 'Трава: фоновая светлая правая часть',
       icon = 'data/textures/tiles/grass/grass0-right.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/grass/grass0-right.png',
@@ -146,7 +124,7 @@ function GetObjectsTemplates()
     },
     -- Grass-1
     {
-      name = 'grass1-left',
+      name = 'Трава: фоновая тёмная левый угол',
       icon = 'data/textures/tiles/grass/grass1-left.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/grass/grass1-left.png',
@@ -154,7 +132,7 @@ function GetObjectsTemplates()
     },
     -- Grass-1
     {
-      name = 'grass1-middle',
+      name = 'Трава: фоновая тёмная центр 1/2',
       icon = 'data/textures/tiles/grass/grass1-middle.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/grass/grass1-middle.png',
@@ -162,7 +140,7 @@ function GetObjectsTemplates()
     },
     -- Grass-1
     {
-      name = 'grass1-center',
+      name = 'Трава: фоновая тёмная центр 2/2',
       icon = 'data/textures/tiles/grass/grass1-center.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/grass/grass1-center.png',
@@ -170,7 +148,7 @@ function GetObjectsTemplates()
     },
     -- Grass-1
     {
-      name = 'grass1-right',
+      name = 'Трава: фоновая тёмная правый угол',
       icon = 'data/textures/tiles/grass/grass1-right.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/grass/grass1-right.png',
@@ -178,7 +156,7 @@ function GetObjectsTemplates()
     },
     -- Grass-1
     {
-      name = 'grass1-top',
+      name = 'Трава: фоновая тёмная верх',
       icon = 'data/textures/tiles/grass/grass1-top.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/grass/grass1-top.png',
@@ -186,7 +164,7 @@ function GetObjectsTemplates()
     },
     -- Tube0
     {
-      name = 'tube0-tl',
+      name = 'Труба: верхушка левая',
       icon = 'data/textures/tiles/bricks/tube0-tl.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/bricks/tube0-tl.png',
@@ -196,7 +174,7 @@ function GetObjectsTemplates()
     },
     -- Tube0
     {
-      name = 'tube0-tr',
+      name = 'Труба: верхушка правая',
       icon = 'data/textures/tiles/bricks/tube0-tr.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/bricks/tube0-tr.png',
@@ -206,7 +184,7 @@ function GetObjectsTemplates()
     },
     -- Tube0
     {
-      name = 'tube0-left',
+      name = 'Труба: левый тайл',
       icon = 'data/textures/tiles/bricks/tube0-left.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/bricks/tube0-left.png',
@@ -216,7 +194,7 @@ function GetObjectsTemplates()
     },
     -- Tube0
     {
-      name = 'tube0-right',
+      name = 'Труба: правый тайл',
       icon = 'data/textures/tiles/bricks/tube0-right.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/bricks/tube0-right.png',
@@ -226,7 +204,7 @@ function GetObjectsTemplates()
     },
     -- Clouds0
     {
-      name = 'clouds0-tl',
+      name = 'Облако: угол верхний левый',
       icon = 'data/textures/tiles/sky/clouds0-tl.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/sky/clouds0-tl.png',
@@ -234,7 +212,7 @@ function GetObjectsTemplates()
     },
     -- Clouds0
     {
-      name = 'clouds0-top',
+      name = 'Облако: тайл верхний',
       icon = 'data/textures/tiles/sky/clouds0-top.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/sky/clouds0-top.png',
@@ -242,7 +220,7 @@ function GetObjectsTemplates()
     },
     -- Clouds0
     {
-      name = 'clouds0-tr',
+      name = 'Облако: угол верхний правый',
       icon = 'data/textures/tiles/sky/clouds0-tr.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/sky/clouds0-tr.png',
@@ -250,7 +228,7 @@ function GetObjectsTemplates()
     },
     -- Clouds0
     {
-      name = 'clouds0-bl',
+      name = 'Облако: угол нижний левый',
       icon = 'data/textures/tiles/sky/clouds0-bl.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/sky/clouds0-bl.png',
@@ -258,7 +236,7 @@ function GetObjectsTemplates()
     },
     -- Clouds0
     {
-      name = 'clouds0-bottom',
+      name = 'Облако: тайл нижний',
       icon = 'data/textures/tiles/sky/clouds0-bottom.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/sky/clouds0-bottom.png',
@@ -266,7 +244,7 @@ function GetObjectsTemplates()
     },
     -- Clouds0
     {
-      name = 'clouds0-br',
+      name = 'Облако: угол нижний правый',
       icon = 'data/textures/tiles/sky/clouds0-br.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/sky/clouds0-br.png',
@@ -274,7 +252,7 @@ function GetObjectsTemplates()
     },
     -- Coin0
     {
-      name = 'coin0',
+      name = 'Собираемая монетка',
       icon = 'data/textures/tiles/coin0.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/coin0.png',

@@ -70,6 +70,7 @@ function CollisionPlayer( player, target, flags, vx, vy )
     if ObjectHasTag( target, 'brick-breakable' ) then
       local x, y = ObjectAttr( target, { 'position' } )
       animation[ 'timer'..SetTimer( 0.01, 'DoAnimationBrickDisplace' ) ] = { step = 1, time = 0, timeMax = 8, object = target, pos = { x = x, y = y } }
+      ObjectAddTag( target, 'push-bottom' )
       -- ObjectAttr( target, { textureName = 'temp/brick3.png' } )
     end
     if ObjectHasTag( target, 'has-mushroom' ) then
@@ -237,6 +238,10 @@ end -- DoAnimationMushroom
 function CollisionMushroom( mushroom, target, flags, vx, vy )
   if bit32.band( flags, 2 ) == 2 or bit32.band( flags, 8 ) == 8 then
     ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
+  elseif bit32.band( flags, 4 ) == 4 then -- stay on target
+    if ObjectHasTag( target, 'push-bottom' ) then
+      ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', vx, -100 ) } )
+    end
   end
   --[[
   if IsObjectRightThis( mushroom, target ) or IsObjectLeftThis( mushroom, target ) then
@@ -252,7 +257,7 @@ function UpdateCamera()
   local _, cy = ObjectGetPos( camera )
   local px, _ = ObjectGetPos( 'player' )
   ObjectSetPos( camera, math.max( px, 0 ), cy )
-  SetTimer( 0, 'UpdateCamera' )
+  SetTimer( 0, 'UpdateCamera' ) -- стараться избегать 0-таймеров, т.к. они зависят от быстродействия приложения и исполняются каждый тик
 end -- UpdateCamera
 
 --[[ DoAnimationBrickDisplace ]]
@@ -271,6 +276,7 @@ function DoAnimationBrickDisplace( timerId )
       animation[ 'timer'..SetTimer( 1/60, 'DoAnimationBrickDisplace' ) ] = anim
     else
       ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y ) } )
+      ObjectRemoveTag( anim.object, 'push-bottom' )
       animation[ keyByTimer ] = nil
     end
   end

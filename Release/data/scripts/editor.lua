@@ -52,6 +52,7 @@ GUI = {
     width = 100,
     height = 100,
   },
+  tooltip = nil,
   elements = {},
   templates = {
     x = 5,
@@ -144,6 +145,7 @@ function EditorInit()
   GUIRenderer.OnKeyboardDefault = OnEditorKey
 
   -- GUI
+  GUI.tooltip = GUILabel:Create( 0, settings.windowSize.y, 200, 13, '', nil, function( self ) self.SetPosition( self, 0, settings.windowSize.y ) end )
   GUI.elements.labelDebug = GUILabel:Create( 0, 0, settings.windowSize.x, 20, 'debug' )
 
   -- settings block
@@ -466,7 +468,16 @@ end --OnEditorMouseKey
 -- Îáğàáîòêà äâèæåíèÿ ìûøè
 function OnEditorMouseMove( x, y )
   if TestMouseOnGUI( x, y ) then
+    local num = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) ) + 1
+    if num > 0 and num <= #GUI.templates.items then
+      GUI.tooltip:SetPosition( x + 1, y - 25 )
+      GUI.tooltip:SetText( GUI.templates.items[ num ].name )
+      GUI.tooltip:CropByTextWidth()
+    else
+      GUI.tooltip:SetPosition( 0, settings.windowSize.y )
+    end
   else
+    GUI.tooltip:SetPosition( 0, settings.windowSize.y )
     local mode = {
       [0] = function()
       end,
