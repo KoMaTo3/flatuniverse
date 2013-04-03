@@ -775,8 +775,10 @@ function RenderGUI()
     end
     end
   end
-  GUI.templates.Draw()
-  GUIRendererRender() -- additional GUI from gui.lua
+  if settings.guiVisibility then
+    GUI.templates.Draw()
+    GUIRendererRender() -- additional GUI from gui.lua
+  end
   SetTimer( 1/30, 'RenderGUI' )
 end --RenderGUI
 
