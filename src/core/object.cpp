@@ -31,14 +31,16 @@ ObjectByCollision::ObjectByCollision( Object *setObject, Collision *setCollision
 :object( setObject ), collision( setCollision )
 {
   if( setObject ) {
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectByCollision => PointerAdd[x%p]", &this->object );
-    setObject->PointerAdd( &this->object );
+    __log.PrintInfo( Filelevel_DEBUG, "ObjectByCollision => PointerAdd[x%p] this[x%p]", &this->object, this );
+    //setObject->PointerAdd( &this->object );
+    __objectByCollision->push_back( this );
   }
 }//constructor
 
 ObjectByCollision::ObjectByCollision( const ObjectByCollision& copyFrom )
 :object( copyFrom.object.GetObject() )
 {
+  __log.PrintInfo( Filelevel_WARNING, "ObjectByCollision::ObjectByCollision => copy-constructor" );
   this->collision = copyFrom.collision;
 }//copy-constructor
 
@@ -66,8 +68,9 @@ ObjectByTrigger::ObjectByTrigger( Object *setObject, ObjectTrigger *setTrigger )
 :object( setObject ), trigger( setTrigger )
 {
   if( setObject ) {
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectByTrigger => PointerAdd[x%p]", &this->object );
-    setObject->PointerAdd( &this->object );
+    __log.PrintInfo( Filelevel_DEBUG, "ObjectByTrigger => PointerAdd[x%p] this[x%p]", &this->object, this );
+    __objectByTrigger->push_back( this );
+    //setObject->PointerAdd( &this->object );
   }
 }//constructor
 
@@ -652,10 +655,11 @@ Collision* Object::EnableCollision()
   this->collision = new Collision( &this->positionSrc );
   __collisionList->push_back( this->collision );
 
-  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableCollision => ObjectByCollision( x%p, x%p )", this, this->collision );
-  ObjectByCollision *byCollision = new ObjectByCollision( this, this->collision );
-  __objectByCollision->push_back( byCollision);
   __log.PrintInfo( Filelevel_DEBUG, "Object::EnableCollision => object['%s'] collision[x%p]", this->GetNameFull().c_str(), this->collision );
+
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::EnableCollision => ObjectByCollision( x%p, x%p )", this, this->collision );
+  new ObjectByCollision( this, this->collision );
+  //__objectByCollision->push_back( byCollision);
 
   //__objectByCollision->push_back( ObjectByCollision( this, this->collision ) );
   /*
@@ -697,6 +701,7 @@ void Object::DisableCollision()
   for( iterCollision = __objectByCollision->begin(); iterCollision != iterEndCollision; ++iterCollision )
     if( ( *iterCollision )->object.GetObject() == this )
     {
+      delete *iterCollision;
       __objectByCollision->erase( iterCollision );
       break;
     }
@@ -1370,8 +1375,8 @@ ObjectTrigger* Object::EnableTrigger()
   __triggerList->push_back( this->trigger );
 
   //__objectByTrigger->push_back( ObjectByTrigger( this, this->trigger ) );
-  ObjectByTrigger *byTrigger = new ObjectByTrigger( this, this->trigger );
-  __objectByTrigger->push_back( byTrigger );
+  new ObjectByTrigger( this, this->trigger );
+  //__objectByTrigger->push_back( byTrigger );
 
   __log.PrintInfo( Filelevel_DEBUG, "Object::EnableTrigger => x%p", this->trigger );
 
@@ -1409,6 +1414,7 @@ void Object::DisableTrigger()
   for( iterTrigger = __objectByTrigger->begin(); iterTrigger != iterEndTrigger; ++iterTrigger )
     if( ( *iterTrigger )->object.GetObject() == this )
     {
+      delete *iterTrigger;
       __objectByTrigger->erase( iterTrigger );
       break;
     }

@@ -121,9 +121,14 @@ void WorldGridManager::Update( bool forceLoadGrids )
         object = ( *iter )->GetObject< Object >();
         WorldGrid::WorldGridPosition pos( this->GetGridPositionByObject( *object ) );
         if( pos != gridPos ) {
-          __log.PrintInfo( Filelevel_WARNING, "WorldGridManager::Update => move object '%s' from grid[%d; %d] to grid[%d; %d]", object->GetNameFull().c_str(), gridPos.x, gridPos.y, pos.x, pos.y );
+          //__log.PrintInfo( Filelevel_WARNING, "WorldGridManager::Update => move object '%s' from grid[%d; %d] to grid[%d; %d]", object->GetNameFull().c_str(), gridPos.x, gridPos.y, pos.x, pos.y );
           ( *iterGrid )->DetachObject( object );
-          this->LoadGrid( pos )->AttachObject( object );
+          grid = this->IsGridLoaded( pos );
+          if( grid ) {
+            grid->AttachObject( object );
+          } else {
+            this->LoadGrid( pos )->AttachObject( object );
+          }
           keepChecking = false;
           break;
         }

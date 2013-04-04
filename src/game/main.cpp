@@ -1680,12 +1680,12 @@ void Game::LUA_ListenCollision( const std::string &funcName, const std::string &
 void Game::CollisionProc( Collision *a, Collision *b, Byte flags, const Vec3 &velocity ) {
   Object *objectA = game->core->GetObjectByCollision( a );
   if( !objectA ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::CollisionProc => object A by collision x%p not found", a );
+    //__log.PrintInfo( Filelevel_ERROR, "Game::CollisionProc => object A by collision x%p not found", a );
     return;
   }
   Object *objectB = game->core->GetObjectByCollision( b );
   if( !objectB ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::CollisionProc => object B by collision x%p not found", b );
+    //__log.PrintInfo( Filelevel_ERROR, "Game::CollisionProc => object B by collision x%p not found", b );
     return;
   }
   if( !game->luaCollisionListeners.size() ) {
