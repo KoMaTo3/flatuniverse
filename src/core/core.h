@@ -109,7 +109,7 @@ private:
 
   CollisionManager      *collisionManager;
   ObjectTriggerManager  *triggerManager;
-  ObjectPointer         *camera;  //текущая камера
+  Pointer               *camera;  //текущая камера
 
 public:
   Keyboard  keyboard;

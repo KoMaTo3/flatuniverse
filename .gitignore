@@ -10,6 +10,7 @@ Release/flatuniverse.exe
 Release/data/temp/*.fu
 flatuniverse/Debug/
 flatuniverse/Release/
+tmp/
 flatuniverse.ncb
 flatuniverse.sdf
 UpgradeLog.htm

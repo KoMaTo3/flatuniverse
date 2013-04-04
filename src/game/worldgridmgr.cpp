@@ -55,13 +55,13 @@ void WorldGridManager::Update( bool forceLoadGrids )
     {
       isActiveObjectsValid = true;
       iterEnd = this->activeObjects.end();
-      for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter )
-        if( !( *iter )->GetValid() )
-        {
+      for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter ) {
+        if( !( *iter )->GetIsValid() ) {
           this->activeObjects.erase( iter );
           isActiveObjectsValid = false;
           break;
         }
+      }
     } while( !isActiveObjectsValid );
 
 
@@ -224,12 +224,12 @@ void WorldGridManager::AddActiveObject( Object *obj )
 
   WorldGridObjectList::iterator iter, iterEnd = this->activeObjects.end();
 
-  for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter )
-    if( ( *iter )->GetObject() == obj )
-    {
+  for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter ) {
+    if( ( *iter )->GetObject< Object >() == obj ) {
       __log.PrintInfo( Filelevel_WARNING, "WorldGridManager::AddActiveObject => object '%s' already in list", obj->GetNameFull().c_str() );
       return;
     }
+  }
 
   //this->activeObjects.push_back( WorldGridObjectList::value_type( obj ) );
   //this->activeObjects.push_back( WorldGridObjectList::value_type() );

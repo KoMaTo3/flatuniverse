@@ -36,10 +36,10 @@ WorldGrid::~WorldGrid()
 {
   WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
   for( iter = this->objects.begin(); iter != iterEnd; ++iter )
-    if( ( *iter )->GetValid() )
+    if( ( *iter )->GetIsValid() )
     {
-      __log.PrintInfo( Filelevel_DEBUG, "~WorldGrid => deleting object x%X['%s']", ( *iter )->GetObject(), ( *iter )->GetObject< Object >()->GetNameFull().c_str() );
-      delete ( *iter )->GetObject();
+      __log.PrintInfo( Filelevel_DEBUG, "~WorldGrid => deleting object x%X['%s']", ( *iter )->GetObject< Object >(), ( *iter )->GetObject< Object >()->GetNameFull().c_str() );
+      delete ( *iter )->GetObject< Object >();
     }
   __log.PrintInfo( Filelevel_DEBUG, "~WorldGrid => clear pointers list" );
 
@@ -115,13 +115,13 @@ void WorldGrid::DetachObject( Object *object )
   this->Update();
   __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::DetachObject => object[x%X]", object );
   WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
-  for( iter = this->objects.begin(); iter != iterEnd; ++iter )
-    if( ( *iter )->GetObject() == object )
-    {
+  for( iter = this->objects.begin(); iter != iterEnd; ++iter ) {
+    if( ( *iter )->GetObject< Object >() == object ) {
       delete ( *iter );
       this->objects.erase( iter );
       break;
     }
+  }
   __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::DetachObject ok" );
 }//DetachObject
 
@@ -159,9 +159,11 @@ bool WorldGrid::IsThisObject( Object *object )
   }
 
   WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
-  for( iter = this->objects.begin(); iter != iterEnd; ++iter )
-    if( ( *iter )->GetObject() == object )
+  for( iter = this->objects.begin(); iter != iterEnd; ++iter ) {
+    if( ( *iter )->GetObject< Object >() == object ) {
       return true;
+    }
+  }
 
   return false;
 }//IsThisObject
@@ -190,12 +192,10 @@ bool WorldGrid::GetGridDump( FU_OUT memory& dump )
   ////RenderableQuad *quad;
   //Collision *collision;
   //std::string textureName;
-  for( iter = this->objects.begin(); iter != iterEnd; ++iter )
-  if( ( *iter )->GetValid() )
-  {
-    //__log.PrintInfo( Filelevel_DEBUG, ". object x%X", iter->GetObject() );
-    //__log.PrintInfo( Filelevel_DEBUG, ". valid %d", iter->GetValid() );
-    ( *iter )->GetObject< Object >()->SaveToBuffer( writer );
+  for( iter = this->objects.begin(); iter != iterEnd; ++iter ) {
+    if( ( *iter )->GetIsValid() ) {
+      ( *iter )->GetObject< Object >()->SaveToBuffer( writer );
+    }
   }
 
   return true;
@@ -253,9 +253,8 @@ void WorldGrid::Update()
     for( iter = this->objects.begin(); iter != iterEnd; ++iter )
     {
       //__log.PrintInfo( Filelevel_DEBUG, ". pointer[x%X] object[x%X] valid[%d]", &( *iter ), iter->GetObject(), iter->GetValid() );
-      if( !( *iter )->GetValid() )
-      {
-        __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => object[x%X] is not valid, delete from grid", ( *iter )->GetObjectSrc() );
+      if( !( *iter )->GetIsValid() ) {
+        //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => object[x%X] is not valid, delete from grid", ( *iter )->GetObjectSrc() );
         //this->DetachObject( iter->GetObjectSrc< Object >() );
         delete ( *iter );
         this->objects.erase( iter );
@@ -277,7 +276,7 @@ bool WorldGrid::GetFirstMovableObject( WorldGridObjectList::iterator &iter ) {
   WorldGridObjectList::iterator iterEnd = this->objects.end();
   Object *object;
   for( iter = this->objects.begin(); iter != iterEnd; ++iter ) {
-    if( ( *iter )->GetValid() ) {
+    if( ( *iter )->GetIsValid() ) {
       object = ( *iter )->GetObject< Object >();
       if( object->GetCollision() && !object->GetCollision()->IsStatic() ) {
         return true;
@@ -298,7 +297,7 @@ bool WorldGrid::GetNextMovableObject( WorldGridObjectList::iterator &iter ) {
   WorldGridObjectList::iterator iterEnd = this->objects.end();
   Object *object;
   for( ++iter; iter != iterEnd; ++iter ) {
-    if( ( *iter )->GetValid() ) {
+    if( ( *iter )->GetIsValid() ) {
       object = ( *iter )->GetObject< Object >();
       if( object->GetCollision() && !object->GetCollision()->IsStatic() ) {
         return true;

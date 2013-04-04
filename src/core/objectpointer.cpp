@@ -2,73 +2,85 @@
 
 
 
+inline void IPointerValidator::SetValid( bool setIsValid ) {
+  this->isValid = setIsValid;
+}//SetValid
 
-ObjectPointer::ObjectPointer( const ObjectPointer& copyFrom )
-:object( copyFrom.object ), valid( copyFrom.valid )
-{
-  if( copyFrom.object )
-    __log.PrintInfo( Filelevel_ERROR, "ObjectPointer +1: copy-operator from pointer[x%p] with object[x%p]", &copyFrom, copyFrom.object );
-}//constructor
+inline bool IPointerValidator::GetIsValid() const {
+  return this->isValid;
+}//GetIsValid
 
 
 
-ObjectPointer::ObjectPointer( IObjectPointer *setObject )
-:object( setObject )
-{
-  this->valid = ( setObject != NULL );
-  __log.PrintInfo( Filelevel_DEBUG, "ObjectPointer +1: object[x%p] pointer[x%p]", setObject, this );
+
+
+void PointerOwnerInfo::Bind( void *setSelf ) {
+  this->self = setSelf;
+}
+
+PointerOwnerInfo::~PointerOwnerInfo() {
+  if( this->self && this->count ) {
+    for( PointerList::const_iterator iter = this->pointers.begin(), iterEnd = this->pointers.end(); iter != iterEnd; ++iter ) {
+      if( *iter ) {
+        ( *iter )->SetValid( false );
+      }
+    }
+  }
+}
+
+
+
+
+
+IPointerOwner::IPointerOwner() {
+  this->_pointerObjectValidator.count = 0;
+}
+
+void IPointerOwner::PointerBind( void *self ) {
+  this->_pointerObjectValidator.Bind( self );
+}
+
+void IPointerOwner::PointerAdd( IPointerValidator *pointer ) {
+  ++this->_pointerObjectValidator.count;
+  this->_pointerObjectValidator.pointers.push_back( pointer );
+}
+
+void IPointerOwner::PointerRemove( IPointerValidator *pointer ) {
+  --this->_pointerObjectValidator.count;
+  if( this->_pointerObjectValidator.count < 0 ) {
+    //WARNING!!!
+  }
+
+  for( PointerOwnerInfo::PointerList::const_iterator iter = this->_pointerObjectValidator.pointers.begin(), iterEnd = this->_pointerObjectValidator.pointers.end(); iter != iterEnd; ++iter ) {
+    if( *iter == pointer ) {
+      this->_pointerObjectValidator.pointers.erase( iter );
+      break;
+    }
+  }
+}
+
+
+
+
+
+Pointer::Pointer( IPointerOwner *setObject ): object( setObject ) {
   if( setObject ) {
     setObject->PointerAdd( this );
+    this->SetValid( true );
+  } else {
+    this->SetValid( false );
   }
-}//constructor
+}
 
 
-
-ObjectPointer::~ObjectPointer()
-{
-  if( this->object )
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectPointer -1: object[x%p] valid[%d] pointer[x%p]", this->object, this->valid, this );
-  if( this->GetValid() )
-  {
-    __log.PrintInfo( Filelevel_DEBUG, ". pointer remove, object[x%p]...", this->object );
+Pointer::~Pointer() {
+  if( this->GetIsValid() && this->object ) {
     this->object->PointerRemove( this );
-    __log.PrintInfo( Filelevel_DEBUG, ". pointer remove ok" );
+    this->SetValid( false );
   }
-  this->valid = false;
-  this->object = NULL;
-}//destructor
+}
 
 
-
-/*
-void ObjectPointer::Init( IObjectPointer *setObject )
-{
-  if( this->object || this->valid )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "ObjectPointer::Init => already initialized by object x%p", this->object );
-    return;
-  }
-  this->object = setObject;
-  this->valid = ( setObject != NULL );
-  if( setObject )
-    setObject->PointerAdd( this );
-  if( setObject )
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectPointer +1: object[x%p] pointer[x%p]", setObject, this );
-}//Init
-
-
-
-void ObjectPointer::Reset()
-{
-  if( this->object )
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectPointer -1: object[x%p] valid[%d] pointer[x%p]", this->object, this->valid, this );
-  if( this->GetValid() )
-  {
-    __log.PrintInfo( Filelevel_DEBUG, ". pointer remove, object[x%p]...", this->object );
-    this->object->PointerRemove( this );
-    __log.PrintInfo( Filelevel_DEBUG, ". pointer remove ok" );
-  }
-  this->valid = false;
-  this->object = NULL;
-}//Reset
-*/
+inline bool Pointer::IsValid() const {
+  return this->GetIsValid();
+}

@@ -16,7 +16,7 @@ private:
     Vec2    position;
     Vec2    size;
     Vec3    spriteOffset;
-    ObjectPointer *sprite;
+    Pointer *sprite;
     Vec2    pixelsToTexels;
     bool    isHardware;
     HCURSOR hCursor;

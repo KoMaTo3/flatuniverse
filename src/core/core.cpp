@@ -432,8 +432,7 @@ bool Core::_CheckShaderError( const std::string& text, GLuint shader )
   char *log = new Char[ maxLength + 1 ];
   log[ maxLength ] = 0;
   glGetShaderInfoLog( shader, maxLength, &logLength, log );
-  GL_CHECK_ERROR;
-  if( log[ 0 ] )
+  if( log[ 0 ] && this->CheckGLError( __LINE__, __FILE__ ) )
   {
     std::string tmpLog = log;
     BYTE errorType = Filelevel_INFO;
@@ -946,7 +945,7 @@ bool Core::Redraw()
     {
       glLoadIdentity();
       //glScalef( this->_window.windowToWorld.x, this->_window.windowToWorld.y, this->_window.windowToWorld.z );
-      if( this->camera && this->camera->GetValid() )
+      if( this->camera && this->camera->GetIsValid() )
       {
         Object *objCamera = this->camera->GetObject< Object >();
         Mat4 matrScale, matrTranslate, matrix;
@@ -1225,7 +1224,7 @@ Object* Core::SetCamera( Object* newCamera )
 {
   Object *oldCamera = ( this->camera ? this->camera->GetObject< Object >() : NULL );
   DEF_DELETE( this->camera );
-  this->camera = new ObjectPointer( newCamera );
+  this->camera = new Pointer( newCamera );
   return oldCamera;
 }//SetCamera
 
@@ -1501,7 +1500,7 @@ Object* Core::GetObjectByTrigger( ObjectTrigger *trigger )
 {
   ObjectByTriggerList::iterator iterTrigger, iterEndTrigger = __objectByTrigger->end();
   for( iterTrigger = __objectByTrigger->begin(); iterTrigger != iterEndTrigger; ++iterTrigger )
-    if( ( *iterTrigger )->object.GetValid() && ( *iterTrigger )->trigger == trigger )
+    if( ( *iterTrigger )->object.GetIsValid() && ( *iterTrigger )->trigger == trigger )
       return ( *iterTrigger )->object.GetObject< Object >();
   return NULL;
 }//GetObjectByTrigger
@@ -1519,7 +1518,7 @@ Object* Core::GetObjectByCollision( Collision *collision )
   //__log.PrintInfo( Filelevel_DEBUG, "Core::GetObjectByCollision => count[%d]", __objectByCollision->size() );
   for( iterCollision = __objectByCollision->begin(); iterCollision != iterEndCollision; ++iterCollision ) {
     //__log.PrintInfo( Filelevel_DEBUG, "Core::GetObjectByCollision => match collision[x%p] with[x%p]", collision, ( *iterCollision )->collision );
-    if( ( *iterCollision )->object.GetValid() && ( *iterCollision )->collision == collision )
+    if( ( *iterCollision )->object.GetIsValid() && ( *iterCollision )->collision == collision )
       return ( *iterCollision )->object.GetObject< Object >();
   }
   return NULL;

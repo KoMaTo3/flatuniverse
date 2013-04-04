@@ -51,7 +51,7 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object, bool se
     return;
   }
   DEF_DELETE( this->cursor.sprite );
-  this->cursor.sprite = new ObjectPointer( object );
+  this->cursor.sprite = new Pointer( object );
   this->cursor.isHardware = setIsHardware;
 
   ImageLoader image;
@@ -60,7 +60,7 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object, bool se
   this->cursor.size.Set( float( image.GetImageSize()->width ) , float( image.GetImageSize()->height ) );
   this->cursor.spriteOffset.Set( this->cursor.size.x * 0.5f * this->cursor.pixelsToTexels.x, this->cursor.size.y * 0.5f * this->cursor.pixelsToTexels.y, 0.0f );
 
-  if( this->cursor.sprite->GetValid() )
+  if( this->cursor.sprite->GetIsValid() )
   {
     this->cursor.sprite->GetObject< Object >()->SetPosition( Vec3( 0.0f, 0.0f, 9.0f ) );
     if( this->cursor.isHardware ) {
@@ -103,7 +103,7 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object, bool se
 =============
 */
 void Mouse::DestroyCursor() {
-  if( this->cursor.sprite && this->cursor.sprite->GetValid() ) {
+  if( this->cursor.sprite && this->cursor.sprite->GetIsValid() ) {
     this->cursor.sprite->GetObject< Object >()->DisableRenderable();
     ShowCursor( true );
   }
@@ -122,7 +122,7 @@ void Mouse::MoveCursor( const Vec2& newPosition )
   this->cursor.position = newPosition;
   if( this->cursor.sprite )
   {
-    if( this->cursor.sprite->GetValid() )
+    if( this->cursor.sprite->GetIsValid() )
       this->cursor.sprite->GetObject< Object >()->SetPosition( Vec3( this->cursor.position.x * this->cursor.pixelsToTexels.x, this->cursor.position.y * this->cursor.pixelsToTexels.y, 9.0f ) + Vec3( this->cursor.spriteOffset.x, this->cursor.spriteOffset.y, 0.0f ) );
     else
       DEF_DELETE( this->cursor.sprite );

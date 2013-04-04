@@ -10,7 +10,6 @@
 #include "memorywriter.h"
 #include "memoryreader.h"
 #include "objectpointer.h"
-#include "objectpointerinterface.h"
 #include "objecttriggermgr.h"
 #include "tags.h"
 //#include "glui2/g2Theme.h"
@@ -27,8 +26,8 @@ typedef std::deque< std::string > stdDequeString;
 //object by collision
 struct ObjectByCollision
 {
-  ObjectPointer object;
-  Collision     *collision;
+  Pointer   object;
+  Collision *collision;
 
   ObjectByCollision( Object *setObject, Collision *setCollision );
   ~ObjectByCollision();
@@ -43,7 +42,7 @@ extern ObjectByCollisionList *__objectByCollision;
 //object by object trigger
 struct ObjectByTrigger
 {
-  ObjectPointer object;
+  Pointer       object;
   ObjectTrigger *trigger;
 
   ObjectByTrigger ( Object *setObject, ObjectTrigger *setTrigger );
@@ -92,11 +91,10 @@ enum ObjectGuiType {
 
 
 
-class Object: public IObjectPointer, public ITags
+class Object: public IPointerOwner, public ITags
 {
 public:
   typedef std::list< Object* > ObjectChilds;
-  typedef std::list< ObjectPointer* > ObjectPointers;
   struct ObjectForce  //вектор силы
   {
     long  id;
@@ -160,7 +158,6 @@ private:
   ObjectForceList forces;   //перечень сил, действующих на объект
 
   Collision       *collision;
-  ObjectPointers  pointers;   //перечень указателей на этот объект. объект обязан делать их невалидными перед своим уничтожением
   ObjectTrigger   *trigger;
   Tags            *tags;    //список тегов
 
@@ -251,8 +248,6 @@ public:
 
   Object*             GetObject           ( const std::string& name, Object *parent = NULL );
 
-  void                PointerAdd          ( ObjectPointer *pointer );
-  void                PointerRemove       ( ObjectPointer *pointer );
   inline
     Object*           SetLockToDelete     ( bool lock ) { this->_isLockedToDelete = lock; return this; }
   inline

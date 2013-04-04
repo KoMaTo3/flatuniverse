@@ -605,9 +605,6 @@
     <ClInclude Include="..\src\core\objectpointer.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\objectpointerinterface.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\objecttrigger.h">
       <Filter>core</Filter>
     </ClInclude>

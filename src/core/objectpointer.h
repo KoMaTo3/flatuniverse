@@ -1,37 +1,80 @@
 #pragma once
 
-#include <stdio.h>
-#include "file.h"
-#include "tools.h"
-#include "objectpointerinterface.h"
+#include <deque>
 
 
-class ObjectPointer
-{
-private:
-  bool            valid;  //флаг того, что объект, на который ссылкается указатель, валиден
-  IObjectPointer  *object;
 
-private:
-  DISALLOW_COPY_AND_ASSIGN( ObjectPointer );
-
+/*
+===============
+  IPointerValidator
+===============
+*/
+class IPointerValidator {
 public:
-  explicit ObjectPointer ( IObjectPointer *setObject ); //explicit запрещает неявный конструктор вида: ObjectPointer obj = someIObjectPointer;
-  ~ObjectPointer();
+  inline void SetValid( bool setIsValid );
+  inline bool GetIsValid() const;
 
-  inline void     SetValid  ( bool setValid ){ this->valid = setValid; if( !setValid ) this->object = NULL; }
-  inline bool     GetValid  (){ return this->valid; }
-  inline
-  IObjectPointer* GetObject () const { return ( this->valid ? this->object : NULL ); }
-  inline
-  IObjectPointer* GetObjectSrc() const { return this->object; }
-  template < class T >
-  T*              GetObject () const { return ( this->valid ? ( T* ) this->object : NULL ); }
-  template < class T >
-  T*              GetObjectSrc() const { return ( T* ) this->object; }
-  IObjectPointer* operator* (){ return this->object; }
-  /*
-  void            Init      ( IObjectPointer *setObject );
-  void            Reset     ();
-  */
+private:
+  bool isValid;
+};
+
+
+
+/*
+===============
+  PointerOwnerInfo
+===============
+*/
+class PointerOwnerInfo {
+public:
+  long count;
+  typedef std::deque< IPointerValidator* > PointerList;
+  PointerList pointers;
+  void *self; //указатель на родительский объект
+
+  ~PointerOwnerInfo();
+  void Bind( void *setSelf );
+};
+
+
+
+/*
+===============
+  IPointerOwner
+  Этим классом должен наследоваться контролируемый объект
+===============
+*/
+class IPointerOwner {
+public:
+  IPointerOwner();
+  void PointerBind( void *self );
+  void PointerAdd( IPointerValidator *pointer );
+  void PointerRemove( IPointerValidator *pointer );
+
+private:
+  PointerOwnerInfo _pointerObjectValidator;
+};
+
+
+
+/*
+===============
+  Pointer
+  Класс-указатель на необходимый объект
+===============
+*/
+class Pointer: public IPointerValidator {
+public:
+  Pointer( IPointerOwner *setObject );
+  virtual ~Pointer();
+  inline bool IsValid() const;
+
+  template< class T >
+  T* GetObject() const {
+    printf( "GetObject => object[x%p] valid[%d]\n", this->object, this->GetIsValid() );
+    return ( this->GetIsValid() ? ( T* ) this->object : NULL );
+  }
+
+private:
+  IPointerOwner *object;
 };

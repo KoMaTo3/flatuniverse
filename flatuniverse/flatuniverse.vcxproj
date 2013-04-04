@@ -282,7 +282,6 @@
     <ClInclude Include="..\src\core\mouse.h" />
     <ClInclude Include="..\src\core\object.h" />
     <ClInclude Include="..\src\core\objectpointer.h" />
-    <ClInclude Include="..\src\core\objectpointerinterface.h" />
     <ClInclude Include="..\src\core\objecttrigger.h" />
     <ClInclude Include="..\src\core\objecttriggermgr.h" />
     <ClInclude Include="..\src\core\renderable.h" />
