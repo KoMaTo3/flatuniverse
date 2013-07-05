@@ -453,8 +453,10 @@ Renderable* Object::EnableRenderable( RenderableType renderType )
   case RENDERABLE_TYPE_QUAD:
     {
       this->renderable.type = renderType;
-
-      GLshort index = -1;
+      __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderable CreateExternalRenderableInList..." );
+      result = Object::CreateExternalRenderableInList( zIndex, this->_renderableList, this->_renderableIndicies, this->_renderableFreeIndicies, &this->renderable.num );
+      __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderable done" );
+      /*
       __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%p = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
       if( this->_renderableFreeIndicies->size() )
       {
@@ -491,6 +493,7 @@ Renderable* Object::EnableRenderable( RenderableType renderType )
         }
       if( !added )
         this->_renderableIndicies->push_back( this->renderable.num );
+        */
     }
   break;
   default:
@@ -501,6 +504,88 @@ Renderable* Object::EnableRenderable( RenderableType renderType )
 
   return result;
 }//EnableRenderable
+
+
+
+RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex ) {
+  __log.PrintInfo( Filelevel_DEBUG, "Object::CreateExternalRenderableInList => pointers[%p; %p; %p] index[%3.3f]", inRenderableList, inRenderableIndicies, inRenderableFreeIndicies, zIndex );
+  Renderable *result = NULL;
+  if( !inRenderableList ) {
+    inRenderableList = __coreRenderableList;
+    inRenderableIndicies = __coreRenderableListIndicies;
+    inRenderableFreeIndicies = __coreRenderableListFreeIndicies;
+  }
+
+  GLushort index = RENDERABLE_INDEX_UNDEFINED;
+  if( inRenderableFreeIndicies->size() )
+  {
+    index = *inRenderableFreeIndicies->rbegin();
+    inRenderableFreeIndicies->pop_back();
+    result = &( *( inRenderableList->begin() + index ) );
+    *result = RenderableQuad( Object::CreateExternalRenderableInList, Object::DestroyExternalRenderableInList, index );
+  }
+  else
+  {
+    inRenderableList->push_back( RenderableQuad( Object::CreateExternalRenderableInList, Object::DestroyExternalRenderableInList, index ) );
+    result = &( *inRenderableList->rbegin() );
+    index = inRenderableList->size() - 1;
+  }
+
+  RenderableQuad *quad = ( RenderableQuad* ) result;
+  quad->SetPosition( Vec3( 0.0f, 0.0f, zIndex ) );
+  float z = quad->GetPosition().z;
+  if( outIndex ) {
+    *outIndex = index;
+  }
+
+  CoreRenderableListIndicies::iterator iter, iterEnd = inRenderableIndicies->end(), iterBegin = inRenderableIndicies->begin();
+  bool added = false;
+  for( iter = iterBegin; iter != iterEnd; ++iter )
+    if( z < ( *( inRenderableList->begin() + *iter ) ).GetPosition().z )
+    {
+      inRenderableIndicies->insert( iter, index );
+      added = true;
+      break;
+    }
+  if( !added )
+    inRenderableIndicies->push_back( index );
+
+  return ( RenderableQuad* ) result;
+}//CreateExternalRenderableInList
+
+
+
+bool Object::DestroyExternalRenderableInList( CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort index ) {
+  if( !inRenderableList ) {
+    inRenderableList = __coreRenderableList;
+    inRenderableIndicies = __coreRenderableListIndicies;
+    inRenderableFreeIndicies = __coreRenderableListFreeIndicies;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Object::DestroyExternalRenderableInList => pointers[%p; %p; %p] index[%d]", inRenderableList, inRenderableIndicies, inRenderableFreeIndicies, index );
+
+  if( index == RENDERABLE_INDEX_UNDEFINED ) {
+    return false;
+  }
+
+  if( ( long ) inRenderableList->size() <= index ) {
+    return false;
+  }
+
+  //__coreRenderableList->erase( __coreRenderableList->begin() + this->renderable.num );
+
+  CoreRenderableListIndicies::iterator iter, iterEnd = inRenderableIndicies->end();
+  for( iter = inRenderableIndicies->begin(); iter != iterEnd; ++iter ) {
+    if( *iter == index ) {
+      __log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%p", *iter, inRenderableFreeIndicies );
+      inRenderableFreeIndicies->push_back( *iter );
+      inRenderableIndicies->erase( iter );
+      break;
+    }
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableRenderable => index[%d]", index );
+  return true;
+}//DestroyExternalRenderableInList
+
 
 
 
@@ -580,6 +665,7 @@ bool Object::DisableRenderable()
   if( this->renderable.num == RENDERABLE_INDEX_UNDEFINED || !this->_renderableList || !this->_renderableIndicies )
     return false;
 
+  /*
   if( ( long ) this->_renderableList->size() <= this->renderable.num )
     return false;
 
@@ -595,6 +681,8 @@ bool Object::DisableRenderable()
       break;
     }
   __log.PrintInfo( Filelevel_DEBUG, "Object::DisableRenderable => index[%d]", this->renderable.num );
+  */
+  Object::DestroyExternalRenderableInList( this->_renderableList, this->_renderableIndicies, this->_renderableFreeIndicies, this->renderable.num );
 
   this->renderable.num = RENDERABLE_INDEX_UNDEFINED;
   this->renderable.type = RENDERABLE_TYPE_UNKNOWN;
@@ -1001,8 +1089,9 @@ void Object::Update( float dt )
   case RENDERABLE_TYPE_QUAD:
     {
       RenderableQuad *renderable = ( RenderableQuad* ) this->GetRenderable();
-      if( !renderable )
+      if( !renderable ) {
         break;
+      }
       renderable->SetPosition( this->position );
     }
   break;

@@ -85,6 +85,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\core\animation.cpp" />
+    <ClCompile Include="..\src\core\animationmanager.cpp" />
+    <ClCompile Include="..\src\core\animationpack.cpp" />
+    <ClCompile Include="..\src\core\animationparameter.cpp" />
+    <ClCompile Include="..\src\core\animationset.cpp" />
+    <ClCompile Include="..\src\core\animationsprite.cpp" />
+    <ClCompile Include="..\src\core\animationtemplate.cpp" />
     <ClCompile Include="..\src\core\collision.cpp" />
     <ClCompile Include="..\src\core\collisionelement.cpp" />
     <ClCompile Include="..\src\core\collisionmgr.cpp" />
@@ -96,6 +103,7 @@
     <ClCompile Include="..\src\core\filemanager.cpp" />
     <ClCompile Include="..\src\core\font.cpp" />
     <ClCompile Include="..\src\core\imageloader.cpp" />
+    <ClCompile Include="..\src\core\interpolation.cpp" />
     <ClCompile Include="..\src\core\keyboard.cpp" />
     <ClCompile Include="..\src\core\memory.cpp" />
     <ClCompile Include="..\src\core\memoryreader.cpp" />
@@ -112,6 +120,7 @@
     <ClCompile Include="..\src\core\stateaction.cpp" />
     <ClCompile Include="..\src\core\statemachine.cpp" />
     <ClCompile Include="..\src\core\tags.cpp" />
+    <ClCompile Include="..\src\core\textparser.cpp" />
     <ClCompile Include="..\src\core\textureatlas.cpp" />
     <ClCompile Include="..\src\core\timer.cpp" />
     <ClCompile Include="..\src\core\tools.cpp" />
@@ -262,6 +271,13 @@
     <ClCompile Include="..\src\pcre\pcre_tables.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\core\animation.h" />
+    <ClInclude Include="..\src\core\animationmanager.h" />
+    <ClInclude Include="..\src\core\animationpack.h" />
+    <ClInclude Include="..\src\core\animationparameter.h" />
+    <ClInclude Include="..\src\core\animationset.h" />
+    <ClInclude Include="..\src\core\animationsprite.h" />
+    <ClInclude Include="..\src\core\animationtemplate.h" />
     <ClInclude Include="..\src\core\collision.h" />
     <ClInclude Include="..\src\core\collisionelement.h" />
     <ClInclude Include="..\src\core\collisionmgr.h" />
@@ -275,6 +291,7 @@
     <ClInclude Include="..\src\core\font.h" />
     <ClInclude Include="..\src\core\imageloader.h" />
     <ClInclude Include="..\src\core\interngl.h" />
+    <ClInclude Include="..\src\core\interpolation.h" />
     <ClInclude Include="..\src\core\keyboard.h" />
     <ClInclude Include="..\src\core\memory.h" />
     <ClInclude Include="..\src\core\memoryreader.h" />
@@ -291,6 +308,7 @@
     <ClInclude Include="..\src\core\stateaction.h" />
     <ClInclude Include="..\src\core\statemachine.h" />
     <ClInclude Include="..\src\core\tags.h" />
+    <ClInclude Include="..\src\core\textparser.h" />
     <ClInclude Include="..\src\core\textureatlas.h" />
     <ClInclude Include="..\src\core\timer.h" />
     <ClInclude Include="..\src\core\tools.h" />

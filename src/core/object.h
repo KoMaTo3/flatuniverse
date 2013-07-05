@@ -233,6 +233,11 @@ public:
   inline
     bool              IsTrigger           () { return this->trigger != NULL; }
 
+  static
+    RenderableQuad*   CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );
+  static
+    bool              DestroyExternalRenderableInList( CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort index );
+
   /*
   g2Controller*       EnableGui           ( const GuiConstructor *info );
   void                DisableGui          ();

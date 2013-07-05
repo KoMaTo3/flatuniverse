@@ -9,6 +9,7 @@
 #include "textureatlas.h"
 #include "memorywriter.h"
 #include "memoryreader.h"
+#include "animationsprite.h"
 
 /*
   Храним не указатели на квады, а сами квады + храним в vector, чтобы все элементы шли один за другим
@@ -49,12 +50,20 @@ public:
 
 
 //Квад заданного цвета. Без текстуры
-class RenderableQuad: public Renderable
+class RenderableQuad: public Renderable, public ISprite
 {
 public:
+  typedef RenderableQuad* (*CreateExternalRenderableInListProc)( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );
+  typedef bool (*DestroyExternalRenderableInListProc)( CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort index );
   struct RenderableQuadInfo
   {
     std::string textureName;
+    bool textureChangedFlag;
+    CreateExternalRenderableInListProc CreateExternalRenderableInListFunc;
+    DestroyExternalRenderableInListProc DestroyExternalRenderableInListFunc;
+    GLshort indexInRenderableList;
+    bool isEnabled;
+    bool isEnabledPrev;
   };
 
 private:
@@ -73,6 +82,7 @@ private:
 public:
   RenderableQuad();
   RenderableQuad( const RenderableQuad &src );
+  RenderableQuad( CreateExternalRenderableInListProc createProc, DestroyExternalRenderableInListProc destroyProc, GLshort index );
   virtual ~RenderableQuad();
   void operator=( const RenderableQuad &src );
 
@@ -100,6 +110,36 @@ public:
   inline void* GetPointerToVertex () { return &this->position.x; }
   inline void* GetPointerToColor  () { return &this->color.x; }
   virtual bool            IsHasPoint      ( const Vec2& pos );
+  virtual Vec3& GetPositionPtr() {
+    return this->position;
+  }
+  virtual Vec4& GetColorPtr() {
+    return this->color;
+  }
+  virtual std::string& GetTextureNamePtr() {
+    return this->info->textureName;
+  }
+  virtual IAnimationObject* MakeInstance() {
+    return this->info->CreateExternalRenderableInListFunc( this->position.z, NULL, NULL, NULL, NULL );
+  }
+  virtual Vec4& GetTextureCoordsPtr() {
+    return this->texCoords;
+  }
+  virtual Vec2& GetScalePtr() {
+    return this->scale;
+  }
+  virtual float* GetRotationPtr() {
+    return &this->rotation;
+  }
+  virtual bool& GetTextureChangedFlag() {
+    return this->info->textureChangedFlag;
+  }
+  virtual Vec2& GetSizePtr() {
+    return this->size;
+  }
+  virtual bool* GetEnabledPtr() {
+    return &this->info->isEnabled;
+  }
 
   bool  Render();
 

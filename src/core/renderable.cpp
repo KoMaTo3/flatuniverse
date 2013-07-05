@@ -99,6 +99,10 @@ RenderableQuad::RenderableQuad()
 {
   this->info = new RenderableQuadInfo();
   this->info->textureName = "";
+  this->info->indexInRenderableList = -1;
+  this->info->textureChangedFlag = false;
+  this->info->isEnabled = true;
+  this->info->isEnabledPrev = this->info->isEnabled;
 }//constructor
 
 
@@ -108,7 +112,26 @@ RenderableQuad::RenderableQuad( const RenderableQuad &src )
 {
   this->info = new RenderableQuadInfo();
   this->info->textureName = src.info->textureName;
+  this->info->indexInRenderableList = src.info->indexInRenderableList;
+  this->info->textureChangedFlag = src.info->isEnabled;
+  this->info->isEnabled = src.info->isEnabled;
+  this->info->isEnabledPrev = src.info->isEnabledPrev;
 }//constructor
+
+
+RenderableQuad::RenderableQuad( CreateExternalRenderableInListProc createProc, DestroyExternalRenderableInListProc destroyProc, GLshort index )
+:position( 0.0f, 0.0f, 0.0f ), size( 1.0f, 1.0f ), color( 1.0f, 1.0f, 1.0f, 1.0f ), scale( 1.0f, 1.0f ), rotation( 0.0f ), texCoords( 0.0f, 0.0f, 0.0f, 0.0f )
+{
+  this->info = new RenderableQuadInfo();
+  this->info->textureName = "";
+  this->info->indexInRenderableList = index;
+  this->info->CreateExternalRenderableInListFunc = createProc;
+  this->info->DestroyExternalRenderableInListFunc = destroyProc;
+  this->info->textureChangedFlag = false;
+  this->info->isEnabled = true;
+  this->info->isEnabledPrev = this->info->isEnabled;
+}
+
 
 
 void RenderableQuad::operator=( const RenderableQuad &src )
@@ -121,6 +144,12 @@ void RenderableQuad::operator=( const RenderableQuad &src )
   this->texCoords = src.texCoords;
 
   this->info->textureName = src.info->textureName;
+  this->info->indexInRenderableList = src.info->indexInRenderableList;
+  this->info->CreateExternalRenderableInListFunc= src.info->CreateExternalRenderableInListFunc;
+  this->info->DestroyExternalRenderableInListFunc = src.info->DestroyExternalRenderableInListFunc;
+  this->info->textureChangedFlag = false;
+  this->info->isEnabled = src.info->isEnabled;
+  this->info->isEnabledPrev = src.info->isEnabledPrev;
 }//operator=
 
 
@@ -129,7 +158,13 @@ void RenderableQuad::operator=( const RenderableQuad &src )
 
 RenderableQuad::~RenderableQuad()
 {
-  delete this->info;
+  /*
+  if( this->info->indexInRenderableList != RENDERABLE_INDEX_UNDEFINED ) {
+    this->info->DestroyExternalRenderableInListFunc( NULL, NULL, NULL, this->info->indexInRenderableList );
+  } else {
+  */
+    delete this->info;
+  //}
 }//destructor
 
 
