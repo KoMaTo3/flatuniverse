@@ -41,6 +41,7 @@ template<class T> KM_INLINE Int  Min3Index( T x, T y, T z ) { return ( x < y ) ?
 template<class T> KM_INLINE T  Sign( T f ) { return ( f > 0 ) ? ( T ) 1 : ( ( f < 0 ) ? ( T ) -1 : 0 ); }
 template<class T> KM_INLINE T  Square( T x ) { return x * x; }
 template<class T> KM_INLINE T  Cube( T x ) { return x * x * x; }
+template<class T> KM_INLINE T  Round( T x ) { return x < 0.0 ? ceil( x - 0.5f ) : floor( x + 0.5f ); }
 
 class Math
 {

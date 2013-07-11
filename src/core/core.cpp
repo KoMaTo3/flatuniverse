@@ -134,8 +134,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   std::string path = tools::GetPathFromFilePath( tmp );
   tools::SetCurDirectory( path.c_str() );
 
-  __log.EnableAutoFlush( true );
-  __log.Open( "logs/core.txt", File_mode_WRITE, Filelevel_ALL );
+  //__log.EnableAutoFlush( true );
+  //__log.Open( "logs/core.txt", File_mode_WRITE, Filelevel_ALL );
 
   SYSTEMTIME curTime;
   GetSystemTime( &curTime );
@@ -963,13 +963,14 @@ bool Core::Redraw()
       if( this->camera && this->camera->GetIsValid() )
       {
         Object *objCamera = this->camera->GetObject< Object >();
+        objCamera->Update( 0.0f );
         Mat4 matrScale, matrTranslate, matrix;
         matrScale.Identity();
         matrTranslate.Identity();
         matrScale[ 0 ][ 0 ] = 1.0f;
         matrScale[ 1 ][ 1 ] = 1.0f;
         matrTranslate[ 3 ][ 0 ] = float( long( -objCamera->GetPosition().x + this->_window.windowCenter.x ) );
-        matrTranslate[ 3 ][ 1 ] = float( -objCamera->GetPosition().y + this->_window.windowCenter.y );
+        matrTranslate[ 3 ][ 1 ] = float( long( -objCamera->GetPosition().y + this->_window.windowCenter.y ) );
         matrTranslate[ 3 ][ 2 ] = -objCamera->GetPosition().z;
         matrix = matrScale * matrTranslate;
         glUniformMatrix4fv( this->_shaders.matrModelLoc, 1, false, &matrix[ 0 ][ 0 ] );

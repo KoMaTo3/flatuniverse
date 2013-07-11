@@ -336,7 +336,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   {
     game->Update();
 
-    if( false ) { //max FPS
+    if( true ) { //max FPS
       game->core->Redraw();
       ++currentFps;
     } else { //limited FPS
