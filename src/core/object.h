@@ -12,6 +12,7 @@
 #include "objectpointer.h"
 #include "objecttriggermgr.h"
 #include "tags.h"
+#include "animationobject.h"
 //#include "glui2/g2Theme.h"
 //#include "glui2/g2Spinner.h"
 
@@ -91,7 +92,7 @@ enum ObjectGuiType {
 
 
 
-class Object: public IPointerOwner, public ITags
+class Object: public IPointerOwner, public ITags, public IObject
 {
 public:
   typedef std::list< Object* > ObjectChilds;
@@ -148,6 +149,8 @@ public:
 protected:
   Vec3            position;     //рассчитанная позиция объекта в сцене. звук это, скрипт, частица или меш, главная координата - эта. её может модифицировать физдвижок, напрямую
 private:
+  bool            isEnabled,    //вкл/выкл. при выключении удаляются все рендерейблы/коллизии/триггеры. при включении ничего не восстанавливается
+                  isEnabledPrev;//предыдущее значение isEnabled
   Vec3            positionSrc;  //исходная позиция объекта. идет постоянный пересчет из positionSrc в position
   Mat4            matrixTransform;  //матрица трансформации для получения позиции объекта
 
@@ -237,6 +240,22 @@ public:
     RenderableQuad*   CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );
   static
     bool              DestroyExternalRenderableInList( CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort index );
+  virtual bool* GetEnabledPtr() {
+    return &this->isEnabled;
+  }
+  virtual Vec2& GetRenderableSize() {
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetSizeModifier() : static_cast< RenderableQuad* >( this->GetRenderable() )->GetSizeModifier() );
+  }
+  virtual Vec4& GetTextureCoords() {
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureCoordsModifier() : static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureCoordsModifier() );
+  }
+  virtual std::string& GetTextureNamePtr() {
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureNameModifier() : static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureNameModifier() );
+  }
+  virtual bool& GetTextureChangedFlag() {
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureChangedFlag() : static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureChangedFlag() );
+  }
+  virtual IAnimationObject* MakeInstance();
 
   /*
   g2Controller*       EnableGui           ( const GuiConstructor *info );

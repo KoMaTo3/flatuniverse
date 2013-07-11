@@ -1,12 +1,15 @@
-#include "core.h"
-#include "tools.h"
 #include <string>
 #include <vector>
+#include <time.h>
+
+
+#include "core.h"
+#include "tools.h"
 #include "interngl.h"
 #include "file.h"
-#include <time.h>
 #include "config.h"
 #include "debugrenderer.h"
+#include "animationmanager.h"
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -29,7 +32,7 @@ extern DebugRenderer* __debugRender;
 
 
 Core::Core()
-:_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL )
+:_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL ), animationMgr( NULL )
 {
   this->_window.isActive  = true;
   this->_window.dc        = NULL;
@@ -70,10 +73,12 @@ Core::~Core()
 */
 bool Core::Destroy()
 {
+  Animation::Destroy();
   DEF_DELETE( this->_rootObject );
   //DEF_DELETE( this->_rootGUIObject );
   DEF_DELETE( this->collisionManager );
   DEF_DELETE( this->triggerManager );
+  DEF_DELETE( this->animationMgr );
   //DEF_DELETE( this->gui.context );
   DEF_DELETE( __coreRenderableList );
   DEF_DELETE( __coreRenderableListIndicies );
@@ -230,6 +235,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   this->triggerManager    = new ObjectTriggerManager();
   __objectByCollision     = new ObjectByCollisionList();
   __objectByTrigger       = new ObjectByTriggerList();
+  this->animationMgr      = new Animation::Manager(  );
   //__objectByGui           = new ObjectByGuiList();
   //__guiList               = new GuiList();
   //
@@ -241,6 +247,15 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   {
     this->SetState( CORE_STATE_EXIT );
     return false;
+  }
+
+  FileManager::FilesList animationFiles;
+  __fileManager->FindFiles( "ani", animationFiles );
+  if( animationFiles.size() ) {
+    for( auto &fileName: animationFiles ) {
+      __log.PrintInfo( Filelevel_DEBUG, "Animation template files list: %s", fileName.c_str() );
+      this->animationMgr->LoadFile( fileName );
+    }
   }
   //MessageBox(0,"ok",0,0);
 
@@ -1275,6 +1290,7 @@ bool Core::Update()
   sTimer.Update();
   this->keyboard.Update();
   this->mouse.Update();
+  Animation::Update( sTimer.GetDeltaF() );
 
   MSG msg;
   while( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )

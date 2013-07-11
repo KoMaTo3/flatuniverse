@@ -1,5 +1,5 @@
 #include "animationmanager.h"
-#include "animationsprite.h"
+#include "animationtemplate.h"
 #include "file.h"
 #include "memory.h"
 #include "textparser.h"
@@ -10,11 +10,12 @@ using namespace Animation;
 
 
 Manager::Manager() {
-  this->_loadFunctionList.insert( std::make_pair( "texture", &Manager::_LoadAttributeTexture ) );
-  this->_loadFunctionList.insert( std::make_pair( "scale", &Manager::_LoadAttributeScale ) );
-  this->_loadFunctionList.insert( std::make_pair( "rotation", &Manager::_LoadAttributeRotation ) );
-  this->_loadFunctionList.insert( std::make_pair( "size", &Manager::_LoadAttributeSize ) );
-  this->_loadFunctionList.insert( std::make_pair( "position", &Manager::_LoadAttributePosition ) );
+  //this->_loadFunctionList.insert( std::make_pair( "scale", &Manager::_LoadAttributeScale ) );
+  //this->_loadFunctionList.insert( std::make_pair( "rotation", &Manager::_LoadAttributeRotation ) );
+  this->_loadFunctionList.insert( std::make_pair( "renderable_size", &Manager::_LoadAttributeRenderableSize ) );
+  this->_loadFunctionList.insert( std::make_pair( "renderable_texture_coords", &Manager::_LoadAttributeRenderableTextureCoords ) );
+  this->_loadFunctionList.insert( std::make_pair( "renderable_texture", &Manager::_LoadAttributeRenderableTexture ) );
+  //this->_loadFunctionList.insert( std::make_pair( "position", &Manager::_LoadAttributePosition ) );
 }
 
 
@@ -313,7 +314,7 @@ bool Manager::_TextParserNextIsNumber( TextParser &parser, TextParser::Result &v
 }//_TextParserNextIsNumber
 
 
-void Manager::_LoadAttributeTexture( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Manager::_LoadAttributeRenderableTexture( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -337,7 +338,8 @@ void Manager::_LoadAttributeTexture( TextParser &parser, AnimationTemplate *tpl,
     break;
     case TPL_STRING:  //texture file name
       if( !textureNameSetted ) {
-        static_cast< AnimationParameterString* >( tpl->SetParameter< AnimationParameterString >( TEXTURE_NAME ) )->AddKeyFrame( time, value.value );
+        __log.PrintInfo( Filelevel_DEBUG, "_LoadAttributeRenderableTexture => name[%s]", value.value.c_str() );
+        static_cast< AnimationParameterString* >( tpl->SetParameter< AnimationParameterString >( RENDERABLE_TEXTURE_NAME ) )->AddKeyFrame( time, value.value );
         textureNameSetted = true;
       } else {
         this->_Error( parser, value );
@@ -375,7 +377,7 @@ void Manager::_LoadAttributeTexture( TextParser &parser, AnimationTemplate *tpl,
           return;
         }
         uv.w = value.GetFloat();
-        static_cast< AnimationParameterFloat4* >( tpl->SetParameter< AnimationParameterFloat4 >( TEXTURE_COORDINATES ) )->AddKeyFrame( time, uv, interpolation );
+        static_cast< AnimationParameterFloat4* >( tpl->SetParameter< AnimationParameterFloat4 >( RENDERABLE_TEXTURE_COORDINATES ) )->AddKeyFrame( time, uv, interpolation );
         textureCoordsSetted = true;
       } else {
         this->_Error( parser, value );
@@ -389,9 +391,10 @@ void Manager::_LoadAttributeTexture( TextParser &parser, AnimationTemplate *tpl,
     }//switch
   }//while
   
-}//_LoadAttributeTexture
+}//_LoadAttributeRenderableTexture
 
 
+/*
 void Manager::_LoadAttributeRotation( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
@@ -483,9 +486,10 @@ void Manager::_LoadAttributeScale( TextParser &parser, AnimationTemplate *tpl, f
   }
 
 }//_LoadAttributeScale
+*/
 
 
-void Manager::_LoadAttributeSize( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Manager::_LoadAttributeRenderableSize( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -531,12 +535,73 @@ void Manager::_LoadAttributeSize( TextParser &parser, AnimationTemplate *tpl, fl
   }//while
 
   if( sizeSettingStep > 0 ) {
-    static_cast< AnimationParameterFloat2* >( tpl->SetParameter< AnimationParameterFloat2 >( OBJECT_SIZE ) )->AddKeyFrame( time, size, interpolation );
+    static_cast< AnimationParameterFloat2* >( tpl->SetParameter< AnimationParameterFloat2 >( RENDERABLE_SIZE ) )->AddKeyFrame( time, size, interpolation );
   }
 
-}//_LoadAttributeSize
+}//_LoadAttributeRenderableSize
 
 
+void Manager::_LoadAttributeRenderableTextureCoords( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+  TextParser::Result value;
+
+  if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
+    return;
+  }
+
+  bool isDone = false;
+  int coordsSettingStep = 0;
+  Vec4 coords( Vec4Null );
+  while( !isDone && parser.GetNext( value ) ) {
+    switch( value.type ) {
+    case TPL_SYMBOL:
+      if( value.value == ")" ) {
+        isDone = true;
+        break;
+      }
+      if( value.value != "," ) {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    case TPL_NUMBER:
+      if( coordsSettingStep < 4 ) {
+        switch( coordsSettingStep ) {
+        case 0:
+          coords.x = coords.y = coords.z = coords.w = value.GetFloat();
+        break;
+        case 1:
+          coords.z = coords.w = value.GetFloat();
+        break;
+        case 2:
+          coords.y = coords.w;
+          coords.z = value.GetFloat();
+        break;
+        case 3:
+          coords.w = value.GetFloat();
+        break;
+        }
+        ++coordsSettingStep;
+      } else {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    default:
+      this->_Error( parser, value );
+      return;
+    break;
+    }//switch
+  }//while
+
+  if( coordsSettingStep > 0 ) {
+    __log.PrintInfo( Filelevel_DEBUG, "RENDERABLE_TEXTURE_COORDINATES => [%3.3f; %3.3f]-[%3.3f; %3.3f] step[%d]", coords.x, coords.y, coords.z, coords.w, coordsSettingStep );
+    static_cast< AnimationParameterFloat4* >( tpl->SetParameter< AnimationParameterFloat4 >( RENDERABLE_TEXTURE_COORDINATES ) )->AddKeyFrame( time, coords, interpolation );
+  }
+
+}//_LoadAttributeRenderableTextureCoords
+
+
+/*
 void Manager::_LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
@@ -587,3 +652,4 @@ void Manager::_LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl
   }
 
 }//_LoadAttributePosition
+*/

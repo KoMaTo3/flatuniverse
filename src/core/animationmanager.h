@@ -26,11 +26,14 @@ private:
   void _Error( TextParser &parser, TextParser::Result &result );
   bool _TextParserNextIsSymbol( TextParser &parser, const std::string& symbol, bool showError = false );
   bool _TextParserNextIsNumber( TextParser &parser, TextParser::Result &value, bool showError = false );
-  void _LoadAttributeTexture( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
-  void _LoadAttributeRotation( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
-  void _LoadAttributeScale( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
-  void _LoadAttributeSize( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
-  void _LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
+  //void _LoadAttributeTexture( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
+  //void _LoadAttributeRotation( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
+  //void _LoadAttributeScale( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
+  //void _LoadAttributeSize( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
+  //void _LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
+  void _LoadAttributeRenderableSize( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
+  void _LoadAttributeRenderableTextureCoords( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
+  void _LoadAttributeRenderableTexture( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
 
   typedef void (Manager::*LoadAttributeFunc)( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation );
   std::hash_map< std::string, LoadAttributeFunc > _loadFunctionList;

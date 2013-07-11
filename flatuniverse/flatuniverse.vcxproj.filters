@@ -570,6 +570,9 @@
     <ClCompile Include="..\src\core\textparser.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\animationobject.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\collision.h">
@@ -864,6 +867,9 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\textparser.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\animationobject.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

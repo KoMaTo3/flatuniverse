@@ -68,6 +68,7 @@ private:
   _FileManagerItems _items;
 
 public:
+  typedef std::vector< std::string > FilesList;
   FileManager     ();
   ~FileManager    ();
 
@@ -78,7 +79,7 @@ public:
 
   bool  GetFile   ( const std::string& fileName, memory& dest, bool addLastNull = false );
   bool  FileExists( const std::string& fileName );
-  void  FindFiles ( const std::string& extension, std::vector< std::string >& result );
+  void  FindFiles ( const std::string& extension, FilesList &result );
 
   void  Dump      (); //!!!DEBUG!!!
 };

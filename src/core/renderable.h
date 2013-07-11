@@ -9,7 +9,6 @@
 #include "textureatlas.h"
 #include "memorywriter.h"
 #include "memoryreader.h"
-#include "animationsprite.h"
 
 /*
   Храним не указатели на квады, а сами квады + храним в vector, чтобы все элементы шли один за другим
@@ -50,21 +49,21 @@ public:
 
 
 //Квад заданного цвета. Без текстуры
-class RenderableQuad: public Renderable, public ISprite
+class RenderableQuad: public Renderable
 {
 public:
-  typedef RenderableQuad* (*CreateExternalRenderableInListProc)( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );
-  typedef bool (*DestroyExternalRenderableInListProc)( CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort index );
+  //RenderableQuadInfo
   struct RenderableQuadInfo
   {
     std::string textureName;
     bool textureChangedFlag;
-    CreateExternalRenderableInListProc CreateExternalRenderableInListFunc;
-    DestroyExternalRenderableInListProc DestroyExternalRenderableInListFunc;
     GLshort indexInRenderableList;
-    bool isEnabled;
-    bool isEnabledPrev;
+    Vec4  textureCoordsPrev,
+          textureCoordsNew;
+    Vec2  sizePrev,
+          sizeNew;
   };
+  //
 
 private:
   Vec3  position; //4 floats
@@ -77,14 +76,13 @@ private:
 
   Vec4  texCoords;  //4 floats
 
-  RenderableQuadInfo *info; //дополнительные данные квада
+  RenderableQuadInfo *info; //дополнительные данные квада (указатель на них в ISprite)
 
 public:
   RenderableQuad();
-  RenderableQuad( const RenderableQuad &src );
-  RenderableQuad( CreateExternalRenderableInListProc createProc, DestroyExternalRenderableInListProc destroyProc, GLshort index );
+  RenderableQuad( RenderableQuad &src );
   virtual ~RenderableQuad();
-  void operator=( const RenderableQuad &src );
+  void operator=( RenderableQuad &src );
 
   RenderableQuad* SetPosition     ( const Vec3& newPosition );
   RenderableQuad* SetSize         ( const Vec2& newSize );
@@ -92,6 +90,7 @@ public:
   RenderableQuad* SetScale        ( const Vec2& newScale );
   RenderableQuad* SetRotation     ( const float newAngle );
   RenderableQuad* SetTexture      ( const std::string& textureFileName, const Vec2& texCoordsLeftTop = Vec2( 0.0f, 0.0f ), const Vec2& texCoordsRightBottom = Vec2( 1.0f, 1.0f ) );
+  RenderableQuad* SetTextureCoords( const Vec2& texCoordsLeftTop = Vec2( 0.0f, 0.0f ), const Vec2& texCoordsRightBottom = Vec2( 1.0f, 1.0f ) );
   inline
   const Vec3&     GetPosition     () { return this->position; }
   inline float    GetRotation     () { return this->rotation; }
@@ -105,41 +104,11 @@ public:
   const Vec4&     GetTexCoords    () { return this->texCoords; }
   Vec2            GetMiddleTextureCoords();
   inline
-  std::string     GetTextureFileName(){ return ( this->info ? this->info->textureName : "" ); }
+    std::string     GetTextureFileName(){ return ( static_cast< RenderableQuadInfo* >( this->info ) ? static_cast< RenderableQuadInfo* >( static_cast< RenderableQuadInfo* >( this->info ) )->textureName : "" ); }
 
   inline void* GetPointerToVertex () { return &this->position.x; }
   inline void* GetPointerToColor  () { return &this->color.x; }
   virtual bool            IsHasPoint      ( const Vec2& pos );
-  virtual Vec3& GetPositionPtr() {
-    return this->position;
-  }
-  virtual Vec4& GetColorPtr() {
-    return this->color;
-  }
-  virtual std::string& GetTextureNamePtr() {
-    return this->info->textureName;
-  }
-  virtual IAnimationObject* MakeInstance() {
-    return this->info->CreateExternalRenderableInListFunc( this->position.z, NULL, NULL, NULL, NULL );
-  }
-  virtual Vec4& GetTextureCoordsPtr() {
-    return this->texCoords;
-  }
-  virtual Vec2& GetScalePtr() {
-    return this->scale;
-  }
-  virtual float* GetRotationPtr() {
-    return &this->rotation;
-  }
-  virtual bool& GetTextureChangedFlag() {
-    return this->info->textureChangedFlag;
-  }
-  virtual Vec2& GetSizePtr() {
-    return this->size;
-  }
-  virtual bool* GetEnabledPtr() {
-    return &this->info->isEnabled;
-  }
 
   bool  Render();
 
@@ -147,6 +116,22 @@ public:
   void LoadFromBuffer             ( MemoryReader &reader );
 
   void CalculateRect              ( Vec2 &leftTop, Vec2 &rightBottom );
+  inline Vec4& GetTexCoordsModifier() {
+    return this->info->textureCoordsNew;
+  }
+  inline Vec2& GetSizeModifier() {
+    return this->info->sizeNew;
+  }
+  inline Vec4& GetTextureCoordsModifier() {
+    return this->info->textureCoordsNew;
+  }
+  inline std::string& GetTextureNameModifier() {
+    return this->info->textureName;
+  }
+  inline bool& GetTextureChangedFlag() {
+    return this->info->textureChangedFlag;
+  }
+  void CheckChanges();
 };
 
 #pragma pack( pop )

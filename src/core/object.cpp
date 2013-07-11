@@ -165,7 +165,7 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 Object::Object()
 :name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
-,tags( NULL )
+,tags( NULL ), isEnabled( true ), isEnabledPrev( true )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
@@ -176,7 +176,7 @@ Object::Object()
 Object::Object( const std::string &objectName, Object* parentObject )
 :name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
-,tags( NULL )
+,tags( NULL ), isEnabled( true ), isEnabledPrev( true )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
@@ -522,11 +522,11 @@ RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRender
     index = *inRenderableFreeIndicies->rbegin();
     inRenderableFreeIndicies->pop_back();
     result = &( *( inRenderableList->begin() + index ) );
-    *result = RenderableQuad( Object::CreateExternalRenderableInList, Object::DestroyExternalRenderableInList, index );
+    *result = RenderableQuad();
   }
   else
   {
-    inRenderableList->push_back( RenderableQuad( Object::CreateExternalRenderableInList, Object::DestroyExternalRenderableInList, index ) );
+    inRenderableList->push_back( RenderableQuad() );
     result = &( *inRenderableList->rbegin() );
     index = inRenderableList->size() - 1;
   }
@@ -550,6 +550,7 @@ RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRender
   if( !added )
     inRenderableIndicies->push_back( index );
 
+  __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => Done" );
   return ( RenderableQuad* ) result;
 }//CreateExternalRenderableInList
 
@@ -1081,6 +1082,23 @@ void Object::_RecalculatePosition()
 */
 void Object::Update( float dt )
 {
+  if( this->isEnabled != this->isEnabledPrev ) {
+    if( !this->isEnabled ) { //disable all
+      if( this->IsRenderable() ) {
+        this->DisableRenderable();
+      }
+      if( this->IsCollision() ) {
+        this->DisableCollision();
+      }
+      if( this->IsTrigger() ) {
+        this->DisableTrigger();
+      }
+    }
+  }
+  this->isEnabledPrev = this->isEnabled;
+  if( !this->isEnabled ) {
+    return;
+  }
   this->_RecalculatePosition();
 
   //обновляем спрайт
@@ -1093,6 +1111,14 @@ void Object::Update( float dt )
         break;
       }
       renderable->SetPosition( this->position );
+      renderable->CheckChanges();
+      /*
+      if( *renderable->GetEnabledPtr() != *renderable->GetPrevEnabledPtr() ) {
+        if( *renderable->GetEnabledPtr() ) {
+        } else {
+        }
+      }
+      */
     }
   break;
   }
@@ -1562,3 +1588,8 @@ void Object::RemoveTag( const std::string& tag ) {
   }
   this->tags->RemoveTag( tag );
 }//RemoveTag
+
+
+IAnimationObject* Object::MakeInstance() {
+  return this;  //!!!
+}

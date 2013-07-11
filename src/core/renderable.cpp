@@ -1,4 +1,5 @@
 #include "renderable.h"
+#include "animationpack.h"
 #include "../gl/gl.h"
 
 
@@ -39,7 +40,7 @@ RenderableQuad* RenderableQuad::SetPosition( const Vec3& newPosition )
 */
 RenderableQuad* RenderableQuad::SetSize( const Vec2& newSize )
 {
-  this->size = newSize;
+  this->size = this->info->sizeNew = this->info->sizePrev = newSize;
   //this->isChanged = true;
   return this;
 }//SetSize
@@ -97,59 +98,38 @@ RenderableQuad* RenderableQuad::SetRotation( const float newAngle )
 RenderableQuad::RenderableQuad()
 :position( 0.0f, 0.0f, 0.0f ), size( 1.0f, 1.0f ), color( 1.0f, 1.0f, 1.0f, 1.0f ), scale( 1.0f, 1.0f ), rotation( 0.0f ), texCoords( 0.0f, 0.0f, 0.0f, 0.0f )
 {
+  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad test: this[%p] info[%p]", this, this->info );
   this->info = new RenderableQuadInfo();
   this->info->textureName = "";
   this->info->indexInRenderableList = -1;
   this->info->textureChangedFlag = false;
-  this->info->isEnabled = true;
-  this->info->isEnabledPrev = this->info->isEnabled;
+  this->info->textureCoordsNew = this->info->textureCoordsPrev = this->texCoords;
+  this->info->sizeNew = this->info->sizePrev = this->size;
 }//constructor
 
 
 
-RenderableQuad::RenderableQuad( const RenderableQuad &src )
+RenderableQuad::RenderableQuad( RenderableQuad &src )
 :position( src.position ), size( src.size ), color( src.color ), scale( src.scale ), rotation( src.rotation ), texCoords( src.texCoords )
 {
-  this->info = new RenderableQuadInfo();
-  this->info->textureName = src.info->textureName;
-  this->info->indexInRenderableList = src.info->indexInRenderableList;
-  this->info->textureChangedFlag = src.info->isEnabled;
-  this->info->isEnabled = src.info->isEnabled;
-  this->info->isEnabledPrev = src.info->isEnabledPrev;
+  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::copy-constructor => this[%p] src[%p]", this, &src );
+  this->info = src.info;
+  src.info = nullptr;
 }//constructor
 
 
-RenderableQuad::RenderableQuad( CreateExternalRenderableInListProc createProc, DestroyExternalRenderableInListProc destroyProc, GLshort index )
-:position( 0.0f, 0.0f, 0.0f ), size( 1.0f, 1.0f ), color( 1.0f, 1.0f, 1.0f, 1.0f ), scale( 1.0f, 1.0f ), rotation( 0.0f ), texCoords( 0.0f, 0.0f, 0.0f, 0.0f )
+
+void RenderableQuad::operator=( RenderableQuad &src )
 {
-  this->info = new RenderableQuadInfo();
-  this->info->textureName = "";
-  this->info->indexInRenderableList = index;
-  this->info->CreateExternalRenderableInListFunc = createProc;
-  this->info->DestroyExternalRenderableInListFunc = destroyProc;
-  this->info->textureChangedFlag = false;
-  this->info->isEnabled = true;
-  this->info->isEnabledPrev = this->info->isEnabled;
-}
-
-
-
-void RenderableQuad::operator=( const RenderableQuad &src )
-{
+  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::operator= => this[%p] src[%p]", this, &src );
   this->position = src.position;
   this->size = src.size;
   this->color = src.color;
   this->scale = src.scale;
   this->rotation = src.rotation;
   this->texCoords = src.texCoords;
-
-  this->info->textureName = src.info->textureName;
-  this->info->indexInRenderableList = src.info->indexInRenderableList;
-  this->info->CreateExternalRenderableInListFunc= src.info->CreateExternalRenderableInListFunc;
-  this->info->DestroyExternalRenderableInListFunc = src.info->DestroyExternalRenderableInListFunc;
-  this->info->textureChangedFlag = false;
-  this->info->isEnabled = src.info->isEnabled;
-  this->info->isEnabledPrev = src.info->isEnabledPrev;
+  this->info = src.info;
+  src.info = nullptr;
 }//operator=
 
 
@@ -158,13 +138,16 @@ void RenderableQuad::operator=( const RenderableQuad &src )
 
 RenderableQuad::~RenderableQuad()
 {
+  //TODO: because RenderableQuad inherited from ISprite, info deleted at ~ISprite
   /*
   if( this->info->indexInRenderableList != RENDERABLE_INDEX_UNDEFINED ) {
     this->info->DestroyExternalRenderableInListFunc( NULL, NULL, NULL, this->info->indexInRenderableList );
   } else {
   */
-    delete this->info;
+    //DEF_DELETE( this->info->animation );
+    //delete this->info;
   //}
+  DEF_DELETE( this->info );
 }//destructor
 
 
@@ -217,10 +200,28 @@ bool RenderableQuad::Render()
 */
 RenderableQuad* RenderableQuad::SetTexture( const std::string& textureFileName, const Vec2& texCoordsLeftTop, const Vec2& texCoordsRightBottom )
 {
-  this->texCoords = __textureAtlas->GetTextureCoords( textureFileName, Vec4( texCoordsLeftTop.x, texCoordsLeftTop.y, texCoordsRightBottom.x, texCoordsRightBottom.y ) );
+  const Vec4 v4( texCoordsLeftTop.x, texCoordsLeftTop.y, texCoordsRightBottom.x, texCoordsRightBottom.y );
+  this->texCoords = __textureAtlas->GetTextureCoords( textureFileName, v4 );
+  this->info->textureCoordsNew = this->info->textureCoordsPrev = v4;
   this->info->textureName = textureFileName;
   return this;
 }//SetTexture
+
+
+
+/*
+=============
+  SetTextureCoords
+=============
+*/
+RenderableQuad* RenderableQuad::SetTextureCoords( const Vec2& texCoordsLeftTop, const Vec2& texCoordsRightBottom ) {
+  if( this->info->textureName.size() ) {
+    const Vec4 v4( texCoordsLeftTop.x, texCoordsLeftTop.y, texCoordsRightBottom.x, texCoordsRightBottom.y );
+    this->texCoords = __textureAtlas->GetTextureCoords( this->info->textureName, v4 );
+    this->info->textureCoordsNew = this->info->textureCoordsPrev = v4;
+  }
+  return this;
+}//SetTextureCoords
 
 
 
@@ -323,3 +324,25 @@ void RenderableQuad::CalculateRect( Vec2 &leftTop, Vec2 &rightBottom )
   leftTop.Set( this->position.x - resSize.x, this->position.y - resSize.y );
   rightBottom.Set( this->position.x + resSize.x, this->position.y + resSize.y );
 }//CalculateRect
+
+
+/*
+=============
+  CheckChanges
+=============
+*/
+void RenderableQuad::CheckChanges() {
+  //size
+  if( this->info->sizeNew != this->info->sizePrev ) {
+    this->SetSize( this->info->sizeNew );
+  }
+
+  //texture
+  if( this->info->textureChangedFlag ) {
+    __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::CheckChanges => texture['%s']", this->info->textureName.c_str() );
+    this->SetTexture( this->info->textureName, Vec2( this->info->textureCoordsNew.x, this->info->textureCoordsNew.y ), Vec2( this->info->textureCoordsNew.z, this->info->textureCoordsNew.w ) );
+    this->info->textureChangedFlag = false;
+  } else if( this->info->textureCoordsNew != this->info->textureCoordsPrev ) {
+    this->SetTextureCoords( Vec2( this->info->textureCoordsNew.x, this->info->textureCoordsNew.y ), Vec2( this->info->textureCoordsNew.z, this->info->textureCoordsNew.w ) );
+  }
+}//CheckChanges

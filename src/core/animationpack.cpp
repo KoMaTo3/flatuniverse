@@ -1,6 +1,5 @@
 #include "animationpack.h"
 #include "animationset.h"
-#include "animationsprite.h"
 #include "file.h"
 
 
@@ -56,16 +55,19 @@ void AnimationPack::__Dump( const std::string &prefix ) {
 
 bool AnimationPack::SetCurrentAnimation( const std::string &animationName, float startTime ) {
   AnimationSetList::const_iterator animation = this->_animationSetList.find( animationName );
+  __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => animationsCount[%d]", this->_animationSetList.size() );
   if( animation == this->_animationSetList.end() ) {
     __log.PrintInfo( Filelevel_WARNING, "AnimationPack::SetCurrentAnimation => this[%p] animation['%s'] not found", this, animationName.c_str() );
     return false;
   }
   for( auto &anim: this->_animationSetList ) {
+  __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => SetEnabled[%p]", anim.second );
     anim.second->SetEnabled( false );
   }
 
   this->_currentAnimation = &( *animation->second );
   this->_currentAnimation->SetEnabled( true );
+  __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => ResetAnimation[%3.1f] _currentAnimation[%p]", startTime, _currentAnimation );
   this->_currentAnimation->ResetAnimation( startTime );
   return true;
 }//SetCurrentAnimation

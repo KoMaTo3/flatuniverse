@@ -6,7 +6,12 @@
 
 #include "../gl/gl3.h"
 #include "../gl/gl.h"
+#include <string>
+#include <deque>
+#include <list>
 //#include "glui2/glui2.h"
+
+
 #include "object.h"
 #include "font.h"
 #include "renderable.h"
@@ -19,9 +24,6 @@
 #include "mouse.h"
 #include "filemanager.h"
 #include "textureatlas.h"
-#include <string>
-#include <deque>
-#include <list>
 
 //
 extern CoreRenderableList *__coreRenderableList;
@@ -47,6 +49,11 @@ enum CoreStates
 #define CORE_SIGNAL_SETWINDOWISACTIVE     ( 0x00000001 )
 #define CORE_SIGNAL_RESIZE                ( 0x00000002 )
 #define CORE_SIGNAL_UPDATEPALETTE         ( 0x00000003 )
+
+
+namespace Animation {
+  class Manager;
+};
 
 
 class Core
@@ -110,6 +117,7 @@ private:
   CollisionManager      *collisionManager;
   ObjectTriggerManager  *triggerManager;
   Pointer               *camera;  //текущая камера
+  Animation::Manager    *animationMgr;
 
 public:
   Keyboard  keyboard;

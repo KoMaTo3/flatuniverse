@@ -3,33 +3,34 @@
 #include "file.h"
 
 
-ISprite::ISprite()
-:_animation( NULL )
-{
-}
-
-
 ISprite::~ISprite() {
   if( this->_animation ) {
     delete this->_animation;
+    this->_animation = NULL;
   }
 }
 
 
 Animation::AnimationPack* ISprite::ApplyAnimation( const std::string& templateName, const std::string& animationName ) {
+  __log.PrintInfo( Filelevel_DEBUG, "ISprite::ApplyAnimation" );
   Animation::AnimationPack *templatePack = Animation::GetPackTemplate( templateName );
   if( !templatePack ) {
     __log.PrintInfo( Filelevel_ERROR, "ISprite::ApplyAnimation => animation '%s' not found", templateName.c_str() );
     return NULL;
   }
 
+  __log.PrintInfo( Filelevel_DEBUG, ". animation[%p]", this->_animation );
   if( this->_animation ) {
     delete this->_animation;
   }
 
+  __log.PrintInfo( Filelevel_DEBUG, ". new AnimationPack" );
   this->_animation = new Animation::AnimationPack();
-  this->_animation->MakeFromTemplate< AnimationSprite >( *templatePack, AnimationSprite::SetParameterOfExternAnimation, this );
-  this->_animation->SetCurrentAnimation( animationName );
+  __log.PrintInfo( Filelevel_DEBUG, ". MakeFromTemplate" );
+  ( this->_animation )->MakeFromTemplate< AnimationSprite >( *templatePack, AnimationSprite::SetParameterOfExternAnimation, this );
+  __log.PrintInfo( Filelevel_DEBUG, ". SetCurrentAnimation '%s'", animationName.c_str() );
+  ( this->_animation )->SetCurrentAnimation( animationName );
+  __log.PrintInfo( Filelevel_DEBUG, ". done" );
 
   return this->_animation;
 }//ApplyAnimation
@@ -41,7 +42,7 @@ Animation::AnimationPack* ISprite::ApplySubAnimation( const std::string& animati
     return NULL;
   }
 
-  this->_animation->SetCurrentAnimation( animationName );
+  ( this->_animation )->SetCurrentAnimation( animationName );
   return this->_animation;
 }//ApplySubAnimation
 
@@ -49,7 +50,7 @@ Animation::AnimationPack* ISprite::ApplySubAnimation( const std::string& animati
 AnimationSprite::AnimationSprite( IAnimationObject* sprite )
 :_sprite( ( ISprite* ) sprite )
 {
-  //static_cast< AnimationParameterBool* >( this->SetParameter( ENABLED ) )->Bind( static_cast< ISprite* >( sprite )->GetEnabledPtr() );
+  static_cast< AnimationParameterBool* >( this->SetParameter( ENABLED ) )->Bind( static_cast< ISprite* >( sprite )->GetEnabledPtr() );
 }
 
 
@@ -74,6 +75,7 @@ IAnimationParameter* AnimationSprite::SetParameter( AnimationSpriteParameterType
   }
 
   switch( parameterType ) {
+    /*
   case POSITION: {
     AnimationParameterFloat3 *value = new AnimationParameterFloat3();
     parameter = value;
@@ -117,23 +119,27 @@ IAnimationParameter* AnimationSprite::SetParameter( AnimationSpriteParameterType
     break;
     }
   case SCALE: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationSprite::SetParameter => binded SCALE[%p]", &this->_sprite->GetScalePtr() );
     AnimationParameterFloat2 *value = new AnimationParameterFloat2();
     parameter = value;
     value->Bind( this->_sprite->GetScalePtr() );
     break;
     }
+    */
   case ENABLED: {
     AnimationParameterBool *value = new AnimationParameterBool();
     parameter = value;
     value->Bind( this->_sprite->GetEnabledPtr() );
     break;
     }
+                /*
   case OBJECT_SIZE: {
     AnimationParameterFloat2 *value = new AnimationParameterFloat2();
     parameter = value;
     value->Bind( this->_sprite->GetSizePtr() );
     break;
     }
+    */
   default:
     __log.PrintInfo( Filelevel_ERROR, "AnimationSprite::SetParameter => can't bind parameter x%X", parameterType );
   }

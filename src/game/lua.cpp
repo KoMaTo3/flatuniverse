@@ -57,6 +57,7 @@ LUAFUNCPROC_RemoveObjectForce *LUAFUNC_RemoveObjectForce    = NULL;
 LUAFUNCPROC_ObjectHasTag      *LUAFUNC_ObjectHasTag         = NULL;
 LUAFUNCPROC_ObjectAddTag      *LUAFUNC_ObjectAddTag         = NULL;
 LUAFUNCPROC_ObjectRemoveTag   *LUAFUNC_ObjectRemoveTag      = NULL;
+LUAFUNCPROC_ObjectSetAnimation*LUAFUNC_ObjectSetAnimation   = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -150,6 +151,7 @@ bool Lua::Init()
   lua_register( this->luaState, "ObjectRemoveTag",  Lua::LUA_ObjectRemoveTag );
   lua_register( this->luaState, "SetClipboard",     Lua::LUA_SetClipboard );
   lua_register( this->luaState, "GetClipboard",     Lua::LUA_GetClipboard );
+  lua_register( this->luaState, "ObjectSetAnimation", Lua::LUA_ObjectSetAnimation );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -1898,3 +1900,25 @@ int Lua::LUA_GetClipboard( lua_State *lua ) {
 
   return 1;
 }//LUA_GetClipboard
+
+
+
+/*
+=============
+  LUA_ObjectSetAnimation
+=============
+*/
+int Lua::LUA_ObjectSetAnimation( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 3 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectSetAnimation => not enough parameters" );
+    return 0;
+  }
+  std::string objectName    = lua_tostring( lua, 1 );
+  std::string templateName  = lua_tostring( lua, 2 );
+  std::string animationName = lua_tostring( lua, 3 );
+  LUAFUNC_ObjectSetAnimation( objectName, templateName, animationName );
+  return 0;
+}//LUA_ObjectSetAnimation

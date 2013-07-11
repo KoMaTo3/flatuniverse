@@ -18,6 +18,7 @@
 
 enum AnimationSpriteParameterType {
   ENABLED,
+  /*
   POSITION,
   POSITION_X,
   POSITION_Y,
@@ -29,7 +30,11 @@ enum AnimationSpriteParameterType {
   TEXTURE_COORDINATES,
   ROTATION,
   SCALE,
-  OBJECT_SIZE
+  OBJECT_SIZE,
+  */
+  RENDERABLE_SIZE,
+  RENDERABLE_TEXTURE_NAME,
+  RENDERABLE_TEXTURE_COORDINATES
 };
 
 

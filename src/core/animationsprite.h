@@ -15,20 +15,11 @@ namespace Animation {
 //Интерфейс для работы со спрайтом
 class ISprite: public IAnimationObject {
 public:
-  //Vec2 _position;
-  //Vec4 _color;
   ISprite();
   virtual ~ISprite();
-  virtual Vec3& GetPositionPtr() = NULL;
-  virtual Vec4& GetColorPtr() = NULL;
-  virtual std::string& GetTextureNamePtr() = NULL;
-  virtual Vec4& GetTextureCoordsPtr() = NULL;
-  virtual bool& GetTextureChangedFlag() = NULL;
-  virtual Vec2& GetScalePtr() = NULL;
-  virtual float* GetRotationPtr() = NULL;
   virtual bool* GetEnabledPtr() = NULL;
-  virtual Vec2& GetSizePtr() = NULL;
-  virtual IAnimationObject* MakeInstance() = NULL;
+  //virtual Vec3& GetPositionPtr() = NULL;
+  //virtual IAnimationObject* MakeInstance() = NULL;
 
   Animation::AnimationPack *ApplyAnimation( const std::string& templateName, const std::string& animationName = "default" );
   Animation::AnimationPack *ApplySubAnimation( const std::string& animationName );
@@ -38,6 +29,10 @@ public:
 
 protected:
   Animation::AnimationPack *_animation;
+
+private:
+  ISprite( const ISprite& );
+  ISprite& operator=( const ISprite& );
 };
 
 

@@ -2,12 +2,7 @@ README.md
 _UpgradeReport_Files/
 Backup/
 Debug/logs/
-Release/logs/
-Release/flatuniverse.exp
-Release/flatuniverse.lib
-Release/flatuniverse.pdb
-Release/flatuniverse.exe
-Release/data/temp/*.fu
+Release/
 flatuniverse/Debug/
 flatuniverse/Release/
 tmp/

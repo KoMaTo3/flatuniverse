@@ -458,13 +458,13 @@ bool FileManager::FileExists( const std::string& fileName )
   FindFile
 ----------
 */
-void FileManager::FindFiles( const std::string& extension, std::vector< std::string >& result )
+void FileManager::FindFiles( const std::string& extension, FilesList &result )
 {
   result.clear();
-  for( _FileManagerItems::iterator iter = this->_items.begin(); iter != this->_items.end(); ++iter )
-    if( iter->second.ext == extension )
-    {
-      result.resize( result.size() + 1 );
-      result[ result.size() - 1 ] = iter->second.fullPath;
+  _FileManagerItems::iterator iterEnd = this->_items.end();
+  for( _FileManagerItems::iterator iter = this->_items.begin(); iter != iterEnd; ++iter ) {
+    if( iter->second.ext == extension ) {
+      result.push_back( iter->second.fullPath );
     }
+  }
 }//FindFile

@@ -262,8 +262,8 @@ Bool ImageLoader::_LoadFromBufferTGA( Byte *buffer, Dword length )
           src_pos += 3;
         for( q = 0; q < num + 1; ++q )
         {
-          dest_pos = ( x + y * this->_size.width ) << 2;
-          //dest_pos = ( x + ( this->_size.height - y - 1 ) * this->_size.width ) << 2;
+          //dest_pos = ( x + y * this->_size.width ) << 2;
+          dest_pos = ( x + ( this->_size.height - y - 1 ) * this->_size.width ) << 2;
           dest[ dest_pos     ] = r;
           dest[ dest_pos + 1 ] = g;
           dest[ dest_pos + 2 ] = b;
@@ -278,8 +278,8 @@ Bool ImageLoader::_LoadFromBufferTGA( Byte *buffer, Dword length )
       {//not compressed block
         for( q = 0; q < num + 1; ++q )
         {
-          dest_pos = ( x + y * this->_size.width ) << 2;
-          //dest_pos = ( x + ( this->_size.height - y - 1 ) * this->_size.width ) << 2;
+          //dest_pos = ( x + y * this->_size.width ) << 2;
+          dest_pos = ( x + ( this->_size.height - y - 1 ) * this->_size.width ) << 2;
           b = tmp[ src_pos     ];
           g = tmp[ src_pos + 1 ];
           r = tmp[ src_pos + 2 ];

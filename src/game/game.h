@@ -91,6 +91,7 @@ public:
   static bool   LUA_ObjectHasTag      ( const std::string &objectName, const std::string &tag );
   static void   LUA_ObjectAddTag      ( const std::string &objectName, const std::string &tag );
   static void   LUA_ObjectRemoveTag   ( const std::string &objectName, const std::string &tag );
+  static void   LUA_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation );
 
   void Update();
   void UpdateLuaTimers();

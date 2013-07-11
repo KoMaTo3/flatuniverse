@@ -87,6 +87,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\core\animation.cpp" />
     <ClCompile Include="..\src\core\animationmanager.cpp" />
+    <ClCompile Include="..\src\core\animationobject.cpp" />
     <ClCompile Include="..\src\core\animationpack.cpp" />
     <ClCompile Include="..\src\core\animationparameter.cpp" />
     <ClCompile Include="..\src\core\animationset.cpp" />
@@ -273,6 +274,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\core\animation.h" />
     <ClInclude Include="..\src\core\animationmanager.h" />
+    <ClInclude Include="..\src\core\animationobject.h" />
     <ClInclude Include="..\src\core\animationpack.h" />
     <ClInclude Include="..\src\core\animationparameter.h" />
     <ClInclude Include="..\src\core\animationset.h" />

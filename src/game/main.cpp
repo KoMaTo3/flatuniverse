@@ -4,6 +4,7 @@
 #include "core/config.h"
 #include "worldgridmgr.h"
 #include "game.h"
+#include "core/animationpack.h"
 
 Game *game = NULL;
 
@@ -30,6 +31,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   }
     //gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
   __log.PrintInfo( Filelevel_DEBUG, "gridsAroundObject: %d", gridsAroundObject );
+  __log.PrintInfo( Filelevel_DEBUG, "sizeof( RenderableQuad ) = %d", sizeof( RenderableQuad ) );
   game->world = new WorldGridManager( game->core->GetRootObject(), gridsAroundObject );
 
   bool isDebug = __config->GetBoolean( "dbg_low_alpha" );
@@ -361,6 +363,31 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       currentFps = 0;
     }
 
+
+    if( game->core->keyboard.IsPressed( VK_RETURN ) ) {
+      auto player = game->core->GetObject( "player" );
+      player->ApplyAnimation( "player/mario", "default" )->SetEnabled( true );
+      /*
+      *player->GetEnabledPtr() = !*player->GetEnabledPtr();
+      if( *player->GetEnabledPtr() ) {
+        auto col = player->EnableCollision();
+        col->InitSquare( Vec3( 14.0f, 20.0f, 0.0f ) );
+        col->SetPosition( Vec3( 65.0f, 0.0f, 0.0f ) );
+        col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
+        col->SetIsStatic( false );
+        col->SetMass( 1000.0f );
+        auto quad = ( RenderableQuad* ) player->EnableRenderable( RENDERABLE_TYPE_QUAD );
+        quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
+        quad->SetSize( Vec2( 20.0f, 20.0f ) );
+        quad->SetTexture( "data/temp/mario.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+        //game->core->SetCamera( obj );
+      }
+      */
+      //auto anim = static_cast< RenderableQuad* >( player->GetRenderable() )->ApplyAnimation( "player/mario", "default" );
+      //anim->SetEnabled( true );
+      //__log.PrintInfo( Filelevel_DEBUG, "VK_RETURN => scale[%p]", &static_cast< RenderableQuad* >( player->GetRenderable() )->GetScalePtr() );
+    }
+
     /*
     if( game->core->keyboard.IsPressed( VK_LEFT ) || game->core->keyboard.IsPressed( VK_LETTER_A ) )
     {
@@ -582,6 +609,7 @@ Game::Game()
   LUAFUNC_ObjectHasTag      = Game::LUA_ObjectHasTag;
   LUAFUNC_ObjectAddTag      = Game::LUA_ObjectAddTag;
   LUAFUNC_ObjectRemoveTag   = Game::LUA_ObjectRemoveTag;
+  LUAFUNC_ObjectSetAnimation= Game::LUA_ObjectSetAnimation;
 
   Collision::SetInitCollisionHandler( Game::LUA_ListenCollision );
   Collision::SetDefaultCollisionHandler( Game::CollisionProc );
@@ -1137,6 +1165,23 @@ void Game::LUA_SetCamera( const std::string &name )
   }
   game->core->SetCamera( camera );
 }//LUA_CreateObject
+
+
+/*
+=============
+  LUA_ObjectSetAnimation
+=============
+*/
+void Game::LUA_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectSetAnimation => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  object->ApplyAnimation( templateName, animation )->SetEnabled( true );
+}//LUA_ObjectSetAnimation
 
 
 /*
