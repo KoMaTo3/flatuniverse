@@ -25,6 +25,7 @@ private:
   GridsList grids;
   const Dword blockSize;
   memory worldData;     //данные о мире
+  std::string fileName; //файл, в который сохраняется мир
 
 public:
   WorldSaver();
@@ -36,5 +37,8 @@ public:
   void  AllocFreeBlocks ( Dword blocksCount );
 
   Dword LoadFromFile    ( const std::string& fileName );
-  void  SaveToFile      ( const std::string& fileName );
+  void  SaveToFile      ( const std::string& fileName = "" );
+  inline const std::string& GetFileName() const {
+    return this->fileName;
+  }
 };

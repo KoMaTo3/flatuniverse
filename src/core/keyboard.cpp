@@ -11,10 +11,7 @@ Keyboard::Keyboard()
   this->keysOld.alloc     ( 1024 );
   this->keysPressed.alloc ( 1024 );
   this->keysReleased.alloc( 1024 );
-  memset( this->keys.getData(),         0, this->keys.getLength() );
-  memset( this->keysOld.getData(),      0, this->keys.getLength() );
-  memset( this->keysPressed.getData(),  0, this->keys.getLength() );
-  memset( this->keysReleased.getData(), 0, this->keys.getLength() );
+  this->ResetState();
 }//constructor
 
 
@@ -287,3 +284,16 @@ int KeyboardGetModifiers()
 {
   return Keyboard::KeyModifiers;
 }
+
+
+/*
+=============
+  ResetState
+=============
+*/
+void Keyboard::ResetState() {
+  memset( this->keys.getData(),         0, this->keys.getLength() );
+  memset( this->keysOld.getData(),      0, this->keys.getLength() );
+  memset( this->keysPressed.getData(),  0, this->keys.getLength() );
+  memset( this->keysReleased.getData(), 0, this->keys.getLength() );
+}//ResetState

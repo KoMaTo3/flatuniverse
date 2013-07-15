@@ -8,7 +8,7 @@
 
 
 WorldSaver::WorldSaver()
-:blockSize( 1024 )
+  :blockSize( 1024 ), fileName( "" )
 {
 }//constructor
 
@@ -209,8 +209,9 @@ void WorldSaver::FreeGrid( Short x, Short y )
 */
 void WorldSaver::SaveToFile( const std::string& fileName )
 {
+  std::string resultFileName = ( fileName.size() ? fileName : this->fileName );
   File f;
-  if( f.Open( fileName, File_mode_WRITE ) ) {
+  if( f.Open( resultFileName, File_mode_WRITE ) ) {
     return;
   }
 
@@ -264,7 +265,13 @@ Dword WorldSaver::LoadFromFile( const std::string& fileName )
 {
   memory data;
   if( !__fileManager->GetFile( fileName, data ) ) {
-    return 0;
+    File f;
+    if( f.Open( fileName, File_mode_READ ) != aOK ) {
+      return 0;
+    }
+    data.alloc( f.GetLength() );
+    f.Read( data.getData(), data.getLength(), 1 );
+    f.Close();
   }
   __log.PrintInfo( Filelevel_DEBUG, "WorldSaver::LoadFromFile => '%s'", fileName.c_str() );
 
@@ -326,6 +333,7 @@ Dword WorldSaver::LoadFromFile( const std::string& fileName )
     }
     this->grids.push_back( grid );
   }
+  this->fileName = fileName;
 
   return version;
 }//LoadFromFile

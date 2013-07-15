@@ -57,7 +57,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //game->core->CreateObject( "tooltips" )->SetLockToDelete( true );
   //game->core->CreateObject( "mouse-grid", game->core->GetObject( "tooltips" ) );
   game->core->CreateObject( "defaults" )->SetLockToDelete( true );
-  game->core->CreateObject( "camera", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
+  game->core->CreateObject( "camera", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->SetLockToDelete( true );
   game->core->CreateObject( "active-object", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
   //game->world->AddActiveObject( game->core->GetObject( "defaults/active-object" ) );
@@ -71,6 +71,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 
   obj = game->core->CreateObject( "player" );
+  obj->SetLockToDelete( true );
   col = obj->EnableCollision();
   col->InitSquare( Vec3( 14.0f, 20.0f, 0.0f ) );
   /*
@@ -364,28 +365,87 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     }
 
 
-    if( game->core->keyboard.IsPressed( VK_RETURN ) ) {
-      auto player = game->core->GetObject( "player" );
-      player->ApplyAnimation( "player/mario", "default" )->SetEnabled( true );
-      /*
-      *player->GetEnabledPtr() = !*player->GetEnabledPtr();
-      if( *player->GetEnabledPtr() ) {
-        auto col = player->EnableCollision();
-        col->InitSquare( Vec3( 14.0f, 20.0f, 0.0f ) );
-        col->SetPosition( Vec3( 65.0f, 0.0f, 0.0f ) );
-        col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
-        col->SetIsStatic( false );
-        col->SetMass( 1000.0f );
-        auto quad = ( RenderableQuad* ) player->EnableRenderable( RENDERABLE_TYPE_QUAD );
-        quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-        quad->SetSize( Vec2( 20.0f, 20.0f ) );
-        quad->SetTexture( "data/temp/mario.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-        //game->core->SetCamera( obj );
+    if( game->core->keyboard.IsPressed( VK_F9 ) ) { //Clear world
+      game->world->ClearWorld();
+      game->core->ClearScene();
+      game->core->Update();
+      game->core->SetCamera( game->core->GetObject( "player" ) );
+      //game->world->AddActiveObject( game->core->GetObject( "player" ) );
+      game->SetActive( false );
+    }
+
+
+    if( game->core->keyboard.IsPressed( VK_F2 ) ) { //Save world
+      char fileName[ MAX_PATH ];
+      fileName[ 0 ] = 0;
+      OPENFILENAME ofn;
+      memset( &ofn, 0, sizeof( ofn ) );
+      ofn.lStructSize = sizeof( ofn );
+      ofn.hwndOwner = game->core->GetWindowHandle();
+      ofn.lpstrFilter = "Flat-universe file (*.fu)\0*.fu\0";
+      ofn.lpstrFile = fileName;
+      ofn.nMaxFile = MAX_PATH;
+      ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_PATHMUSTEXIST;
+      ofn.lpstrDefExt = "fu";
+      ofn.lpstrInitialDir = "data";
+      if( GetSaveFileName( &ofn ) == TRUE ) {
+        __log.PrintInfo( Filelevel_DEBUG, "GetSaveFileName => true fileName['%s']", fileName );
+        std::string name = fileName;
+        std::string ext = tools::GetFileExtension( name );
+        if( ext != "fu" ) {
+          name += ".fu";
+        }
+        File f;
+        bool doSave = false;
+        if( f.Open( name, File_mode_READ ) == aOK ) { //file exists. replace?
+          f.Close();
+          auto result = MessageBox( game->core->GetWindowHandle(), ( "Файл '" + name + "' уже существует. Заменить?" ).c_str(), "Внимание!", MB_YESNO | MB_ICONWARNING );
+          doSave = ( result == IDYES );
+        } else {
+          doSave = true;
+        }
+        if( doSave ) {
+          game->world->SaveToFile( name );
+        }
       }
-      */
-      //auto anim = static_cast< RenderableQuad* >( player->GetRenderable() )->ApplyAnimation( "player/mario", "default" );
-      //anim->SetEnabled( true );
-      //__log.PrintInfo( Filelevel_DEBUG, "VK_RETURN => scale[%p]", &static_cast< RenderableQuad* >( player->GetRenderable() )->GetScalePtr() );
+      sTimer.Update();
+      game->core->Update();
+      game->core->keyboard.ResetState();
+      game->core->mouse.ResetState();
+    }
+
+
+    if( game->core->keyboard.IsPressed( VK_F3 ) ) { //Load world
+      char fileName[ MAX_PATH ];
+      fileName[ 0 ] = 0;
+      OPENFILENAME ofn;
+      memset( &ofn, 0, sizeof( ofn ) );
+      ofn.lStructSize = sizeof( ofn );
+      ofn.hwndOwner = game->core->GetWindowHandle();
+      ofn.lpstrFilter = "Flat-universe file (*.fu)\0*.fu\0";
+      ofn.lpstrFile = fileName;
+      ofn.nMaxFile = MAX_PATH;
+      ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_PATHMUSTEXIST;
+      ofn.lpstrDefExt = "fu";
+      ofn.lpstrInitialDir = "data";
+      if( GetOpenFileName( &ofn ) == TRUE ) {
+        __log.PrintInfo( Filelevel_DEBUG, "GetOpenFileName => true fileName['%s']", fileName );
+        game->world->ClearWorld();
+        game->core->ClearScene();
+        game->core->Update();
+        game->core->SetCamera( game->core->GetObject( "player" ) );
+        game->world->LoadFromFile( fileName );
+        //game->world->AddActiveObject( game->core->GetObject( "player" ) );
+        game->SetActive( false );
+      }
+      sTimer.Update();
+      game->core->Update();
+      game->core->keyboard.ResetState();
+      game->core->mouse.ResetState();
+    }
+
+    if( game->core->keyboard.IsPressed( VK_RETURN ) ) { //active/deactive game process
+      game->SetActive( !game->isActive );
     }
 
     /*
@@ -567,6 +627,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 Game::Game()
 {
+  this->isActive = true;
   this->gridTooltipUnderMouse.show = false;
   memset( this->gridTooltipUnderMouse.obj, 0, sizeof( this->gridTooltipUnderMouse.obj ) );
   this->core = new Core();
@@ -625,6 +686,23 @@ Game::~Game()
   DEF_DELETE( this->world );
   DEF_DELETE( this->core );
 }//destructor
+
+
+
+void Game::SetActive( bool setActive ) {
+  this->isActive = setActive;
+  auto player = this->core->GetObject( "player" );
+  __log.PrintInfo( Filelevel_DEBUG, "Game::SetActive => %d", setActive );
+  if( setActive ) {
+    if( player ) {
+      player->GetCollision()->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
+    }
+  } else { //not active
+    if( player ) {
+      player->GetCollision()->SetAcceleration( Vec3( 0.0f, 0, 0.0f ) )->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );
+    }
+  }
+}//SetActive
 
 
 

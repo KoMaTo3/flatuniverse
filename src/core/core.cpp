@@ -134,8 +134,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   std::string path = tools::GetPathFromFilePath( tmp );
   tools::SetCurDirectory( path.c_str() );
 
-  //__log.EnableAutoFlush( true );
-  //__log.Open( "logs/core.txt", File_mode_WRITE, Filelevel_ALL );
+  __log.EnableAutoFlush( true );
+  __log.Open( "logs/core.txt", File_mode_WRITE, Filelevel_ALL );
 
   SYSTEMTIME curTime;
   GetSystemTime( &curTime );

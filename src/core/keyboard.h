@@ -34,6 +34,7 @@ public:
   bool  IsFree      ( Dword keyId );
   bool  IsPressed   ( Dword keyId );
   bool  IsReleased  ( Dword keyId );
+  void  ResetState  ();
 
   void  AddListener     ( Listener *listenerProc );
   void  RemoveListener  ( Listener *listenerProc );

@@ -393,4 +393,5 @@ void WorldGridManager::ClearWorld()
   WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
   for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
     ( *iterGrid )->DetachAll();
+  __worldGridList->clear();
 }//ClearWorld

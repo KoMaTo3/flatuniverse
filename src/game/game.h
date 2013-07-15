@@ -21,6 +21,7 @@ public:
   Core              *core;
   WorldGridManager  *world;
   Lua               *lua;
+  bool              isActive; //true - playing, false - editing
 
   //lua-таймеры
   struct GameLuaTimer
@@ -95,6 +96,7 @@ public:
 
   void Update();
   void UpdateLuaTimers();
+  void SetActive( bool setActive );
 
   static void   KeyboardProc          ( Dword keyId, bool isPressed );
   static void   MouseKeyProc          ( Dword keyId, bool isPressed );
