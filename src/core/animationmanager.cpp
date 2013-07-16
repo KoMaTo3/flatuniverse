@@ -15,6 +15,9 @@ Manager::Manager() {
   this->_loadFunctionList.insert( std::make_pair( "renderable_size", &Manager::_LoadAttributeRenderableSize ) );
   this->_loadFunctionList.insert( std::make_pair( "renderable_texture_coords", &Manager::_LoadAttributeRenderableTextureCoords ) );
   this->_loadFunctionList.insert( std::make_pair( "renderable_texture", &Manager::_LoadAttributeRenderableTexture ) );
+  this->_loadFunctionList.insert( std::make_pair( "renderable_rotation", &Manager::_LoadAttributeRenderableRotation ) );
+  this->_loadFunctionList.insert( std::make_pair( "position", &Manager::_LoadAttributePosition ) );
+  this->_loadFunctionList.insert( std::make_pair( "color", &Manager::_LoadAttributeColor ) );
   //this->_loadFunctionList.insert( std::make_pair( "position", &Manager::_LoadAttributePosition ) );
 }
 
@@ -541,6 +544,94 @@ void Manager::_LoadAttributeRenderableSize( TextParser &parser, AnimationTemplat
 }//_LoadAttributeRenderableSize
 
 
+void Manager::_LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+  TextParser::Result value;
+
+  if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
+    return;
+  }
+
+  bool isDone = false;
+  int positionSettingStep = 0;
+  Vec2 position( Vec2Null );
+  while( !isDone && parser.GetNext( value ) ) {
+    switch( value.type ) {
+    case TPL_SYMBOL:
+      if( value.value == ")" ) {
+        isDone = true;
+        break;
+      }
+      if( value.value != "," ) {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    case TPL_NUMBER:
+      if( positionSettingStep < 2 ) {
+        switch( positionSettingStep ) {
+        case 0:
+          position.x = position.y = value.GetFloat();
+        break;
+        case 1:
+          position.y = value.GetFloat();
+        break;
+        }
+        ++positionSettingStep;
+      } else {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    default:
+      this->_Error( parser, value );
+      return;
+    break;
+    }//switch
+  }//while
+
+  if( positionSettingStep > 0 ) {
+    static_cast< AnimationParameterFloat2* >( tpl->SetParameter< AnimationParameterFloat2 >( POSITION ) )->AddKeyFrame( time, position, interpolation );
+  }
+
+}//_LoadAttributePosition
+
+
+void Manager::_LoadAttributeRenderableRotation( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+  TextParser::Result value;
+
+  if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
+    return;
+  }
+
+  bool isDone = false;
+  float rotation = 0.0f;
+  while( !isDone && parser.GetNext( value ) ) {
+    switch( value.type ) {
+    case TPL_SYMBOL:
+      if( value.value == ")" ) {
+        isDone = true;
+        break;
+      }
+      if( value.value != "," ) {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    case TPL_NUMBER:
+      rotation = value.GetFloat();
+    break;
+    default:
+      this->_Error( parser, value );
+      return;
+    break;
+    }//switch
+  }//while
+
+  static_cast< AnimationParameterFloat1* >( tpl->SetParameter< AnimationParameterFloat1 >( RENDERABLE_ROTATION ) )->AddKeyFrame( time, rotation, interpolation );
+
+}//_LoadAttributeRenderableRotation
+
+
 void Manager::_LoadAttributeRenderableTextureCoords( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
@@ -599,6 +690,65 @@ void Manager::_LoadAttributeRenderableTextureCoords( TextParser &parser, Animati
   }
 
 }//_LoadAttributeRenderableTextureCoords
+
+
+void Manager::_LoadAttributeColor( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+  TextParser::Result value;
+
+  if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
+    return;
+  }
+
+  bool isDone = false;
+  int colorSettingStep = 0;
+  Vec4 color( Vec4Null );
+  while( !isDone && parser.GetNext( value ) ) {
+    switch( value.type ) {
+    case TPL_SYMBOL:
+      if( value.value == ")" ) {
+        isDone = true;
+        break;
+      }
+      if( value.value != "," ) {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    case TPL_NUMBER:
+      if( colorSettingStep < 4 ) {
+        switch( colorSettingStep ) {
+        case 0:
+          color.x = color.y = color.z = color.w = value.GetFloat();
+        break;
+        case 1:
+          color.y = value.GetFloat();
+        break;
+        case 2:
+          color.z = value.GetFloat();
+        break;
+        case 3:
+          color.w = value.GetFloat();
+        break;
+        }
+        ++colorSettingStep;
+      } else {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    default:
+      this->_Error( parser, value );
+      return;
+    break;
+    }//switch
+  }//while
+
+  if( colorSettingStep > 0 ) {
+    __log.PrintInfo( Filelevel_DEBUG, "COLOR => [%3.3f; %3.3f]-[%3.3f; %3.3f] step[%d]", color.x, color.y, color.z, color.w, colorSettingStep );
+    static_cast< AnimationParameterFloat4* >( tpl->SetParameter< AnimationParameterFloat4 >( COLOR ) )->AddKeyFrame( time, color, interpolation );
+  }
+
+}//_LoadAttributeColor
 
 
 /*

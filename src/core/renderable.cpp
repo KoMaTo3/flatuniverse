@@ -58,7 +58,7 @@ RenderableQuad* RenderableQuad::SetSize( const Vec2& newSize )
 */
 RenderableQuad* RenderableQuad::SetColor( const Vec4& newColor )
 {
-  this->color = newColor;
+  this->color = this->info->colorNew = this->info->colorPrev = newColor;
   //this->isChanged = true;
   return this;
 }//SetColor
@@ -88,7 +88,7 @@ RenderableQuad*RenderableQuad::SetScale( const Vec2& newScale )
 */
 RenderableQuad* RenderableQuad::SetRotation( const float newAngle )
 {
-  this->rotation = newAngle;
+  this->rotation = this->info->rotationNew = this->info->rotationPrev = newAngle;
   //this->isChanged = true;
   return this;
 }//SetRotation
@@ -108,6 +108,8 @@ RenderableQuad::RenderableQuad()
   this->info->textureChangedFlag = false;
   this->info->textureCoordsNew = this->info->textureCoordsPrev = this->texCoords;
   this->info->sizeNew = this->info->sizePrev = this->size;
+  this->info->rotationNew = this->info->rotationPrev = this->rotation;
+  this->info->colorNew = this->info->colorPrev = this->color;
 }//constructor
 
 
@@ -347,6 +349,16 @@ void RenderableQuad::CheckChanges() {
     this->info->textureChangedFlag = false;
   } else if( this->info->textureCoordsNew != this->info->textureCoordsPrev ) {
     this->SetTextureCoords( Vec2( this->info->textureCoordsNew.x, this->info->textureCoordsNew.y ), Vec2( this->info->textureCoordsNew.z, this->info->textureCoordsNew.w ) );
+  }
+
+  //rotation
+  if( this->info->rotationNew != this->info->rotationPrev ) {
+    this->SetRotation( this->info->rotationNew );
+  }
+
+  //color
+  if( this->info->colorNew != this->info->colorPrev ) {
+    this->SetColor( this->info->colorNew );
   }
 }//CheckChanges
 

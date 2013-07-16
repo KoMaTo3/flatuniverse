@@ -132,27 +132,52 @@ IAnimationParameter* AnimationObject::SetParameter( AnimationSpriteParameterType
     }
     */
   case ENABLED: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => ENABLED" );
     AnimationParameterBool *value = new AnimationParameterBool();
     parameter = value;
     value->Bind( this->_object->GetEnabledPtr() );
     break;
     }
   case RENDERABLE_SIZE: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => RENDERABLE_SIZE" );
     AnimationParameterFloat2 *value = new AnimationParameterFloat2();
     parameter = value;
     value->Bind( this->_object->GetRenderableSize() );
     break;
     }
   case RENDERABLE_TEXTURE_COORDINATES: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => RENDERABLE_TEXTURE_COORDINATES" );
     AnimationParameterFloat4 *value = new AnimationParameterFloat4();
     parameter = value;
     value->Bind( this->_object->GetTextureCoords() );
     break;
     }
   case RENDERABLE_TEXTURE_NAME: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => RENDERABLE_TEXTURE_NAME" );
     AnimationParameterString *value = new AnimationParameterString();
     parameter = value;
     value->Bind( &this->_object->GetTextureNamePtr(), &this->_object->GetTextureChangedFlag() );
+    break;
+    }
+  case POSITION: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => POSITION" );
+    AnimationParameterFloat2 *value = new AnimationParameterFloat2();
+    parameter = value;
+    value->Bind( &this->_object->GetPositionPtr().x, &this->_object->GetPositionPtr().y );
+    break;
+    }
+  case RENDERABLE_ROTATION: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => RENDERABLE_ROTATION" );
+    AnimationParameterFloat1 *value = new AnimationParameterFloat1();
+    parameter = value;
+    value->Bind( this->_object->GetRenderableRotationPtr() );
+    break;
+    }
+  case COLOR: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => COLOR" );
+    AnimationParameterFloat4 *value = new AnimationParameterFloat4();
+    parameter = value;
+    value->Bind( this->_object->GetColorPtr() );
     break;
     }
   default:

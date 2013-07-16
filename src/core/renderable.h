@@ -63,6 +63,10 @@ public:
           textureCoordsNew;
     Vec2  sizePrev,
           sizeNew;
+    float rotationPrev,
+          rotationNew;
+    Vec4  colorNew,
+          colorPrev;
   };
   //
 
@@ -132,6 +136,12 @@ public:
   }
   inline bool& GetTextureChangedFlag() {
     return this->info->textureChangedFlag;
+  }
+  inline float* GetRotationModifier() {
+    return &this->info->rotationNew;
+  }
+  inline Vec4& GetColorModifier() {
+    return this->info->colorNew;
   }
   void CheckChanges();
   inline void SetIndexInRenderableList( GLshort index ) {

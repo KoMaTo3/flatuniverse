@@ -255,6 +255,15 @@ public:
   virtual bool& GetTextureChangedFlag() {
     return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureChangedFlag() : static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureChangedFlag() );
   }
+  virtual Vec3& GetPositionPtr() {
+    return this->positionSrc;
+  }
+  virtual float* GetRenderableRotationPtr() {
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->GetRenderable() )->GetRotationModifier() : static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetRotationModifier() );
+  }
+  virtual Vec4& GetColorPtr() {
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->GetRenderable() )->GetColorModifier() : static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetColorModifier() );
+  }
   virtual IAnimationObject* MakeInstance( const std::string& setName );
 
   /*

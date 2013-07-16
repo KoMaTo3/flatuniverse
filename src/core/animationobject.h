@@ -22,6 +22,9 @@ public:
   virtual Vec4& GetTextureCoords() = NULL;
   virtual std::string& GetTextureNamePtr() = NULL;
   virtual bool& GetTextureChangedFlag() = NULL;
+  virtual Vec3& GetPositionPtr() = NULL;
+  virtual float* GetRenderableRotationPtr() = NULL;
+  virtual Vec4& GetColorPtr() = NULL;
   //virtual Vec3& GetPositionPtr() = NULL;
   //virtual IAnimationObject* MakeInstance() = NULL;
 
