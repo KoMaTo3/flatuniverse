@@ -1291,7 +1291,7 @@ bool Core::Update()
   sTimer.Update();
   this->keyboard.Update();
   this->mouse.Update();
-  Animation::Update( sTimer.GetDeltaF() );
+  float delta = ( this->_state == CORE_STATE_PAUSED ? 0.0f : sTimer.GetDeltaF() );
 
   MSG msg;
   while( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
@@ -1303,16 +1303,18 @@ bool Core::Update()
   if( this->_state == CORE_STATE_EXIT )
     return false;
 
+  Animation::Update( delta );
+
   //обновл€ем физ-объекты. они обновл€ют положени€ объектов
   if( this->collisionManager )
-    this->collisionManager->Update( sTimer.GetDeltaF() );
+    this->collisionManager->Update( delta );
 
   //триггеры
   if( this->triggerManager )
     this->triggerManager->Update();
 
   //обновл€ем объекты. они обновл€ют положени€ спрайтов
-  this->_rootObject->Update( sTimer.GetDeltaF() );
+  this->_rootObject->Update( delta );
   //this->_rootGUIObject->Update( sTimer.GetDeltaF() );
 
   //__log.PrintInfo( Filelevel_DEBUG, "============" );

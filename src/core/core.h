@@ -40,6 +40,7 @@ enum CoreStates
   CORE_STATE_RUN,         //промежуточное рабочее состояние
   CORE_STATE_EXIT,        //производится завершение работы
   CORE_STATE_INIT,        //происходит инициализация
+  CORE_STATE_PAUSED,      //игровая пауза
 
 
   CORE_STATE_UNDEFINED    //dummy
@@ -174,6 +175,9 @@ public:
   void    ClearScene          ();
   inline HWND GetWindowHandle() const {
     return this->_window.hwnd;
+  }
+  inline CoreStates GetState() {
+    return this->_state;
   }
   /*
   inline

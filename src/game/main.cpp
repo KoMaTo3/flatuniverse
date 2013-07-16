@@ -696,13 +696,9 @@ void Game::SetActive( bool setActive ) {
   auto player = this->core->GetObject( "player" );
   __log.PrintInfo( Filelevel_DEBUG, "Game::SetActive => %d", setActive );
   if( setActive ) {
-    if( player ) {
-      player->GetCollision()->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
-    }
+    this->core->SetState( CORE_STATE_RUN );
   } else { //not active
-    if( player ) {
-      player->GetCollision()->SetAcceleration( Vec3( 0.0f, 0, 0.0f ) )->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );
-    }
+    this->core->SetState( CORE_STATE_PAUSED );
   }
 }//SetActive
 
@@ -733,7 +729,7 @@ void Game::UpdateLuaTimers()
     timer = &this->luaTimers[ q ];
     if( timer->active )
     {
-      timer->time -= sTimer.GetDeltaF();
+      timer->time -= ( this->core->GetState() == CORE_STATE_PAUSED ? 0.0f : sTimer.GetDeltaF() );
       if( timer->time <= 0.0f )
       {
         timer->active = false;
