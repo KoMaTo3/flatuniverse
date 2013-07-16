@@ -58,8 +58,8 @@ Animation::AnimationPack* IObject::ApplySubAnimation( const std::string& animati
 }//ApplySubAnimation
 
 
-AnimationObject::AnimationObject( IAnimationObject* object )
-:_object( ( IObject* ) object )
+AnimationObject::AnimationObject( IAnimationObject* object, const std::string& setName )
+:AnimationTemplate( setName ), _object( ( IObject* ) object )
 {
   static_cast< AnimationParameterBool* >( this->SetParameter( ENABLED ) )->Bind( static_cast< IObject* >( object )->GetEnabledPtr() );
 }
@@ -172,8 +172,8 @@ IAnimationParameter* AnimationObject::SetParameterOfExternAnimation( AnimationSp
 }
 
 
-IAnimationObject* AnimationObject::MakeObjectInstance() {
-  return this->_object->MakeInstance();
+IAnimationObject* AnimationObject::MakeObjectInstance( const std::string& setName ) {
+  return this->_object->MakeInstance( setName );
 }//MakeObjectInstance
 
 

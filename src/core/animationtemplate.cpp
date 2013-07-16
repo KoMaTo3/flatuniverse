@@ -1,7 +1,9 @@
 #include "animationtemplate.h"
 
 
-AnimationTemplate::AnimationTemplate() {
+AnimationTemplate::AnimationTemplate( const std::string& setName )
+:IAnimation( setName )
+{
 }
 
 

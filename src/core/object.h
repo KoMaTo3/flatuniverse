@@ -244,18 +244,18 @@ public:
     return &this->isEnabled;
   }
   virtual Vec2& GetRenderableSize() {
-    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetSizeModifier() : static_cast< RenderableQuad* >( this->GetRenderable() )->GetSizeModifier() );
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->GetRenderable() )->GetSizeModifier() : static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetSizeModifier() );
   }
   virtual Vec4& GetTextureCoords() {
-    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureCoordsModifier() : static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureCoordsModifier() );
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureCoordsModifier() : static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureCoordsModifier() );
   }
   virtual std::string& GetTextureNamePtr() {
-    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureNameModifier() : static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureNameModifier() );
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureNameModifier() : static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureNameModifier() );
   }
   virtual bool& GetTextureChangedFlag() {
-    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureChangedFlag() : static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureChangedFlag() );
+    return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->GetRenderable() )->GetTextureChangedFlag() : static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetTextureChangedFlag() );
   }
-  virtual IAnimationObject* MakeInstance();
+  virtual IAnimationObject* MakeInstance( const std::string& setName );
 
   /*
   g2Controller*       EnableGui           ( const GuiConstructor *info );

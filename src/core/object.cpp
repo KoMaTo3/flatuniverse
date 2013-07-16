@@ -549,6 +549,7 @@ RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRender
     }
   if( !added )
     inRenderableIndicies->push_back( index );
+  quad->SetIndexInRenderableList( index );
 
   __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => Done" );
   return ( RenderableQuad* ) result;
@@ -1083,10 +1084,10 @@ void Object::_RecalculatePosition()
 void Object::Update( float dt )
 {
   if( this->isEnabled != this->isEnabledPrev ) {
+    if( this->IsRenderable() ) {
+      this->GetRenderable()->SetEnabled( this->isEnabled );
+    }
     if( !this->isEnabled ) { //disable all
-      if( this->IsRenderable() ) {
-        this->DisableRenderable();
-      }
       if( this->IsCollision() ) {
         this->DisableCollision();
       }
@@ -1590,6 +1591,10 @@ void Object::RemoveTag( const std::string& tag ) {
 }//RemoveTag
 
 
-IAnimationObject* Object::MakeInstance() {
-  return this;  //!!!
+IAnimationObject* Object::MakeInstance( const std::string& setName ) {
+  Object *child = this->GetChild( setName );
+  if( !child ) {
+    child = new Object( setName, this );
+  }
+  return child;
 }

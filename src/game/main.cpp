@@ -87,11 +87,13 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
   col->SetIsStatic( false );
   col->SetMass( 1000.0f );
+  /*
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   //quad->SetPosition( Vec3( 50.0f, 50.0f, 0.0f ) );
   quad->SetSize( Vec2( 20.0f, 20.0f ) );
   quad->SetTexture( "data/temp/mario.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
+  */
   //quad->scale.Set( 0.5f, 1.0f );
   game->core->SetCamera( obj );
 

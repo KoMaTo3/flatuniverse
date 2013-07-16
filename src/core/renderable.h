@@ -43,6 +43,7 @@ public:
 
   virtual bool Render() = NULL;
   virtual bool IsHasPoint( const Vec2& pos ) = NULL;
+  virtual void SetEnabled( bool isEnabled ) = NULL;
 };
 
 #pragma pack( push, 4 )
@@ -109,6 +110,7 @@ public:
   inline void* GetPointerToVertex () { return &this->position.x; }
   inline void* GetPointerToColor  () { return &this->color.x; }
   virtual bool            IsHasPoint      ( const Vec2& pos );
+  virtual void SetEnabled( bool isEnabled );
 
   bool  Render();
 
@@ -132,6 +134,11 @@ public:
     return this->info->textureChangedFlag;
   }
   void CheckChanges();
+  inline void SetIndexInRenderableList( GLshort index ) {
+    if( this->info ) {
+      this->info->indexInRenderableList = index;
+    }
+  }
 };
 
 #pragma pack( pop )

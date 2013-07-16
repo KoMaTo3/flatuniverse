@@ -57,7 +57,7 @@ void AnimationSet::MakeFromTemplate( const AnimationSet& set, IAnimationObject *
   this->_animationLength = set._animationLength;
   this->_cycled = set._cycled;
   for( auto &animation: set._animationList ) {
-    TAnimation *anim = new TAnimation( object->MakeInstance() );
+    TAnimation *anim = new TAnimation( object->MakeInstance( animation->GetName() ), animation->GetName() );
     this->AddAnimation( anim )->MakeFromTemplate( *animation );
   }
 }//MakeFromTemplate

@@ -39,11 +39,11 @@ private:
 class AnimationSprite: public AnimationTemplate
 {
 public:
-  AnimationSprite( IAnimationObject *sprite );
+  AnimationSprite( IAnimationObject *sprite, const std::string& setName );
   virtual ~AnimationSprite();
   virtual IAnimationParameter* SetParameter( AnimationSpriteParameterType parameterType );
   static IAnimationParameter* SetParameterOfExternAnimation( AnimationSpriteParameterType parameterType, void* AnimationSpriteThis );
-  virtual IAnimationObject* MakeObjectInstance();
+  virtual IAnimationObject* MakeObjectInstance( const std::string& setName );
   virtual void MakeFromTemplate( const IAnimation &animation );
 
 private:

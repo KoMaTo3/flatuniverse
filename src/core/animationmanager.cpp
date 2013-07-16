@@ -170,7 +170,7 @@ void Manager::_LoadAnimationSprite( TextParser &parser, AnimationSet *set ) {
     return;
   }
   const std::string name = value.value;
-  AnimationTemplate *tpl = new AnimationTemplate();
+  AnimationTemplate *tpl = new AnimationTemplate( name );
   set->AddAnimation( tpl );
 
   if( !this->_TextParserNextIsSymbol( parser, "{" ) ) {

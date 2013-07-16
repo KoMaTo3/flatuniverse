@@ -40,14 +40,14 @@ enum AnimationSpriteParameterType {
 
 class IAnimationObject {
 public:
-  virtual IAnimationObject* MakeInstance() = NULL;
+  virtual IAnimationObject* MakeInstance( const std::string& setName ) = NULL;
 };
 
 
 class IAnimation
 {
 public:
-  IAnimation();
+  IAnimation( const std::string& setName );
   virtual ~IAnimation();
   virtual IAnimationParameter* SetParameter( AnimationSpriteParameterType parameterType ) = 0;
   virtual IAnimationObject* MakeObjectInstance() = NULL;
@@ -55,11 +55,20 @@ public:
   void SetEnable( bool isEnabled );
   void __Dump( const std::string &prefix = "" );
   virtual void MakeFromTemplate( const IAnimation &animation ) = NULL;
+  inline const std::string& GetName() const {
+    return this->_name;
+  }
 
 protected:
   typedef std::shared_ptr< IAnimationParameter > ParameterPtr;
   typedef std::hash_map< AnimationSpriteParameterType, ParameterPtr > ParametersList;
   ParametersList _parameters;
+  std::string _name;
+
+private:
+  IAnimation();
+  IAnimation( const IAnimation& );
+  const IAnimation& operator=( const IAnimation& );
 };
 
 

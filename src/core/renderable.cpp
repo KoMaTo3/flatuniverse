@@ -3,6 +3,9 @@
 #include "../gl/gl.h"
 
 
+extern CoreRenderableListIndicies *__coreRenderableListIndicies;
+
+
 Renderable::Renderable()
 //:isChanged( false )
 {
@@ -346,3 +349,31 @@ void RenderableQuad::CheckChanges() {
     this->SetTextureCoords( Vec2( this->info->textureCoordsNew.x, this->info->textureCoordsNew.y ), Vec2( this->info->textureCoordsNew.z, this->info->textureCoordsNew.w ) );
   }
 }//CheckChanges
+
+
+
+/*
+=============
+  SetEnabled
+=============
+*/
+void RenderableQuad::SetEnabled( bool isEnabled ) {
+  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => this[x%p] value[%d]", this, isEnabled );
+  if( isEnabled ) {
+    if( this->info->indexInRenderableList != RENDERABLE_INDEX_UNDEFINED ) {
+      __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => added index %d", this->info->indexInRenderableList );
+      __coreRenderableListIndicies->push_back( this->info->indexInRenderableList );
+    }
+  } else {
+    if( this->info->indexInRenderableList != RENDERABLE_INDEX_UNDEFINED ) {
+      auto iterEnd = __coreRenderableListIndicies->end();
+      for( auto iter = __coreRenderableListIndicies->begin(); iter != iterEnd; ++iter ) {
+        if( *iter == this->info->indexInRenderableList ) {
+          __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => removed index %d", this->info->indexInRenderableList );
+          __coreRenderableListIndicies->erase( iter );
+          break;
+        }
+      }
+    }
+  }
+}//SetEnabled

@@ -45,11 +45,11 @@ private:
 class AnimationObject: public AnimationTemplate
 {
 public:
-  AnimationObject( IAnimationObject *object );
+  AnimationObject( IAnimationObject *object, const std::string& setName );
   virtual ~AnimationObject();
   virtual IAnimationParameter* SetParameter( AnimationSpriteParameterType parameterType );
   static IAnimationParameter* SetParameterOfExternAnimation( AnimationSpriteParameterType parameterType, void* AnimationObjectThis );
-  virtual IAnimationObject* MakeObjectInstance();
+  virtual IAnimationObject* MakeObjectInstance( const std::string& setName );
   virtual void MakeFromTemplate( const IAnimation &animation );
 
 private:

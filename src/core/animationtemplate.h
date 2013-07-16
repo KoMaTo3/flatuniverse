@@ -12,7 +12,7 @@
 class AnimationTemplate: public IAnimation
 {
 public:
-  AnimationTemplate();
+  AnimationTemplate( const std::string& setName );
   virtual ~AnimationTemplate();
   template <class T>
   IAnimationParameter* SetParameter( AnimationSpriteParameterType parameterType );
@@ -21,6 +21,7 @@ public:
   }
 
 private:
+  AnimationTemplate();
   AnimationTemplate( const AnimationTemplate& );
   AnimationTemplate& operator=( const AnimationTemplate& );
   virtual IAnimationParameter* SetParameter( AnimationSpriteParameterType parameterType ) { return nullptr; }

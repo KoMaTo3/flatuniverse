@@ -60,12 +60,15 @@ bool AnimationPack::SetCurrentAnimation( const std::string &animationName, float
     __log.PrintInfo( Filelevel_WARNING, "AnimationPack::SetCurrentAnimation => this[%p] animation['%s'] not found", this, animationName.c_str() );
     return false;
   }
-  for( auto &anim: this->_animationSetList ) {
-  __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => SetEnabled[%p]", anim.second );
-    anim.second->SetEnabled( false );
-  }
 
   this->_currentAnimation = &( *animation->second );
+  for( auto &anim: this->_animationSetList ) {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => SetEnabled[%p]", anim.second );
+    if( &*anim.second != this->_currentAnimation ) {
+      anim.second->SetEnabled( false );
+    }
+  }
+
   this->_currentAnimation->SetEnabled( true );
   __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => ResetAnimation[%3.1f] _currentAnimation[%p]", startTime, _currentAnimation );
   this->_currentAnimation->ResetAnimation( startTime );

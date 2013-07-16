@@ -1,7 +1,9 @@
 #include "animation.h"
 
 
-IAnimation::IAnimation() {
+IAnimation::IAnimation( const std::string& setName )
+:_name( setName )
+{
   printf( "+IAnimation %p\n", this );
 }
 
