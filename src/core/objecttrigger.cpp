@@ -5,6 +5,9 @@
 #include "memoryreader.h"
 
 extern ObjectTriggerOnRemoveHandler __ObjectTriggerOnRemoveGlobalHandler = NULL;
+ObjectTrigger::TriggerHandlerInit *ObjectTrigger::InitTriggerHandler = NULL;
+luaTriggerListenersList *ObjectTrigger::triggerLintenersList = NULL;
+ObjectTrigger::TriggerHandler *ObjectTrigger::defaultTriggerHandler = NULL;
 
 
 ObjectTrigger::ObjectTrigger( Vec3 *setPosition )
@@ -216,8 +219,24 @@ void ObjectTrigger::AddOnRemoveHandler( ObjectTriggerOnRemoveHandler handler )
 */
 void ObjectTrigger::SaveToBuffer( MemoryWriter &writer )
 {
+  __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::SaveToBuffer..." );
   writer << this->offset;
   this->triggerRect->SaveToBuffer( writer );
+
+  //handlers
+  Dword count = this->handlers.size();
+  writer << count;
+  if( count && ObjectTrigger::triggerLintenersList ) {
+    __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::SaveToBuffer => count[%d]", count );
+    luaTriggerListenersList::const_iterator iter, iterEnd = ObjectTrigger::triggerLintenersList->end();
+    for( iter = ObjectTrigger::triggerLintenersList->begin(); iter != iterEnd; ++iter ) {
+      if( iter->object == this ) {
+        writer << iter->funcName;
+        __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::SaveToBuffer => . handler['%s']", iter->funcName.c_str() );
+      }
+    }
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::SaveToBuffer done" );
 }//SaveToBuffer
 
 
@@ -227,7 +246,7 @@ void ObjectTrigger::SaveToBuffer( MemoryWriter &writer )
   LoadFromBuffer
 =============
 */
-void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const Dword version )
+void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const std::string &thisObjectName, const Dword version )
 {
   Vec3 v3;
 
@@ -237,4 +256,19 @@ void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const Dword version )
   DEF_DELETE( this->triggerRect );
   this->triggerRect = new Collision( this->position );
   this->triggerRect->LoadFromBuffer( reader, "", version );
+
+  if( version >= 0x00000005 ) {
+    //handlers
+    Dword count, q;
+    reader >> count;
+    __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::LoadFromBuffer => handlers[%d]", count );
+    std::string s;
+    if( count && this->InitTriggerHandler && ObjectTrigger::triggerLintenersList ) { //something wrong...
+      for( q = 0; q < count; ++q ) {
+        reader >> s;
+        __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::LoadFromBuffer => . handler['%s']", s.c_str() );
+        this->InitTriggerHandler( s, thisObjectName );
+      }
+    }
+  }
 }//LoadFromBuffer

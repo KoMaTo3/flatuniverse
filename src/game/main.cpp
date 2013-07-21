@@ -60,7 +60,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->core->CreateObject( "camera", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->SetLockToDelete( true );
   game->core->CreateObject( "active-object", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
-  //game->world->AddActiveObject( game->core->GetObject( "defaults/active-object" ) );
+  game->world->AddActiveObject( game->core->GetObject( "defaults/camera" ) );
 
   obj = game->core->CreateObject( "test-bg-2" );
   obj->SetPosition( Vec3( 50.0f, 50.0f, -9.0f ) );
@@ -434,6 +434,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         __log.PrintInfo( Filelevel_DEBUG, "GetOpenFileName => true fileName['%s']", fileName );
         game->world->ClearWorld();
         game->core->ClearScene();
+        game->ClearLuaTimers();
+        //game->luaCollisionListeners.clear();
+        //game->luaTriggerListeners.clear();
         game->core->Update();
         game->core->SetCamera( game->core->GetObject( "player" ) );
         game->world->LoadFromFile( fileName );
@@ -446,9 +449,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       game->core->mouse.ResetState();
     }
 
-    if( game->core->keyboard.IsPressed( VK_RETURN ) ) { //active/deactive game process
-      game->SetActive( !game->isActive );
-    }
+    //if( game->core->keyboard.IsPressed( VK_RETURN ) ) { //active/deactive game process
+    //  game->SetActive( !game->isActive );
+    //}
 
     /*
     if( game->core->keyboard.IsPressed( VK_LEFT ) || game->core->keyboard.IsPressed( VK_LETTER_A ) )
@@ -667,16 +670,21 @@ Game::Game()
   LUAFUNC_LoadScript        = Game::LUA_LoadScript;
   LUAFUNC_ObjectAttr        = Game::LUA_ObjectAttr;
   LUAFUNC_ListenCollision   = Game::LUA_ListenCollision;
+  LUAFUNC_ListenTrigger     = Game::LUA_ListenTrigger;
   LUAFUNC_SetObjectForce    = Game::LUA_SetObjectForce;
   LUAFUNC_RemoveObjectForce = Game::LUA_RemoveObjectForce;
   LUAFUNC_ObjectHasTag      = Game::LUA_ObjectHasTag;
   LUAFUNC_ObjectAddTag      = Game::LUA_ObjectAddTag;
   LUAFUNC_ObjectRemoveTag   = Game::LUA_ObjectRemoveTag;
   LUAFUNC_ObjectSetAnimation= Game::LUA_ObjectSetAnimation;
+  LUAFUNC_SetPause          = Game::LUA_SetPause;
 
   Collision::SetInitCollisionHandler( Game::LUA_ListenCollision );
   Collision::SetDefaultCollisionHandler( Game::CollisionProc );
   Collision::SetCollisionListenerList( &this->luaCollisionListeners );
+  ObjectTrigger::SetInitTriggerHandler( Game::LUA_ListenTrigger );
+  ObjectTrigger::SetDefaultTriggerHandler( Game::TriggerProc );
+  ObjectTrigger::SetTriggerListenerList( &this->luaTriggerListeners );
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
 }//constructor
@@ -688,6 +696,28 @@ Game::~Game()
   DEF_DELETE( this->world );
   DEF_DELETE( this->core );
 }//destructor
+
+
+
+/*
+=============
+  ClearLuaTimers
+=============
+*/
+void Game::ClearLuaTimers() {
+  bool deleted = true;
+  while( deleted ) {
+    deleted = false;
+    auto iterEnd = game->luaTimers.end();
+    for( auto iter = game->luaTimers.begin(); iter != iterEnd; ++iter ) {
+      if( !iter->dontPause ) {
+        game->luaTimers.erase( iter );
+        deleted = true;
+        break;
+      }
+    }
+  }
+}//ClearLuaTimers
 
 
 
@@ -729,7 +759,7 @@ void Game::UpdateLuaTimers()
     timer = &this->luaTimers[ q ];
     if( timer->active )
     {
-      timer->time -= ( this->core->GetState() == CORE_STATE_PAUSED ? 0.0f : sTimer.GetDeltaF() );
+      timer->time -= ( this->core->GetState() == CORE_STATE_PAUSED && !timer->dontPause ? 0.0f : sTimer.GetDeltaF() );
       if( timer->time <= 0.0f )
       {
         timer->active = false;
@@ -805,7 +835,7 @@ void Game::LUA_SetCollisionStatic( const std::string &name, bool isStatic )
   LUA_SetTimer
 =============
 */
-Dword Game::LUA_SetTimer( float time, const std::string &funcName )
+Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPause )
 {
   Dword id, count = game->luaTimers.size();
   bool setted = false;
@@ -824,6 +854,7 @@ Dword Game::LUA_SetTimer( float time, const std::string &funcName )
   game->luaTimers[ id ].active    = 1;
   game->luaTimers[ id ].time      = time;
   game->luaTimers[ id ].funcName  = funcName;
+  game->luaTimers[ id ].dontPause = dontPause;
   return id;
 }//LUA_SetTimer
 
@@ -845,7 +876,7 @@ bool Game::LUA_RemoveObject( const std::string &name )
   LUA_CreateObject
 =============
 */
-void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos )
+void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos, int notInGrid )
 {
     __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject..." );
   long slashPos = name.find_last_of( "/" );
@@ -870,9 +901,11 @@ void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos )
     obj = game->core->CreateObject( name );
     obj->SetPosition( pos );
     obj->Update( 0.0f );
-    WorldGrid::WorldGridPosition gridPos = game->world->GetGridPositionByObject( *obj );
-    __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => gridPos[%d; %d]", gridPos.x, gridPos.y );
-    game->world->AttachObjectToGrid( gridPos, obj );
+    if( !notInGrid ) {
+      WorldGrid::WorldGridPosition gridPos = game->world->GetGridPositionByObject( *obj );
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => gridPos[%d; %d]", gridPos.x, gridPos.y );
+      game->world->AttachObjectToGrid( gridPos, obj );
+    }
   }
   __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => object['%s'] parent['%s']", obj->GetNameFull().c_str(), obj->GetParentNameFull().c_str() );
 
@@ -1258,6 +1291,17 @@ void Game::LUA_ObjectSetAnimation( const std::string &objectName, const std::str
   }
   object->ApplyAnimation( templateName, animation )->SetEnabled( true );
 }//LUA_ObjectSetAnimation
+
+
+/*
+=============
+  LUA_SetPause
+=============
+*/
+void Game::LUA_SetPause( bool isPause )
+{
+  game->SetActive( isPause );
+}//LUA_SetPause
 
 
 /*
@@ -1795,6 +1839,33 @@ void Game::LUA_ListenCollision( const std::string &funcName, const std::string &
 
 /*
 =============
+  LUA_ListenTrigger
+=============
+*/
+void Game::LUA_ListenTrigger( const std::string &funcName, const std::string &objectName ) {
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenTrigger => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  ObjectTrigger *trigger = object->GetTrigger();
+  if( !trigger ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenTrigger => object '%s' don't have collision", objectName.c_str() );
+    return;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ListenTrigger => object['%s'] collision[x%p] function['%s']", object->GetNameFull().c_str(), trigger, funcName.c_str() );
+
+  luaTriggerListenerStruct listener( trigger, funcName );
+
+  game->luaTriggerListeners.push_back( listener );
+  trigger->AddHandler( Game::TriggerProc );
+}//LUA_ListenTrigger
+
+
+
+
+/*
+=============
   CollisionProc
 =============
 */
@@ -1820,6 +1891,37 @@ void Game::CollisionProc( Collision *a, Collision *b, Byte flags, const Vec3 &ve
     }
   }
 }//CollisionProc
+
+
+
+
+/*
+=============
+  TriggerProc
+=============
+*/
+void Game::TriggerProc( ObjectTrigger *trigger, Collision *collision, bool isInTrigger ) {
+  Object *objectA = game->core->GetObjectByTrigger( trigger );
+  if( !objectA ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::TriggerProc => object A by trigger x%p not found", trigger );
+    return;
+  }
+  Object *objectB = game->core->GetObjectByCollision( collision );
+  if( !objectB ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::TriggerProc => object B by trigger x%p not found", collision );
+    return;
+  }
+  if( !game->luaTriggerListeners.size() ) {
+    return;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Game::TriggerProc => a[x%p] b[x%p] objectA['%s'] objectB['%s']", trigger, collision, objectA->GetNameFull().c_str(), objectB->GetNameFull().c_str() );
+  luaTriggerListenersList::iterator iter, iterEnd = game->luaTriggerListeners.end();
+  for( iter = game->luaTriggerListeners.begin(); iter != iterEnd; ++iter ) {
+    if( iter->object == trigger ) {
+      LUACALLBACK_ListenTrigger( game->lua, iter->funcName, objectA->GetNameFull(), objectB->GetNameFull(), isInTrigger );
+    }
+  }
+}//TriggerProc
 
 
 /*

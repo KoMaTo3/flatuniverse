@@ -18,6 +18,7 @@ Manager::Manager() {
   this->_loadFunctionList.insert( std::make_pair( "renderable_rotation", &Manager::_LoadAttributeRenderableRotation ) );
   this->_loadFunctionList.insert( std::make_pair( "position", &Manager::_LoadAttributePosition ) );
   this->_loadFunctionList.insert( std::make_pair( "color", &Manager::_LoadAttributeColor ) );
+  this->_loadFunctionList.insert( std::make_pair( "enabled", &Manager::_LoadAttributeEnabled ) );
   //this->_loadFunctionList.insert( std::make_pair( "position", &Manager::_LoadAttributePosition ) );
 }
 
@@ -395,6 +396,46 @@ void Manager::_LoadAttributeRenderableTexture( TextParser &parser, AnimationTemp
   }//while
   
 }//_LoadAttributeRenderableTexture
+
+
+void Manager::_LoadAttributeEnabled( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+  TextParser::Result value;
+
+  if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
+    return;
+  }
+
+  bool isDone = false;
+  bool valueSetted = false;
+  while( !isDone && parser.GetNext( value ) ) {
+    switch( value.type ) {
+    case TPL_SYMBOL:
+      if( value.value == ")" ) {
+        isDone = true;
+        break;
+      }
+      if( value.value != "," ) {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    case TPL_STRING:  //texture file name
+      if( !valueSetted ) {
+        static_cast< AnimationParameterBool* >( tpl->SetParameter< AnimationParameterBool >( ENABLED ) )->AddKeyFrame( time, value.value == "true" ? true : false );
+        valueSetted = true;
+      } else {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    default:
+      this->_Error( parser, value );
+      return;
+    break;
+    }//switch
+  }//while
+  
+}//_LoadAttributeEnabled
 
 
 /*

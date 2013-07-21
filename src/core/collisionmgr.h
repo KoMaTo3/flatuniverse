@@ -9,7 +9,7 @@ extern CollisionList *__collisionList;
 
 
 //частота обновления
-#define COLLISION_UPDATE_FREQUENCY ( 1.0f / 60.0f )
+#define COLLISION_UPDATE_FREQUENCY ( 1.0f / 100.0f )
 
 
 

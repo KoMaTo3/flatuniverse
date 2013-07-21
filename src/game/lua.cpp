@@ -52,12 +52,14 @@ LUAFUNCPROC_GetSelectedObject *LUAFUNC_GetSelectedObject    = NULL;
 LUAFUNCPROC_LoadScript        *LUAFUNC_LoadScript           = NULL;
 LUAFUNCPROC_ObjectAttr        *LUAFUNC_ObjectAttr           = NULL;
 LUAFUNCPROC_ListenCollision   *LUAFUNC_ListenCollision      = NULL;
+LUAFUNCPROC_ListenTrigger     *LUAFUNC_ListenTrigger        = NULL;
 LUAFUNCPROC_SetObjectForce    *LUAFUNC_SetObjectForce       = NULL;
 LUAFUNCPROC_RemoveObjectForce *LUAFUNC_RemoveObjectForce    = NULL;
 LUAFUNCPROC_ObjectHasTag      *LUAFUNC_ObjectHasTag         = NULL;
 LUAFUNCPROC_ObjectAddTag      *LUAFUNC_ObjectAddTag         = NULL;
 LUAFUNCPROC_ObjectRemoveTag   *LUAFUNC_ObjectRemoveTag      = NULL;
 LUAFUNCPROC_ObjectSetAnimation*LUAFUNC_ObjectSetAnimation   = NULL;
+LUAFUNCPROC_SetPause          *LUAFUNC_SetPause             = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -143,6 +145,7 @@ bool Lua::Init()
   lua_register( this->luaState, "ObjectAttr",       Lua::LUA_ObjectAttr );
   lua_register( this->luaState, "Render",           Lua::LUA_Render );
   lua_register( this->luaState, "ListenCollision",  Lua::LUA_ListenCollision );
+  lua_register( this->luaState, "ListenTrigger",    Lua::LUA_ListenTrigger );
   lua_register( this->luaState, "GetTime",          Lua::LUA_GetTime );
   lua_register( this->luaState, "SetObjectForce",   Lua::LUA_SetObjectForce );
   lua_register( this->luaState, "RemoveObjectForce",Lua::LUA_RemoveObjectForce );
@@ -152,6 +155,7 @@ bool Lua::Init()
   lua_register( this->luaState, "SetClipboard",     Lua::LUA_SetClipboard );
   lua_register( this->luaState, "GetClipboard",     Lua::LUA_GetClipboard );
   lua_register( this->luaState, "ObjectSetAnimation", Lua::LUA_ObjectSetAnimation );
+  lua_register( this->luaState, "SetPause",         Lua::LUA_SetPause );
   lua_atpanic( this->luaState, ErrorHandler );
 
   __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -438,8 +442,13 @@ int Lua::LUA_SetTimer( lua_State *lua )
 
   float period          = ( float ) lua_tonumber( lua, 1 );
   std::string funcName  = lua_tostring( lua, 2 );
+  int dontPause         = false;
 
-  int id = LUAFUNC_SetTimer( period, funcName );
+  if( parmsCount >= 3 ) {
+    dontPause = lua_toboolean( lua, 3 );
+  }
+
+  int id = LUAFUNC_SetTimer( period, funcName, dontPause ? true : false );
   lua_pushinteger( lua, id );
 
   return 1;
@@ -615,7 +624,11 @@ int Lua::LUA_CreateObject( lua_State *lua )
   }
   std::string objectName = lua_tostring( lua, 1 );
   Vec3 pos( ( float ) lua_tonumber( lua, 2 ), ( float ) lua_tonumber( lua, 3 ), ( float ) lua_tonumber( lua, 4 ) );
-  LUAFUNC_CreateObject( objectName, pos );
+  int notInGrid = 0;
+  if( parmsCount >= 5 ) {
+    notInGrid = lua_toboolean( lua, 5 );
+  }
+  LUAFUNC_CreateObject( objectName, pos, notInGrid );
   return 0;
 }//LUA_CreateObject
 
@@ -1693,6 +1706,18 @@ void LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, const s
 
 /*
 =============
+  LUACALLBACK_ListenTrigger
+=============
+*/
+void LUACALLBACK_ListenTrigger( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, bool isInTrigger )
+{
+  Lua::LUACALLBACK_ListenTrigger( lua, funcName, objectName, targetName, isInTrigger );
+}//LUACALLBACK_ListenTrigger
+
+
+
+/*
+=============
   LUACALLBACK_ListenCollision
 =============
 */
@@ -1719,6 +1744,30 @@ void Lua::LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, co
 
 /*
 =============
+  LUACALLBACK_ListenTrigger
+=============
+*/
+void Lua::LUACALLBACK_ListenTrigger( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, bool isInTrigger ) {
+  LuaStateCheck state( lua->luaState );
+  lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
+  if( !lua_isfunction( lua->luaState, -1 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenTrigger => '%s' is not a function", funcName.c_str() );
+    lua_pop( lua->luaState, 1 );  //stack:
+  }
+
+  lua_pushstring( lua->luaState, objectName.c_str() ); //stack: funcName objectName
+  lua_pushstring( lua->luaState, targetName.c_str() ); //stack: funcName objectName targetName
+  lua_pushinteger( lua->luaState, isInTrigger ); //stack: funcName objectName targetName isInTrigger
+  if( lua_pcall( lua->luaState, 3, 0, 0 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenTrigger => error by calling function '%s'", funcName.c_str() );
+    return;
+  }
+}//LUACALLBACK_ListenTrigger
+
+
+
+/*
+=============
   LUA_ListenCollision
 =============
 */
@@ -1733,6 +1782,25 @@ int Lua::LUA_ListenCollision( lua_State *lua ) {
   LUAFUNC_ListenCollision( objectName, funcName );
   return 0;
 }//LUA_ListenCollision
+
+
+
+/*
+=============
+  LUA_ListenTrigger
+=============
+*/
+int Lua::LUA_ListenTrigger( lua_State *lua ) {
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenTrigger => not enough parameters" );
+    return 0;
+  }
+  std::string objectName  = lua_tostring( lua, 1 );
+  std::string funcName    = lua_tostring( lua, 2 );
+  LUAFUNC_ListenTrigger( objectName, funcName );
+  return 0;
+}//LUA_ListenTrigger
 
 
 
@@ -1922,3 +1990,23 @@ int Lua::LUA_ObjectSetAnimation( lua_State *lua )
   LUAFUNC_ObjectSetAnimation( objectName, templateName, animationName );
   return 0;
 }//LUA_ObjectSetAnimation
+
+
+
+/*
+=============
+  LUA_SetPause
+=============
+*/
+int Lua::LUA_SetPause( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetPause => not enough parameters" );
+    return 0;
+  }
+  int isEnabled = lua_toboolean( lua, 1 );
+  LUAFUNC_SetPause( isEnabled ? true : false );
+  return 0;
+}//LUA_SetPause

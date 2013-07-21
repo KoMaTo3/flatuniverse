@@ -13,8 +13,44 @@ extern ObjectTriggerOnRemoveHandler __ObjectTriggerOnRemoveGlobalHandler;
 class MemoryWriter;
 class MemoryReader;
 
+
+
+class ObjectTrigger;
+
+//lua-слушатели триггеров
+class luaTriggerListenerStruct {
+public:
+  ObjectTrigger *object;
+  std::string funcName;
+
+  luaTriggerListenerStruct( const luaTriggerListenerStruct& setFrom )
+    :object( setFrom.object ), funcName( setFrom.funcName ) {
+  }
+
+  luaTriggerListenerStruct( ObjectTrigger *setObject, const std::string &setFuncName )
+    :object( setObject ), funcName( setFuncName ) {
+  }
+
+  luaTriggerListenerStruct& operator=( const luaTriggerListenerStruct& setFrom ) {
+    this->funcName  = setFrom.funcName;
+    this->object    = setFrom.object;
+    return *this;
+  }
+
+private:
+  luaTriggerListenerStruct(){}
+};
+typedef std::deque< luaTriggerListenerStruct > luaTriggerListenersList;
+
+
+
 class ObjectTrigger
 {
+public:
+  typedef void TriggerHandler( ObjectTrigger* trigger, Collision* collision, bool isInTrigger );
+  typedef void TriggerHandlerInit( const std::string &funcName, const std::string &objectName );
+  typedef std::deque< TriggerHandler* > TriggerHandlerList;
+
 private:
   Vec3  *position;  //ссылка на координаты Object
   Vec3  offset;     //смещение центра триггера относительно position
@@ -38,6 +74,10 @@ private:
   typedef std::deque< ObjectTriggerOnRemoveHandler > ObjectTriggerOnRemoveHandlerList;
   ObjectTriggerOnRemoveHandlerList  onRemoveHandlers;
 
+  static TriggerHandlerInit *InitTriggerHandler;
+  static luaTriggerListenersList *triggerLintenersList;
+  static TriggerHandler *defaultTriggerHandler;
+
 public:
   ObjectTrigger( Vec3 *setPosition );
   ~ObjectTrigger();
@@ -57,7 +97,10 @@ public:
   void  AddOnRemoveHandler      ( ObjectTriggerOnRemoveHandler handler );
 
   void  SaveToBuffer            ( MemoryWriter &writer );
-  void  LoadFromBuffer          ( MemoryReader &reader, const Dword version );
+  void  LoadFromBuffer          ( MemoryReader &reader, const std::string &thisObjectName, const Dword version );
+  static inline void SetInitTriggerHandler( TriggerHandlerInit setHandler ) { ObjectTrigger::InitTriggerHandler = setHandler; }
+  static inline void SetTriggerListenerList( luaTriggerListenersList *setList ) { ObjectTrigger::triggerLintenersList = setList; }
+  static inline void SetDefaultTriggerHandler( TriggerHandler *setHandler ) { ObjectTrigger::defaultTriggerHandler = setHandler; }
 
 private:
   void  _TouchHandlers( Collision *collision, bool isInTrigger );

@@ -29,6 +29,7 @@ public:
     bool active;
     float time;
     std::string funcName;
+    bool dontPause; //не паузится от Game::SetActive
   };
   std::vector< GameLuaTimer > luaTimers;
 
@@ -41,6 +42,7 @@ public:
 
   //lua-слушатели коллизий
   luaCollisionListenersList luaCollisionListeners;
+  luaTriggerListenersList luaTriggerListeners;
 
   //триггеры
   struct GameObjectTrigger
@@ -57,8 +59,8 @@ public:
   static bool   LUA_RemoveObject      ( const std::string &name );
   static Vec2   LUA_GetObjectPos      ( const std::string &name );
   static void   LUA_SetObjectPos      ( const std::string &name, const Vec2 &pos );
-  static Dword  LUA_SetTimer          ( float time, const std::string &funcName );
-  static void   LUA_CreateObject      ( const std::string &name, const Vec3 &pos );
+  static Dword  LUA_SetTimer          ( float time, const std::string &funcName, bool dontPause );
+  static void   LUA_CreateObject      ( const std::string &name, const Vec3 &pos, int notInGrid );
   static void   LUA_ListenKeyboard    ( const std::string &funcName );
   static void   LUA_ListenMouseKey    ( const std::string &funcName );
   static void   LUA_ListenMouseMove   ( const std::string &funcName );
@@ -87,22 +89,26 @@ public:
   static void   LUA_LoadScript        ( const std::string &fileName );
   static void   LUA_ObjectAttr        ( const std::string &objectName, VariableAttributesList &setAttributes, VariableAttributesList &getAttributes );
   static void   LUA_ListenCollision   ( const std::string &funcName, const std::string &objectName );
+  static void   LUA_ListenTrigger     ( const std::string &funcName, const std::string &objectName );
   static void   LUA_SetObjectForce    ( const std::string &objectName, int num, const Vec2& force );
   static void   LUA_RemoveObjectForce ( const std::string &objectName, int num );
   static bool   LUA_ObjectHasTag      ( const std::string &objectName, const std::string &tag );
   static void   LUA_ObjectAddTag      ( const std::string &objectName, const std::string &tag );
   static void   LUA_ObjectRemoveTag   ( const std::string &objectName, const std::string &tag );
   static void   LUA_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation );
+  static void   LUA_SetPause          ( bool isPause );
 
   void Update();
   void UpdateLuaTimers();
   void SetActive( bool setActive );
+  void ClearLuaTimers();
 
   static void   KeyboardProc          ( Dword keyId, bool isPressed );
   static void   MouseKeyProc          ( Dword keyId, bool isPressed );
   static void   MouseMoveProc         ( const Vec2 &pos );
   static void   OnRemoveTrigger       ( ObjectTrigger *trigger );
   static void   CollisionProc         ( Collision *a, Collision *b, Byte flags, const Vec3 &velocity );
+  static void   TriggerProc           ( ObjectTrigger *trigger, Collision *collision, bool isInTrigger );
 
   //debug/test
 };

@@ -1318,7 +1318,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
   }
 
   if( isTrigger ) {
-    this->EnableTrigger()->LoadFromBuffer( reader, version );
+    this->EnableTrigger()->LoadFromBuffer( reader, this->nameFull, version );
   }
 
   //tags
@@ -1335,6 +1335,10 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
   reader >> childsCount;
   if( childsCount ) //TODO: надо допиливать подгрузку дочерних объектов
   {
+    for( Dword num = 0; num < childsCount; ++num ) {
+      Object *child = new Object( "", this );
+      child->LoadFromBuffer( reader, this, version );
+    }
     __log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
   }
 }//LoadFromBuffer

@@ -20,9 +20,9 @@ class Lua;
 typedef bool  LUAFUNCPROC_RemoveObject      ( const std::string &name );
 typedef Vec2  LUAFUNCPROC_GetObjectPos      ( const std::string &name );
 typedef void  LUAFUNCPROC_SetObjectPos      ( const std::string &name, const Vec2 &pos );
-typedef Dword LUAFUNCPROC_SetTimer          ( float time, const std::string &funcName );
+typedef Dword LUAFUNCPROC_SetTimer          ( float time, const std::string &funcName, bool dontPause );
 typedef void  LUAFUNCPROC_LogWrite          ( const std::string &text );
-typedef void  LUAFUNCPROC_CreateObject      ( const std::string &name, const Vec3 &pos );
+typedef void  LUAFUNCPROC_CreateObject      ( const std::string &name, const Vec3 &pos, int notInGrid );
 typedef void  LUAFUNCPROC_ListenKeyboard    ( const std::string &funcName );
 typedef void  LUAFUNCPROC_ListenMouseKey    ( const std::string &funcName );
 typedef void  LUAFUNCPROC_ListenMouseMove   ( const std::string &funcName );
@@ -57,6 +57,7 @@ typedef std::string LUAFUNCPROC_GetSelectedObject ();
 typedef void  LUAFUNCPROC_LoadScript        ( const std::string &fileName );
 typedef void  LUAFUNCPROC_ObjectAttr        ( const std::string &objectName, VariableAttributesList &setAttributes, VariableAttributesList &getAttributes );
 typedef void  LUAFUNCPROC_ListenCollision   ( const std::string &objectName, const std::string &funcName );
+typedef void  LUAFUNCPROC_ListenTrigger     ( const std::string &objectName, const std::string &funcName );
 typedef float LUAFUNCPROC_GetTime           ();
 typedef void  LUAFUNCPROC_SetObjectForce    ( const std::string &name, int forceNum, const Vec2 &force );
 typedef void  LUAFUNCPROC_RemoveObjectForce ( const std::string &name, int forceNum );
@@ -64,6 +65,7 @@ typedef bool  LUAFUNCPROC_ObjectHasTag      ( const std::string &name, const std
 typedef void  LUAFUNCPROC_ObjectAddTag      ( const std::string &name, const std::string &tag );
 typedef void  LUAFUNCPROC_ObjectRemoveTag   ( const std::string &name, const std::string &tag );
 typedef void  LUAFUNCPROC_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation );
+typedef void  LUAFUNCPROC_SetPause          ( bool isPause );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -105,12 +107,14 @@ extern LUAFUNCPROC_GetSelectedObject        *LUAFUNC_GetSelectedObject;
 extern LUAFUNCPROC_LoadScript       *LUAFUNC_LoadScript;
 extern LUAFUNCPROC_ObjectAttr       *LUAFUNC_ObjectAttr;
 extern LUAFUNCPROC_ListenCollision  *LUAFUNC_ListenCollision;
+extern LUAFUNCPROC_ListenTrigger    *LUAFUNC_ListenTrigger;
 extern LUAFUNCPROC_SetObjectForce   *LUAFUNC_SetObjectForce;
 extern LUAFUNCPROC_RemoveObjectForce        *LUAFUNC_RemoveObjectForce;
 extern LUAFUNCPROC_ObjectHasTag     *LUAFUNC_ObjectHasTag;
 extern LUAFUNCPROC_ObjectAddTag     *LUAFUNC_ObjectAddTag;
 extern LUAFUNCPROC_ObjectRemoveTag  *LUAFUNC_ObjectRemoveTag;
 extern LUAFUNCPROC_ObjectSetAnimation       *LUAFUNC_ObjectSetAnimation;
+extern LUAFUNCPROC_SetPause         *LUAFUNC_SetPause;
 
 
 //callbacks
@@ -121,6 +125,7 @@ void LUACALLBACK_ListenMouseMove  ( Lua *lua, const std::string &funcName, const
 void LUACALLBACK_ObjectTrigger    ( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger );
 //void LUACALLBACK_GuiTrigger       ( Lua *lua, const std::string &funcName, const std::string &objectName );
 void LUACALLBACK_ListenCollision  ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, Byte flags, const Vec3 &velocity );
+void LUACALLBACK_ListenTrigger    ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, bool isInTrigger );
 
 
 
@@ -183,6 +188,7 @@ public:
   static int LUA_ObjectAttr       ( lua_State *lua );
   static int LUA_Render           ( lua_State *lua );
   static int LUA_ListenCollision  ( lua_State *lua );
+  static int LUA_ListenTrigger    ( lua_State *lua );
   static int LUA_GetTime          ( lua_State *lua );
   static int LUA_SetObjectForce   ( lua_State *lua );
   static int LUA_RemoveObjectForce( lua_State *lua );
@@ -192,6 +198,7 @@ public:
   static int LUA_SetClipboard     ( lua_State *lua );
   static int LUA_GetClipboard     ( lua_State *lua );
   static int LUA_ObjectSetAnimation ( lua_State *lua );
+  static int LUA_SetPause         ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );
@@ -201,6 +208,7 @@ public:
   static void LUACALLBACK_ObjectTrigger   ( Lua *lua, const std::string &funcName, const std::string &triggerName, const std::string &objectName, bool isInTrigger );
   //static void LUACALLBACK_GuiTrigger      ( Lua *lua, const std::string &funcName, const std::string &objectName );
   static void LUACALLBACK_ListenCollision ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, Byte flags, const Vec3 &velocity );
+  static void LUACALLBACK_ListenTrigger   ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, bool isInTrigger );
 
 private:
   static int  GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color );
