@@ -1,0 +1,60 @@
+template "player/mario" {
+  animation "default" 0.3 {
+    sprite "body" {
+      renderable_texture( "data/textures/player/mario/walk.png", 0.666,0.5, 1,1 )
+      renderable_size( 24 )
+    }
+  }//default
+
+  animation "stay-right" 1 {
+    sprite "body" {
+      renderable_texture( "data/textures/player/mario/walk.png", 0.666,0.5, 1,1 )
+      renderable_size( 24 )
+    }
+  }//stay-right
+
+  animation "stay-left" 1 {
+    sprite "body" {
+      renderable_texture( "data/textures/player/mario/walk.png", 1,0.5, 0.666,1 )
+      renderable_size( 24 )
+    }
+  }//stay-left
+
+  animation "jump-right" 0.3 {
+    sprite "body" {
+      renderable_texture( "data/textures/player/mario/walk.png", 0.333,0.5, 0.666,1 )
+      renderable_size( 24 )
+    }
+  }//jump-right
+
+  animation "jump-left" 0.3 {
+    sprite "body" {
+      renderable_texture( "data/textures/player/mario/walk.png", 0.666,0.5, 0.333,1 )
+      renderable_size( 24 )
+    }
+  }//jump-left
+
+  animation "walk-right" 0.3 {
+    sprite "body" {
+      renderable_texture( "data/textures/player/mario/walk.png" )
+      renderable_texture_coords {
+        0.0( 0.666,0, 1,0.5 )
+        0.1( 0,0, 0.333,0.5 )
+        0.2( 0.333,0, 0.666,0.5 )
+      }
+      renderable_size( 24 )
+    }
+  }//walk-right
+
+  animation "walk-left" 0.3 {
+    sprite "body" {
+      renderable_texture( "data/textures/player/mario/walk.png" )
+      renderable_texture_coords {
+        0.0( 1,0, 0.666,0.5 )
+        0.1( 0.333,0, 0,0.5 )
+        0.2( 0.666,0, 0.333,0.5 )
+      }
+      renderable_size( 24 )
+    }
+  }//walk-left
+}//mario

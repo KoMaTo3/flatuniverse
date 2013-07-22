@@ -16,6 +16,7 @@ LUAFUNCPROC_RemoveObject      *LUAFUNC_RemoveObject         = NULL;
 LUAFUNCPROC_GetObjectPos      *LUAFUNC_GetObjectPos         = NULL;
 LUAFUNCPROC_SetObjectPos      *LUAFUNC_SetObjectPos         = NULL;
 LUAFUNCPROC_SetTimer          *LUAFUNC_SetTimer             = NULL;
+LUAFUNCPROC_StopTimer         *LUAFUNC_StopTimer            = NULL;
 LUAFUNCPROC_LogWrite          *LUAFUNC_LogWrite             = NULL;
 LUAFUNCPROC_CreateObject      *LUAFUNC_CreateObject         = NULL;
 LUAFUNCPROC_ListenKeyboard    *LUAFUNC_ListenKeyboard       = NULL;
@@ -111,6 +112,7 @@ bool Lua::Init()
   lua_register( this->luaState, "ObjectGetPos",     Lua::LUA_GetObjectPos );
   lua_register( this->luaState, "ObjectSetPos",     Lua::LUA_SetObjectPos );
   lua_register( this->luaState, "SetTimer",         Lua::LUA_SetTimer );
+  lua_register( this->luaState, "StopTimer",        Lua::LUA_StopTimer );
   lua_register( this->luaState, "LogWrite",         Lua::LUA_LogWrite );
   lua_register( this->luaState, "ObjectCreate",     Lua::LUA_CreateObject );
   lua_register( this->luaState, "ListenKeyboard",   Lua::LUA_ListenKeyboard );
@@ -453,6 +455,28 @@ int Lua::LUA_SetTimer( lua_State *lua )
 
   return 1;
 }//LUA_SetTimer
+
+
+
+/*
+=============
+  LUA_StopTimer
+=============
+*/
+int Lua::LUA_StopTimer( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_StopTimer => not enough parameters" );
+    return 0;
+  }
+
+  Dword id = ( Dword ) lua_tonumber( lua, 1 );
+
+  LUAFUNC_StopTimer( id );
+
+  return 0;
+}//LUA_StopTimer
 
 
 

@@ -5,11 +5,13 @@
 #include "../pcre/pcre.h"
 
 
+#ifndef min
 #define min( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
 #define max( a, b ) ( ( a ) > ( b ) ? ( a ) : ( b ) )
+#endif
 
 
-TextParser::TextParser( char *textBuffer, int textLength )
+TextParser::TextParser( const char *textBuffer, int textLength )
 :_buffer( textBuffer ), _length( textLength ), _currentPos( 0 )
 {
   this->RemoveComments( this->_buffer );

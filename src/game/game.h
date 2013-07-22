@@ -60,6 +60,7 @@ public:
   static Vec2   LUA_GetObjectPos      ( const std::string &name );
   static void   LUA_SetObjectPos      ( const std::string &name, const Vec2 &pos );
   static Dword  LUA_SetTimer          ( float time, const std::string &funcName, bool dontPause );
+  static void   LUA_StopTimer         ( Dword id );
   static void   LUA_CreateObject      ( const std::string &name, const Vec3 &pos, int notInGrid );
   static void   LUA_ListenKeyboard    ( const std::string &funcName );
   static void   LUA_ListenMouseKey    ( const std::string &funcName );

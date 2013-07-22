@@ -2,7 +2,9 @@ README.md
 _UpgradeReport_Files/
 Backup/
 Debug/logs/
-Release/
+Release/logs/
+Release/data/temp/
+Release/flatuniverse.*
 flatuniverse/Debug/
 flatuniverse/Release/
 tmp/

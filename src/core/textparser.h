@@ -38,7 +38,7 @@ public:
     }
   };
 
-  TextParser( char *textBuffer, int textLength );
+  TextParser( const char *textBuffer, int textLength );
   virtual ~TextParser();
   bool GetNext( Result& result );
   __forceinline int AllowedToRead() {

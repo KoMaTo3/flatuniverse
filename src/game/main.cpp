@@ -5,6 +5,7 @@
 #include "worldgridmgr.h"
 #include "game.h"
 #include "core/animationpack.h"
+#include "core/textparser.h"
 
 Game *game = NULL;
 
@@ -440,6 +441,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         game->core->Update();
         game->core->SetCamera( game->core->GetObject( "player" ) );
         game->world->LoadFromFile( fileName );
+        game->core->GetObject( "player" )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->GetCollision()->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );
         //game->world->AddActiveObject( game->core->GetObject( "player" ) );
         game->SetActive( false );
       }
@@ -523,6 +525,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     }
     */
 
+    /*
     if( game->core->keyboard.IsPressed( VK_TAB ) )
     {
       static long num = 0;
@@ -543,6 +546,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       }
       //game->core->RemoveObject( "/gui/button-exit" );
     }
+    */
 
     //mouse tooltips
     /*
@@ -642,6 +646,7 @@ Game::Game()
   LUAFUNC_GetObjectPos      = Game::LUA_GetObjectPos;
   LUAFUNC_SetObjectPos      = Game::LUA_SetObjectPos;
   LUAFUNC_SetTimer          = Game::LUA_SetTimer;
+  LUAFUNC_StopTimer         = Game::LUA_StopTimer;
   LUAFUNC_CreateObject      = Game::LUA_CreateObject;
   LUAFUNC_ListenKeyboard    = Game::LUA_ListenKeyboard;
   LUAFUNC_ListenMouseKey    = Game::LUA_ListenMouseKey;
@@ -857,6 +862,19 @@ Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPaus
   game->luaTimers[ id ].dontPause = dontPause;
   return id;
 }//LUA_SetTimer
+
+
+/*
+=============
+  LUA_StopTimer
+=============
+*/
+void Game::LUA_StopTimer( Dword id )
+{
+  if( id < game->luaTimers.size() ) {
+    game->luaTimers[ id ].active = false;
+  }
+}//LUA_StopTimer
 
 
 
@@ -1678,6 +1696,35 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       }
       continue;
     }//triggerSize
+    if( name == "triggerPolygon" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        CollisionElementPolygon::PointList points;
+        TextParser parser( value.GetString().c_str(), value.GetString().size() );
+        TextParser::Result parserValue;
+        int step = 0;
+        Vec2 point;
+        while( parser.GetNext( parserValue ) ) {
+          if( parserValue.type != TPL_NUMBER ) {
+            __log.PrintInfo( Filelevel_WARNING, "triggerPolygon => bad format of string '%s'", value.GetString().c_str() );
+            break;
+          } else {
+            if( step == 0 ) {
+              point.x = parserValue.GetFloat();
+            } else {
+              point.y = parserValue.GetFloat();
+              __log.PrintInfo( Filelevel_DEBUG, "triggerPolygon => point[%3.3f; %3.3f]", point.x, point.y );
+              points.push_back( point );
+            }
+          }
+          step ^= 1;
+        }
+        trigger->SetPolygon( points );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => triggerPolygon: object '%s' not trigger", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//triggerPolygon
 
   }//for iter
 

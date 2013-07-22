@@ -1101,12 +1101,13 @@ bool Core::Redraw()
           glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         }//renderable
 
+        Vec3 camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f );
         //collision
         if( this->debug.renderCollision && __collisionList->size() )
         {
           glLineWidth( 1.0f );
           CollisionList::iterator iter, iterEnd = __collisionList->end();
-          Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
+          Vec3 pos, size;
           for( iter = __collisionList->begin(); iter != iterEnd; ++iter ) {
             ( *iter )->Render( alpha, camera, this->debug.selectedObject && this->debug.selectedObject->GetCollision() == *iter );
           }
@@ -1117,6 +1118,10 @@ bool Core::Redraw()
         {
           glLineWidth( 1.0f );
           ObjectTriggerList::iterator iter, iterEnd = __triggerList->end();
+          for( iter = __triggerList->begin(); iter != iterEnd; ++iter ) {
+            ( *iter )->Redraw( alpha, camera, this->debug.selectedObject && this->debug.selectedObject->GetTrigger() == *iter );
+          }
+          /*
           glBegin( GL_QUADS );
           Vec3 pos, camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f ), size;
           for( iter = __triggerList->begin(); iter != iterEnd; ++iter ) {
@@ -1133,6 +1138,7 @@ bool Core::Redraw()
             glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
           }
           glEnd();
+          */
         }//trigger
 
         glEnable( GL_DEPTH_TEST );

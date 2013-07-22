@@ -2,6 +2,7 @@
 
 #include "klib.h"
 #include <deque>
+#include "collision.h"
 
 class Collision;
 class ObjectTrigger;
@@ -89,10 +90,12 @@ public:
   bool  IsHandlerExists         ( ObjectTriggerHandler handler );
 
   ObjectTrigger*  SetSize       ( const Vec3 &setSize );
+  ObjectTrigger*  SetPolygon    ( const CollisionElementPolygon::PointList &points );
   const Vec3&     GetSize       ( );
   inline
   const Vec3&     GetPosition   ( ){ return *this->position; }
   bool            TestInPoint   ( const Vec2 &pos );
+  void            Redraw        ( float phase, const Vec3 &offset, bool isActive );
 
   void  AddOnRemoveHandler      ( ObjectTriggerOnRemoveHandler handler );
 

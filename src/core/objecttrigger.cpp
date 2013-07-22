@@ -135,6 +135,32 @@ bool ObjectTrigger::IsObjectAlreadyTriggered( Collision *collision )
 
 /*
 =============
+  SetPolygon
+=============
+*/
+ObjectTrigger* ObjectTrigger::SetPolygon( const CollisionElementPolygon::PointList &points )
+{
+  this->triggerRect->InitPolygon( points );
+  return this;
+}//SetPolygon
+
+
+
+/*
+=============
+  Redraw
+=============
+*/
+void ObjectTrigger::Redraw( float phase, const Vec3 &offset, bool isActive ) {
+  if( this->triggerRect ) {
+    this->triggerRect->Render( phase, offset, isActive );
+  }
+}//Redraw
+
+
+
+/*
+=============
   SetSize
 =============
 */

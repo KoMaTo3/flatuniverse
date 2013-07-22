@@ -1,0 +1,64 @@
+template "supermario/coin" {
+  animation "default" 0 {
+  }
+  animation "do" 1.5 {
+    sprite "coin" {
+      renderable_texture( "data/textures/items/coin0.png" )
+      renderable_texture_coords {
+        0.0( 0,0, 0.25,1 )
+        0.05( 0.25,0, 0.5,1 )
+        0.1( 0.5,0, 0.75,1 )
+        0.15( 0.75,0, 1,1 )
+        0.20( 0,0, 0.25,1 )
+        0.25( 0.25,0, 0.5,1 )
+        0.3( 0.5,0, 0.75,1 )
+        0.35( 0.75,0, 1,1 )
+        0.4( 0,0, 0.25,1 )
+        0.45( 0.25,0, 0.5,1 )
+        0.5( 0.5,0, 0.75,1 )
+        0.55( 0.75,0, 1,1 )
+        0.6( 0,0, 0.25,1 )
+        0.65( 0.25,0, 0.5,1 )
+        0.7( 0.5,0, 0.75,1 )
+        0.75( 0.75,0, 1,1 )
+        0.8( 0,0, 0.25,1 )
+        0.85( 0.25,0, 0.5,1 )
+        0.9( 0.5,0, 0.75,1 )
+        0.95( 0.75,0, 1,1 )
+        1.0( 0,0, 0.25,1 )
+      }
+      renderable_size( 16, 32 )
+      position {
+        0.0( 0,0 )
+        0.1 linear( 0,-50 )
+        0.2 linear( 0,-80 )
+        0.3 linear( 0,-100 )
+        0.4 linear( 0,-110 )
+        0.5 linear( 0,-100 )
+        0.6 linear( 0,-85 )
+        0.7 linear( 0,-70 )
+        0.8 linear( 0,-60 )
+        1.0 linear( 0,-50 )
+      }
+    }
+  }
+}
+
+template "supermario/brick2" {
+  animation "default" 0 {
+  }
+  animation "do" 1 {
+    sprite "brick" {
+      renderable_texture( "data/textures/tiles/bricks/brick2.png" )
+      renderable_texture_coords {
+        0(0,0,1,1)
+      }
+      renderable_size( 32, 32 )
+      position {
+        0.0( 0,0 )
+        0.15 linear( 0,-10 )
+        0.3 linear( 0,0 )
+      }
+    }
+  }
+}
