@@ -7,7 +7,8 @@
 local playerState = {
   onGroundTime = -1,
   isHoldJump = false,
-  longJumpPower = 100,
+  longJumpPower = 150,
+  longJumpStep = 0,
   longJumpTimer = -1,
   PlayerEndLongJumpTimer = -1,
   lastDirection = 1,  -- direction of face
@@ -143,6 +144,7 @@ function PlayerControl( id, isPressed )
           local vx, _ = ObjectAttr( 'player', { 'collisionVelocity' } )
           ObjectAttr( 'player', { collisionVelocity = vx..' '..( -300 )  } )
           playerState.isHoldJump = true
+          playerState.longJumpStep = 0
           if playerState.longJumpTimer ~= -1 then
             StopTimer( playerState.longJumpTimer )
             playerState.longJumpTimer = -1
@@ -228,7 +230,8 @@ end -- PlayerControl
 function PlayerDoLongJump( timerId )
   if playerState.isHoldJump then
     local vx, vy = ObjectAttr( 'player', { 'collisionVelocity' } )
-    ObjectAttr( 'player', { collisionVelocity = vx..' '..( vy - playerState.longJumpPower )  } )
+    playerState.longJumpStep = playerState.longJumpStep + 1
+    ObjectAttr( 'player', { collisionVelocity = vx..' '..( vy - playerState.longJumpPower / playerState.longJumpStep )  } )
     SetTimer( 0.1, 'PlayerDoLongJump' )
   end
 end -- PlayerDoLongJump

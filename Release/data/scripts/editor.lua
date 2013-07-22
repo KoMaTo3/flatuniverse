@@ -738,7 +738,13 @@ end --ToggleLayer
 --
 function EditorUpdateDebug()
   local cx, cy = GetCameraPos()
-  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ) ) )
+  local mx, my = GetMousePos()
+  local width, height = GetWindowSize()
+  local pos = {
+    x = cx + mx - width * 0.5,
+    y = cy + my - height * 0.5
+  }
+  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] pixel[%d; %d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), math.floor( pos.x ), math.floor( pos.y ) ) )
   -- GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
   SetTimer( 0.01, 'EditorUpdateDebug', true )
 end -- EditorUpdateDebug
