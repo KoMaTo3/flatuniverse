@@ -56,7 +56,7 @@ function Main()
   ListenCollision( 'CollisionPlayer', 'player' )
   ObjectAddTag( 'player', 'player' )
   ObjectSetAnimation( 'player', 'player/mario', 'stay-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
-  SetTimer( 1 / 10, 'UpdatePlayerAnimation' )
+  SetTimer( 1 / 10, 'UpdatePlayerAnimation', true )
   ObjectAttr( 'player', { collisionAcceleration = '0 1500' } )
   -- ListenTrigger( 'testFunc', 'wall.424.286.4.030000' )
   -- ObjectRemove( 'camera-mario-style' )
@@ -71,6 +71,13 @@ Main()
 
 function TestFunc( object, trigger, isInTrigger )
   if isInTrigger == 0 then  -- object in trigger
+  end
+end
+
+function DoKill( object, trigger, isInTrigger )
+  if isInTrigger == 0 then  -- object in trigger
+    ObjectSetPos( 'player', 0, 0 )
+    ObjectAttrs( 'player', { collisionVelocity = '0 0' } )
   end
 end
 
@@ -252,7 +259,7 @@ function UpdatePlayerAnimation()
       ObjectSetAnimation( 'player', 'player/mario', 'jump-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
     end
   end
-  SetTimer( timer, 'UpdatePlayerAnimation' )
+  SetTimer( timer, 'UpdatePlayerAnimation', true )
 end -- UpdatePlayerAnimation
 
 --[[ IsObjectUnderThis ]]
@@ -430,7 +437,7 @@ function UpdateCamera()
   local _, cy = ObjectGetPos( camera )
   local px, _ = ObjectGetPos( 'player' )
   ObjectSetPos( camera, math.max( px, 0 ), cy )
-  SetTimer( 0, 'UpdateCamera' ) -- стараться избегать 0-таймеров, т.к. они зависят от быстродействия приложения и исполняются каждый тик
+  SetTimer( 0, 'UpdateCamera', true ) -- стараться избегать 0-таймеров, т.к. они зависят от быстродействия приложения и исполняются каждый тик
 end -- UpdateCamera
 
 --[[ DoAnimationBrickDisplace ]]

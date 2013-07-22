@@ -63,12 +63,14 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
   game->world->AddActiveObject( game->core->GetObject( "defaults/camera" ) );
 
+  /*
   obj = game->core->CreateObject( "test-bg-2" );
   obj->SetPosition( Vec3( 50.0f, 50.0f, -9.0f ) );
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
   quad->SetTexture( "data/temp/AUCHINDOUN_VORTEXCLOUD01.png" );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 100.0f, 100.0f ) );
+  */
 
 
   obj = game->core->CreateObject( "player" );
@@ -611,6 +613,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       obj->GetCollision()->SetVelocity( Vec3( 0.0f, Math::Sin16( rot * 3.0f ) * 100.0f, 0.0f ) );
       */
 
+      /*
     if( obj = game->core->GetObject( "test-bg-2" ) )
     {
       quad = ( RenderableQuad* ) obj->GetRenderable();
@@ -619,6 +622,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         quad->SetScale( Vec2( scale, scale ) )->SetRotation( -rot );
       }
     }
+    */
       //obj->SetPosition( Vec3( -20.0f, 50.0f + Math::Sin16( rot * 5.0f ) * 50.0f, 0.0f ) );
 
     sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), __worldGridList->size() );
@@ -1493,7 +1497,7 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
   ObjectTrigger   *trigger;
   //set
   for( iter = setAttributes.begin(); iter != iterEnd; ++iter ) {
-    //__log.PrintInfo( Filelevel_DEBUG, ". set %s = '%s'", ( *iter )->name.c_str(), ( *iter )->value.GetString().c_str() );
+    __log.PrintInfo( Filelevel_DEBUG, ". set %s = '%s'", ( *iter )->name.c_str(), ( *iter )->value.GetString().c_str() );
 
     const std::string &name = ( *iter )->name;
     const Variable &value   = ( *iter )->value;

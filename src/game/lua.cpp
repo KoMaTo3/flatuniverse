@@ -1311,7 +1311,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
   int res = 0;
   VariableAttributesList setAttrs, getAttrs;
   if( lua_istable( lua, 2 ) ) {
-    //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => start:" );
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => start:" );
 
     lua_pushvalue( lua, -1 );
     lua_pushnil( lua );
@@ -1322,7 +1322,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
 
       if( lua_isnumber( lua, -1 ) ) { //get parameter
         if( lua_isstring( lua, -2 ) ) {
-          //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => get '%s'", lua_tostring( lua, -2 ) );
+          __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => get '%s'", lua_tostring( lua, -2 ) );
           attr = new VariableAttribute();
           attr->name = lua_tostring( lua, -2 );
           getAttrs.push_back( attr );
@@ -1345,7 +1345,8 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
             attr = new VariableAttribute();
             attr->value.SetString( lua_tostring( lua, -2 ) );
           } else {
-            __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => parameter's  key '%s' has bad value", attr->name.c_str() );
+            std::string name = lua_tostring( lua, -1 );
+            __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => parameter's  key '%s' has bad value", name.c_str() );
           }
           if( attr ) {
             attr->name = lua_tostring( lua, -1 );
@@ -1353,11 +1354,13 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
               attr->name == "renderable"  ||
               attr->name == "collision"   ||
               attr->name == "trigger"
-              )
+              ) {
               setAttrs.push_front( attr );
-            else
+            }
+            else {
               setAttrs.push_back( attr );
-            //__log.PrintInfo( Filelevel_DEBUG, ". '%s' => '%s'", attr->name.c_str(), attr->value.GetString().c_str() );
+            }
+            __log.PrintInfo( Filelevel_DEBUG, ". '%s' => '%s'", attr->name.c_str(), attr->value.GetString().c_str() );
           }
 
         } else {
@@ -1370,6 +1373,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
       ++num;
     }//while
 
+    __log.PrintInfo( Filelevel_DEBUG, "LUAFUNC_ObjectAttr => objectName['%s'] setAttrs[%d] getAttrs[%d]", objectName.c_str(), setAttrs.size(), getAttrs.size() );
     LUAFUNC_ObjectAttr( objectName, setAttrs, getAttrs );
 
     if( getAttrs.size() ) { //return parameters

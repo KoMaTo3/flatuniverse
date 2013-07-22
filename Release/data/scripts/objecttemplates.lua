@@ -46,44 +46,41 @@ function GetObjectsTemplates()
       creationScript = function( name )
       end,
     },
-    -- Tile000
+    -- Tile000a
     {
-      name = 'Тайл: заросшие кирпичи 1/4',
+      name = 'Шип (верхний)',
       icon = 'data/textures/tiles/tile000a.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000a.png',
-        collision = true, _collisionScale = 1, collisionStatic = true,
-        trigger = false,
+        collision = false,
+        trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -0.8,-1, 0.8,-1, 0,1 }, _triggerScale = 1,
       },
     },
-    -- Tile000
+    -- Tile000b
     {
-      name = 'Тайл: заросшие кирпичи 2/4',
+      name = 'Шип (нижний)',
       icon = 'data/textures/tiles/tile000b.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000b.png',
-        collision = true, _collisionScale = 1, collisionStatic = true,
-        trigger = false,
+        trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 0.8,1, -0.8,1, 0,-1 }, _triggerScale = 1,
       },
     },
-    -- Tile000
+    -- Tile000c
     {
-      name = 'Тайл: заросшие кирпичи 3/4',
+      name = 'Шип (правый)',
       icon = 'data/textures/tiles/tile000c.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000c.png',
-        collision = true, _collisionScale = 1, collisionStatic = true,
-        trigger = false,
+        trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 1,-0.8, 1,0.8, -1,0 }, _triggerScale = 1,
       },
     },
-    -- Tile000
+    -- Tile000d
     {
-      name = 'Тайл: заросшие кирпичи 4/4',
+      name = 'Шип (левый)',
       icon = 'data/textures/tiles/tile000d.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000d.png',
-        collision = true, _collisionScale = 1, collisionStatic = true,
-        trigger = false,
+        trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -1,-0.8, 1,0, -1,0.8 }, _triggerScale = 1,
       },
     },
     -- Question-brick

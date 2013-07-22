@@ -356,6 +356,8 @@ function OnEditorKey( id, isPressed )
       end
       if id == 0x47 then    -- G: toggle showing grid
         ToggleGrid()
+      end
+      if id == 0x10 then    -- Shift
         settings.keys.isShift = isPressed
       end
       if id == 0x11 then    -- Control
@@ -377,6 +379,11 @@ function OnEditorKey( id, isPressed )
       end
       if id == 0x72 then    -- F3
         settings.gamePaused = true
+        settings.editorMode = 0
+        settings.buffer = {}
+        settings.keys.isShift = false
+        settings.keys.isCtrl = false
+        settings.keys.isAlt = false
       end
   end
 end --OnEditorKey
@@ -733,7 +740,7 @@ function EditorUpdateDebug()
   local cx, cy = GetCameraPos()
   GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ) ) )
   -- GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
-  SetTimer( 0.01, 'EditorUpdateDebug' )
+  SetTimer( 0.01, 'EditorUpdateDebug', true )
 end -- EditorUpdateDebug
 
 function UpdateGuiBySelectedObject()
@@ -848,7 +855,7 @@ function RenderGUI()
     GUI.templates.Draw()
     GUIRendererRender() -- additional GUI from gui.lua
   end
-  SetTimer( 1/30, 'RenderGUI' )
+  SetTimer( 1/30, 'RenderGUI', true )
 end --RenderGUI
 
 function TestMouseOnGUI( x, y )
@@ -941,15 +948,8 @@ function EditorInsertItemByTemplate( px, py )
   ObjectCreate( name, x * tileSize + offsetX, y * tileSize + offsetY, 0 )
 
   -- remove bad attrs
-  local newAttrs = table.copy( attrs )
-  for key, value in pairs( newAttrs ) do
-    if #key > 0 and key:sub( 1, 1 ) == '_' then
-      newAttrs[ key ] = nil
-      break
-    end
-  end
 
-  ObjectAttr( name, newAttrs )
+  ObjectAttr( name, attrs )
   if attrs['_triggerFunc'] ~= nil and attrs.trigger ~= nil then
     ListenTrigger( attrs['_triggerFunc'], name )
     -- attrs['_triggerFunc'] = nil
