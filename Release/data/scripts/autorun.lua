@@ -19,6 +19,14 @@ local playerState = {
 local animation = {
 }
 
+function table.copy( t )
+  local t2 = {}
+  for k,v in pairs( t ) do
+    t2[ k ] = v
+  end
+  return t2
+end
+
 --[[ Main ]]
 function Main()
   LoadScript( 'data/scripts/gui.lua' )
@@ -62,8 +70,7 @@ end -- Main
 Main()
 
 function TestFunc( object, trigger, isInTrigger )
-  if isInTrigger == 0 then
-    Alert('','')
+  if isInTrigger == 0 then  -- object in trigger
   end
 end
 

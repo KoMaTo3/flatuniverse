@@ -634,8 +634,6 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
     return false;
   }
 
-  __log.PrintInfo( Filelevel_WARNING, "CollisionElementPolygon::TestIntersectWithSquare => insert algorythm" );
-
   //Проецируем объекты на разделяющие оси: оси полигона + 2 оси квадрата
   AxisList::const_iterator iter, iterEnd = this->axes.end();
   float projectMin[ 2 ], projectMax[ 2 ];

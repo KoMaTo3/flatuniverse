@@ -6,8 +6,9 @@ function GetObjectsTemplates()
       icon = 'data/textures/tiles/bricks/brick0.png',
       attr = {
         renderable = true, textureName = 'textures/tiles/bricks/brick0.png',
-        collision = true, _collisionScale = 1, collisionStatic = true,
+        -- collision = true, _collisionScale = 1, collisionStatic = true,
         -- trigger = true, _triggerFunc = 'TestFunc', triggerPolygon = '-12 -12  12 -12  0 12'
+        trigger = true, _triggerFunc = 'TestFunc', _triggerPolygon = { -1,-1, 1,-1, 0,1 }, _triggerScale = 1,
       },
       tags = {
         'brick-breakable',

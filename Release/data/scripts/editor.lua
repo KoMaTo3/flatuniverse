@@ -911,11 +911,23 @@ function EditorInsertItemByTemplate( px, py )
     end
     attrs['collisionSize'] = size..' '..size
   end
-  if attrs['trigger'] ~= nil and attrs.trigger then
+
+  if attrs['trigger'] ~= nil and attrs.trigger then -- init trigger
     local size = tileSize
-    if attrs['_triggerScale'] ~= nil then
-      size = size * attrs['_triggerScale']
-      attrs['triggerSize'] = size..' '..size
+    if attrs['_triggerPolygon'] ~= nil then  -- polygon: convert table to string
+      if attrs['_triggerScale'] ~= nil then
+        size = size * attrs['_triggerScale'] * 0.5
+      end
+      local str = ''
+      for key, value in pairs( attrs['_triggerPolygon'] ) do
+        str = str..( #str > 0 and ' ' or '' )..( value * size )
+      end
+      attrs['triggerPolygon'] = str
+    else  -- default: square
+      if attrs['_triggerScale'] ~= nil then
+        size = size * attrs['_triggerScale']
+        attrs['triggerSize'] = size..' '..size
+      end
     end
   end
   --attrs.collisionSize = ( tileSize * _collisionScale )..' '..( tileSize * _collisionScale )
@@ -927,10 +939,20 @@ function EditorInsertItemByTemplate( px, py )
 
   --ObjectRemove( name )
   ObjectCreate( name, x * tileSize + offsetX, y * tileSize + offsetY, 0 )
-  ObjectAttr( name, attrs )
-  if attrs['_triggerFunc'] ~= nil and attrs.trigger then
+
+  -- remove bad attrs
+  local newAttrs = table.copy( attrs )
+  for key, value in pairs( newAttrs ) do
+    if #key > 0 and key:sub( 1, 1 ) == '_' then
+      newAttrs[ key ] = nil
+      break
+    end
+  end
+
+  ObjectAttr( name, newAttrs )
+  if attrs['_triggerFunc'] ~= nil and attrs.trigger ~= nil then
     ListenTrigger( attrs['_triggerFunc'], name )
-    attrs['_triggerFunc'] = nil
+    -- attrs['_triggerFunc'] = nil
   end
   if GUI.templates.items[ GUI.templates.currentItem ].creationScript ~= nil then
     GUI.templates.items[ GUI.templates.currentItem ].creationScript( name )
