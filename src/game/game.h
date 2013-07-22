@@ -89,8 +89,8 @@ public:
   static std::string LUA_GetSelectedObject  ();
   static void   LUA_LoadScript        ( const std::string &fileName );
   static void   LUA_ObjectAttr        ( const std::string &objectName, VariableAttributesList &setAttributes, VariableAttributesList &getAttributes );
-  static void   LUA_ListenCollision   ( const std::string &funcName, const std::string &objectName );
-  static void   LUA_ListenTrigger     ( const std::string &funcName, const std::string &objectName );
+  static void   LUA_ListenCollision   ( const std::string &objectName, const std::string &funcName );
+  static void   LUA_ListenTrigger     ( const std::string &objectName, const std::string &funcName );
   static void   LUA_SetObjectForce    ( const std::string &objectName, int num, const Vec2& force );
   static void   LUA_RemoveObjectForce ( const std::string &objectName, int num );
   static bool   LUA_ObjectHasTag      ( const std::string &objectName, const std::string &tag );

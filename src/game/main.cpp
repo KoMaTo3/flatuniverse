@@ -1866,7 +1866,7 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
   LUA_ListenCollision
 =============
 */
-void Game::LUA_ListenCollision( const std::string &funcName, const std::string &objectName ) {
+void Game::LUA_ListenCollision( const std::string &objectName, const std::string &funcName ) {
   Object *object = game->core->GetObject( objectName );
   if( !object ) {
     __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenCollision => object '%s' not found", objectName.c_str() );
@@ -1893,7 +1893,7 @@ void Game::LUA_ListenCollision( const std::string &funcName, const std::string &
   LUA_ListenTrigger
 =============
 */
-void Game::LUA_ListenTrigger( const std::string &funcName, const std::string &objectName ) {
+void Game::LUA_ListenTrigger( const std::string &objectName, const std::string &funcName ) {
   Object *object = game->core->GetObject( objectName );
   if( !object ) {
     __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenTrigger => object '%s' not found", objectName.c_str() );

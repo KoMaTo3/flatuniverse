@@ -54,7 +54,7 @@ function Main()
   -- local r,g,b,a = ObjectAttr( 'wall', { 'color' } )
   -- Alert( '', r..':'..g..':'..b..':'..a )
   ListenKeyboard( 'PlayerControl' )
-  ListenCollision( 'CollisionPlayer', 'player' )
+  ListenCollision( 'player', 'CollisionPlayer' )
   ObjectAddTag( 'player', 'player' )
   ObjectSetAnimation( 'player', 'player/mario', 'stay-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
   SetTimer( 1 / 10, 'UpdatePlayerAnimation', true )
@@ -78,7 +78,7 @@ end
 function DoKill( object, trigger, isInTrigger )
   if isInTrigger == 0 then  -- object in trigger
     ObjectSetPos( 'player', 0, 0 )
-    ObjectAttrs( 'player', { collisionVelocity = '0 0' } )
+    ObjectAttr( 'player', { collisionVelocity = '0 0' } )
   end
 end
 
@@ -380,7 +380,7 @@ function DoAnimationMushroom( timerId )
       ObjectAttr( anim.object, { collision = true, collisionSize = '32 32', collisionVelocity = '150 0', collisionAcceleration = '0 1200', collisionStatic = false } )
       ObjectAddTag( anim.object, 'mushroom' )
       ObjectAddTag( anim.object, 'no-reset-player-velocity' )
-      ListenCollision( 'CollisionMushroom', anim.object )
+      ListenCollision( anim.object, 'CollisionMushroom' )
     end
   end
 end -- DoAnimationMushroom

@@ -293,7 +293,7 @@ void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const std::string &thi
       for( q = 0; q < count; ++q ) {
         reader >> s;
         __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::LoadFromBuffer => . handler['%s']", s.c_str() );
-        this->InitTriggerHandler( s, thisObjectName );
+        this->InitTriggerHandler( thisObjectName, s );
       }
     }
   }

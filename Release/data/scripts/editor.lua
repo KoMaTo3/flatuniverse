@@ -957,7 +957,7 @@ function EditorInsertItemByTemplate( px, py )
 
   ObjectAttr( name, attrs )
   if attrs['_triggerFunc'] ~= nil and attrs.trigger ~= nil then
-    ListenTrigger( attrs['_triggerFunc'], name )
+    ListenTrigger( name, attrs['_triggerFunc'] )
     -- attrs['_triggerFunc'] = nil
   end
   if GUI.templates.items[ GUI.templates.currentItem ].creationScript ~= nil then

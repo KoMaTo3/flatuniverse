@@ -49,7 +49,7 @@ class ObjectTrigger
 {
 public:
   typedef void TriggerHandler( ObjectTrigger* trigger, Collision* collision, bool isInTrigger );
-  typedef void TriggerHandlerInit( const std::string &funcName, const std::string &objectName );
+  typedef void TriggerHandlerInit( const std::string &objectName, const std::string &funcName );
   typedef std::deque< TriggerHandler* > TriggerHandlerList;
 
 private:
