@@ -1,0 +1,20 @@
+template "lift/small" {
+  animation "down" 3 {
+    sprite "main" {
+      position {
+        0( 0, 0 )
+        1.5 linear( 0, 100 )
+        3 linear( 0, 0 )
+      }
+      renderable_texture( "data/textures/tiles/question0.png" )
+      renderable_texture_coords( 0, 1 )
+      renderable_size( 100, 24 )
+      collision_square {
+        0( 10, 10 )
+        1 linear( 50, 1 )
+        2 linear( 1, 50 )
+        3 linear( 10, 10 )
+      }
+    }
+  }
+}//lift/small

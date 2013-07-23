@@ -38,6 +38,7 @@ private:
   void _LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
   void _LoadAttributeColor( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
   void _LoadAttributeEnabled( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
+  void _LoadAttributeCollisionSquare( TextParser &parser, AnimationTemplate *tpl, float time = 0.0f, InterpolationType interpolation = FLAT );
 
   typedef void (Manager::*LoadAttributeFunc)( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation );
   std::hash_map< std::string, LoadAttributeFunc > _loadFunctionList;

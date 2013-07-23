@@ -235,16 +235,17 @@ void AnimationParameterFloat3::Update( float animationTime ) {
 
   KeyFramesList::const_reverse_iterator
     iterLast = this->_keyFrames.rbegin();
+  KeyFramesList::const_iterator
+    iter = this->_keyFrames.begin();
 
   if( size == 1 ) {
-    *this->_value[ 0 ] = iterLast->value.x;
-    *this->_value[ 1 ] = iterLast->value.y;
-    *this->_value[ 2 ] = iterLast->value.z;
+    *this->_value[ 0 ] = iter->value.x;
+    *this->_value[ 1 ] = iter->value.y;
+    *this->_value[ 2 ] = iter->value.z;
     return;
   }
 
   KeyFramesList::const_iterator
-    iter = this->_keyFrames.begin(),
     iterEnd = this->_keyFrames.end(),
     iterBegin = this->_keyFrames.begin(),
     iterNext, iterPrev;

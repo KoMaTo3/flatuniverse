@@ -25,6 +25,7 @@ public:
   virtual Vec3& GetPositionPtr() = NULL;
   virtual float* GetRenderableRotationPtr() = NULL;
   virtual Vec4& GetColorPtr() = NULL;
+  virtual Vec3& GetCollisionSquareSize() = NULL;
   //virtual Vec3& GetPositionPtr() = NULL;
   //virtual IAnimationObject* MakeInstance() = NULL;
 

@@ -1129,8 +1129,9 @@ void Object::Update( float dt )
   {
     Vec3 force( 0.0f, 0.0f, 0.0f );
     ObjectForceList::iterator iter, iterEnd = this->forces.end();
-    for( iter = this->forces.begin(); iter != iterEnd; ++iter )
+    for( iter = this->forces.begin(); iter != iterEnd; ++iter ) {
       force += iter->vec;
+    }
     //__log.PrintInfo( Filelevel_DEBUG, "force: %3.3f; %3.3f; %3.3f", force.x, force.y, force.z );
     this->collision->SetForce( force );
   }
@@ -1139,8 +1140,9 @@ void Object::Update( float dt )
   if( this->_childs && this->_childs->size() )
   {
     ObjectChilds::iterator iter, iterEnd = this->_childs->end();
-    for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
+    for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
       ( *iter )->Update( dt );
+    }
   }
 }//Update
 

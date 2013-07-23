@@ -122,6 +122,9 @@ public:
   static inline void SetInitCollisionHandler( CollisionHandlerInit setHandler ) { Collision::InitCollisionHandler = setHandler; }
   static inline void SetCollisionListenerList( luaCollisionListenersList *setList ) { Collision::collisionLintenersList = setList; }
   static inline void SetDefaultCollisionHandler( CollisionHandler *setHandler ) { Collision::defaultCollisionHandler = setHandler; }
+  Vec3&       GetSquareSizeModifier() {
+    return static_cast< CollisionElementSquare* >( this->collisionElement )->GetSizeModifier();
+  }
 
   void        Render          ( float phase, const Vec3 &offset, bool isActive );
 

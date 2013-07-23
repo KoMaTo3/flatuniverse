@@ -115,6 +115,7 @@ function CollisionPlayer( player, target, flags, vx, vy )
       animation[ 'timer'..SetTimer( 0.5, 'DoAnimationBrickDisplace' ) ] = { step = 1, time = 0, timeMax = 8, object = target }
       ObjectAddTag( target, 'push-bottom' )
       ObjectRemoveTag( target, 'brick-breakable' )
+      ObjectStopAnimation( target )
       ObjectSetAnimation( target, 'supermario/brick2', 'do' )
       ObjectAttr( target, { color = '0 0 0 0' } )
     end
@@ -215,6 +216,11 @@ function PlayerControl( id, isPressed )
           playerState.lastDirection = 1
         end
       end
+    end
+
+    if id == 0x10 and isPressed then  -- test
+      local object = 'wall.174.58.1.050000'
+      ObjectSetAnimation( object, 'lift/small', 'down' )
     end
   end -- !settings.gamePaused
 

@@ -264,6 +264,9 @@ public:
   virtual Vec4& GetColorPtr() {
     return ( this->IsRenderable() ? static_cast< RenderableQuad* >( this->GetRenderable() )->GetColorModifier() : static_cast< RenderableQuad* >( this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->GetColorModifier() );
   }
+  virtual Vec3& GetCollisionSquareSize() {
+    return ( this->IsCollision() ? this->GetCollision()->GetSquareSizeModifier() : this->EnableCollision()->InitSquare( Vec3( 1.0f, 1.0f, 0.0f ) )->GetSquareSizeModifier() );
+  }
   virtual IAnimationObject* MakeInstance( const std::string& setName );
 
   /*

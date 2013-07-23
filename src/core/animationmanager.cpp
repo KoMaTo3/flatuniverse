@@ -19,6 +19,7 @@ Manager::Manager() {
   this->_loadFunctionList.insert( std::make_pair( "position", &Manager::_LoadAttributePosition ) );
   this->_loadFunctionList.insert( std::make_pair( "color", &Manager::_LoadAttributeColor ) );
   this->_loadFunctionList.insert( std::make_pair( "enabled", &Manager::_LoadAttributeEnabled ) );
+  this->_loadFunctionList.insert( std::make_pair( "collision_square", &Manager::_LoadAttributeCollisionSquare ) );
   //this->_loadFunctionList.insert( std::make_pair( "position", &Manager::_LoadAttributePosition ) );
 }
 
@@ -583,6 +584,58 @@ void Manager::_LoadAttributeRenderableSize( TextParser &parser, AnimationTemplat
   }
 
 }//_LoadAttributeRenderableSize
+
+
+void Manager::_LoadAttributeCollisionSquare( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+  TextParser::Result value;
+
+  if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
+    return;
+  }
+
+  bool isDone = false;
+  int sizeSettingStep = 0;
+  Vec3 size( Vec3Null );
+  while( !isDone && parser.GetNext( value ) ) {
+    switch( value.type ) {
+    case TPL_SYMBOL:
+      if( value.value == ")" ) {
+        isDone = true;
+        break;
+      }
+      if( value.value != "," ) {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    case TPL_NUMBER:
+      if( sizeSettingStep < 2 ) {
+        switch( sizeSettingStep ) {
+        case 0:
+          size.x = size.y = value.GetFloat();
+        break;
+        case 1:
+          size.y = value.GetFloat();
+        break;
+        }
+        ++sizeSettingStep;
+      } else {
+        this->_Error( parser, value );
+        return;
+      }
+    break;
+    default:
+      this->_Error( parser, value );
+      return;
+    break;
+    }//switch
+  }//while
+
+  if( sizeSettingStep > 0 ) {
+    static_cast< AnimationParameterFloat3* >( tpl->SetParameter< AnimationParameterFloat3 >( COLLISION_SQUARE ) )->AddKeyFrame( time, size, interpolation );
+  }
+
+}//_LoadAttributeCollisionSquare
 
 
 void Manager::_LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {

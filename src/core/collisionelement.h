@@ -3,6 +3,7 @@
 #include "klib.h"
 #include "tools.h"
 #include <vector>
+#include "file.h"
 
 
 
@@ -65,6 +66,9 @@ public:
   bool TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver );
   virtual void  _Render( const Vec3 &offset );
   virtual void  SaveToBuffer  ( MemoryWriter &writer );
+  inline Vec3& GetSizeModifier() {
+    return this->size;
+  }
 
 protected:
   virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );

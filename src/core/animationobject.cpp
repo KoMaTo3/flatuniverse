@@ -187,6 +187,13 @@ IAnimationParameter* AnimationObject::SetParameter( AnimationSpriteParameterType
     value->Bind( this->_object->GetColorPtr() );
     break;
     }
+  case COLLISION_SQUARE: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => COLLISION_SQUARE" );
+    AnimationParameterFloat3 *value = new AnimationParameterFloat3();
+    parameter = value;
+    value->Bind( this->_object->GetCollisionSquareSize() );
+    break;
+    }
   default:
     __log.PrintInfo( Filelevel_ERROR, "AnimationObject::SetParameter => can't bind parameter x%X", parameterType );
   }
