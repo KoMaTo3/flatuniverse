@@ -18,7 +18,6 @@ IObject::~IObject() {
 
 
 Animation::AnimationPack* IObject::ApplyAnimation( const std::string& templateName, const std::string& animationName ) {
-  __log.PrintInfo( Filelevel_DEBUG, "IObject::ApplyAnimation" );
   Animation::AnimationPack *templatePack = Animation::GetPackTemplate( templateName );
   if( !templatePack ) {
     __log.PrintInfo( Filelevel_ERROR, "IObject::ApplyAnimation => animation '%s' not found", templateName.c_str() );
@@ -29,18 +28,14 @@ Animation::AnimationPack* IObject::ApplyAnimation( const std::string& templateNa
     return this->ApplySubAnimation( animationName );
   }
 
-  __log.PrintInfo( Filelevel_DEBUG, ". animation[%p]", this->_animation );
   if( this->_animation ) {
+    this->_animation->SetEnabled( false );
     delete this->_animation;
   }
 
-  __log.PrintInfo( Filelevel_DEBUG, ". new AnimationPack" );
   this->_animation = new Animation::AnimationPack();
-  __log.PrintInfo( Filelevel_DEBUG, ". MakeFromTemplate" );
   ( this->_animation )->MakeFromTemplate< AnimationObject >( *templatePack, AnimationObject::SetParameterOfExternAnimation, this );
-  __log.PrintInfo( Filelevel_DEBUG, ". SetCurrentAnimation '%s'", animationName.c_str() );
   ( this->_animation )->SetCurrentAnimation( animationName );
-  __log.PrintInfo( Filelevel_DEBUG, ". done" );
   this->_animationTemplate = templatePack;
 
   return this->_animation;
@@ -56,6 +51,18 @@ Animation::AnimationPack* IObject::ApplySubAnimation( const std::string& animati
   ( this->_animation )->SetCurrentAnimation( animationName );
   return this->_animation;
 }//ApplySubAnimation
+
+
+void IObject::StopAnimation() {
+  if( !this->_animation ) {
+    return;
+  }
+
+  this->_animation->SetEnabled( false );
+  delete this->_animation;
+  this->_animation = NULL;
+  this->_animationTemplate = NULL;
+}//StopAnimation
 
 
 AnimationObject::AnimationObject( IAnimationObject* object, const std::string& setName )

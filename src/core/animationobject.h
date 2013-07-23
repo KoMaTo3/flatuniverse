@@ -30,6 +30,7 @@ public:
 
   Animation::AnimationPack *ApplyAnimation( const std::string& templateName, const std::string& animationName = "default" );
   Animation::AnimationPack *ApplySubAnimation( const std::string& animationName );
+  void StopAnimation();
   inline Animation::AnimationPack *GetAnimation() {
     return this->_animation;
   }

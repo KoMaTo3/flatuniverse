@@ -49,14 +49,12 @@ template "supermario/brick2" {
   }
   animation "do" 1 {
     sprite "brick" {
-      renderable_texture( "data/textures/tiles/bricks/brick2.png" )
-      renderable_texture_coords {
-        0(0,0,1,1)
-      }
-      renderable_size( 32, 32 )
+      renderable_texture( "data/textures/tiles/bricks/brick0.png" )
+      renderable_texture_coords(0,0,1,1)
+      renderable_size( 24, 24 )
       position {
         0.0( 0,0 )
-        0.15 linear( 0,-10 )
+        0.15 linear( 0,-5 )
         0.3 linear( 0,0 )
       }
     }

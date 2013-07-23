@@ -37,7 +37,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   bool isDebug = __config->GetBoolean( "dbg_low_alpha" );
   Object *obj;
-  RenderableQuad *quad;
   Collision *col;
   float worldAlpha = ( isDebug ? 0.1f : 1.0f );
   //CollisionElementPolygon::PointList polyPoints;
@@ -686,6 +685,7 @@ Game::Game()
   LUAFUNC_ObjectAddTag      = Game::LUA_ObjectAddTag;
   LUAFUNC_ObjectRemoveTag   = Game::LUA_ObjectRemoveTag;
   LUAFUNC_ObjectSetAnimation= Game::LUA_ObjectSetAnimation;
+  LUAFUNC_ObjectStopAnimation = Game::LUA_ObjectStopAnimation;
   LUAFUNC_SetPause          = Game::LUA_SetPause;
 
   Collision::SetInitCollisionHandler( Game::LUA_ListenCollision );
@@ -1313,6 +1313,23 @@ void Game::LUA_ObjectSetAnimation( const std::string &objectName, const std::str
   }
   object->ApplyAnimation( templateName, animation )->SetEnabled( true );
 }//LUA_ObjectSetAnimation
+
+
+/*
+=============
+  LUA_ObjectStopAnimation
+=============
+*/
+void Game::LUA_ObjectStopAnimation( const std::string &objectName )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectStopAnimation => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  object->StopAnimation();
+}//LUA_ObjectStopAnimation
 
 
 /*

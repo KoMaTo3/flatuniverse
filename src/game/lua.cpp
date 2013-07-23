@@ -60,6 +60,7 @@ LUAFUNCPROC_ObjectHasTag      *LUAFUNC_ObjectHasTag         = NULL;
 LUAFUNCPROC_ObjectAddTag      *LUAFUNC_ObjectAddTag         = NULL;
 LUAFUNCPROC_ObjectRemoveTag   *LUAFUNC_ObjectRemoveTag      = NULL;
 LUAFUNCPROC_ObjectSetAnimation*LUAFUNC_ObjectSetAnimation   = NULL;
+LUAFUNCPROC_ObjectStopAnimation *LUAFUNC_ObjectStopAnimation= NULL;
 LUAFUNCPROC_SetPause          *LUAFUNC_SetPause             = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
@@ -157,6 +158,7 @@ bool Lua::Init()
   lua_register( this->luaState, "SetClipboard",     Lua::LUA_SetClipboard );
   lua_register( this->luaState, "GetClipboard",     Lua::LUA_GetClipboard );
   lua_register( this->luaState, "ObjectSetAnimation", Lua::LUA_ObjectSetAnimation );
+  lua_register( this->luaState, "ObjectStopAnimation",Lua::LUA_ObjectStopAnimation );
   lua_register( this->luaState, "SetPause",         Lua::LUA_SetPause );
   lua_atpanic( this->luaState, ErrorHandler );
 
@@ -2018,6 +2020,26 @@ int Lua::LUA_ObjectSetAnimation( lua_State *lua )
   LUAFUNC_ObjectSetAnimation( objectName, templateName, animationName );
   return 0;
 }//LUA_ObjectSetAnimation
+
+
+
+/*
+=============
+  LUA_ObjectStopAnimation
+=============
+*/
+int Lua::LUA_ObjectStopAnimation( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectStopAnimation => not enough parameters" );
+    return 0;
+  }
+  std::string objectName    = lua_tostring( lua, 1 );
+  LUAFUNC_ObjectStopAnimation( objectName );
+  return 0;
+}//LUA_ObjectStopAnimation
 
 
 

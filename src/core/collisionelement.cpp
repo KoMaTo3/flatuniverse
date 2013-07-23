@@ -529,7 +529,7 @@ void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
 void CollisionElementPolygon::Update() {
   PointList::iterator iter, iterEnd = this->pointsSource.end();
   int count = this->pointsSource.size();
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => points[%d] pointsResult[%d]", count, this->pointsResult.size() );
+  //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => points[%d] pointsResult[%d]", count, this->pointsResult.size() );
   if( count > 2 ) {
     Vec2 min, max, radius;
     Point *point;
@@ -551,12 +551,12 @@ void CollisionElementPolygon::Update() {
           max.y > point->y ? max.y : point->y
           );
       }
-      __log.PrintInfo( Filelevel_DEBUG, ". point[%3.1f; %3.1f]", this->pointsResult[ num ].x, this->pointsResult[ num ].y );
+      //__log.PrintInfo( Filelevel_DEBUG, ". point[%3.1f; %3.1f]", this->pointsResult[ num ].x, this->pointsResult[ num ].y );
     }
     this->pointsResult[ this->pointsResult.size() - 1 ] = this->pointsResult[ 0 ];
     this->_rect->leftTop.Set( min.x, min.y, 0.0f );
     this->_rect->rightBottom.Set( max.x, max.y, 0.0f );
-    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => rect[%3.1f; %3.1f]-[%3.1f; %3.1f]", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y );
+    //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => rect[%3.1f; %3.1f]-[%3.1f; %3.1f]", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y );
   } else {
     __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::Update => not enough points" );
   }
@@ -582,24 +582,24 @@ bool CollisionElementPolygon::TestIntersect( CollisionElement &object, Vec3 *out
     this->_rect->leftTop.y        >= object._rect->rightBottom.y
     )
   {
-    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => first square test: false" );
+    //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => first square test: false" );
     return false;
   }
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => first square test: true" );
+  //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => first square test: true" );
 
   switch( object.GetType() ) {
     case COLLISION_ELEMENT_TYPE_SQUARE: {
-      __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with square" );
+      //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with square" );
       return this->TestIntersectWithSquare( object, outSolver );
       break;
     }
     case COLLISION_ELEMENT_TYPE_CIRCLE: {
-      __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with circle" );
+      //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with circle" );
       return this->TestIntersectWithCircle( object, outSolver );
       break;
     }
     case COLLISION_ELEMENT_TYPE_POLYGON: {
-      __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with polygon" );
+      //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with polygon" );
       //return this->TestIntersectWithPolygon( object, outSolver );
       break;
     }

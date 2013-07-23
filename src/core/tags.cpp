@@ -58,6 +58,7 @@ void Tags::RemoveTag( const std::string& tag ) {
       return;
     }
   }//foreach tags
+  __log.PrintInfo( Filelevel_WARNING, "Tags::RemoveTag => tag '%s' not found", tag.c_str() );
 }//RemoveTag
 
 

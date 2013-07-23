@@ -66,6 +66,7 @@ typedef bool  LUAFUNCPROC_ObjectHasTag      ( const std::string &name, const std
 typedef void  LUAFUNCPROC_ObjectAddTag      ( const std::string &name, const std::string &tag );
 typedef void  LUAFUNCPROC_ObjectRemoveTag   ( const std::string &name, const std::string &tag );
 typedef void  LUAFUNCPROC_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation );
+typedef void  LUAFUNCPROC_ObjectStopAnimation ( const std::string &objectName );
 typedef void  LUAFUNCPROC_SetPause          ( bool isPause );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
@@ -116,6 +117,7 @@ extern LUAFUNCPROC_ObjectHasTag     *LUAFUNC_ObjectHasTag;
 extern LUAFUNCPROC_ObjectAddTag     *LUAFUNC_ObjectAddTag;
 extern LUAFUNCPROC_ObjectRemoveTag  *LUAFUNC_ObjectRemoveTag;
 extern LUAFUNCPROC_ObjectSetAnimation       *LUAFUNC_ObjectSetAnimation;
+extern LUAFUNCPROC_ObjectStopAnimation      *LUAFUNC_ObjectStopAnimation;
 extern LUAFUNCPROC_SetPause         *LUAFUNC_SetPause;
 
 
@@ -201,6 +203,7 @@ public:
   static int LUA_SetClipboard     ( lua_State *lua );
   static int LUA_GetClipboard     ( lua_State *lua );
   static int LUA_ObjectSetAnimation ( lua_State *lua );
+  static int LUA_ObjectStopAnimation( lua_State *lua );
   static int LUA_SetPause         ( lua_State *lua );
 
   //callbacks

@@ -97,6 +97,7 @@ public:
   static void   LUA_ObjectAddTag      ( const std::string &objectName, const std::string &tag );
   static void   LUA_ObjectRemoveTag   ( const std::string &objectName, const std::string &tag );
   static void   LUA_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation );
+  static void   LUA_ObjectStopAnimation ( const std::string &objectName );
   static void   LUA_SetPause          ( bool isPause );
 
   void Update();

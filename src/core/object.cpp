@@ -1270,8 +1270,11 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   if( childsCount )
   {
     ObjectChilds::iterator iter, iterEnd = this->_childs->end();
-    for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
-      ( *iter )->SaveToBuffer( writer );
+    for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
+      if( !( *iter )->_animation ) { //animated object don't save
+        ( *iter )->SaveToBuffer( writer );
+      }
+    }
   }
 }//SaveToBuffer
 

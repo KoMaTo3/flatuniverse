@@ -112,11 +112,11 @@ function CollisionPlayer( player, target, flags, vx, vy )
     end
   elseif IsObjectUnderThis( player, target ) then
     if ObjectHasTag( target, 'brick-breakable' ) then
-      local x, y = ObjectAttr( target, { 'position' } )
-      animation[ 'timer'..SetTimer( 0.01, 'DoAnimationBrickDisplace' ) ] = { step = 1, time = 0, timeMax = 8, object = target, pos = { x = x, y = y } }
+      animation[ 'timer'..SetTimer( 0.5, 'DoAnimationBrickDisplace' ) ] = { step = 1, time = 0, timeMax = 8, object = target }
       ObjectAddTag( target, 'push-bottom' )
       ObjectRemoveTag( target, 'brick-breakable' )
-      -- ObjectAttr( target, { textureName = 'temp/brick3.png' } )
+      ObjectSetAnimation( target, 'supermario/brick2', 'do' )
+      ObjectAttr( target, { color = '0 0 0 0' } )
     end
     if ObjectHasTag( target, 'has-mushroom' ) then
       PushMushroom( target )
@@ -453,6 +453,12 @@ function DoAnimationBrickDisplace( timerId )
   local anim = animation[ keyByTimer ]
 
   if anim.step == 1 then
+    ObjectStopAnimation( anim.object, 'supermario/brick2', 'default' )
+    ObjectRemoveTag( anim.object, 'push-bottom' )
+    ObjectAddTag( anim.object, 'brick-breakable' )
+    ObjectAttr( anim.object, { color = '1 1 1 1' } )
+    animation[ keyByTimer ] = nil
+    --[[
     anim.time = anim.time + 1
     if anim.time < anim.timeMax then
       ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y - math.sin( anim.time / anim.timeMax * 3.14 ) * 10 ) } )
@@ -461,7 +467,7 @@ function DoAnimationBrickDisplace( timerId )
       ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y ) } )
       ObjectRemoveTag( anim.object, 'push-bottom' )
       ObjectAddTag( anim.object, 'brick-breakable' )
-      animation[ keyByTimer ] = nil
     end
+    ]]
   end
 end -- DoAnimationBrickDisplace
