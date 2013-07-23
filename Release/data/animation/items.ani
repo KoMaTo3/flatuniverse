@@ -44,7 +44,7 @@ template "supermario/coin" {
   }
 }
 
-template "supermario/brick2" {
+template "supermario/brick0" {
   animation "default" 0 {
   }
   animation "do" 1 {
@@ -56,6 +56,24 @@ template "supermario/brick2" {
         0.3 linear( 0,0 )
       }
       renderable_texture( "data/textures/tiles/bricks/brick0.png" )
+      renderable_texture_coords(0,0,1,1)
+      renderable_size( 32, 32 )
+    }
+  }
+}
+
+template "supermario/brick2" {
+  animation "default" 0 {
+  }
+  animation "do" 1 {
+    sprite "brick" {
+      collision_square( 32, 32 )
+      position {
+        0.0( 0,0 )
+        0.15 linear( 0,-10 )
+        0.3 linear( 0,0 )
+      }
+      renderable_texture( "data/textures/tiles/bricks/brick2.png" )
       renderable_texture_coords(0,0,1,1)
       renderable_size( 32, 32 )
     }

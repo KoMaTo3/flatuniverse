@@ -9,6 +9,7 @@ AnimationSet::AnimationSet( const std::string &setName, float setAnimationLength
 
 
 AnimationSet::~AnimationSet() {
+  this->_animationList.clear();
 }
 
 

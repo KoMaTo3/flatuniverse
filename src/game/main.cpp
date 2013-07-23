@@ -339,7 +339,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   while( game->core->Update() )
   {
-    game->Update();
 
     if( true ) { //max FPS
       game->core->Redraw();
@@ -354,6 +353,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         ++currentFps;
       }
     }
+    game->Update();
 
     //__log.PrintInfo( Filelevel_DEBUG, "=> world->Update" );
     game->world->Update();

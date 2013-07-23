@@ -29,6 +29,7 @@ AnimationPack::~AnimationPack() {
   if( this->_isTemplate ) {
     __animationPackTemplatesList.erase( this->_name );
   }
+  this->_animationSetList.clear();
 }
 
 

@@ -116,7 +116,7 @@ function CollisionPlayer( player, target, flags, vx, vy )
       ObjectAddTag( target, 'push-bottom' )
       ObjectRemoveTag( target, 'brick-breakable' )
       ObjectStopAnimation( target )
-      ObjectSetAnimation( target, 'supermario/brick2', 'do' )
+      ObjectSetAnimation( target, 'supermario/brick0', 'do' )
       ObjectAttr( target, { color = '0 0 0 0' } )
     end
     if ObjectHasTag( target, 'has-mushroom' ) then

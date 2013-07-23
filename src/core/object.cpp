@@ -165,7 +165,7 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 Object::Object()
 :name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
-,tags( NULL ), isEnabled( true ), isEnabledPrev( true )
+,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( true )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
@@ -173,10 +173,10 @@ Object::Object()
 }//constructor
 
 
-Object::Object( const std::string &objectName, Object* parentObject )
+Object::Object( const std::string &objectName, Object* parentObject, bool setIsSaveable )
 :name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
-,tags( NULL ), isEnabled( true ), isEnabledPrev( true )
+,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( setIsSaveable )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
@@ -1266,15 +1266,24 @@ void Object::SaveToBuffer( MemoryWriter &writer )
     this->tags->SaveToBuffer( writer );
   }
 
-  Dword childsCount = ( this->_childs ? this->_childs->size() : 0 );
+  Dword childsCount = 0;
+  if( !this->_childs ) {
+    writer << childsCount;
+  } else {
+    for( auto &child: *this->_childs ) {
+      if( child->isSaveable ) {
+        ++childsCount;
+      }
+    }
 
-  writer << childsCount;
-  if( childsCount )
-  {
-    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
-    for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
-      if( !( *iter )->_animation ) { //animated object don't save
-        ( *iter )->SaveToBuffer( writer );
+    writer << childsCount;
+    if( childsCount )
+    {
+      ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+      for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
+        if( ( *iter )->isSaveable ) {
+          ( *iter )->SaveToBuffer( writer );
+        }
       }
     }
   }
@@ -1603,7 +1612,7 @@ void Object::RemoveTag( const std::string& tag ) {
 IAnimationObject* Object::MakeInstance( const std::string& setName ) {
   Object *child = this->GetChild( setName );
   if( !child ) {
-    child = new Object( setName, this );
+    child = new Object( setName, this, false );
   }
   return child;
 }

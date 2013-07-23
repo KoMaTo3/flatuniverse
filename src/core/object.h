@@ -151,6 +151,7 @@ protected:
 private:
   bool            isEnabled,    //вкл/выкл. при выключении удал€ютс€ все рендерейблы/коллизии/триггеры. при включении ничего не восстанавливаетс€
                   isEnabledPrev;//предыдущее значение isEnabled
+  bool            isSaveable;
   Vec3            positionSrc;  //исходна€ позици€ объекта. идет посто€нный пересчет из positionSrc в position
   Mat4            matrixTransform;  //матрица трансформации дл€ получени€ позиции объекта
 
@@ -197,7 +198,7 @@ protected:
 
 public:
   Object();
-  Object( const std::string &objectName, Object* parentObject );
+  Object( const std::string &objectName, Object* parentObject, bool setIsSaveable = true );
   virtual ~Object();
 
   const std::string&  GetName             ();
