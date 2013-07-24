@@ -3,9 +3,10 @@ flatuniverse
 
 OpenGL 2D engine
 
-Latest release 2013.07.22: https://dl.dropboxusercontent.com/u/71135358/flatuniverse-20130722.tar.gz
+Latest release 2013.07.24: https://dl.dropboxusercontent.com/u/71135358/flatuniverse-20130724.tar.gz
 
 Последние изменения:
+- изменена физика - теперь скорость при падении не растёт до бесконечности
 - полигональные триггеры (шипы)
 - добавлен дабл-джамп и подкорректирована физика движения игрока
 - хоткеи загрузки и сохранения мира: F2 - сохранить, F3 - загрузить, F9 - очистить
