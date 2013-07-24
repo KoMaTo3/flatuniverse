@@ -30,14 +30,14 @@ ConfigFile::~ConfigFile()
 */
 bool ConfigFile::LoadFromFile( const std::string &fileName )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "ConfigFile::LoadFromFile( '%s' )", fileName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "ConfigFile::LoadFromFile( '%s' )", fileName.c_str() );
 
   //берём файл из файлового менеджера
   memory dataMem, res;
   std::string data;
   if( !__fileManager->GetFile( fileName, dataMem, true ) )
   {
-    __log.PrintInfo( Filelevel_WARNING, "ConfigFile::LoadFromFile => file '%s' not found", fileName.c_str() );
+    //__log.PrintInfo( Filelevel_WARNING, "ConfigFile::LoadFromFile => file '%s' not found", fileName.c_str() );
     return false;
   }
   data = dataMem.getData();
@@ -132,7 +132,7 @@ bool ConfigFile::LoadFromFile( const std::string &fileName )
       case ConfigFile_LEXEMTYPE_QUOTES:
         {
           paramValue = data.substr( reRes[ resultIndex * 2 ] + offset, reRes[ resultIndex * 2 + 1 ] - reRes[ resultIndex * 2 ] );
-          __log.PrintInfo( Filelevel_DEBUG, "result[%d] paramValue['%s']", result, paramValue.c_str() );
+          //__log.PrintInfo( Filelevel_DEBUG, "result[%d] paramValue['%s']", result, paramValue.c_str() );
 
           //в зависимости от текущего оператора делаем что-то
           switch( operation )

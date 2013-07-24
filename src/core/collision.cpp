@@ -5,6 +5,9 @@
 //разделяющие оси могу иметь погрешности, поэтому игнорируем некоторые почти-параллельные оси
 
 
+#define COLLISION_FRICTION_FORCE   ( 0.98f )
+
+
 Vec3 __nullCollisionPosition( 0.0f, 0.0f, 0.0f );
 
 Collision::CollisionHandlerInit *Collision::InitCollisionHandler = NULL;
@@ -42,7 +45,8 @@ bool Collision::Update( float dt )
     return false;
 
   //__log.PrintInfo( Filelevel_DEBUG, "Collision::Update => dt[%3.3f] pos[%3.3f;%3.3f] vel[%3.3f;%3.3f] acc[%3.3f;%3.3f]", dt, this->position->x, this->position->y, this->velocity.x, this->velocity.y, this->acceleration.x, this->acceleration.y );
-  this->velocity += this->acceleration * dt * COLLISION_FRICTION_FORCE;
+  this->velocity += this->acceleration * dt;
+  this->velocity.y *= COLLISION_FRICTION_FORCE;
   *this->position += ( this->velocity + this->force ) * dt;
 
   //пересчет характеристик
@@ -137,7 +141,7 @@ Collision* Collision::InitSquare( const Vec3& newSize )
     CollisionElementSquare *item = new CollisionElementSquare( this->position, &this->_rect );
     this->collisionElement = item;
     item->SetSize( newSize );
-    __log.PrintInfo( Filelevel_DEBUG, "Collision::InitSquare => size[%3.1f; %3.1f; %3.1f;]", newSize.x, newSize.y, newSize.z );
+    //__log.PrintInfo( Filelevel_DEBUG, "Collision::InitSquare => size[%3.1f; %3.1f; %3.1f;]", newSize.x, newSize.y, newSize.z );
   } else if( this->collisionElement->GetType() != COLLISION_ELEMENT_TYPE_SQUARE ) {
     __log.PrintInfo( Filelevel_ERROR, "Collision::InitSquare => this already initialized by type %d", this->collisionElement->GetType() );
     return this;
@@ -646,7 +650,7 @@ void Collision::LoadFromBuffer( MemoryReader &reader, const std::string &thisObj
   switch( cet ) {
     case COLLISION_ELEMENT_TYPE_SQUARE:
       reader >> v3;
-      __log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => squareSize[%3.1f; %3.1f; %3.1f;]", v3.x, v3.y, v3.z );
+      //__log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => squareSize[%3.1f; %3.1f; %3.1f;]", v3.x, v3.y, v3.z );
       this->InitSquare( v3 );
       break;
     case COLLISION_ELEMENT_TYPE_CIRCLE:
@@ -671,12 +675,12 @@ void Collision::LoadFromBuffer( MemoryReader &reader, const std::string &thisObj
     //handlers
     Dword count, q;
     reader >> count;
-    __log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => handlers[%d]", count );
+    //__log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => handlers[%d]", count );
     std::string s;
     if( count && this->InitCollisionHandler && Collision::collisionLintenersList ) { //something wrong...
       for( q = 0; q < count; ++q ) {
         reader >> s;
-        __log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => . handler['%s']", s.c_str() );
+        //__log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => . handler['%s']", s.c_str() );
         //Collision::collisionLintenersList->push_back( luaCollisionListenerStruct( this, s ) );
         this->InitCollisionHandler( s, thisObjectName );
         //this->AddHandler( Collision::defaultCollisionHandler );
@@ -763,7 +767,7 @@ void Collision::AddHandler( CollisionHandler *handler ) {
   }
 
   this->handlers->push_back( handler );
-  __log.PrintInfo( Filelevel_DEBUG, "Collision::AddHandler => collision[x%p] handler[x%p]", this, handler );
+  //__log.PrintInfo( Filelevel_DEBUG, "Collision::AddHandler => collision[x%p] handler[x%p]", this, handler );
 }//AddHandler
 
 

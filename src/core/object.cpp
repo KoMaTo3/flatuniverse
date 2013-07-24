@@ -26,7 +26,7 @@ ObjectByCollision::ObjectByCollision( Object *setObject, Collision *setCollision
 :object( setObject ), collision( setCollision )
 {
   if( setObject ) {
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectByCollision => PointerAdd[x%p] this[x%p]", &this->object, this );
+    //__log.PrintInfo( Filelevel_DEBUG, "ObjectByCollision => PointerAdd[x%p] this[x%p]", &this->object, this );
     //setObject->PointerAdd( &this->object );
     __objectByCollision->push_back( this );
   }
@@ -62,7 +62,7 @@ ObjectByTrigger::ObjectByTrigger( Object *setObject, ObjectTrigger *setTrigger )
 :object( setObject ), trigger( setTrigger )
 {
   if( setObject ) {
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectByTrigger => PointerAdd[x%p] this[x%p]", &this->object, this );
+    //__log.PrintInfo( Filelevel_DEBUG, "ObjectByTrigger => PointerAdd[x%p] this[x%p]", &this->object, this );
     __objectByTrigger->push_back( this );
     //setObject->PointerAdd( &this->object );
   }
@@ -169,7 +169,7 @@ Object::Object()
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
-  __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%p]", this );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%p]", this );
 }//constructor
 
 
@@ -187,7 +187,7 @@ Object::Object( const std::string &objectName, Object* parentObject, bool setIsS
   }
   else
     this->nameFull = "/" + this->name;
-  __log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%p] parent[x%p] nameFull['%s']", this, this->_parent, this->nameFull.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%p] parent[x%p] nameFull['%s']", this, this->_parent, this->nameFull.c_str() );
 }//constructor
 
 
@@ -195,7 +195,7 @@ Object::Object( const std::string &objectName, Object* parentObject, bool setIsS
 
 Object::~Object()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%p] name['%s']", this, this->GetNameFull().c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%p] name['%s']", this, this->GetNameFull().c_str() );
   //if( !this->_parent )
   //  __log.PrintInfo( Filelevel_DEBUG, "is a root object" );
 
@@ -208,7 +208,7 @@ Object::~Object()
 
   DEF_DELETE( this->tags );
 
-  __log.PrintInfo( Filelevel_DEBUG, "Object x%p deleted", this );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object x%p deleted", this );
 }//destructor
 
 
@@ -225,7 +225,7 @@ void Object::ClearChilds( bool forceDelete )
   if( !this->_childs )
     return;
 
-  __log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => objects[%d]", this->_childs->size() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => objects[%d]", this->_childs->size() );
   if( forceDelete ) //полная очистка
   {
     ObjectChilds::iterator iter;
@@ -236,7 +236,7 @@ void Object::ClearChilds( bool forceDelete )
   }
   else  //удаление только незалоченных
   {
-    __log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => not forced" );
+    //__log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => not forced" );
     bool deleted;
     ObjectChilds::iterator iter, iterEnd;
     do
@@ -244,13 +244,10 @@ void Object::ClearChilds( bool forceDelete )
       deleted = false;
 
       iterEnd = this->_childs->end();
-      __log.PrintInfo( Filelevel_DEBUG, ". iteration +1" );
       for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
       {
-        __log.PrintInfo( Filelevel_DEBUG, ".   child[x%p]", *iter );
         if( !( *iter )->IsLockedToDelete() )
         {
-          __log.PrintInfo( Filelevel_DEBUG, ". deleted '%s'", ( *iter )->GetNameFull().c_str() );
           deleted = true;
           Object *tmpChild = *iter;
           this->_childs->erase( iter );
@@ -262,7 +259,7 @@ void Object::ClearChilds( bool forceDelete )
     if( !this->_childs->size() )
       DEF_DELETE( this->_childs );
   }
-  __log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => Done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => Done" );
 }//ClearChilds
 
 
@@ -413,7 +410,7 @@ Object* Object::GetChild( const std::string& name )
 
   if( !this->_childs )
   {
-    __log.PrintInfo( Filelevel_WARNING, "Object::GetChild => no childs in '%s'", this->GetNameFull().c_str() );
+    //__log.PrintInfo( Filelevel_WARNING, "Object::GetChild => no childs in '%s'", this->GetNameFull().c_str() );
     return NULL;
   }
 
@@ -422,7 +419,7 @@ Object* Object::GetChild( const std::string& name )
     if( ( *iter )->GetName() == name )
       return *iter;
 
-  __log.PrintInfo( Filelevel_WARNING, "Object::GetChild => '%s' not found in '%s'", name.c_str(), this->GetNameFull().c_str() );
+  //__log.PrintInfo( Filelevel_WARNING, "Object::GetChild => '%s' not found in '%s'", name.c_str(), this->GetNameFull().c_str() );
 
   return NULL;
 }//GetChild
@@ -453,9 +450,7 @@ Renderable* Object::EnableRenderable( RenderableType renderType )
   case RENDERABLE_TYPE_QUAD:
     {
       this->renderable.type = renderType;
-      __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderable CreateExternalRenderableInList..." );
       result = Object::CreateExternalRenderableInList( zIndex, this->_renderableList, this->_renderableIndicies, this->_renderableFreeIndicies, &this->renderable.num );
-      __log.PrintInfo( Filelevel_DEBUG, "Object::EnableRenderable done" );
       /*
       __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%p = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
       if( this->_renderableFreeIndicies->size() )
@@ -508,7 +503,7 @@ Renderable* Object::EnableRenderable( RenderableType renderType )
 
 
 RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex ) {
-  __log.PrintInfo( Filelevel_DEBUG, "Object::CreateExternalRenderableInList => pointers[%p; %p; %p] index[%3.3f]", inRenderableList, inRenderableIndicies, inRenderableFreeIndicies, zIndex );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::CreateExternalRenderableInList => pointers[%p; %p; %p] index[%3.3f]", inRenderableList, inRenderableIndicies, inRenderableFreeIndicies, zIndex );
   Renderable *result = NULL;
   if( !inRenderableList ) {
     inRenderableList = __coreRenderableList;
@@ -551,7 +546,7 @@ RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRender
     inRenderableIndicies->push_back( index );
   quad->SetIndexInRenderableList( index );
 
-  __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => Done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => Done" );
   return ( RenderableQuad* ) result;
 }//CreateExternalRenderableInList
 
@@ -563,7 +558,7 @@ bool Object::DestroyExternalRenderableInList( CoreRenderableList *inRenderableLi
     inRenderableIndicies = __coreRenderableListIndicies;
     inRenderableFreeIndicies = __coreRenderableListFreeIndicies;
   }
-  __log.PrintInfo( Filelevel_DEBUG, "Object::DestroyExternalRenderableInList => pointers[%p; %p; %p] index[%d]", inRenderableList, inRenderableIndicies, inRenderableFreeIndicies, index );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::DestroyExternalRenderableInList => pointers[%p; %p; %p] index[%d]", inRenderableList, inRenderableIndicies, inRenderableFreeIndicies, index );
 
   if( index == RENDERABLE_INDEX_UNDEFINED ) {
     return false;
@@ -578,13 +573,13 @@ bool Object::DestroyExternalRenderableInList( CoreRenderableList *inRenderableLi
   CoreRenderableListIndicies::iterator iter, iterEnd = inRenderableIndicies->end();
   for( iter = inRenderableIndicies->begin(); iter != iterEnd; ++iter ) {
     if( *iter == index ) {
-      __log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%p", *iter, inRenderableFreeIndicies );
+      //__log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%p", *iter, inRenderableFreeIndicies );
       inRenderableFreeIndicies->push_back( *iter );
       inRenderableIndicies->erase( iter );
       break;
     }
   }
-  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableRenderable => index[%d]", index );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::DisableRenderable => index[%d]", index );
   return true;
 }//DestroyExternalRenderableInList
 
@@ -738,7 +733,7 @@ Collision* Object::EnableCollision()
   this->collision = new Collision( &this->positionSrc );
   __collisionList->push_back( this->collision );
 
-  __log.PrintInfo( Filelevel_DEBUG, "Object::EnableCollision => object['%s'] collision[x%p]", this->GetNameFull().c_str(), this->collision );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::EnableCollision => object['%s'] collision[x%p]", this->GetNameFull().c_str(), this->collision );
 
   //__log.PrintInfo( Filelevel_DEBUG, "Object::EnableCollision => ObjectByCollision( x%p, x%p )", this, this->collision );
   new ObjectByCollision( this, this->collision );
@@ -771,7 +766,7 @@ void Object::DisableCollision()
   if( !__collisionList )
     return;
 
-  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableCollision..." );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::DisableCollision..." );
   for( CollisionList::iterator iter = __collisionList->begin(); iter != __collisionList->end(); ++iter )
     if( *iter == this->collision )
     {
@@ -798,7 +793,7 @@ void Object::DisableCollision()
       break;
     }
     */
-  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableCollision done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::DisableCollision done" );
 }//DisableCollision
 
 
@@ -1309,7 +1304,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
   reader >> tmpName;
   reader >> parentName;
   reader >> position;
-  __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => name['%s'] parent['%s']", tmpName.c_str(), parentName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => name['%s'] parent['%s']", tmpName.c_str(), parentName.c_str() );
 
   this->name = tmpName;
   this->_parent = ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName ) );
@@ -1353,7 +1348,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
       Object *child = new Object( "", this );
       child->LoadFromBuffer( reader, this, version );
     }
-    __log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
+    //__log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
   }
 }//LoadFromBuffer
 

@@ -31,8 +31,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( max( __config->GetNumber( "gl_screen_width" ), __config->GetNumber( "gl_screen_height" ) ) / gridSize ) );
   }
     //gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
-  __log.PrintInfo( Filelevel_DEBUG, "gridsAroundObject: %d", gridsAroundObject );
-  __log.PrintInfo( Filelevel_DEBUG, "sizeof( RenderableQuad ) = %d", sizeof( RenderableQuad ) );
+  //__log.PrintInfo( Filelevel_DEBUG, "gridsAroundObject: %d", gridsAroundObject );
+  //__log.PrintInfo( Filelevel_DEBUG, "sizeof( RenderableQuad ) = %d", sizeof( RenderableQuad ) );
   game->world = new WorldGridManager( game->core->GetRootObject(), gridsAroundObject );
 
   bool isDebug = __config->GetBoolean( "dbg_low_alpha" );
@@ -733,7 +733,7 @@ void Game::ClearLuaTimers() {
 void Game::SetActive( bool setActive ) {
   this->isActive = setActive;
   auto player = this->core->GetObject( "player" );
-  __log.PrintInfo( Filelevel_DEBUG, "Game::SetActive => %d", setActive );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::SetActive => %d", setActive );
   if( setActive ) {
     this->core->SetState( CORE_STATE_RUN );
   } else { //not active
@@ -900,7 +900,7 @@ bool Game::LUA_RemoveObject( const std::string &name )
 */
 void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos, int notInGrid )
 {
-    __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject..." );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject..." );
   long slashPos = name.find_last_of( "/" );
   Object *parentObj = NULL;
   Object *obj       = NULL;
@@ -910,7 +910,7 @@ void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos, int notIn
     std::deque< std::string >::iterator iter, iterEnd = path.end();
     std::string currentPath = "";
     for( iter = path.begin(); iter != iterEnd; ++iter ) {
-      __log.PrintInfo( Filelevel_DEBUG, ". iter: '%s'", iter->c_str() );
+      //__log.PrintInfo( Filelevel_DEBUG, ". iter: '%s'", iter->c_str() );
       obj = game->core->CreateObject( *iter, ( currentPath.length() ? game->core->GetObject( currentPath ) : NULL ) );
       obj->SetPosition( pos );
       currentPath += ( currentPath.length() ? "/" : "" ) + *iter;
@@ -925,11 +925,11 @@ void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos, int notIn
     obj->Update( 0.0f );
     if( !notInGrid ) {
       WorldGrid::WorldGridPosition gridPos = game->world->GetGridPositionByObject( *obj );
-      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => gridPos[%d; %d]", gridPos.x, gridPos.y );
+      //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => gridPos[%d; %d]", gridPos.x, gridPos.y );
       game->world->AttachObjectToGrid( gridPos, obj );
     }
   }
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => object['%s'] parent['%s']", obj->GetNameFull().c_str(), obj->GetParentNameFull().c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => object['%s'] parent['%s']", obj->GetNameFull().c_str(), obj->GetParentNameFull().c_str() );
 
   //Object *parentObj = ( parentName.length() ? game->core->GetObject( parentName ) : NULL );
   //Object *obj = game->core->CreateObject( name, parentObj );
@@ -1514,7 +1514,7 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
   ObjectTrigger   *trigger;
   //set
   for( iter = setAttributes.begin(); iter != iterEnd; ++iter ) {
-    __log.PrintInfo( Filelevel_DEBUG, ". set %s = '%s'", ( *iter )->name.c_str(), ( *iter )->value.GetString().c_str() );
+    //__log.PrintInfo( Filelevel_DEBUG, ". set %s = '%s'", ( *iter )->name.c_str(), ( *iter )->value.GetString().c_str() );
 
     const std::string &name = ( *iter )->name;
     const Variable &value   = ( *iter )->value;
@@ -1734,7 +1734,7 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
               point.x = parserValue.GetFloat();
             } else {
               point.y = parserValue.GetFloat();
-              __log.PrintInfo( Filelevel_DEBUG, "triggerPolygon => point[%3.3f; %3.3f]", point.x, point.y );
+              //__log.PrintInfo( Filelevel_DEBUG, "triggerPolygon => point[%3.3f; %3.3f]", point.x, point.y );
               points.push_back( point );
             }
           }
@@ -1894,7 +1894,7 @@ void Game::LUA_ListenCollision( const std::string &objectName, const std::string
     __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenCollision => object '%s' don't have collision", objectName.c_str() );
     return;
   }
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ListenCollision => object['%s'] collision[x%p] function['%s']", object->GetNameFull().c_str(), collision, funcName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ListenCollision => object['%s'] collision[x%p] function['%s']", object->GetNameFull().c_str(), collision, funcName.c_str() );
 
   luaCollisionListenerStruct listener( collision, funcName );
 

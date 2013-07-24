@@ -56,7 +56,7 @@ void AnimationPack::__Dump( const std::string &prefix ) {
 
 bool AnimationPack::SetCurrentAnimation( const std::string &animationName, float startTime ) {
   AnimationSetList::const_iterator animation = this->_animationSetList.find( animationName );
-  __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => animationsCount[%d]", this->_animationSetList.size() );
+  //__log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => animationsCount[%d]", this->_animationSetList.size() );
   if( animation == this->_animationSetList.end() ) {
     __log.PrintInfo( Filelevel_WARNING, "AnimationPack::SetCurrentAnimation => this[%p] animation['%s'] not found", this, animationName.c_str() );
     return false;
@@ -64,14 +64,14 @@ bool AnimationPack::SetCurrentAnimation( const std::string &animationName, float
 
   this->_currentAnimation = &( *animation->second );
   for( auto &anim: this->_animationSetList ) {
-    __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => SetEnabled[%p]", anim.second );
+    //__log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => SetEnabled[%p]", anim.second );
     if( &*anim.second != this->_currentAnimation ) {
       anim.second->SetEnabled( false );
     }
   }
 
   this->_currentAnimation->SetEnabled( true );
-  __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => ResetAnimation[%3.1f] _currentAnimation[%p]", startTime, _currentAnimation );
+  //__log.PrintInfo( Filelevel_DEBUG, "AnimationPack::SetCurrentAnimation => ResetAnimation[%3.1f] _currentAnimation[%p]", startTime, _currentAnimation );
   this->_currentAnimation->ResetAnimation( startTime );
   return true;
 }//SetCurrentAnimation

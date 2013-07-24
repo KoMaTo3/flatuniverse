@@ -101,7 +101,7 @@ RenderableQuad* RenderableQuad::SetRotation( const float newAngle )
 RenderableQuad::RenderableQuad()
 :position( 0.0f, 0.0f, 0.0f ), size( 1.0f, 1.0f ), color( 1.0f, 1.0f, 1.0f, 1.0f ), scale( 1.0f, 1.0f ), rotation( 0.0f ), texCoords( 0.0f, 0.0f, 0.0f, 0.0f )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad test: this[%p] info[%p]", this, this->info );
+  //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad test: this[%p] info[%p]", this, this->info );
   this->info = new RenderableQuadInfo();
   this->info->textureName = "";
   this->info->indexInRenderableList = -1;
@@ -117,7 +117,7 @@ RenderableQuad::RenderableQuad()
 RenderableQuad::RenderableQuad( RenderableQuad &src )
 :position( src.position ), size( src.size ), color( src.color ), scale( src.scale ), rotation( src.rotation ), texCoords( src.texCoords )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::copy-constructor => this[%p] src[%p]", this, &src );
+  //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::copy-constructor => this[%p] src[%p]", this, &src );
   this->info = src.info;
   src.info = nullptr;
 }//constructor
@@ -126,7 +126,7 @@ RenderableQuad::RenderableQuad( RenderableQuad &src )
 
 void RenderableQuad::operator=( RenderableQuad &src )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::operator= => this[%p] src[%p]", this, &src );
+  //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::operator= => this[%p] src[%p]", this, &src );
   this->position = src.position;
   this->size = src.size;
   this->color = src.color;
@@ -344,7 +344,7 @@ void RenderableQuad::CheckChanges() {
 
   //texture
   if( this->info->textureChangedFlag ) {
-    __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::CheckChanges => texture['%s']", this->info->textureName.c_str() );
+    //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::CheckChanges => texture['%s']", this->info->textureName.c_str() );
     this->SetTexture( this->info->textureName, Vec2( this->info->textureCoordsNew.x, this->info->textureCoordsNew.y ), Vec2( this->info->textureCoordsNew.z, this->info->textureCoordsNew.w ) );
     this->info->textureChangedFlag = false;
   } else if( this->info->textureCoordsNew != this->info->textureCoordsPrev ) {
@@ -370,10 +370,10 @@ void RenderableQuad::CheckChanges() {
 =============
 */
 void RenderableQuad::SetEnabled( bool isEnabled ) {
-  __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => this[x%p] value[%d]", this, isEnabled );
+  //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => this[x%p] value[%d]", this, isEnabled );
   if( isEnabled ) {
     if( this->info->indexInRenderableList != RENDERABLE_INDEX_UNDEFINED ) {
-      __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => added index %d", this->info->indexInRenderableList );
+      //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => added index %d", this->info->indexInRenderableList );
       __coreRenderableListIndicies->push_back( this->info->indexInRenderableList );
     }
   } else {
@@ -381,7 +381,7 @@ void RenderableQuad::SetEnabled( bool isEnabled ) {
       auto iterEnd = __coreRenderableListIndicies->end();
       for( auto iter = __coreRenderableListIndicies->begin(); iter != iterEnd; ++iter ) {
         if( *iter == this->info->indexInRenderableList ) {
-          __log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => removed index %d", this->info->indexInRenderableList );
+          //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => removed index %d", this->info->indexInRenderableList );
           __coreRenderableListIndicies->erase( iter );
           break;
         }

@@ -7,7 +7,8 @@
 local playerState = {
   onGroundTime = -1,
   isHoldJump = false,
-  longJumpPower = 150,
+  jumpPower = -350,
+  longJumpPower = 250,
   longJumpStep = 0,
   longJumpTimer = -1,
   PlayerEndLongJumpTimer = -1,
@@ -143,7 +144,7 @@ function PlayerControl( id, isPressed )
             playerState.allowDoubleJump = false
           end
           local vx, _ = ObjectAttr( 'player', { 'collisionVelocity' } )
-          ObjectAttr( 'player', { collisionVelocity = vx..' '..( -300 )  } )
+          ObjectAttr( 'player', { collisionVelocity = vx..' '..( playerState.jumpPower )  } )
           playerState.isHoldJump = true
           playerState.longJumpStep = 0
           if playerState.longJumpTimer ~= -1 then

@@ -59,14 +59,14 @@ bool SquareAtlas::HasPlace( const Size& size )
 */
 bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "SquareAtlas::Cut => %d x %d", size.width, size.height );
+  //__log.PrintInfo( Filelevel_DEBUG, "SquareAtlas::Cut => %d x %d", size.width, size.height );
 
   //поиск достаточной области
   SquareAtlasMap::iterator iter, iter2, iterEnd;
   bool  can = false;
   Rect< Dword > placeTo;
 
-  this->__Dump();
+  //this->__Dump();
 
   iterEnd = this->items.end();
   for( iter = this->items.begin(); iter != iterEnd; ++iter )
@@ -74,7 +74,7 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
     {
       can = true;
       placeTo = Rect< Dword >( iter->second.left, iter->second.top, iter->second.left + size.width - 1, iter->second.top + size.height - 1 );
-      __log.PrintInfo( Filelevel_DEBUG, "place to (%d, %d)-(%d, %d)", placeTo.left, placeTo.top, placeTo.right, placeTo.bottom );
+      //__log.PrintInfo( Filelevel_DEBUG, "place to (%d, %d)-(%d, %d)", placeTo.left, placeTo.top, placeTo.right, placeTo.bottom );
       break;
     }
 
@@ -83,8 +83,9 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
     __log.PrintInfo( Filelevel_WARNING, "SquareAtlas::Cut => false" );
     return false;
   }
-  else
-    __log.PrintInfo( Filelevel_DEBUG, "SquareAtlas::Cut => finded place" );
+  else {
+    //__log.PrintInfo( Filelevel_DEBUG, "SquareAtlas::Cut => finded place" );
+  }
 
   //место есть => режем все пересекающие области
   //предположительно (как бы это ещё проверить?) - новый блок не может быть в центре какого-либо другого блока,
@@ -95,7 +96,7 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
   {
     if( this->_IsIntersect( placeTo, iter->second ) ) //нужная площадь пересекает свободную => обрезаем
     {
-      __log.PrintInfo( Filelevel_DEBUG, "is intersect rect(%d, %d)-(%d, %d)", iter->second.left, iter->second.top, iter->second.right, iter->second.bottom );
+      //__log.PrintInfo( Filelevel_DEBUG, "is intersect rect(%d, %d)-(%d, %d)", iter->second.left, iter->second.top, iter->second.right, iter->second.bottom );
 
       //разрезаем iter->second
       Rect< Dword > iterRect = iter->second;
@@ -139,24 +140,24 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
 
       //Нужная площадь всегда в левом-верхнем углу
       rect = Rect< Dword >( placeTo.left, placeTo.bottom + 1, iterRect.right, iterRect.bottom );
-	  this->items.insert( SquareAtlasMap::value_type( _MapKey( rect ), rect ) );
-      __log.PrintInfo( Filelevel_DEBUG, "added right block: (%d, %d)-(%d, %d)", rect.left, rect.top, rect.right, rect.bottom );
+	    this->items.insert( SquareAtlasMap::value_type( _MapKey( rect ), rect ) );
+      //__log.PrintInfo( Filelevel_DEBUG, "added right block: (%d, %d)-(%d, %d)", rect.left, rect.top, rect.right, rect.bottom );
 
       rect = Rect< Dword >( placeTo.right + 1, placeTo.top, iterRect.right, placeTo.bottom );
-	  this->items.insert( SquareAtlasMap::value_type( _MapKey( rect ), rect ) );
-      __log.PrintInfo( Filelevel_DEBUG, "added right block: (%d, %d)-(%d, %d)", rect.left, rect.top, rect.right, rect.bottom );
+	    this->items.insert( SquareAtlasMap::value_type( _MapKey( rect ), rect ) );
+      //__log.PrintInfo( Filelevel_DEBUG, "added right block: (%d, %d)-(%d, %d)", rect.left, rect.top, rect.right, rect.bottom );
 
-      __log.PrintInfo( Filelevel_DEBUG, "deleted block: (%d, %d)-(%d, %d)", iterRect.left, iterRect.top, iterRect.right, iterRect.bottom );
+      //__log.PrintInfo( Filelevel_DEBUG, "deleted block: (%d, %d)-(%d, %d)", iterRect.left, iterRect.top, iterRect.right, iterRect.bottom );
       break;
     }//обрезка
   }//for items
 
-  this->__Dump();
+  //this->__Dump();
 
   //проверка на поглощение одних свободных блоков другими
   bool deleted = true;
 
-  __log.PrintInfo( Filelevel_DEBUG, ". checking for fully-placed rects" );
+  //__log.PrintInfo( Filelevel_DEBUG, ". checking for fully-placed rects" );
   while( deleted )
   {
     deleted = false;
@@ -168,10 +169,11 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
         continue;
       if( this->_IsHave( iter->second, iter2->second ) )  //iter полностью в iter2
       {
+        /*
         __log.PrintInfo( Filelevel_DEBUG, "rect(%d, %d)-(%d, %d) fully placed in rect(%d, %d)-(%d, %d)",
           iter->second.left, iter->second.top, iter->second.right, iter->second.bottom,
           iter2->second.left, iter2->second.top, iter2->second.right, iter2->second.bottom
-          );
+          );*/
         deleted = true;
         this->items.erase( iter );
         iter = this->items.begin();
@@ -180,10 +182,11 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
       else
       if( this->_IsHave( iter2->second, iter->second ) )  //iter2 полностью в iter
       {
+        /*
         __log.PrintInfo( Filelevel_DEBUG, "rect(%d, %d)-(%d, %d) fully placed in rect(%d, %d)-(%d, %d)",
           iter2->second.left, iter2->second.top, iter2->second.right, iter2->second.bottom,
           iter->second.left, iter->second.top, iter->second.right, iter->second.bottom
-          );
+          );*/
         deleted = true;
         this->items.erase( iter2 );
         iter = this->items.begin();
@@ -191,15 +194,15 @@ bool SquareAtlas::Cut( const Size& size, Rect< Dword > *result )
       }
     }//for
   }//while deleted
-  __log.PrintInfo( Filelevel_DEBUG, ". checking done" );
+  //__log.PrintInfo( Filelevel_DEBUG, ". checking done" );
 
 
   if( result )
     *result = placeTo;
 
-  this->__Dump();
+  //this->__Dump();
 
-  __log.PrintInfo( Filelevel_DEBUG, "SquareAtlas::Cut => Done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "SquareAtlas::Cut => Done" );
   return true;
 }//Cut
 

@@ -162,7 +162,7 @@ bool Lua::Init()
   lua_register( this->luaState, "SetPause",         Lua::LUA_SetPause );
   lua_atpanic( this->luaState, ErrorHandler );
 
-  __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
+  //__log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
 
   __LuaCurrentContext = this;
 
@@ -1313,7 +1313,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
   int res = 0;
   VariableAttributesList setAttrs, getAttrs;
   if( lua_istable( lua, 2 ) ) {
-    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => start:" );
+    //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => start:" );
 
     lua_pushvalue( lua, -1 );
     lua_pushnil( lua );
@@ -1324,7 +1324,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
 
       if( lua_isnumber( lua, -1 ) ) { //get parameter
         if( lua_isstring( lua, -2 ) ) {
-          __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => get '%s'", lua_tostring( lua, -2 ) );
+          //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectAttr => get '%s'", lua_tostring( lua, -2 ) );
           attr = new VariableAttribute();
           attr->name = lua_tostring( lua, -2 );
           getAttrs.push_back( attr );
@@ -1362,11 +1362,11 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
             else {
               setAttrs.push_back( attr );
             }
-            __log.PrintInfo( Filelevel_DEBUG, ". '%s' => '%s'", attr->name.c_str(), attr->value.GetString().c_str() );
+            //__log.PrintInfo( Filelevel_DEBUG, ". '%s' => '%s'", attr->name.c_str(), attr->value.GetString().c_str() );
           }
 
         } else {
-          __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => parameter's key ¹%d is not a string" );
+          __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => parameter's key is not a string" );
         }
       }
 
@@ -1375,7 +1375,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
       ++num;
     }//while
 
-    __log.PrintInfo( Filelevel_DEBUG, "LUAFUNC_ObjectAttr => objectName['%s'] setAttrs[%d] getAttrs[%d]", objectName.c_str(), setAttrs.size(), getAttrs.size() );
+    //__log.PrintInfo( Filelevel_DEBUG, "LUAFUNC_ObjectAttr => objectName['%s'] setAttrs[%d] getAttrs[%d]", objectName.c_str(), setAttrs.size(), getAttrs.size() );
     LUAFUNC_ObjectAttr( objectName, setAttrs, getAttrs );
 
     if( getAttrs.size() ) { //return parameters

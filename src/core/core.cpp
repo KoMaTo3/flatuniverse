@@ -148,7 +148,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
 
   __config = new ConfigFile();
   __config->LoadFromFile( "data/default.cfg" );
-  __config->Dump();
+  //__config->Dump();
 
   sTimer.UpdateFreq();
   sTimer.UpdateCounter();

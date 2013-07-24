@@ -31,14 +31,14 @@ FileManager::~FileManager()
 */
 void FileManager::ScanAll( const std::string& subDir )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "FileManager::ScanAll" );
+  //__log.PrintInfo( Filelevel_DEBUG, "FileManager::ScanAll" );
 
   WIN32_FIND_DATA find;
   HANDLE hFind = NULL;
   std::string oldDir = tools::GetCurDirectory();
   memset( &find, 0, sizeof( find ) );
 
-  __log.PrintInfo( Filelevel_DEBUG, "FileManager::ScanAll => move to dir '%s'", subDir.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "FileManager::ScanAll => move to dir '%s'", subDir.c_str() );
   ::SetCurrentDirectory( ( tools::GetCorePath() + DIR_DELIMITER + subDir ).c_str() );
 
   if( INVALID_HANDLE_VALUE == ( hFind = ::FindFirstFile( "*", &find ) ) )
@@ -52,11 +52,11 @@ void FileManager::ScanAll( const std::string& subDir )
   {
     if( find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )  //dir
     {
-      __log.PrintInfo( Filelevel_DEBUG, "finded: dir [%s]", find.cFileName );
+      //__log.PrintInfo( Filelevel_DEBUG, "finded: dir [%s]", find.cFileName );
       if( !( find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN ) ) //not hidden
       if( !( std::string( find.cFileName ) == "." || std::string( find.cFileName ) == ".." ) )  //не "." и не ".."
       {
-        __log.PrintInfo( Filelevel_DEBUG, "scan it sub-items" );
+        //__log.PrintInfo( Filelevel_DEBUG, "scan it sub-items" );
         tools::SetCurDirectory( oldDir );
         this->ScanAll( subDir + DIR_DELIMITER + find.cFileName );
         ::SetCurrentDirectory( ( tools::GetCorePath() + DIR_DELIMITER + subDir ).c_str() );
@@ -64,7 +64,7 @@ void FileManager::ScanAll( const std::string& subDir )
     }
     else  //file
     {
-      __log.PrintInfo( Filelevel_DEBUG, "finded: file [%s]", find.cFileName );
+      //__log.PrintInfo( Filelevel_DEBUG, "finded: file [%s]", find.cFileName );
       if( tools::GetFileExtension( find.cFileName ) != FileManager_EXTENSION ) //обычный файл, не архив
         this->AddFile( subDir, find.cFileName );
       else
@@ -72,7 +72,7 @@ void FileManager::ScanAll( const std::string& subDir )
     }
   } while( FindNextFile( hFind, &find ) );
 
-  __log.PrintInfo( Filelevel_DEBUG, "FileManager::ScanAll => Done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "FileManager::ScanAll => Done" );
 
   tools::SetCurDirectory( oldDir );
 }//ScanAll
@@ -123,7 +123,7 @@ void FileManager::AddFile( const std::string& path, const std::string& fileName 
   item.type       = FileManager_type_FILE;
   item.ext        = tools::GetFileExtension( fileName );
 
-  __log.PrintInfo( Filelevel_DEBUG, "FileManager::AddFile => [%s / %s] time[%d]", newPath.c_str(), fileName.c_str(), item.timestamp );
+  //__log.PrintInfo( Filelevel_DEBUG, "FileManager::AddFile => [%s / %s] time[%d]", newPath.c_str(), fileName.c_str(), item.timestamp );
 
   tools::SetCurDirectory( oldDir );
 }//AddFile
@@ -366,10 +366,10 @@ void FileManager::SaveAll( const std::string& fileName, bool useCompression )
 */
 bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLastNull )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile ( '%s' )", fileName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile ( '%s' )", fileName.c_str() );
   if( this->_items.find( fileName ) == this->_items.end() )
   {
-    __log.PrintInfo( Filelevel_ERROR, "FileManager::GetFile => file not found" );
+    __log.PrintInfo( Filelevel_ERROR, "FileManager::GetFile => file '%S' not found", fileName.c_str() );
     return false;
   }
 
@@ -379,7 +379,7 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
   {
   case FileManager_type_FILE: //просто файл => читаем, отдаём
     {
-      __log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => getting real file" );
+      //__log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => getting real file" );
       File f;
       if( f.Open( file.fullPath.c_str(), File_mode_READ ) != aOK )
         return false;
@@ -393,7 +393,7 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
 
   case FileManager_type_NOTPACKED:  //в архиве, но не запакован => достаём, отдаём
     {
-      __log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => getting file from not compressed pack" );
+      //__log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => getting file from not compressed pack" );
       File f;
       if( f.Open( file.pack, File_mode_READ ) != aOK )
         return false;
@@ -409,13 +409,13 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
 
   case FileManager_type_PACKED: //в архиве, запакован => достаём, распаковываем, отдаём
     {
-      __log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => getting file from compressed pack" );
+      //__log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => getting file from compressed pack" );
       File f;
       if( f.Open( file.pack, File_mode_READ ) != aOK )
         return false;
 
       f.SeekFromStart( file.start );
-      __log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => file start = %d", f.GetCurrentPos() );
+      //__log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => file start = %d", f.GetCurrentPos() );
       memory tmp( file.sizePacked );
       f.Read( tmp.getData(), tmp.getLength() );
       f.Close();
@@ -425,7 +425,7 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
       int res;
       if( Z_OK != ( res = uncompress( ( Byte* ) dest.getData(), &destSize, ( Byte* ) tmp.getData(), tmp.getLength() ) ) )
       {
-        __log.PrintInfo( Filelevel_ERROR, "FileManager::GetFile => uncompress failed (%d)", res );
+        //__log.PrintInfo( Filelevel_ERROR, "FileManager::GetFile => uncompress failed (%d)", res );
         dest.free();
         return false;
       }
@@ -435,7 +435,7 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
   break;
   }//switch type
 
-  __log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => Done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile => Done" );
 
   return true;
 }//GetFile

@@ -8,8 +8,6 @@
 #include <vector>
 #include "tools.h"
 
-#define COLLISION_FRICTION_FORCE   ( 0.8f )
-
 
 
 class Collision;

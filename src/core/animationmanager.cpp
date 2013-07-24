@@ -343,7 +343,7 @@ void Manager::_LoadAttributeRenderableTexture( TextParser &parser, AnimationTemp
     break;
     case TPL_STRING:  //texture file name
       if( !textureNameSetted ) {
-        __log.PrintInfo( Filelevel_DEBUG, "_LoadAttributeRenderableTexture => name[%s]", value.value.c_str() );
+        //__log.PrintInfo( Filelevel_DEBUG, "_LoadAttributeRenderableTexture => name[%s]", value.value.c_str() );
         static_cast< AnimationParameterString* >( tpl->SetParameter< AnimationParameterString >( RENDERABLE_TEXTURE_NAME ) )->AddKeyFrame( time, value.value );
         textureNameSetted = true;
       } else {
@@ -779,7 +779,7 @@ void Manager::_LoadAttributeRenderableTextureCoords( TextParser &parser, Animati
   }//while
 
   if( coordsSettingStep > 0 ) {
-    __log.PrintInfo( Filelevel_DEBUG, "RENDERABLE_TEXTURE_COORDINATES => [%3.3f; %3.3f]-[%3.3f; %3.3f] step[%d]", coords.x, coords.y, coords.z, coords.w, coordsSettingStep );
+    //__log.PrintInfo( Filelevel_DEBUG, "RENDERABLE_TEXTURE_COORDINATES => [%3.3f; %3.3f]-[%3.3f; %3.3f] step[%d]", coords.x, coords.y, coords.z, coords.w, coordsSettingStep );
     static_cast< AnimationParameterFloat4* >( tpl->SetParameter< AnimationParameterFloat4 >( RENDERABLE_TEXTURE_COORDINATES ) )->AddKeyFrame( time, coords, interpolation );
   }
 
@@ -838,7 +838,7 @@ void Manager::_LoadAttributeColor( TextParser &parser, AnimationTemplate *tpl, f
   }//while
 
   if( colorSettingStep > 0 ) {
-    __log.PrintInfo( Filelevel_DEBUG, "COLOR => [%3.3f; %3.3f]-[%3.3f; %3.3f] step[%d]", color.x, color.y, color.z, color.w, colorSettingStep );
+    //__log.PrintInfo( Filelevel_DEBUG, "COLOR => [%3.3f; %3.3f]-[%3.3f; %3.3f] step[%d]", color.x, color.y, color.z, color.w, colorSettingStep );
     static_cast< AnimationParameterFloat4* >( tpl->SetParameter< AnimationParameterFloat4 >( COLOR ) )->AddKeyFrame( time, color, interpolation );
   }
 
