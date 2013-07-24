@@ -408,17 +408,14 @@ function OnEditorMouseKey( id, isPressed )
   local mode = {
     [0] = function() --(
       if isPressed then --(
+        local doMultiSelect = false
         if settings.editorType == 0 then --(
           if GUI.templates.currentItem > 0 then --(
             settings.editorMode = 20
             settings.move.mouseStart.x = mousePos.x
             settings.move.mouseStart.y = mousePos.y
           else --)(
-            settings.editorMode = 22
-            local cx, cy = GetCameraPos()
-            settings.multiSelectStartPoint.x = mousePos.x + cx
-            settings.multiSelectStartPoint.y = mousePos.y + cy
-            LogWrite( 'start multiselect' )
+            doMultiSelect = true
           end --)
           --[[
         else
@@ -432,7 +429,16 @@ function OnEditorMouseKey( id, isPressed )
               -- multiselect?
           end
           ]]
+        else --)(
+          doMultiSelect = true
         end --)
+        if doMultiSelect then
+          settings.editorMode = 22
+          local cx, cy = GetCameraPos()
+          settings.multiSelectStartPoint.x = mousePos.x + cx
+          settings.multiSelectStartPoint.y = mousePos.y + cy
+          LogWrite( 'start multiselect' )
+        end
       else --)( released
       end --)
     end, --)
