@@ -4,7 +4,7 @@ Backup/
 Debug/logs/
 Release/logs/
 Release/data/temp/
-Release/data/default.cfg
+*/*/default.cfg
 Release/flatuniverse.*
 flatuniverse/Debug/
 flatuniverse/Release/
