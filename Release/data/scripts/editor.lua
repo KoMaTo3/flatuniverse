@@ -450,7 +450,7 @@ function OnEditorMouseKey( id, isPressed )
           settings.editorMode = 2
         else
           settings.editorMode = 0
-      end
+        end
       end
     end,
     [2] = function()
@@ -581,9 +581,20 @@ function OnEditorMouseKey( id, isPressed )
     [22] = function() --(
       if isPressed then --(
       else --)(
-        if settings.editorMode == 22 then --(
-          local cx, cy = GetCameraPos()
-          local objects = SelectObjectsInRectangle( settings.multiSelectStartPoint.x, settings.multiSelectStartPoint.y, mousePos.x + cx, mousePos.y + cy, settings.editorType )
+        local cx, cy = GetCameraPos()
+        local newX = mousePos.x + cx
+        local newY = mousePos.y + cy
+        if settings.multiSelectStartPoint.x == newX and settings.multiSelectStartPoint.y == newY then --( one-select
+          local object = GetObjectUnderCursorByMode()
+          if #object > 0 then --(
+              SelectObject( object )
+              UpdateGuiBySelectedObject()
+              settings.editorMode = 2
+          else --)(
+            settings.editorMode = 0
+          end --)
+        else --)( multi-select
+          local objects = SelectObjectsInRectangle( settings.multiSelectStartPoint.x, settings.multiSelectStartPoint.y, newX, newY, settings.editorType )
           if #objects > 0 then
             settings.editorMode = 2
           else
