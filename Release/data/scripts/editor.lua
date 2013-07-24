@@ -43,6 +43,7 @@ settings = {
     gridSize = GetGridSize(),
     gamePaused = false,
     cameraDirection = 0,  -- перемещение камеры
+    multiSelectStartPoint = { x = 0, y = 0 }, -- стартовая точка мультиселекта
 }
 mousePos = {    -- экранная позиция курсора
     x = 0,
@@ -251,7 +252,7 @@ function UpdateEditorCamera( id )
   SetTimer( 0.01, 'UpdateEditorCamera', true )
 end -- UpdateEditorCamera
 
--- Обработка кнопок клавы
+--( Обработка кнопок клавы
 function OnEditorKey( id, isPressed )
   if settings.gamePaused then
     if id == 0x26 or id == 0x57 then  -- Up
@@ -296,6 +297,7 @@ function OnEditorKey( id, isPressed )
         end
       end
       if id == 0xC0 then    -- ~
+        DoPause( true )
         --GuiSetText( 'editor/settings.layer', 'default' )
         DebugRender( 0 )
         settings.editorType = 0
@@ -307,12 +309,14 @@ function OnEditorKey( id, isPressed )
       end
       if id == 0x31 then    -- 1
         --GuiSetText( 'editor/settings.layer', 'renderable' )
+        DoPause( true )
         DebugRender( 1 )
         settings.editorType = 1
         GUI.elements.layer:SetText( 'renderable' )
         OnChangeLayer( GUI.elements.layer )
       end
       if id == 0x32 then    -- 2
+        DoPause( true )
         --GuiSetText( 'editor/settings.layer', 'collision' )
         DebugRender( 2 )
         settings.editorType = 2
@@ -320,6 +324,7 @@ function OnEditorKey( id, isPressed )
         OnChangeLayer( GUI.elements.layer )
       end
       if id == 0x33 then    -- 3
+        DoPause( true )
         --GuiSetText( 'editor/settings.layer', 'trigger' )
         DebugRender( 4 )
         settings.editorType = 3
@@ -367,15 +372,7 @@ function OnEditorKey( id, isPressed )
         settings.keys.isAlt = isPressed
       end
       if id == 0x0D then    -- Enter
-        settings.gamePaused = not settings.gamePaused
-        SetPause( not settings.gamePaused )
-        if settings.gamePaused then
-          local x, y = ObjectAttr( 'player', { 'position' } )
-          ObjectAttr( 'defaults/camera', { position = x..' '..y } )
-          SetCamera( 'defaults/camera' )
-        else
-          SetCamera( 'player' )
-        end
+        DoPause( not settings.gamePaused )
       end
       if id == 0x72 then    -- F3
         settings.gamePaused = true
@@ -386,17 +383,44 @@ function OnEditorKey( id, isPressed )
         settings.keys.isAlt = false
       end
   end
-end --OnEditorKey
+end --) OnEditorKey
 
--- Обработка кнопок мыши
+--( Переключение режима паузы(редактора) и игры
+function DoPause( setPause )
+  settings.gamePaused = setPause
+  SetPause( not settings.gamePaused )
+  if settings.gamePaused then
+    if GetCamera() ~= 'defaults/camera' then
+      local x, y = ObjectAttr( 'player', { 'position' } )
+      ObjectAttr( 'defaults/camera', { position = x..' '..y } )
+    end
+    SetCamera( 'defaults/camera' )
+  else
+    SetCamera( 'player' )
+  end
+end --)
+
+--( Обработка кнопок мыши
 function OnEditorMouseKey( id, isPressed )
+  if not settings.gamePaused then
+    return false
+  end
   local mode = {
-    [0] = function()
-      if isPressed then
-        if settings.editorType == 0 and GUI.templates.currentItem > 0 then
-          settings.editorMode = 20
-          settings.move.mouseStart.x = mousePos.x
-          settings.move.mouseStart.y = mousePos.y
+    [0] = function() --(
+      if isPressed then --(
+        if settings.editorType == 0 then --(
+          if GUI.templates.currentItem > 0 then --(
+            settings.editorMode = 20
+            settings.move.mouseStart.x = mousePos.x
+            settings.move.mouseStart.y = mousePos.y
+          else --)(
+            settings.editorMode = 22
+            local cx, cy = GetCameraPos()
+            settings.multiSelectStartPoint.x = mousePos.x + cx
+            settings.multiSelectStartPoint.y = mousePos.y + cy
+            LogWrite( 'start multiselect' )
+          end --)
+          --[[
         else
           local object = GetObjectUnderCursorByMode()
           if #object > 0 then
@@ -404,12 +428,14 @@ function OnEditorMouseKey( id, isPressed )
               UpdateGuiBySelectedObject()
               settings.editorMode = 1
           else
+            settings.editorMode = 1
               -- multiselect?
           end
-        end
-      else
-      end
-    end,
+          ]]
+        end --)
+      else --)( released
+      end --)
+    end, --)
     [1] = function()
       if isPressed then
       else
@@ -514,7 +540,7 @@ function OnEditorMouseKey( id, isPressed )
         end
       )
     end,
-    [21] = function()
+    [21] = function() --(
       if isPressed then
       else
         settings.editorMode = 0
@@ -545,10 +571,24 @@ function OnEditorMouseKey( id, isPressed )
           end
         )
       end
-    end, -- 21
+    end, --) 21
+    [22] = function() --(
+      if isPressed then --(
+      else --)(
+        if settings.editorMode == 22 then --(
+          local cx, cy = GetCameraPos()
+          local objects = SelectObjectsInRectangle( settings.multiSelectStartPoint.x, settings.multiSelectStartPoint.y, mousePos.x + cx, mousePos.y + cy, settings.editorType )
+          if #objects > 0 then
+            settings.editorMode = 2
+          else
+            settings.editorMode = 0
+          end
+        end --)
+      end --)
+    end, --) 22
   }
   mode[ settings.editorMode ]()
-end --OnEditorMouseKey
+end --) OnEditorMouseKey
 
 -- Обработка движения мыши
 function OnEditorMouseMove( x, y )
@@ -599,6 +639,8 @@ function OnEditorMouseMove( x, y )
         settings.move.mouseStart.y = mousePos.y - settings.windowSize.y * 0.5 + cy
       end,
       [21] = function()
+      end,
+      [22] = function()
       end,
     }
     mode[ settings.editorMode ]()
@@ -834,7 +876,8 @@ function RenderGUI()
   if settings.showGrid then
     GUI.grid.Render()
   end
-  if settings.editorMode == 21 then -- multi-insert tiles
+  --( вставка блока тайлов
+  if settings.editorMode == 21 then
     local cx, cy = GetCameraPos()
     local x = settings.move.mouseStart.x - cx + settings.windowSize.x * 0.5
     local y = settings.move.mouseStart.y - cy + settings.windowSize.y * 0.5
@@ -856,7 +899,31 @@ function RenderGUI()
       Render( 'sprite', x, y, 0, x + tileSize, y + tileSize, 0, texture, 'ffffff44' )
     end
     end
-  end
+  end --)
+  --( рамка тайла под курсором
+  if settings.editorMode == 0 and settings.gamePaused then
+    x, y = GetTilePosByPixel( mousePos.x, mousePos.y )
+    left, top = GetPixelByTile( x, y )
+    right, bottom = GetPixelByTile( x + 1, y + 1 )
+    Render( 'rect', left, top, 0, right, bottom, 0, 'ff0000ff' )
+  end --)
+
+  --( рамка мультиселекта
+  if settings.editorMode == 22 then
+    local cx, cy = GetCameraPos()
+    left = settings.multiSelectStartPoint.x - cx
+    top = settings.multiSelectStartPoint.y - cy
+    right = mousePos.x
+    bottom = mousePos.y
+    if left > right then
+      left, right = right, left
+    end
+    if top > bottom then
+      top, bottom = bottom, top
+    end
+    Render( 'rect', left, top, 0, right, bottom, 0, 'ff0000ff' )
+  end --)
+
   if settings.guiVisibility then
     GUI.templates.Draw()
     GUIRendererRender() -- additional GUI from gui.lua
@@ -1045,3 +1112,16 @@ function OnChangeTileSize( tileSizeGuiElement )
     end
   end --)
 end -- OnChangeTileSize
+
+--( Выбор всех объектов в рамке в зависимости от режима редактора
+function SelectObjectsInRectangle( left, top, right, bottom, editorType )
+  if left > right then
+    left, right = right, left
+  end
+  if top > bottom then
+    top, bottom = bottom, top
+  end
+  local objects = '' -- = Get Object In Rectangle
+  LogWrite( left..':'..top..' => '..right..':'..bottom )
+  return objects
+end --)
