@@ -1405,11 +1405,17 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
   switch( type ) {
     case 1: { //renderable
       Object *object = game->core->GetRenderableInPoint( point, afterObject );
+      while( object && !object->IsSaveable() ) {
+        object = object->GetParent();
+      }
       if( object ) {
         return object->GetNameFull();
       } else {
         if( afterObject.length() ) {
           object = game->core->GetRenderableInPoint( point, "" );
+          while( object && !object->IsSaveable() ) {
+            object = object->GetParent();
+          }
           if( object ) {
             return object->GetNameFull();
           }
@@ -1419,11 +1425,17 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
     }//renderable
     case 2: { //collision
       Object *object = game->core->GetCollisionInPoint( point, afterObject );
+      while( object && !object->IsSaveable() ) {
+        object = object->GetParent();
+      }
       if( object ) {
         return object->GetNameFull();
       } else {
         if( afterObject.length() ) {
           object = game->core->GetCollisionInPoint( point, "" );
+          while( object && !object->IsSaveable() ) {
+            object = object->GetParent();
+          }
           if( object ) {
             return object->GetNameFull();
           }
@@ -1433,11 +1445,17 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
     }//collision
     case 3: { //trigger
       Object *object = game->core->GetTriggerInPoint( point, afterObject );
+      while( object && !object->IsSaveable() ) {
+        object = object->GetParent();
+      }
       if( object ) {
         return object->GetNameFull();
       } else {
         if( afterObject.length() ) {
           object = game->core->GetTriggerInPoint( point, "" );
+          while( object && !object->IsSaveable() ) {
+            object = object->GetParent();
+          }
           if( object ) {
             return object->GetNameFull();
           }

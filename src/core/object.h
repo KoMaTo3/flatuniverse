@@ -234,8 +234,9 @@ public:
   ObjectTrigger*      EnableTrigger       ();
   void                DisableTrigger      ();
   ObjectTrigger*      GetTrigger          ();
-  inline
-    bool              IsTrigger           () { return this->trigger != NULL; }
+  inline bool         IsTrigger           () { return this->trigger != NULL; }
+  inline bool         IsSaveable          () { return this->isSaveable; }
+  inline Object*      GetParent           () { return this->_parent; }
 
   static
     RenderableQuad*   CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );
