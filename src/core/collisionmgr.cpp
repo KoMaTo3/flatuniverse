@@ -35,12 +35,14 @@ bool CollisionManager::Update( float dt )
   CollisionList::iterator iter0, iter1, iterEnd = __collisionList->end();
 
   this->time += dt;
+  bool forceUpdate = ( dt == 0.0f );
+  float updateInterval = ( forceUpdate ? 0.0f : COLLISION_UPDATE_FREQUENCY );
 
-  while( this->time > COLLISION_UPDATE_FREQUENCY )
+  while( this->time > COLLISION_UPDATE_FREQUENCY || forceUpdate )
   {
     //Обновляем позиции, сбрасываем решения коллизий
     for( iter0 = __collisionList->begin(); iter0 != iterEnd; ++iter0 )
-      ( *iter0 )->Update( COLLISION_UPDATE_FREQUENCY );
+      ( *iter0 )->Update( updateInterval );
 
     //проверяем расстояния и коллизии
     //не проверяем статика+статика или статика+динамика, т.к. при дальнейшем проходе эта динамика будет проверяться со всей статикой
@@ -85,7 +87,10 @@ bool CollisionManager::Update( float dt )
           ( *iter0 )->ResolveCollision();
     }
 
-    this->time -= COLLISION_UPDATE_FREQUENCY;
+    this->time -= updateInterval;
+    if( forceUpdate ) {
+      break;
+    }
   }//while
 
   return true;
