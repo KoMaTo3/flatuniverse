@@ -46,6 +46,7 @@ LUAFUNCPROC_GetCollisionStatic*LUAFUNC_GetCollisionStatic   = NULL;
 LUAFUNCPROC_SetCollisionStatic*LUAFUNC_SetCollisionStatic   = NULL;
 LUAFUNCPROC_DebugRender       *LUAFUNC_DebugRender          = NULL;
 LUAFUNCPROC_GetObjectByPoint  *LUAFUNC_GetObjectByPoint     = NULL;
+LUAFUNCPROC_GetObjectByRect   *LUAFUNC_GetObjectByRect      = NULL;
 //LUAFUNCPROC_SetGuiVisibility  *LUAFUNC_SetGuiVisibility     = NULL;
 LUAFUNCPROC_SelectObject      *LUAFUNC_SelectObject         = NULL;
 LUAFUNCPROC_GetSelectedObject *LUAFUNC_GetSelectedObject    = NULL;
@@ -141,6 +142,7 @@ bool Lua::Init()
   lua_register( this->luaState, "CollisionSetStatic", Lua::LUA_SetCollisionStatic );
   lua_register( this->luaState, "DebugRender",      Lua::LUA_DebugRender );
   lua_register( this->luaState, "GetObjectByPoint", Lua::LUA_GetObjectByPoint );
+  lua_register( this->luaState, "GetObjectByRect",  Lua::LUA_GetObjectByRect );
   lua_register( this->luaState, "SelectObject",     Lua::LUA_SelectObject );
   lua_register( this->luaState, "GetSelectedObject",Lua::LUA_GetSelectedObject );
   //lua_register( this->luaState, "GuiAttr",          Lua::LUA_GuiAttr );
@@ -1529,6 +1531,32 @@ int Lua::LUA_GetObjectByPoint( lua_State *lua )
 
   return 1;
 }//LUA_GetObjectByPoint
+
+
+
+/*
+=============
+  LUA_GetObjectByRect
+=============
+*/
+int Lua::LUA_GetObjectByRect( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 5 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GetObjectByRect => not enough parameters" );
+    return 0;
+  }
+  int type = lua_tointeger( lua, 1 );
+  Vec2 leftTop, rightBottom;
+  leftTop.Set( ( float ) lua_tonumber( lua, 2 ), ( float ) lua_tonumber( lua, 3 ) );
+  rightBottom.Set( ( float ) lua_tonumber( lua, 4 ), ( float ) lua_tonumber( lua, 5 ) );
+  std::string objectName;
+  objectName = LUAFUNC_GetObjectByRect( type, leftTop, rightBottom );
+  lua_pushstring( lua, objectName.c_str() );
+
+  return 1;
+}//LUA_GetObjectByRect
 
 
 

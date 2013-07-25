@@ -59,15 +59,19 @@ void ObjectTrigger::Update()
 bool ObjectTrigger::TestInPoint( const Vec2 &pos )
 {
   return this->triggerRect->TestInPoint( pos );
-  /*
-  return
-    !( this->rect.rightBottom.x < pos.x ||
-     this->rect.leftTop.x       > pos.x ||
-     this->rect.rightBottom.y   < pos.y ||
-     this->rect.leftTop.y       > pos.y
-    );
-    */
 }//TestInPoint
+
+
+
+/*
+=============
+  TestIntersectRect
+=============
+*/
+bool ObjectTrigger::TestIntersectRect( const Vec2 &leftTop, const Vec2 &rightBottom )
+{
+  return this->triggerRect->TestIntersect( Vec3( leftTop.x, leftTop.y, 0.0f ), Vec3( rightBottom.x, rightBottom.y, 0.0f ) );
+}//TestIntersectRect
 
 
 

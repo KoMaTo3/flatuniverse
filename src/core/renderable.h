@@ -43,6 +43,7 @@ public:
 
   virtual bool Render() = NULL;
   virtual bool IsHasPoint( const Vec2& pos ) = NULL;
+  virtual bool IsIntersectRect( const Vec2& leftTop, const Vec2& rightBottom ) = NULL;
   virtual void SetEnabled( bool isEnabled ) = NULL;
 };
 
@@ -114,7 +115,9 @@ public:
   inline void* GetPointerToVertex () { return &this->position.x; }
   inline void* GetPointerToColor  () { return &this->color.x; }
   virtual bool            IsHasPoint      ( const Vec2& pos );
+  virtual bool            IsIntersectRect ( const Vec2& leftTop, const Vec2& rightBottom );
   virtual void SetEnabled( bool isEnabled );
+  inline GLshort  GetIndexInList() { return ( this->info ? this->info->indexInRenderableList : 0 ); }
 
   bool  Render();
 

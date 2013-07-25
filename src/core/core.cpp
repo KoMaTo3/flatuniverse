@@ -51,7 +51,7 @@ Core::Core()
   this->debug.renderRenderable  = false;
   this->debug.renderCollision   = false;
   this->debug.renderTrigger     = false;
-  this->debug.selectedObject    = NULL;
+  //this->debug.selectedObject    = NULL;
 
   //this->gui.context = NULL;
   //this->gui.show    = true;
@@ -1060,7 +1060,6 @@ bool Core::Redraw()
         glDisable( GL_TEXTURE_2D );
         glDisable( GL_DEPTH_TEST );
         float alpha = Math::Sin16( ( float ) sTimer.GetTime() * 5.0f ) * 0.5f + 0.5f;
-        bool showSelected = false;
         Vec4 selectedRect;
 
         //renderable
@@ -1079,10 +1078,11 @@ bool Core::Redraw()
             size = quad->GetSize() * 0.5f;
             size.x *= quad->GetScale().x;
             size.y *= quad->GetScale().y;
+            /*
             if( this->debug.selectedObject && this->debug.selectedObject->GetRenderable() == quad ) {
               showSelected = true;
               selectedRect.Set( pos.x - size.x, pos.y - size.y, pos.x + size.x, pos.y + size.y );
-            } else {
+            } else */ {
               glColor4f( 0.0f, 1.0f, 0.0f, alpha );
               glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
               glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
@@ -1090,12 +1090,21 @@ bool Core::Redraw()
               glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
             }
           }
-          if( showSelected ) {
+          if( this->debug.selectedObjects.size() ) {
             glColor4f( 1.0f, 0.0f, 0.0f, alpha );
-            glVertex3f( selectedRect.x, selectedRect.y, 0.0f );
-            glVertex3f( selectedRect.z, selectedRect.y, 0.0f );
-            glVertex3f( selectedRect.z, selectedRect.w, 0.0f );
-            glVertex3f( selectedRect.x, selectedRect.w, 0.0f );
+            for( auto &obj: this->debug.selectedObjects ) {
+              if( obj->IsRenderable() ) {
+                quad = &( ( *__coreRenderableList )[ static_cast< RenderableQuad* >( obj->GetRenderable() )->GetIndexInList() ] );
+                pos = quad->GetPosition() - camera;
+                size = quad->GetSize() * 0.5f;
+                size.x *= quad->GetScale().x;
+                size.y *= quad->GetScale().y;
+                glVertex3f( pos.x - size.x, pos.y - size.y, 0.0f );
+                glVertex3f( pos.x + size.x, pos.y - size.y, 0.0f );
+                glVertex3f( pos.x + size.x, pos.y + size.y, 0.0f );
+                glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
+              }
+            }
           }
           glEnd();
           glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -1109,8 +1118,13 @@ bool Core::Redraw()
           CollisionList::iterator iter, iterEnd = __collisionList->end();
           Vec3 pos, size;
           for( iter = __collisionList->begin(); iter != iterEnd; ++iter ) {
-            ( *iter )->Render( alpha, camera, this->debug.selectedObject && this->debug.selectedObject->GetCollision() == *iter );
+            ( *iter )->Render( alpha, camera, false /* this->debug.selectedObject && this->debug.selectedObject->GetCollision() == *iter */ );
           }
+            for( auto &obj: this->debug.selectedObjects ) {
+              if( obj->IsCollision() ) {
+                obj->GetCollision()->Render( alpha, camera, true );
+              }
+            }
         }//collisions
 
         //trigger
@@ -1119,7 +1133,12 @@ bool Core::Redraw()
           glLineWidth( 1.0f );
           ObjectTriggerList::iterator iter, iterEnd = __triggerList->end();
           for( iter = __triggerList->begin(); iter != iterEnd; ++iter ) {
-            ( *iter )->Redraw( alpha, camera, this->debug.selectedObject && this->debug.selectedObject->GetTrigger() == *iter );
+            ( *iter )->Redraw( alpha, camera, false /* this->debug.selectedObject && this->debug.selectedObject->GetTrigger() == *iter */ );
+          }
+          for( auto &obj: this->debug.selectedObjects ) {
+            if( obj->IsTrigger() ) {
+              obj->GetTrigger()->Redraw( alpha, camera, true );
+            }
           }
           /*
           glBegin( GL_QUADS );
@@ -1467,17 +1486,21 @@ Object* Core::GetGUIObject( const std::string& name, Object *parent )
   RemoveObject
 =============
 */
-bool Core::RemoveObject( const std::string& name )
+bool Core::RemoveObject( const std::string& name, bool useLockToDeleteFlag )
 {
   Object *obj = this->GetObject( name );
-  if( !obj )
+  if( !obj ) {
     return false;
+  }
 
   //всё это делается в деструкторе Object
   //obj->ClearChilds();
   //obj->DisableRenderable();
   //obj->DisableCollision();
 
+  if( useLockToDeleteFlag && obj->IsLockedToDelete() ) {
+    return false;
+  }
   delete obj; //анаттач происходит здесь
   return true;
 }//RemoveObject
@@ -1513,6 +1536,19 @@ Object* Core::getObjectInPoint( const Vec2& pos )
 {
   return this->_rootObject->GetObjectInPoint( pos );
 }//getObjectInPoint
+
+
+
+
+/*
+=============
+  GetObjectsInRect
+=============
+*/
+void Core::GetObjectsInRect( int type, const Vec2 &leftTop, const Vec2 &rightBottom, ObjectList& result )
+{
+  this->_rootObject->GetObjectsInRect( type, leftTop, rightBottom, result );
+}//GetObjectsInRect
 
 
 
@@ -1790,6 +1826,13 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
       bool altPressed = ( ( lParam&( 1<<29 ) ) == ( 1<<29) );
       if( wParam == VK_F4 && altPressed ) { //Alt+F4
         core->SetState( CORE_STATE_EXIT );
+      }
+      if( message == WM_SYSKEYDOWN ) {
+        if( !( lParam & 0x40000000 ) ) {
+          core->keyboard.DoPress( wParam );
+        }
+      } else {
+        core->keyboard.DoRelease( wParam );
       }
       return 0;
       break;

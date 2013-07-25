@@ -345,4 +345,14 @@ Vec4 StringToColor( const std::string& str ) {
 
 
 
+bool TestPointInRect2( const Vec2& point, const Vec2& leftTop, const Vec2& rightBottom ) {
+  return
+    point.x >= leftTop.x &&
+    point.x <= rightBottom.x &&
+    point.y >= leftTop.y &&
+    point.y <= rightBottom.y
+    ;
+}//TestPointInRect2
+
+
 }//namespace tools

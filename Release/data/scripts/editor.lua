@@ -12,6 +12,7 @@ settings.editorMode:
 -- 12: скролл GUI.templates
 -- 20: промежуточный режим вставки тайла: нажал мышь и ждём отпускания или движения
 -- 21: вставка блока тайлов: рисование прямоугольной области
+-- 22: мульти-селект (рисование рамки)
 ]]
 settings = {
     guiVisibility     = false,  -- отображение GUI
@@ -297,39 +298,16 @@ function OnEditorKey( id, isPressed )
         end
       end
       if id == 0xC0 then    -- ~
-        DoPause( true )
-        --GuiSetText( 'editor/settings.layer', 'default' )
-        DebugRender( 0 )
-        settings.editorType = 0
-        settings.editorMode = 0
-        GUI.elements.layer:SetText( 'default' )
-        OnChangeLayer( GUI.elements.layer )
-        SelectObject( '' )
-        UpdateGuiBySelectedObject()
+        SetEditorMode( 0 )
       end
       if id == 0x31 then    -- 1
-        --GuiSetText( 'editor/settings.layer', 'renderable' )
-        DoPause( true )
-        DebugRender( 1 )
-        settings.editorType = 1
-        GUI.elements.layer:SetText( 'renderable' )
-        OnChangeLayer( GUI.elements.layer )
+        SetEditorMode( 1 )
       end
       if id == 0x32 then    -- 2
-        DoPause( true )
-        --GuiSetText( 'editor/settings.layer', 'collision' )
-        DebugRender( 2 )
-        settings.editorType = 2
-        GUI.elements.layer:SetText( 'collision' )
-        OnChangeLayer( GUI.elements.layer )
+        SetEditorMode( 2 )
       end
       if id == 0x33 then    -- 3
-        DoPause( true )
-        --GuiSetText( 'editor/settings.layer', 'trigger' )
-        DebugRender( 4 )
-        settings.editorType = 3
-        GUI.elements.layer:SetText( 'trigger' )
-        OnChangeLayer( GUI.elements.layer )
+        SetEditorMode( 3 )
       end
       if id == 0x2E then    -- Del
         local object = GetSelectedObject() -- GuiGetText( 'editor/object.object_name' )
@@ -362,15 +340,6 @@ function OnEditorKey( id, isPressed )
       if id == 0x47 then    -- G: toggle showing grid
         ToggleGrid()
       end
-      if id == 0x10 then    -- Shift
-        settings.keys.isShift = isPressed
-      end
-      if id == 0x11 then    -- Control
-        settings.keys.isCtrl = isPressed
-      end
-      if id == 0x12 then    -- Alt
-        settings.keys.isAlt = isPressed
-      end
       if id == 0x0D then    -- Enter
         DoPause( not settings.gamePaused )
       end
@@ -382,6 +351,15 @@ function OnEditorKey( id, isPressed )
         settings.keys.isCtrl = false
         settings.keys.isAlt = false
       end
+  end
+  if id == 0x10 then    -- Shift
+    settings.keys.isShift = isPressed
+  end
+  if id == 0x11 then    -- Control
+    settings.keys.isCtrl = isPressed
+  end
+  if id == 0x12 then    -- Alt
+    settings.keys.isAlt = isPressed
   end
 end --) OnEditorKey
 
@@ -397,6 +375,10 @@ function DoPause( setPause )
     SetCamera( 'defaults/camera' )
   else
     SetCamera( 'player' )
+    DebugRender( 0 )
+    settings.editorType = 0
+    GUI.elements.layer:SetText( 'default' )
+    OnChangeLayer( GUI.elements.layer )
   end
 end --)
 
@@ -455,8 +437,15 @@ function OnEditorMouseKey( id, isPressed )
     end,
     [2] = function()
       if isPressed then
-        settings.editorMode = 3
-        settings.objectMode3Moved = false
+        if settings.keys.isCtrl or settings.keys.isAlt then --(
+          settings.editorMode = 22
+          local cx, cy = GetCameraPos()
+          settings.multiSelectStartPoint.x = mousePos.x + cx
+          settings.multiSelectStartPoint.y = mousePos.y + cy
+        else --)(
+          settings.editorMode = 3
+          settings.objectMode3Moved = false
+        end --)
       else
         local object = GetObjectUnderCursorByMode()
         if #object > 0 then
@@ -587,9 +576,21 @@ function OnEditorMouseKey( id, isPressed )
         if settings.multiSelectStartPoint.x == newX and settings.multiSelectStartPoint.y == newY then --( one-select
           local object = GetObjectUnderCursorByMode()
           if #object > 0 then --(
-              SelectObject( object )
-              UpdateGuiBySelectedObject()
-              settings.editorMode = 2
+            if settings.keys.isCtrl then  --( add
+              local oldObject = GetSelectedObject()
+              if( #oldObject > 0 ) then
+                object = AddObjectsToList( oldObject, object )
+              end
+            end --)
+            if settings.keys.isAlt then --( exclude
+              local oldObject = GetSelectedObject()
+              if( #oldObject > 0 ) then
+                object = RemoveObjectsFromList( oldObject, object )
+              end
+            end --)
+            SelectObject( object )
+            UpdateGuiBySelectedObject()
+            settings.editorMode = 2
           else --)(
             settings.editorMode = 0
           end --)
@@ -803,7 +804,7 @@ function EditorUpdateDebug()
     x = cx + mx - width * 0.5,
     y = cy + my - height * 0.5
   }
-  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] pixel[%d; %d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), math.floor( pos.x ), math.floor( pos.y ) ) )
+  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] pixel[%d; %d] mode[%d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), math.floor( pos.x ), math.floor( pos.y ), settings.editorMode ) )
   -- GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
   SetTimer( 0.01, 'EditorUpdateDebug', true )
 end -- EditorUpdateDebug
@@ -918,7 +919,7 @@ function RenderGUI()
     end
   end --)
   --( рамка тайла под курсором
-  if settings.editorMode == 0 and settings.gamePaused then
+  if settings.editorMode == 0 and settings.gamePaused and GUI.templates.currentItem > 0 then
     x, y = GetTilePosByPixel( mousePos.x, mousePos.y )
     left, top = GetPixelByTile( x, y )
     right, bottom = GetPixelByTile( x + 1, y + 1 )
@@ -1138,7 +1139,78 @@ function SelectObjectsInRectangle( left, top, right, bottom, editorType )
   if top > bottom then
     top, bottom = bottom, top
   end
-  local objects = '' -- = Get Object In Rectangle
-  LogWrite( left..':'..top..' => '..right..':'..bottom )
+  local cx, cy = GetCameraPos()
+  local width, height = GetWindowSize()
+  width, height = width * 0.5, height * 0.5
+  left, right, top, bottom = left - width, right - width, top - height, bottom - height
+
+  local objects = GetObjectByRect( settings.editorType, left, top, right, bottom ) --GetObjects()
+  if settings.keys.isCtrl then  -- add
+    local oldObject = GetSelectedObject()
+    if( #oldObject > 0 ) then
+      objects = oldObject..'//'..objects
+    end
+  end
+  if settings.keys.isAlt then --( exclude
+    local oldObject = GetSelectedObject()
+    if( #oldObject > 0 ) then
+      objects = RemoveObjectsFromList( oldObject, objects )
+    end
+  end
+  SelectObject( objects )
+  -- LogWrite( left..':'..top..' => '..right..':'..bottom )
   return objects
+end --)
+
+--( Переключение режима редактора на default, renderable, collision, trigger
+function SetEditorMode( setMode )
+  DoPause( true )
+  DebugRender( setMode == 0 and 0 or math.pow( 2, setMode - 1 ) )
+  settings.editorType = setMode
+  local modeToText = {
+    [0] = 'default',
+    [1] = 'renderable',
+    [2] = 'collision',
+    [3] = 'trigger',
+  }
+  GUI.elements.layer:SetText( modeToText[ setMode ] )
+  OnChangeLayer( GUI.elements.layer )
+  -- settings.editorMode = 0
+  -- SelectObject( '' )
+  UpdateGuiBySelectedObject()
+end --)
+
+--( Добавление объектов в список (для мульти-селекта)
+function AddObjectsToList( list, objects )
+  listTable = Explode( list, '//' )
+  objectsList = Explode( objects, '//' )
+  for kObj,obj in pairs( objectsList ) do
+    local alreadyExist = false
+    for kT,t in pairs( listTable ) do
+      if t == obj then
+        alreadyExist = true
+        break
+      end
+    end
+    if not alreadyExist then
+      list = list..( #list > 0 and '//' or '' )..obj
+    end
+  end
+  return list
+end --)
+
+--( Добавление объектов в список (для мульти-селекта)
+function RemoveObjectsFromList( list, objects )
+  listTable = Explode( list, '//' )
+  objectsList = Explode( objects, '//' )
+  for kObj,obj in pairs( objectsList ) do
+    for kT,t in pairs( listTable ) do
+      if t == obj then
+        table.remove( listTable, kT )
+        break
+      end
+    end
+  end
+  list = Implode( listTable, '//' )
+  return list
 end --)

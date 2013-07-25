@@ -56,6 +56,8 @@ private:
 typedef std::deque< ObjectByTrigger* > ObjectByTriggerList;
 extern ObjectByTriggerList *__objectByTrigger;
 
+typedef std::list< Object* > ObjectList;
+
 //object by gui
 /*
 struct ObjectByGui
@@ -95,7 +97,6 @@ enum ObjectGuiType {
 class Object: public IPointerOwner, public ITags, public IObject
 {
 public:
-  typedef std::list< Object* > ObjectChilds;
   struct ObjectForce  //вектор силы
   {
     long  id;
@@ -156,7 +157,7 @@ private:
   Mat4            matrixTransform;  //матрица трансформации для получения позиции объекта
 
   Object          *_parent; //объект-родитель
-  ObjectChilds    *_childs; //дочерние объекты
+  ObjectList      *_childs; //дочерние объекты
   std::string     name;     //имя объекта (root, item0001, player02...)
   std::string     nameFull; //полное имя с учетом иерархии (/root/player02/weapon0)
   ObjectForceList forces;   //перечень сил, действующих на объект
@@ -217,6 +218,8 @@ public:
   void                RemoveForce         ( long forceId );
   const Mat4&         GetMatrixTransform  ();
   Object*             GetObjectInPoint    ( const Vec2& pos );
+  void                GetObjectsInRect    ( int type, const Vec2 &leftTop, const Vec2 &rightBottom, ObjectList& result );
+  bool                TestInRect          ( int type, const Vec2 &leftTop, const Vec2 &rightBottom, bool recursive );
 
   Renderable*         EnableRenderable    ( RenderableType renderType );
   bool                DisableRenderable   ();
@@ -286,10 +289,9 @@ public:
 
   Object*             GetObject           ( const std::string& name, Object *parent = NULL );
 
-  inline
-    Object*           SetLockToDelete     ( bool lock ) { this->_isLockedToDelete = lock; return this; }
-  inline
-    bool              IsLockedToDelete    () { return this->_isLockedToDelete; }
+  inline Object*      SetLockToDelete     ( bool lock ) { this->_isLockedToDelete = lock; return this; }
+  inline Object*      SetSaveable         ( bool saveable ) { this->isSaveable = saveable; return this; }
+  inline bool         IsLockedToDelete    () { return this->_isLockedToDelete; }
 
   bool                IsHasTag            ( const std::string& tag ) const;
   void                AddTag              ( const std::string& tag );

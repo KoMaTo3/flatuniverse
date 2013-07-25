@@ -43,6 +43,7 @@ void        Dump                ( void *mem, Dword size, const std::string& comm
 std::string StrToLowerCase      ( std::string str );
 std::string StrToUpperCase      ( std::string str );
 Vec4        StringToColor       ( const std::string& str );
+bool        TestPointInRect2    ( const Vec2& point, const Vec2& leftTop, const Vec2& rightBottom );
 
 
 }//namespace tools
