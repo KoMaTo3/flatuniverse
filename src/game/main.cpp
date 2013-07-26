@@ -1787,6 +1787,26 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
     }//collisionForce
 
     //trigger
+    if( name == "triggerType" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        CollisionElementType type = trigger->GetType();
+        std::string typeName = "";
+        switch( type ) {
+        case COLLISION_ELEMENT_TYPE_SQUARE:
+          typeName = "square";
+          break;
+        case COLLISION_ELEMENT_TYPE_CIRCLE:
+          typeName = "circle";
+          break;
+        case COLLISION_ELEMENT_TYPE_POLYGON:
+          typeName = "polygon";
+          break;
+        }
+        value.SetString( typeName );
+      }
+      continue;
+    }//triggerType
     if( name == "triggerSize" ) {
       trigger = object->GetTrigger();
       if( trigger ) {
@@ -1795,6 +1815,24 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       }
       continue;
     }//triggerSize
+    if( name == "triggerPolygon" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        CollisionElementPolygon::PointList pointList;
+        if( trigger->GetPolygon( pointList ) ) {
+          std::string result = "";
+          char temp[ 1024 ];
+          for( auto &point: pointList ) {
+            sprintf_s( temp, sizeof( temp ), "%s%3.3f %3.3f", result.size() ? " " : "", point.x, point.y );
+            result += temp;
+          }
+          value.SetString( result );
+        } else {
+          value.SetString( "" );
+        }
+      }
+      continue;
+    }//triggerPolygon
 
   }
 }//LUA_ObjectAttr

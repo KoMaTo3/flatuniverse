@@ -18,7 +18,7 @@ settings = {
     guiVisibility     = false,  -- отображение GUI
 
     objectMode3Moved  = false,  -- bool если происходит перемещение объекта мышкой
-    objectMode3StartPosition = { 0, 0 },  -- начальное положение обекта, до перемещения
+    objectMode3StartPosition = { 0, 0 },  -- начальное положение объекта, до перемещения
 
     editorMode        = 0,      -- текущий режим редактора
     move              = {
@@ -27,6 +27,10 @@ settings = {
         y = 0,
       },
       mouseStart = {
+        x = 0,
+        y = 0,
+      },
+      lastOffset = {
         x = 0,
         y = 0,
       },
@@ -311,13 +315,64 @@ function OnEditorKey( id, isPressed )
       end
       if id == 0x2E then    -- Del
         local object = GetSelectedObject() -- GuiGetText( 'editor/object.object_name' )
-        if #object > 0 then
-          ObjectRemove( object )
-          SelectObject( '' )
-          if settings.editorMode == 2 then
-            settings.editorMode = 0
+        local objectList = Explode( object, '//' )
+        for num,name in pairs( objectList ) do --(
+          -- buffer
+          local
+            x, y, z
+            , isRenderable, isCollision, isTrigger
+            , setTextureName, renderableSizeX, renderableSizeY, renderablePositionX, renderablePositionY, colorR, colorG, colorB, colorA, renderableScaleX, renderableScaleY, setRenderableRotation
+            , collisionSizeX, collisionSizeY, collisionAccelerationX, collisionAccelerationY
+            =
+            ObjectAttr( name, {
+              'position'
+              , 'renderable', 'collision', 'trigger'
+              , 'textureName', 'renderableSize', 'renderablePosition', 'color', 'renderableScale', 'renderableRotation'
+              , 'collisionSize', 'collisionAcceleration'
+            } )
+          local
+            triggerType
+            , setCollisionStatic, collisionForceX, collisionForceY, collisionVelocityX, collisionVelocityY
+            =
+            ObjectAttr( name, {
+              'triggerType'
+              , 'collisionStatic', 'collisionForce', 'collisionVelocity'
+            } )
+          local setTriggerPolygon = ''
+          if triggerType == "polygon" then
+            setTriggerPolygon = ObjectAttr( name, { 'triggerPolygon' } )
           end
+          PushToBuffer( function()
+            end, function()
+              ObjectCreate( name, x, y, z )
+              ObjectAttr( name, { renderable = isRenderable, collision = isCollision, trigger = isTrigger } )
+              if isRenderable then
+                ObjectAttr( name, {
+                  textureName = setTextureName, renderableSize = renderableSizeX..' '..renderableSizeY, renderablePosition = renderablePositionX..' '..renderablePositionY
+                  , color = colorR..' '..colorG..' '..colorB..' '..colorA, renderableScale = renderableScaleX..' '..renderableScaleY, renderableRotation = setRenderableRotation
+                } )
+              end
+              if isCollision then
+                ObjectAttr( name, {
+                  collisionSize = collisionSizeX..' '..collisionSizeY, collisionAcceleration = collisionAccelerationX..' '..collisionAccelerationY
+                  -- , collisionVelocity = collisionVelocityX..' '..collisionVelocityY --, collisionStatic = setCollisionStatic, collisionForce = collisionForceX..' '..collisionForceY
+                } )
+              end
+              if isTrigger then
+                if triggerType == "polygon" then
+                  ObjectAttr( name, { triggerPolygon = setTriggerPolygon } )
+                end
+              end
+            end
+          )
+          --
+          ObjectRemove( name )
+        end --)
+        SelectObject( '' )
+        if settings.editorMode == 2 then
+          settings.editorMode = 0
         end
+        UpdateGuiBySelectedObject()
       end
       if id == 0x20 then    -- Space
         SelectObject( '' )
@@ -459,6 +514,7 @@ function OnEditorMouseKey( id, isPressed )
       else
         if settings.objectMode3Moved then
           settings.editorMode = 2
+          --[[
           local x, y = ObjectGetPos( GetSelectedObject() )
           settings.objectMode3Moved = false
           if settings.objectMode3StartPosition[ 1 ] ~= x or settings.objectMode3StartPosition[ 2 ] ~= y then
@@ -471,6 +527,7 @@ function OnEditorMouseKey( id, isPressed )
               end
             )
           end
+          ]]
         else
           local object = GetObjectUnderCursorByMode()
           SelectObject( object )
@@ -589,7 +646,6 @@ function OnEditorMouseKey( id, isPressed )
               end
             end --)
             SelectObject( object )
-            UpdateGuiBySelectedObject()
             settings.editorMode = 2
           else --)(
             settings.editorMode = 0
@@ -602,6 +658,7 @@ function OnEditorMouseKey( id, isPressed )
             settings.editorMode = 0
           end
         end --)
+        UpdateGuiBySelectedObject()
       end --)
     end, --) 22
   }
@@ -631,23 +688,43 @@ function OnEditorMouseMove( x, y )
       end,
       [3] = function()
         local object = GetSelectedObject()
-        local oldX, oldY = ObjectGetPos( object )
+        -- local oldX, oldY = ObjectGetPos( object )
         if not settings.objectMode3Moved then
-          settings.move.objectStart.x = oldX
-          settings.move.objectStart.y = oldY
+          -- settings.move.objectStart.x = oldX
+          -- settings.move.objectStart.y = oldY
           settings.move.mouseStart.x = mousePos.x
           settings.move.mouseStart.y = mousePos.y
+          settings.move.lastOffset.x = 0
+          settings.move.lastOffset.y = 0
         end
-        local newX = settings.move.objectStart.x + x - settings.move.mouseStart.x
-        local newY = settings.move.objectStart.y + y - settings.move.mouseStart.y
-        local tileSize = GetTileSize()
+        -- local newX = settings.move.objectStart.x + x - settings.move.mouseStart.x
+        -- local newY = settings.move.objectStart.y + y - settings.move.mouseStart.y
+        local tileSize = tonumber( GetTileSize() )
         local offsetX, offsetY = GetTileOffset()
-        newX = math.floor( newX / tileSize ) * tileSize + offsetX
-        newY = math.floor( newY / tileSize ) * tileSize + offsetY
-        if not settings.objectMode3Moved then
-          settings.objectMode3StartPosition = { oldX, oldY }
+        objectList = Explode( object, '//' )
+        local dx, dy = math.floor( ( mousePos.x - settings.move.mouseStart.x ) / tileSize ) * tileSize, math.floor( ( mousePos.y - settings.move.mouseStart.y ) / tileSize ) * tileSize
+        local moveByX, moveByY = -settings.move.lastOffset.x + dx, -settings.move.lastOffset.y + dy
+        settings.move.lastOffset.x = settings.move.lastOffset.x + moveByX
+        settings.move.lastOffset.y = settings.move.lastOffset.y + moveByY
+        LogWrite( settings.move.lastOffset.x..':'..settings.move.lastOffset.y..' => '..moveByX..':'..moveByY )
+        for num,name in pairs( objectList ) do
+          local x, y = ObjectGetPos( name )
+          ObjectSetPos( name, x + moveByX, y + moveByY )
+          -- newX = math.floor( newX / tileSize ) * tileSize + offsetX
+          -- newY = math.floor( newY / tileSize ) * tileSize + offsetY
         end
-        ObjectSetPos( object, newX, newY )
+        -- buffer
+        if moveByX ~= 0 or moveByY ~= 0 then
+          PushToBuffer( function()
+            end, function()
+              for num,name in pairs( objectList ) do
+                local x, y = ObjectGetPos( name )
+                ObjectSetPos( name, x - moveByX, y - moveByY )
+              end
+            end
+          )
+        end
+        --
         settings.objectMode3Moved = true
       end,
       [20] = function()
@@ -811,69 +888,60 @@ end -- EditorUpdateDebug
 
 function UpdateGuiBySelectedObject()
   local object = GetSelectedObject()
-  local elements = {
-    -- 'editor/object.object_name',
-    GUI.elements.isRenderable,
-    'editor/object.is_renderable',
-    -- 'editor/renderable.texture_name',
-    -- 'editor/object.is_collision',
-    -- 'editor/object.is_static',
-    -- 'editor/object.is_trigger',
-    -- 'editor/renderable.width',
-    -- 'editor/renderable.height',
-  }
-  if #object < 1 then
-    for key, element in pairs( elements ) do
-      -- elements[ i ]:SetText( false )
-      GUI.elements.objectName:SetEnabled( false )
-      GUI.elements.objectName:SetText( '' )
-      GUI.elements.isRenderable:SetEnabled( false )
-      GUI.elements.isRenderable:SetIsChecked( false )
-      GUI.elements.isCollision:SetEnabled( false )
-      GUI.elements.isCollision:SetIsChecked( false )
-      GUI.elements.isTrigger:SetEnabled( false )
-      GUI.elements.isTrigger:SetIsChecked( false )
-      -- GuiAttr( elements[ i ], 'enabled', false )
-      -- GuiAttr( elements[ i ], 'checked', false )
+  local objectList = Explode( object, '//' )
+  local doReset = false
+  if( #objectList == 1 ) then --( one object
+    if #object < 1 then
+      doReset = true
+    else
+      local isRenderable
+          , isCollision
+          , isTrigger
+          , textureName
+          , renderableSizeX
+          , renderableSizeY
+          = ObjectAttr( object, {
+            'renderable',
+            'collision',
+            'trigger',
+            'textureName',
+            'renderableSize',
+          } )
+      GUI.elements.objectName:SetEnabled( true )
+      GUI.elements.objectName:SetText( object )
+      GUI.elements.isRenderable:SetEnabled( true )
+      GUI.elements.isRenderable:SetIsChecked( isRenderable )
+      GUI.elements.isCollision:SetEnabled( true )
+      GUI.elements.isCollision:SetIsChecked( isCollision )
+      GUI.elements.isTrigger:SetEnabled( true )
+      GUI.elements.isTrigger:SetIsChecked( isTrigger )
     end
-  else
-    local isRenderable
-        , isCollision
-        , isTrigger
-        , textureName
-        , renderableSizeX
-        , renderableSizeY
-        = ObjectAttr( object, {
-          'renderable',
-          'collision',
-          'trigger',
-          'textureName',
-          'renderableSize',
-        } )
-    GUI.elements.objectName:SetEnabled( true )
-    GUI.elements.objectName:SetText( object )
+  else --)( multi-object
+    local isRenderable, isCollision, isTrigger = false, false, false
+    for num,name in pairs( objectList ) do
+      isRenderable = isRenderable or ObjectAttr( name, { 'renderable' } )
+      isCollision = isCollision or ObjectAttr( name, { 'collision' } )
+      isTrigger = isTrigger or ObjectAttr( name, { 'trigger' } )
+    end
+    GUI.elements.objectName:SetEnabled( false )
+    GUI.elements.objectName:SetText( '' )
     GUI.elements.isRenderable:SetEnabled( true )
     GUI.elements.isRenderable:SetIsChecked( isRenderable )
     GUI.elements.isCollision:SetEnabled( true )
     GUI.elements.isCollision:SetIsChecked( isCollision )
     GUI.elements.isTrigger:SetEnabled( true )
     GUI.elements.isTrigger:SetIsChecked( isTrigger )
-    --[[
-    GuiAttr( 'editor/object.is_renderable', 'enabled', true )
-    GuiAttr( 'editor/object.is_collision', 'enabled', true )
-    GuiAttr( 'editor/object.is_trigger', 'enabled', true )
-    GuiAttr( 'editor/renderable.width', 'enabled', isRenderable )
-    GuiAttr( 'editor/renderable.height', 'enabled', isRenderable )
-    GuiAttr( 'editor/renderable.texture_name', 'enabled', isRenderable )
-    GuiAttr( 'editor/object.is_renderable', 'checked', isRenderable )
-    GuiAttr( 'editor/object.is_collision', 'checked', isCollision )
-    GuiAttr( 'editor/object.is_trigger', 'checked', isTrigger )
-    GuiSetText( 'editor/renderable.texture_name', textureName )
-    GuiSetText( 'editor/renderable.width', renderableSizeX )
-    GuiSetText( 'editor/renderable.height', renderableSizeY )
-    ]]
+  end --)
+  if doReset then
+    GUI.elements.objectName:SetEnabled( false )
+    GUI.elements.objectName:SetText( '' )
+    GUI.elements.isRenderable:SetEnabled( false )
+    GUI.elements.isRenderable:SetIsChecked( false )
+    GUI.elements.isCollision:SetEnabled( false )
+    GUI.elements.isCollision:SetIsChecked( false )
+    GUI.elements.isTrigger:SetEnabled( false )
+    GUI.elements.isTrigger:SetIsChecked( false )
   end
-  -- GuiSetText( 'editor/object.object_name', object )
 end --UpdateGuiBySelectedObject
 
 --[[

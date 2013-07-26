@@ -771,3 +771,17 @@ void Collision::AddHandler( CollisionHandler *handler ) {
 }//AddHandler
 
 
+
+/*
+=============
+  GetPolygon
+=============
+*/
+bool Collision::GetPolygon( CollisionElementPolygon::PointList& result ) {
+  if( this->GetType() != COLLISION_ELEMENT_TYPE_POLYGON ) {
+    result.clear();
+    return false;
+  }
+  static_cast< CollisionElementPolygon* >( this->collisionElement )->GetPointList( result );
+  return true;
+}//GetPolygon

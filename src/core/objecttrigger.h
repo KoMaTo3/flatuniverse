@@ -97,6 +97,8 @@ public:
   bool            TestInPoint   ( const Vec2 &pos );
   bool            TestIntersectRect ( const Vec2 &leftTop, const Vec2 &rightBottom );
   void            Redraw        ( float phase, const Vec3 &offset, bool isActive );
+  inline CollisionElementType GetType() { return ( this->triggerRect ? this->triggerRect->GetType() : COLLISION_ELEMENT_TYPE_UNDEFINED ); }
+  bool            GetPolygon( CollisionElementPolygon::PointList& result );
 
   void  AddOnRemoveHandler      ( ObjectTriggerOnRemoveHandler handler );
 

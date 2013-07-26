@@ -521,6 +521,18 @@ void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
 }//SetPointList
 
 
+
+/*
+=============
+  GetPointList
+=============
+*/
+void CollisionElementPolygon::GetPointList( PointList &points ) {
+  points = this->pointsSource;
+}//GetPointList
+
+
+
 /*
 =============
   Update

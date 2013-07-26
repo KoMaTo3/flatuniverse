@@ -302,3 +302,19 @@ void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const std::string &thi
     }
   }
 }//LoadFromBuffer
+
+
+
+/*
+=============
+  GetPolygon
+=============
+*/
+bool ObjectTrigger::GetPolygon( CollisionElementPolygon::PointList& result ) {
+  result.clear();
+  if( this->GetType() != COLLISION_ELEMENT_TYPE_POLYGON ) {
+    return false;
+  }
+  this->triggerRect->GetPolygon( result );
+  return true;
+}//GetPolygon

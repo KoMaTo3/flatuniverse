@@ -114,6 +114,7 @@ public:
   bool        Update          ( float dt );
   void        ResolveCollision();
   void        AddHandler      ( CollisionHandler *handler );
+  inline CollisionElementType GetType() { return ( this->collisionElement ? this->collisionElement->GetType() : COLLISION_ELEMENT_TYPE_UNDEFINED ); }
 
   void        SaveToBuffer    ( MemoryWriter &writer );
   void        LoadFromBuffer  ( MemoryReader &reader, const std::string &thisObjectName, const Dword version );
@@ -123,6 +124,7 @@ public:
   Vec3&       GetSquareSizeModifier() {
     return static_cast< CollisionElementSquare* >( this->collisionElement )->GetSizeModifier();
   }
+  bool        GetPolygon( CollisionElementPolygon::PointList& result );
 
   void        Render          ( float phase, const Vec3 &offset, bool isActive );
 
