@@ -181,8 +181,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
 
   if( !screenWidth )
   {
-    screenWidth   = ( WORD ) __config->GetNumber( "gl_screen_width" );
-    screenHeight  = ( WORD ) __config->GetNumber( "gl_screen_height" );
+    screenWidth   = ( WORD ) __config->GetNumber( "gl_screen_width", 800 );
+    screenHeight  = ( WORD ) __config->GetNumber( "gl_screen_height", 600 );
   }
 
   DWORD style   = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;  //WS_POPUP for fullscreen

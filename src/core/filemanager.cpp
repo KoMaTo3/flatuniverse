@@ -369,7 +369,7 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
   //__log.PrintInfo( Filelevel_DEBUG, "FileManager::GetFile ( '%s' )", fileName.c_str() );
   if( this->_items.find( fileName ) == this->_items.end() )
   {
-    __log.PrintInfo( Filelevel_ERROR, "FileManager::GetFile => file '%S' not found", fileName.c_str() );
+    __log.PrintInfo( Filelevel_ERROR, "FileManager::GetFile => file '%s' not found", fileName.c_str() );
     return false;
   }
 
