@@ -31,9 +31,13 @@ public:
     this->_time = setTime;
   }
   void SetEnabled( bool isEnabled );
+  bool GetEnabled() const;
   void __Dump( const std::string &prefix = "" );
   template< class TAnimation >
   void MakeFromTemplate( const AnimationSet& set, IAnimationObject *object );
+  inline float GetTime() const {
+    return this->_time;
+  }
 
 private:
   typedef std::shared_ptr< IAnimation > AnimationPtr;

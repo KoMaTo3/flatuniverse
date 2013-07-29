@@ -17,7 +17,7 @@ IObject::~IObject() {
 }
 
 
-Animation::AnimationPack* IObject::ApplyAnimation( const std::string& templateName, const std::string& animationName ) {
+Animation::AnimationPack* IObject::ApplyAnimation( const std::string& templateName, const std::string& animationName, float startTime ) {
   Animation::AnimationPack *templatePack = Animation::GetPackTemplate( templateName );
   if( !templatePack ) {
     __log.PrintInfo( Filelevel_ERROR, "IObject::ApplyAnimation => animation '%s' not found", templateName.c_str() );
@@ -35,7 +35,7 @@ Animation::AnimationPack* IObject::ApplyAnimation( const std::string& templateNa
 
   this->_animation = new Animation::AnimationPack();
   ( this->_animation )->MakeFromTemplate< AnimationObject >( *templatePack, AnimationObject::SetParameterOfExternAnimation, this );
-  ( this->_animation )->SetCurrentAnimation( animationName );
+  ( this->_animation )->SetCurrentAnimation( animationName, startTime );
   this->_animationTemplate = templatePack;
 
   return this->_animation;

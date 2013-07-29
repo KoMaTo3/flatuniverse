@@ -29,7 +29,7 @@ public:
   virtual Vec3& GetCollisionOffsetPtr() = NULL;
   //virtual IAnimationObject* MakeInstance() = NULL;
 
-  Animation::AnimationPack *ApplyAnimation( const std::string& templateName, const std::string& animationName = "default" );
+  Animation::AnimationPack *ApplyAnimation( const std::string& templateName, const std::string& animationName = "default", float startTime = 0.0f );
   Animation::AnimationPack *ApplySubAnimation( const std::string& animationName );
   void StopAnimation();
   inline Animation::AnimationPack *GetAnimation() {

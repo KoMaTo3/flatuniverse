@@ -1,6 +1,7 @@
 #include "object.h"
 #include "file.h"
 #include "tools.h"
+#include "animationpack.h"
 //#include "glui2/glui2.h"
 
 extern CoreRenderableList *__coreRenderableList;
@@ -1230,7 +1231,7 @@ void Object::RemoveForce( long forceId )
 */
 void Object::SaveToBuffer( MemoryWriter &writer )
 {
-  bool isRenderable, isCollision, isTrigger;
+  bool isRenderable, isCollision, isTrigger, isAnimation;
 
   isRenderable = this->IsRenderable();
   writer << isRenderable;  //renderable true/false
@@ -1261,6 +1262,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
     this->tags->SaveToBuffer( writer );
   }
 
+  //childs
   Dword childsCount = 0;
   if( !this->_childs ) {
     writer << childsCount;
@@ -1282,6 +1284,13 @@ void Object::SaveToBuffer( MemoryWriter &writer )
       }
     }
   }
+
+  //animation
+  isAnimation = ( this->_animation != NULL );
+  writer << isAnimation;
+  if( isAnimation ) {
+    this->_animation->SaveToBuffer( writer );
+  }
 }//SaveToBuffer
 
 
@@ -1294,7 +1303,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 */
 void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dword version )
 {
-  bool isRenderable, isCollision, isTrigger;
+  bool isRenderable, isCollision, isTrigger, isAnimation;
   std::string tmpName, parentName;
   Vec3 position;
 
@@ -1349,6 +1358,20 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
       child->LoadFromBuffer( reader, this, version );
     }
     //__log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
+  }
+
+  if( version >= 0x00000006 ) {
+    //animation
+    reader >> isAnimation;
+    if( isAnimation ) {
+      std::string templateName = "", animationName = "";
+      float startTime;
+      reader >> templateName;
+      reader >> animationName;
+      reader >> startTime;
+      __log.PrintInfo( Filelevel_DEBUG, "LoadFromBuffer => animationTemplate['%s'] name['%s'] time[%3.3f]", templateName.c_str(), animationName.c_str(), startTime );
+      this->ApplyAnimation( templateName, animationName, startTime )->SetEnabled( true );
+    }
   }
 }//LoadFromBuffer
 

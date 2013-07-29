@@ -107,6 +107,19 @@ void AnimationPack::SetEnabled( bool setEnabled ) {
 }//SetEnabled
 
 
+
+void AnimationPack::SaveToBuffer( MemoryWriter &writer ) {
+  writer << this->_name;
+  if( this->_currentAnimation ) {
+    writer << this->_currentAnimation->GetName();
+    writer << this->_currentAnimation->GetTime();
+  } else {
+    __log.PrintInfo( Filelevel_ERROR, "AnimationPack::SaveToBuffer => no current animation" );
+  }
+}//SaveToBuffer
+
+
+
 void Animation::Update( float dt ) {
   for( auto &pack: __animationPackActiveList ) {
     pack->Update( dt );
