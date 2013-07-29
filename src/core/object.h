@@ -272,6 +272,9 @@ public:
   virtual Vec3& GetCollisionSquareSize() {
     return ( this->IsCollision() ? this->GetCollision()->GetSquareSizeModifier() : this->EnableCollision()->InitSquare( Vec3( 1.0f, 1.0f, 0.0f ) )->GetSquareSizeModifier() );
   }
+  virtual Vec3& GetCollisionOffsetPtr() {
+    return ( this->IsCollision() ? this->GetCollision()->GetOffsetModifier() : this->EnableCollision()->InitSquare( Vec3( 1.0f, 1.0f, 0.0f ) )->GetOffsetModifier() );
+  }
   virtual IAnimationObject* MakeInstance( const std::string& setName );
 
   /*

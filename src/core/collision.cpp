@@ -17,9 +17,10 @@ Collision::CollisionHandler *Collision::defaultCollisionHandler = NULL;
 
 Collision::Collision( Vec3* objectPosition )
 :position( NULL ), velocity( 0.0f, 0.0f, 0.0f ), acceleration( 0.0f, 0.0f, 0.0f ), isStatic( true ), mass( 1.0f )
-, force( 0.0f, 0.0f, 0.0f ), collisionElement( NULL ), handlers( NULL )
+, force( 0.0f, 0.0f, 0.0f ), collisionElement( NULL ), handlers( NULL ), offset( Vec3Null ), positionLast( 0.0f, 0.0f, 0.0f )
 {
   this->position = objectPosition;
+  this->positionResult = *this->position + this->offset;
 }//constructor
 
 
@@ -44,10 +45,12 @@ bool Collision::Update( float dt )
   if( !this->position )
     return false;
 
+  this->positionLast = this->positionResult;
   //__log.PrintInfo( Filelevel_DEBUG, "Collision::Update => dt[%3.3f] pos[%3.3f;%3.3f] vel[%3.3f;%3.3f] acc[%3.3f;%3.3f]", dt, this->position->x, this->position->y, this->velocity.x, this->velocity.y, this->acceleration.x, this->acceleration.y );
   this->velocity += this->acceleration * dt;
   this->velocity.y *= COLLISION_FRICTION_FORCE;
   *this->position += ( this->velocity + this->force ) * dt;
+  this->positionResult = *this->position + this->offset;
 
   //пересчет характеристик
   /*
@@ -107,6 +110,7 @@ Collision* Collision::SetPosition( const Vec3& newPosition )
     return this;
   }
   *this->position = newPosition;
+  this->positionResult = *this->position + this->offset;
   return this;
 }//SetPosition
 
@@ -125,6 +129,7 @@ Collision* Collision::SetPositionBy( const Vec3& deltaPosition )
     return this;
   }
   *this->position += deltaPosition;
+  this->positionResult = *this->position + this->offset;
   return this;
 }//SetPositionBy
 
@@ -138,7 +143,7 @@ Collision* Collision::SetPositionBy( const Vec3& deltaPosition )
 Collision* Collision::InitSquare( const Vec3& newSize )
 {
   if( !this->collisionElement ) {
-    CollisionElementSquare *item = new CollisionElementSquare( this->position, &this->_rect );
+    CollisionElementSquare *item = new CollisionElementSquare( &this->positionResult, &this->_rect );
     this->collisionElement = item;
     item->SetSize( newSize );
     //__log.PrintInfo( Filelevel_DEBUG, "Collision::InitSquare => size[%3.1f; %3.1f; %3.1f;]", newSize.x, newSize.y, newSize.z );
@@ -164,7 +169,7 @@ Collision* Collision::InitCircle( float setDiameter ) {
     __log.PrintInfo( Filelevel_ERROR, "Collision::InitCircle => already initialized" );
     return this;
   }
-  CollisionElementCircle *item = new CollisionElementCircle( this->position, &this->_rect );
+  CollisionElementCircle *item = new CollisionElementCircle( &this->positionResult, &this->_rect );
   this->collisionElement = item;
   item->SetDiameter( setDiameter );
 
@@ -183,7 +188,7 @@ Collision* Collision::InitPolygon( const CollisionElementPolygon::PointList &poi
     __log.PrintInfo( Filelevel_ERROR, "Collision::InitPolygon => already initialized" );
     return this;
   }
-  CollisionElementPolygon *item = new CollisionElementPolygon( this->position, &this->_rect );
+  CollisionElementPolygon *item = new CollisionElementPolygon( &this->positionResult, &this->_rect );
   this->collisionElement = item;
   item->SetPointList( points );
 
@@ -200,9 +205,7 @@ Collision* Collision::InitPolygon( const CollisionElementPolygon::PointList &poi
 */
 const Vec3& Collision::GetPosition () const
 {
-  if( !this->position )
-    return __nullCollisionPosition;
-  return *this->position;
+  return this->positionResult;
 }//GetPosition
 
 

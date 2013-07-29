@@ -187,6 +187,13 @@ IAnimationParameter* AnimationObject::SetParameter( AnimationSpriteParameterType
     value->Bind( this->_object->GetCollisionSquareSize() );
     break;
     }
+  case COLLISION_OFFSET: {
+    __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => COLLISION_OFFSET" );
+    AnimationParameterFloat3 *value = new AnimationParameterFloat3();
+    parameter = value;
+    value->Bind( this->_object->GetCollisionOffsetPtr() );
+    break;
+    }
   default:
     __log.PrintInfo( Filelevel_ERROR, "AnimationObject::SetParameter => can't bind parameter x%X", parameterType );
   }

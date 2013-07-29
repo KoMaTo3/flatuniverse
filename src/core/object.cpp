@@ -1694,5 +1694,6 @@ IAnimationObject* Object::MakeInstance( const std::string& setName ) {
   if( !child ) {
     child = new Object( setName, this, false );
   }
+  child->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   return child;
 }

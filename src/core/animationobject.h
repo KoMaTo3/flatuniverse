@@ -26,7 +26,7 @@ public:
   virtual float* GetRenderableRotationPtr() = NULL;
   virtual Vec4& GetColorPtr() = NULL;
   virtual Vec3& GetCollisionSquareSize() = NULL;
-  //virtual Vec3& GetPositionPtr() = NULL;
+  virtual Vec3& GetCollisionOffsetPtr() = NULL;
   //virtual IAnimationObject* MakeInstance() = NULL;
 
   Animation::AnimationPack *ApplyAnimation( const std::string& templateName, const std::string& animationName = "default" );

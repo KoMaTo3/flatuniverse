@@ -3,7 +3,7 @@
 #include "file.h"
 
 CollisionList *__collisionList = NULL;
-
+CollisionPairList __collisionPairList;
 
 
 CollisionManager::CollisionManager()
@@ -11,6 +11,7 @@ CollisionManager::CollisionManager()
 {
   if( !__collisionList )
     __collisionList = new CollisionList();
+  __collisionPairList.reserve( 256 );
 }//constructor
 
 
@@ -41,6 +42,22 @@ bool CollisionManager::Update( float dt )
   while( this->time > COLLISION_UPDATE_FREQUENCY || forceUpdate )
   {
     //Обновляем позиции, сбрасываем решения коллизий
+    __log.PrintInfo( Filelevel_DEBUG, "__collisionPairList => count[%d]", __collisionPairList.size() );
+    for( auto &pair: __collisionPairList ) {
+      int exists = 0;
+      auto iterEnd = __collisionList->end();
+      for( auto iter = __collisionList->begin(); iter != iterEnd && exists < 2; ++iter ) {
+        if( *iter == pair.platform || *iter == pair.target ) {
+          ++exists;
+        }
+      }
+      if( exists == 2 ) {
+        pair.target->SetPositionBy( pair.platform->GetOffsetFromLastPosition() );
+        __log.PrintInfo( Filelevel_DEBUG, "__collisionPairList => move by[%3.3f; %3.3f]", pair.platform->GetOffsetFromLastPosition().x, pair.platform->GetOffsetFromLastPosition().y );
+      }
+    }
+    __collisionPairList.clear();
+
     for( iter0 = __collisionList->begin(); iter0 != iterEnd; ++iter0 )
       ( *iter0 )->Update( updateInterval );
 
@@ -75,6 +92,10 @@ bool CollisionManager::Update( float dt )
             //__log.PrintInfo( Filelevel_DEBUG, "test" );
             if( ( *iter0 )->TestIntersect( **iter1 ) )
             {
+              __collisionPairList.push_back( CollisionPair( *iter1, *iter0 ) );
+              if( !( *iter1 )->IsStatic() ) {
+                __collisionPairList.push_back( CollisionPair( *iter0, *iter1 ) );
+              }
               //__log.PrintInfo( Filelevel_DEBUG, "intersect" );
             }
           }//CheckDistance

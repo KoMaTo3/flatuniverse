@@ -220,7 +220,7 @@ function PlayerControl( id, isPressed )
     end
 
     if id == 0x10 and isPressed then  -- test
-      local object = 'wall.174.58.1.050000'
+      local object = 'wall.161.63.2.010000'
       ObjectSetAnimation( object, 'lift/small', 'down' )
     end
   end -- !settings.gamePaused
