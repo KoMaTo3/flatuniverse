@@ -1106,7 +1106,7 @@ void Object::Update( float dt )
       if( !renderable ) {
         break;
       }
-      renderable->SetPosition( this->position );
+      renderable->SetPosition( Vec3( Math::Floor( this->position.x ), Math::Floor( this->position.y ), this->position.z ) );
       renderable->CheckChanges();
       /*
       if( *renderable->GetEnabledPtr() != *renderable->GetPrevEnabledPtr() ) {
