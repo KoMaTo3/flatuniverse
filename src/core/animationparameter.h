@@ -2,7 +2,7 @@
 #define __ANIMATIONPARAMETER_H__
 
 
-#include <deque>
+#include <vector>
 
 
 #include "klib.h"
@@ -51,7 +51,7 @@ public:
 private:
   float *_value;
   typedef KeyFrame< float > KeyFrameType;
-  typedef std::deque< KeyFrameType > KeyFramesList;
+  typedef std::vector< KeyFrameType > KeyFramesList;
   KeyFramesList _keyFrames;
 };
 
@@ -77,7 +77,7 @@ public:
 private:
   float *_value[ 2 ];
   typedef KeyFrame< Vec2 > KeyFrameType;
-  typedef std::deque< KeyFrameType > KeyFramesList;
+  typedef std::vector< KeyFrameType > KeyFramesList;
   KeyFramesList _keyFrames;
 };
 
@@ -103,7 +103,7 @@ public:
 private:
   float *_value[ 3 ];
   typedef KeyFrame< Vec3 > KeyFrameType;
-  typedef std::deque< KeyFrameType > KeyFramesList;
+  typedef std::vector< KeyFrameType > KeyFramesList;
   KeyFramesList _keyFrames;
 };
 
@@ -129,7 +129,7 @@ public:
 private:
   float *_value[ 4 ];
   typedef KeyFrame< Vec4 > KeyFrameType;
-  typedef std::deque< KeyFrameType > KeyFramesList;
+  typedef std::vector< KeyFrameType > KeyFramesList;
   KeyFramesList _keyFrames;
 };
 
@@ -156,7 +156,7 @@ private:
   std::hash< std::string > _valueHasher;
   size_t _valueHash;
   typedef KeyFrame< std::string > KeyFrameType;
-  typedef std::deque< KeyFrameType > KeyFramesList;
+  typedef std::vector< KeyFrameType > KeyFramesList;
   KeyFramesList _keyFrames;
 
   void _SetValue( const std::string &newValue );
@@ -183,7 +183,7 @@ public:
 private:
   bool *_value;
   typedef KeyFrame< bool > KeyFrameType;
-  typedef std::deque< KeyFrameType > KeyFramesList;
+  typedef std::vector< KeyFrameType > KeyFramesList;
   KeyFramesList _keyFrames;
 };
 

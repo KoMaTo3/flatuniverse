@@ -7,7 +7,6 @@
 #include "../gl/gl3.h"
 #include "../gl/gl.h"
 #include <string>
-#include <deque>
 #include <list>
 //#include "glui2/glui2.h"
 
@@ -79,7 +78,7 @@ private:
   } _build;
 
   CoreStates  _state;       //состояние ядра
-  std::deque< std::string >   _extensions;  //перечень расширений OpenGL
+  std::vector< std::string >  _extensions;  //перечень расширений OpenGL
   //std::list< Object* >        _objects;
   Object                      *_rootObject; //корневой объект сцены
   //Object                      *_rootGUIObject;  //корневой объект GUI

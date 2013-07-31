@@ -74,7 +74,7 @@ private:
     bool        useAllAxices;
     Collision   *target;
   };
-  typedef std::deque< CollisionResolver > CollisionResolverList;
+  typedef std::vector< CollisionResolver > CollisionResolverList;
   CollisionResolverList resolver;
 
   DISALLOW_COPY_AND_ASSIGN( Collision );

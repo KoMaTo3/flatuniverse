@@ -1,7 +1,7 @@
 #pragma once
 
 #include "klib.h"
-#include <deque>
+#include <vector>
 
 
 #define RGBA( r, g, b, a ) ( (r) | (g<<8) | (b<<16) | a<<24 )
@@ -20,7 +20,7 @@
 namespace tools
 {
 
-std::deque< std::string >  Explode ( const std::string& source, const std::string& separator );
+std::vector< std::string >  Explode ( const std::string& source, const std::string& separator );
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 

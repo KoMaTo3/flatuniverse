@@ -765,8 +765,8 @@ void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos, int notIn
   Object *obj       = NULL;
   if( slashPos > 0 ) {
     std::string fullPath = &name[ slashPos ];
-    std::deque< std::string > path = tools::Explode( name, "/" );
-    std::deque< std::string >::iterator iter, iterEnd = path.end();
+    std::vector< std::string > path = tools::Explode( name, "/" );
+    std::vector< std::string >::iterator iter, iterEnd = path.end();
     std::string currentPath = "";
     for( iter = path.begin(); iter != iterEnd; ++iter ) {
       //__log.PrintInfo( Filelevel_DEBUG, ". iter: '%s'", iter->c_str() );

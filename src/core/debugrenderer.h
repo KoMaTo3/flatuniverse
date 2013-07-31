@@ -2,7 +2,6 @@
 
 #include "klib.h"
 #include "font.h"
-#include <deque>
 #include <unordered_map>
 
 
@@ -16,7 +15,7 @@ class DebugRendererObject;
 
 class DebugRenderer {
 public:
-  typedef std::deque< DebugRendererObject* > ObjectsList;
+  typedef std::vector< DebugRendererObject* > ObjectsList;
 
   DebugRenderer();
   virtual ~DebugRenderer();

@@ -474,7 +474,7 @@ bool Core::_CheckShaderError( const std::string& text, GLuint shader )
 bool Core::IsExtensionExist( const std::string extensionName )
 {
   //for( unsigned long num = 0; num < this->_extensions.size(); ++num )
-  for( std::deque< std::string >::iterator iter = this->_extensions.begin(); iter != this->_extensions.end(); ++iter )
+  for( auto iter = this->_extensions.begin(); iter != this->_extensions.end(); ++iter )
     if( *iter == extensionName )
       return true;
   return false;
@@ -500,7 +500,7 @@ void Core::_InitExtensions()
   {
     ::wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC) wglGetProcAddress ( "wglGetExtensionsStringARB" );
     //__log.PrintInfo( Filelevel_DEBUG, "Core::InitExtensions => wglGetExtensionsStringARB = x%X", wglGetExtensionsStringARB );
-    std::deque< std::string > ext = tools::Explode( std::string( ( const char* ) ::wglGetExtensionsStringARB( this->_window.dc ) ), " " );
+    std::vector< std::string > ext = tools::Explode( std::string( ( const char* ) ::wglGetExtensionsStringARB( this->_window.dc ) ), " " );
     //__log.PrintInfo( Filelevel_INFO, "WGL extensions:\n. %s", Implode( ext, "\n. " ).c_str() );
   }
 

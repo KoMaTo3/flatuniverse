@@ -6,6 +6,7 @@
 #include "lua.h"
 #include <vector>
 #include <map>
+#include <list>
 
 class Lua;
 
@@ -34,7 +35,7 @@ public:
   std::vector< GameLuaTimer > luaTimers;
 
   //lua-слушатели клавиатуры и мыши
-  typedef std::deque< std::string > luaKeyboardListenersList;
+  typedef std::vector< std::string > luaKeyboardListenersList;
   luaKeyboardListenersList
       luaKeyboardListeners,
       luaMouseKeyListeners,

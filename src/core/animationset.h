@@ -2,7 +2,7 @@
 #define __ANIMATIONSET_H__
 
 
-#include <deque>
+#include <vector>
 #include <memory>
 #include <string>
 
@@ -41,7 +41,7 @@ public:
 
 private:
   typedef std::shared_ptr< IAnimation > AnimationPtr;
-  typedef std::deque< AnimationPtr > AnimationList;
+  typedef std::vector< AnimationPtr > AnimationList;
   AnimationList _animationList;
   std::string _name;
   float

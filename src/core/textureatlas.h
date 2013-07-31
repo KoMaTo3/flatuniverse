@@ -4,7 +4,7 @@
 #include "memory.h"
 #include "squareatlas.h"
 #include "gl/gl3.h"
-#include <deque>
+#include <vector>
 
 
 class TextureAtlas;
@@ -29,7 +29,7 @@ private:
     Mat4          matInvTransform;  //матрица преобразования координат в атласе в текстурные координаты
     Rect< Dword>  rect;             //координаты блока в атласе
   };
-  typedef std::deque< TextureAtlasItem* > TextureAtlasItemsList;
+  typedef std::vector< TextureAtlasItem* > TextureAtlasItemsList;
   TextureAtlasItemsList textures;
 
 public:
