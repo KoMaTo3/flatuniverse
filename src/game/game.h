@@ -116,5 +116,8 @@ public:
   static void   CollisionProc         ( Collision *a, Collision *b, Byte flags, const Vec3 &velocity );
   static void   TriggerProc           ( ObjectTrigger *trigger, Collision *collision, bool isInTrigger );
 
+  static void   ObjectOnLoad          ( Object* obj );
+  static void   ObjectOnUnload        ( Object* obj );
+
   //debug/test
 };

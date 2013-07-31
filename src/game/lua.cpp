@@ -268,6 +268,29 @@ bool Lua::RunFile( const std::string &fileName )
 
 /*
 =============
+  RunScript
+=============
+*/
+bool Lua::RunScript( const std::string &script )
+{
+  if( !this->luaState ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::RunScript( '%s' ) => lua-state not initialized", script.c_str() );
+    return false;
+  }
+
+  if( luaL_dostring( this->luaState, script.c_str() ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::RunScript( '%s' ) => luaL_dostring failed:\n%s", script.c_str(), lua_tostring( this->luaState, -1 ) );
+    return false;
+  }
+
+  return true;
+}//RunScript
+
+
+
+
+/*
+=============
   CallFunction
 =============
 */
@@ -290,6 +313,38 @@ bool Lua::CallFunction( const std::string &funcName )
 
   return true;
 }//CallFunction
+
+
+
+
+/*
+=============
+  CallFunctionStrStr
+=============
+*/
+const std::string& Lua::CallFunctionStrStr( const std::string &funcName, const std::string& inValue )
+{
+  //TODO: необходимо допиливать
+  /*
+  LuaStateCheck state( this->luaState );
+  lua_getglobal( this->luaState, funcName.c_str() );  //stack: funcName
+  if( !lua_isfunction( this->luaState, -1 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::CallFunctionStrStr => '%s' is not a function", funcName.c_str() );
+    lua_pop( this->luaState, 1 ); //stack:
+    return false;
+  }
+
+  lua_getglobal( this->luaState, inValue.c_str() );  //stack: funcName 
+  if( lua_pcall( this->luaState, 1, 1, 0 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::CallFunctionStrStr => error by calling function '%s': \n%s", funcName.c_str(), lua_tostring( this->luaState, -1 ) );
+    return false;
+  }
+
+  return true;
+  */
+  return "";
+}//CallFunctionStrStr
 
 
 

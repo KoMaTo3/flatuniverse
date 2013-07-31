@@ -17,6 +17,9 @@ ObjectByCollisionList *__objectByCollision  = NULL;
 ObjectByTriggerList   *__objectByTrigger    = NULL;
 //ObjectByGuiList       *__objectByGui        = NULL;
 
+Object::ObjectEvent *Object::OnLoad = NULL;
+Object::ObjectEvent *Object::OnUnload = NULL;
+
 
 /*
 =============
@@ -1231,6 +1234,10 @@ void Object::RemoveForce( long forceId )
 */
 void Object::SaveToBuffer( MemoryWriter &writer )
 {
+  if( this->OnUnload ) {
+    this->OnUnload( this );
+  }
+
   bool isRenderable, isCollision, isTrigger, isAnimation;
 
   isRenderable = this->IsRenderable();
@@ -1291,6 +1298,10 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   if( isAnimation ) {
     this->_animation->SaveToBuffer( writer );
   }
+
+  //scripts
+  //тут нужна сериализация объекта посредством вызова lua-функции
+  writer << this->luaScript;
 }//SaveToBuffer
 
 
@@ -1372,6 +1383,14 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
       __log.PrintInfo( Filelevel_DEBUG, "LoadFromBuffer => animationTemplate['%s'] name['%s'] time[%3.3f]", templateName.c_str(), animationName.c_str(), startTime );
       this->ApplyAnimation( templateName, animationName, startTime )->SetEnabled( true );
     }
+
+    if( version >= 0x00000007 ) {
+      reader >> this->luaScript;
+    }//7
+  }//6
+
+  if( this->OnLoad ) {
+    this->OnLoad( this );
   }
 }//LoadFromBuffer
 
@@ -1720,3 +1739,14 @@ IAnimationObject* Object::MakeInstance( const std::string& setName ) {
   child->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   return child;
 }
+
+
+
+/*
+=============
+  SetLuaScript
+=============
+*/
+void Object::SetLuaScript( const std::string& setScript ) {
+  this->luaScript = setScript;
+}//SetLuaScript

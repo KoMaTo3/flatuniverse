@@ -105,7 +105,10 @@ public:
     ObjectForce( long newId, const Vec3& newVec ){ this->id = newId; this->vec = newVec; }
   };
   typedef std::deque< ObjectForce > ObjectForceList;
+  typedef void (ObjectEvent)( Object* );
 
+  static ObjectEvent *OnLoad;
+  static ObjectEvent *OnUnload;
   /*
   class GuiConstructor { //конструктор создания glui-объектов
   public:
@@ -165,6 +168,7 @@ private:
   Collision       *collision;
   ObjectTrigger   *trigger;
   Tags            *tags;    //список тегов
+  std::string     luaScript;  //скрипты
 
   /*
   struct {
@@ -240,6 +244,9 @@ public:
   inline bool         IsTrigger           () { return this->trigger != NULL; }
   inline bool         IsSaveable          () { return this->isSaveable; }
   inline Object*      GetParent           () { return this->_parent; }
+  void                SetLuaScript        ( const std::string& setScript );
+  inline
+  const std::string&  GetLuaScript        () { return this->luaScript; }
 
   static
     RenderableQuad*   CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );

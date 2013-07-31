@@ -457,6 +457,8 @@ Game::Game()
   memset( this->gridTooltipUnderMouse.obj, 0, sizeof( this->gridTooltipUnderMouse.obj ) );
   this->core = new Core();
   this->lua = new Lua();
+  Object::OnLoad = Game::ObjectOnLoad;
+  Object::OnUnload = Game::ObjectOnUnload;
 
   LUAFUNC_RemoveObject      = Game::LUA_RemoveObject;
   LUAFUNC_GetObjectPos      = Game::LUA_GetObjectPos;
@@ -633,6 +635,29 @@ std::string Game::ObjectListToString( const ObjectList &list ) const {
   return result;
 }//ObjectListToString
 
+
+
+/*
+=============
+  ObjectOnLoad
+=============
+*/
+void Game::ObjectOnLoad( Object* obj ) {
+  game->lua->RunScript( obj->GetLuaScript() );
+}//ObjectOnLoad
+
+
+
+
+/*
+=============
+  ObjectOnUnload
+=============
+*/
+void Game::ObjectOnUnload( Object* obj ) {
+  __log.PrintInfo( Filelevel_DEBUG, "Game::ObjectOnUnload => start..." );
+  __log.PrintInfo( Filelevel_DEBUG, "Game::ObjectOnUnload => done" );
+}//ObjectOnUnload
 
 
 /*

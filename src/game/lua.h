@@ -148,7 +148,9 @@ public:
   bool  Init          ();
   void  Destroy       ();
   bool  RunFile       ( const std::string &fileName );
+  bool  RunScript     ( const std::string &script );
   bool  CallFunction  ( const std::string &funcName );
+  const std::string&  CallFunctionStrStr( const std::string &funcName, const std::string& inValue );
 
   void  ShowError     ( const std::string &comment, const std::string &errorName );
 
