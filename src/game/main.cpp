@@ -643,7 +643,10 @@ std::string Game::ObjectListToString( const ObjectList &list ) const {
 =============
 */
 void Game::ObjectOnLoad( Object* obj ) {
-  game->lua->RunScript( obj->GetLuaScript() );
+  if( obj->GetLuaScript().size() ) {
+    game->lua->RunScript( obj->GetLuaScript() );
+    game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "OnLoad" );
+  }
 }//ObjectOnLoad
 
 
@@ -655,8 +658,10 @@ void Game::ObjectOnLoad( Object* obj ) {
 =============
 */
 void Game::ObjectOnUnload( Object* obj ) {
-  __log.PrintInfo( Filelevel_DEBUG, "Game::ObjectOnUnload => start..." );
-  __log.PrintInfo( Filelevel_DEBUG, "Game::ObjectOnUnload => done" );
+  if( obj->GetLuaScript().size() ) {
+    game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "OnUnload" );
+    game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "__fu_destroy" );
+  }
 }//ObjectOnUnload
 
 

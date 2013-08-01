@@ -319,33 +319,40 @@ bool Lua::CallFunction( const std::string &funcName )
 
 /*
 =============
-  CallFunctionStrStr
+  CallTableTableFunction
+  Вызывает lua-функцию из таблицы, находящейся в таблице:
+  table[ key ].function()
 =============
 */
-const std::string& Lua::CallFunctionStrStr( const std::string &funcName, const std::string& inValue )
-{
-  //TODO: необходимо допиливать
-  /*
+bool Lua::CallTableTableFunction( const std::string &table, const std::string &key, const std::string &function ) {
+  __log.PrintInfo( Filelevel_DEBUG, "CallTableTableFunction => %s[%s].%s()", table.c_str(), key.c_str(), function.c_str() );
   LuaStateCheck state( this->luaState );
-  lua_getglobal( this->luaState, funcName.c_str() );  //stack: funcName
-  if( !lua_isfunction( this->luaState, -1 ) )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "Lua::CallFunctionStrStr => '%s' is not a function", funcName.c_str() );
-    lua_pop( this->luaState, 1 ); //stack:
-    return false;
-  }
 
-  lua_getglobal( this->luaState, inValue.c_str() );  //stack: funcName 
-  if( lua_pcall( this->luaState, 1, 1, 0 ) ) {
-    __log.PrintInfo( Filelevel_ERROR, "Lua::CallFunctionStrStr => error by calling function '%s': \n%s", funcName.c_str(), lua_tostring( this->luaState, -1 ) );
+  lua_getglobal( this->luaState, table.c_str() );  //stack: table
+  if( !lua_istable( this->luaState, -1 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "CallTableTableFunction => '%s' is not a table", table.c_str() );
+    lua_pop( this->luaState, 1 );
     return false;
   }
+  lua_pushstring( this->luaState, key.c_str() );  //stack: table key
+  lua_gettable( this->luaState, -2 ); //stack: table[key]
+  if( !lua_istable( this->luaState, -1 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "CallTableTableFunction => '%s[%s]' is not a table", table.c_str(), key.c_str() );
+    lua_pop( this->luaState, 2 );
+    return false;
+  }
+  lua_pushstring( this->luaState, function.c_str() ); //stack: table[key] function
+  lua_gettable( this->luaState, -2 ); //stack: table[key][function]
+  if( !lua_isfunction( this->luaState, -1 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "CallTableTableFunction => %s[%s].'%s' is not a function", table.c_str(), key.c_str(), function.c_str() );
+    lua_pop( this->luaState, 1 );
+    return false;
+  }
+  lua_pcall( this->luaState, 0, 0, 0 );
+  lua_pop( this->luaState, 2 ); //pop function and result
 
   return true;
-  */
-  return "";
-}//CallFunctionStrStr
-
+}//CallTableTableFunction
 
 
 

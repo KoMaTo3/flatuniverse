@@ -150,7 +150,7 @@ public:
   bool  RunFile       ( const std::string &fileName );
   bool  RunScript     ( const std::string &script );
   bool  CallFunction  ( const std::string &funcName );
-  const std::string&  CallFunctionStrStr( const std::string &funcName, const std::string& inValue );
+  bool  CallTableTableFunction    ( const std::string &table, const std::string &key, const std::string &function );
 
   void  ShowError     ( const std::string &comment, const std::string &errorName );
 

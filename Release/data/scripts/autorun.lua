@@ -478,3 +478,46 @@ function DoAnimationBrickDisplace( timerId )
     ]]
   end
 end -- DoAnimationBrickDisplace
+
+-- Objects test
+
+
+----------------------
+----------------------
+-- Инициализация объекта, добавление неопределённых функций
+FUObjectList = {}
+function RegisterObject( obj )
+  FUObjectList[ obj.name ] = obj
+  local functionList = {
+    'OnLoad',
+    'OnUnload',
+  }
+  for key, funcName in pairs( functionList ) do
+    if type( obj[ funcName ] ) ~= 'function' then
+      obj[ funcName ].OnLoad = function() end
+    end
+  end
+  --[[
+    на объект у нас 2 указателья - object и FUObjectList[ '...' ]
+    object удаляем сразу после регистрации
+    из FUObjectList удаляем вызовом __fu_destroy из движка
+  ]]
+  obj.__fu_destroy = function()
+    RegisterObject.obj = nil
+  end
+end
+
+-- это пишет разраб
+local object = {
+  OnLoad = function()
+    LogWrite( 'custom OnLoad' )
+  end,
+  OnUnload = function()
+    LogWrite( 'custom OnUnload' )
+  end,
+  somethingValue = 123,
+}
+-- досюда. остальное всё подставляется движком, инициализируя объект
+object.name = 'wall123'
+RegisterObject( object )
+object = nil  -- garbage collecting
