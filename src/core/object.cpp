@@ -1,6 +1,7 @@
 #include "object.h"
 #include "file.h"
 #include "tools.h"
+#include "animationpack.h"
 //#include "glui2/glui2.h"
 
 extern CoreRenderableList *__coreRenderableList;
@@ -15,6 +16,9 @@ extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
 ObjectByCollisionList *__objectByCollision  = NULL;
 ObjectByTriggerList   *__objectByTrigger    = NULL;
 //ObjectByGuiList       *__objectByGui        = NULL;
+
+Object::ObjectEvent *Object::OnLoad = NULL;
+Object::ObjectEvent *Object::OnUnload = NULL;
 
 
 /*
@@ -228,7 +232,7 @@ void Object::ClearChilds( bool forceDelete )
   //__log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => objects[%d]", this->_childs->size() );
   if( forceDelete ) //полная очистка
   {
-    ObjectChilds::iterator iter;
+    ObjectList::iterator iter;
     while( this->_childs->size() )
       delete *this->_childs->begin();
 
@@ -238,7 +242,7 @@ void Object::ClearChilds( bool forceDelete )
   {
     //__log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => not forced" );
     bool deleted;
-    ObjectChilds::iterator iter, iterEnd;
+    ObjectList::iterator iter, iterEnd;
     do
     {
       deleted = false;
@@ -318,7 +322,7 @@ void Object::AttachChildObject( Object* newChild )
   {
     //__log.PrintInfo( Filelevel_DEBUG, "Object::AttachChildObject => '%s' now is child of '%s'", newChild->GetNameFull().c_str(), this->GetNameFull().c_str() );
     if( !this->_childs )
-      this->_childs = new ObjectChilds();
+      this->_childs = new ObjectList();
     this->_childs->push_back( newChild );
     newChild->_parent = this;
   }
@@ -359,7 +363,7 @@ void Object::UnAttachChildObject( Object* child )
   if( this->_childs && this->IsChild( child ) )
   {
     child->_parent = NULL;
-    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+    ObjectList::iterator iter, iterEnd = this->_childs->end();
     for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
       if( *iter == child )
       {
@@ -385,7 +389,7 @@ bool Object::IsChild( const Object* obj )
   if( !this->_childs )
     return false;
 
-  for( ObjectChilds::iterator iter = this->_childs->begin(); iter != this->_childs->end(); ++iter )
+  for( ObjectList::iterator iter = this->_childs->begin(); iter != this->_childs->end(); ++iter )
     if( *iter == obj )
       return true;
 
@@ -415,7 +419,7 @@ Object* Object::GetChild( const std::string& name )
   }
 
   //__log.PrintInfo( Filelevel_DEBUG, "Object::GetChild => name['%s'] thisName['%s']", name.c_str(), this->GetNameFull().c_str() );
-  for( ObjectChilds::iterator iter = this->_childs->begin(); iter != this->_childs->end(); ++iter )
+  for( ObjectList::iterator iter = this->_childs->begin(); iter != this->_childs->end(); ++iter )
     if( ( *iter )->GetName() == name )
       return *iter;
 
@@ -1106,7 +1110,7 @@ void Object::Update( float dt )
       if( !renderable ) {
         break;
       }
-      renderable->SetPosition( this->position );
+      renderable->SetPosition( Vec3( Math::Floor( this->position.x ), Math::Floor( this->position.y ), this->position.z ) );
       renderable->CheckChanges();
       /*
       if( *renderable->GetEnabledPtr() != *renderable->GetPrevEnabledPtr() ) {
@@ -1134,7 +1138,7 @@ void Object::Update( float dt )
   //обновляем дочерние объекты
   if( this->_childs && this->_childs->size() )
   {
-    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+    ObjectList::iterator iter, iterEnd = this->_childs->end();
     for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
       ( *iter )->Update( dt );
     }
@@ -1230,7 +1234,11 @@ void Object::RemoveForce( long forceId )
 */
 void Object::SaveToBuffer( MemoryWriter &writer )
 {
-  bool isRenderable, isCollision, isTrigger;
+  if( this->OnUnload ) {
+    this->OnUnload( this );
+  }
+
+  bool isRenderable, isCollision, isTrigger, isAnimation;
 
   isRenderable = this->IsRenderable();
   writer << isRenderable;  //renderable true/false
@@ -1261,6 +1269,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
     this->tags->SaveToBuffer( writer );
   }
 
+  //childs
   Dword childsCount = 0;
   if( !this->_childs ) {
     writer << childsCount;
@@ -1274,7 +1283,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
     writer << childsCount;
     if( childsCount )
     {
-      ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+      ObjectList::iterator iter, iterEnd = this->_childs->end();
       for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
         if( ( *iter )->isSaveable ) {
           ( *iter )->SaveToBuffer( writer );
@@ -1282,6 +1291,17 @@ void Object::SaveToBuffer( MemoryWriter &writer )
       }
     }
   }
+
+  //animation
+  isAnimation = ( this->_animation != NULL );
+  writer << isAnimation;
+  if( isAnimation ) {
+    this->_animation->SaveToBuffer( writer );
+  }
+
+  //scripts
+  //тут нужна сериализация объекта посредством вызова lua-функции
+  writer << this->luaScript;
 }//SaveToBuffer
 
 
@@ -1294,7 +1314,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 */
 void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dword version )
 {
-  bool isRenderable, isCollision, isTrigger;
+  bool isRenderable, isCollision, isTrigger, isAnimation;
   std::string tmpName, parentName;
   Vec3 position;
 
@@ -1349,6 +1369,28 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
       child->LoadFromBuffer( reader, this, version );
     }
     //__log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
+  }
+
+  if( version >= 0x00000006 ) {
+    //animation
+    reader >> isAnimation;
+    if( isAnimation ) {
+      std::string templateName = "", animationName = "";
+      float startTime;
+      reader >> templateName;
+      reader >> animationName;
+      reader >> startTime;
+      __log.PrintInfo( Filelevel_DEBUG, "LoadFromBuffer => animationTemplate['%s'] name['%s'] time[%3.3f]", templateName.c_str(), animationName.c_str(), startTime );
+      this->ApplyAnimation( templateName, animationName, startTime )->SetEnabled( true );
+    }
+
+    if( version >= 0x00000007 ) {
+      reader >> this->luaScript;
+    }//7
+  }//6
+
+  if( this->OnLoad ) {
+    this->OnLoad( this );
   }
 }//LoadFromBuffer
 
@@ -1418,7 +1460,7 @@ Object* Object::GetObjectInPoint( const Vec2& pos )
 
   if( this->_childs )
   {
-    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+    ObjectList::iterator iter, iterEnd = this->_childs->end();
     Object *obj;
     for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
     {
@@ -1431,6 +1473,91 @@ Object* Object::GetObjectInPoint( const Vec2& pos )
   return NULL;
 }//GetObjectInPoint
 
+
+
+/*
+=============
+  GetObjectsInRect
+=============
+*/
+void Object::GetObjectsInRect( int type, const Vec2 &leftTop, const Vec2 &rightBottom, ObjectList& result )
+{
+  if( !this->_childs || !this->_childs->size() ) {
+    return;
+  }
+
+  for( auto &child: *this->_childs ) {
+    if( child->TestInRect( type, leftTop, rightBottom, true ) ) {
+      if( child->IsSaveable() ) {
+        result.push_back( &( *child ) );
+      } else {
+        Object *saveableObject = this;
+        while( saveableObject && !saveableObject->IsSaveable() ) {
+          saveableObject = saveableObject->GetParent();
+        }
+        if( saveableObject && saveableObject->GetParent() ) {
+          bool inList = false;
+          for( auto &objectinList: result ) {
+            if( &( *objectinList ) == saveableObject ) {
+              inList = true;
+              break;
+            }
+          }//for
+          if( !inList ) {
+            result.push_back( saveableObject );
+          }
+        }
+      }//not saveable
+    }//in rect
+  }//for
+}//GetObjectsInRect
+
+
+
+
+/*
+=============
+  TestInRect
+=============
+*/
+bool Object::TestInRect( int type, const Vec2 &leftTop, const Vec2 &rightBottom, bool recursive ) {
+  switch( type ) {
+  case 0: //all
+    if( tools::TestPointInRect2( Vec2( this->position.x, this->position.y ), leftTop, rightBottom ) ) {
+      return true;
+    }
+  case 1: //renderable
+    if( this->IsRenderable() && this->GetRenderable()->IsIntersectRect( leftTop, rightBottom ) ) {
+      return true;
+    }
+    if( type == 1 ) {
+      return false;
+    }
+  case 2: //collision
+    if( this->IsCollision() && this->GetCollision()->TestIntersect( Vec3( leftTop.x, leftTop.y, 0.0f ), Vec3( rightBottom.x, rightBottom.y, 0.0f ) ) ) {
+      return true;
+    }
+    if( type == 2 ) {
+      return false;
+    }
+  case 3: //trigger
+    if( this->IsTrigger() && this->GetTrigger()->TestIntersectRect( leftTop, rightBottom ) ) {
+      return true;
+    }
+    if( type == 2 ) {
+      return false;
+    }
+  }//switch
+
+  if( recursive && this->_childs && this->_childs->size() ) {
+    for( auto &child: *this->_childs ) {
+      if( child->TestInRect( type, leftTop, rightBottom, recursive ) ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}//TestInRect
 
 
 
@@ -1522,7 +1649,7 @@ Object* Object::GetObjectByRenderableIndex( CoreRenderableList *renderableList, 
   }
   if( this->_childs && this->_childs->size() ) {
     __log.PrintInfo( Filelevel_DEBUG, "Object::GetObjectByRenderableIndex => this[x%p] name['%s'] index[%d]", this, this->GetNameFull().c_str(), index );
-    ObjectChilds::iterator iter, iterEnd = this->_childs->end();
+    ObjectList::iterator iter, iterEnd = this->_childs->end();
     Object *obj;
     for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
       obj = ( *iter )->GetObjectByRenderableIndex( renderableList, index );
@@ -1609,5 +1736,17 @@ IAnimationObject* Object::MakeInstance( const std::string& setName ) {
   if( !child ) {
     child = new Object( setName, this, false );
   }
+  child->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   return child;
 }
+
+
+
+/*
+=============
+  SetLuaScript
+=============
+*/
+void Object::SetLuaScript( const std::string& setScript ) {
+  this->luaScript = setScript;
+}//SetLuaScript

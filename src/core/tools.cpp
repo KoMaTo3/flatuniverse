@@ -3,7 +3,7 @@
 #include "file.h"
 #include "ktypes.h"
 #include "time.h"
-#include <deque>
+#include <vector>
 #include <algorithm>
 
 
@@ -17,12 +17,12 @@ const float oneBy256 = 1.0f / 256.0f;
   Разбивает строку source разделителем separator
 ----------
 */
-std::deque< std::string > Explode( const std::string& source, const std::string& separator )
+std::vector< std::string > Explode( const std::string& source, const std::string& separator )
 {
   if( !source.length() )
-    return std::deque< std::string >();
-  std::deque< std::string > res;
-  std::deque< std::string >::iterator iter;
+    return std::vector< std::string >();
+  std::vector< std::string > res;
+  std::vector< std::string >::iterator iter;
   for( unsigned long w, q = 0; q < source.length(); )
   {
     w = source.find( separator, q );
@@ -343,6 +343,16 @@ Vec4 StringToColor( const std::string& str ) {
   return color;
 }//StringToColor
 
+
+
+bool TestPointInRect2( const Vec2& point, const Vec2& leftTop, const Vec2& rightBottom ) {
+  return
+    point.x >= leftTop.x &&
+    point.x <= rightBottom.x &&
+    point.y >= leftTop.y &&
+    point.y <= rightBottom.y
+    ;
+}//TestPointInRect2
 
 
 }//namespace tools

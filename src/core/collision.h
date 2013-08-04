@@ -49,6 +49,9 @@ public:
 
 private:
   Vec3  *position;    //указывает на координаты объекта, дабы не дублировать код и ускорить расчеты
+  Vec3  offset;       //смещение коллизии относительно объекта
+  Vec3  positionResult; //результирующая позиция с учетом смещения
+  Vec3  positionLast;   //позиция перед последним апдейтом
   Vec3  velocity;     //скорость
   Vec3  acceleration; //ускорение
   Vec3  size;         //ширина и высота объекта
@@ -71,7 +74,7 @@ private:
     bool        useAllAxices;
     Collision   *target;
   };
-  typedef std::deque< CollisionResolver > CollisionResolverList;
+  typedef std::vector< CollisionResolver > CollisionResolverList;
   CollisionResolverList resolver;
 
   DISALLOW_COPY_AND_ASSIGN( Collision );
@@ -114,6 +117,7 @@ public:
   bool        Update          ( float dt );
   void        ResolveCollision();
   void        AddHandler      ( CollisionHandler *handler );
+  inline CollisionElementType GetType() { return ( this->collisionElement ? this->collisionElement->GetType() : COLLISION_ELEMENT_TYPE_UNDEFINED ); }
 
   void        SaveToBuffer    ( MemoryWriter &writer );
   void        LoadFromBuffer  ( MemoryReader &reader, const std::string &thisObjectName, const Dword version );
@@ -122,6 +126,13 @@ public:
   static inline void SetDefaultCollisionHandler( CollisionHandler *setHandler ) { Collision::defaultCollisionHandler = setHandler; }
   Vec3&       GetSquareSizeModifier() {
     return static_cast< CollisionElementSquare* >( this->collisionElement )->GetSizeModifier();
+  }
+  Vec3&       GetOffsetModifier() {
+    return this->offset;
+  }
+  bool        GetPolygon( CollisionElementPolygon::PointList& result );
+  inline const Vec3& GetOffsetFromLastPosition() const {
+    return this->positionResult - this->positionLast;
   }
 
   void        Render          ( float phase, const Vec3 &offset, bool isActive );

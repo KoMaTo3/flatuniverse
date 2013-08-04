@@ -7,7 +7,6 @@
 #include "../gl/gl3.h"
 #include "../gl/gl.h"
 #include <string>
-#include <deque>
 #include <list>
 //#include "glui2/glui2.h"
 
@@ -79,7 +78,7 @@ private:
   } _build;
 
   CoreStates  _state;       //состояние ядра
-  std::deque< std::string >   _extensions;  //перечень расширений OpenGL
+  std::vector< std::string >  _extensions;  //перечень расширений OpenGL
   //std::list< Object* >        _objects;
   Object                      *_rootObject; //корневой объект сцены
   //Object                      *_rootGUIObject;  //корневой объект GUI
@@ -129,7 +128,7 @@ public:
     bool  renderRenderable,
           renderCollision,
           renderTrigger;
-    Object *selectedObject;
+    ObjectList selectedObjects;
   } debug;
 
 private:
@@ -161,7 +160,7 @@ public:
   Object* CreateObject        ( const std::string& name, Object *parent = NULL );
   Font*   CreateFont          ( const std::string& name, Object *parent = NULL );
   Object* GetObject           ( const std::string& name, Object *parent = NULL );
-  bool    RemoveObject        ( const std::string& name );
+  bool    RemoveObject        ( const std::string& name, bool useLockToDeleteFlag = false );
   Object* SetCamera           ( Object* newCamera );
   inline Object* GetCamera    () { return ( this->camera ? this->camera->GetObject< Object >() : NULL ); }
   Object* getObjectInPoint    ( const Vec2& pos );
@@ -169,6 +168,7 @@ public:
   Object* GetObjectByCollision( Collision *collision );
   //Object* GetObjectByGui      ( g2Controller *controller );
   Object* GetObjectByRenderableIndex  ( GLushort index );
+  void    GetObjectsInRect    ( int type, const Vec2 &leftTop, const Vec2 &rightBottom, ObjectList& result );
   Object* GetCollisionInPoint ( const Vec2& pos, const std::string &afterObject );
   Object* GetTriggerInPoint   ( const Vec2& pos, const std::string &afterObject );
   Object* GetRenderableInPoint( const Vec2& pos, const std::string &afterObject );

@@ -29,8 +29,10 @@ WorldGridManager::~WorldGridManager()
 */
 void WorldGridManager::Update( bool forceLoadGrids )
 {
+  bool forceUpdate = ( sTimer.GetDeltaF() == 0.0f );
+  float updateInterval = ( forceUpdate ? 0.0f : WORLD_GRID_UPDATE_INTERVAL );
   this->currentTime += sTimer.GetDeltaF();
-  while( this->currentTime > WORLD_GRID_UPDATE_INTERVAL )
+  while( this->currentTime > WORLD_GRID_UPDATE_INTERVAL || forceUpdate )
   {
     //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update" );
 
@@ -156,7 +158,10 @@ void WorldGridManager::Update( bool forceLoadGrids )
     }
     */
 
-    this->currentTime -= WORLD_GRID_UPDATE_INTERVAL;
+    this->currentTime -= updateInterval;
+    if( forceUpdate ) {
+      break;
+    }
   }//while time
 }//Update
 

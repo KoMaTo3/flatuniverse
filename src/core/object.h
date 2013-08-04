@@ -56,6 +56,8 @@ private:
 typedef std::deque< ObjectByTrigger* > ObjectByTriggerList;
 extern ObjectByTriggerList *__objectByTrigger;
 
+typedef std::list< Object* > ObjectList;
+
 //object by gui
 /*
 struct ObjectByGui
@@ -95,7 +97,6 @@ enum ObjectGuiType {
 class Object: public IPointerOwner, public ITags, public IObject
 {
 public:
-  typedef std::list< Object* > ObjectChilds;
   struct ObjectForce  //вектор силы
   {
     long  id;
@@ -104,7 +105,10 @@ public:
     ObjectForce( long newId, const Vec3& newVec ){ this->id = newId; this->vec = newVec; }
   };
   typedef std::deque< ObjectForce > ObjectForceList;
+  typedef void (ObjectEvent)( Object* );
 
+  static ObjectEvent *OnLoad;
+  static ObjectEvent *OnUnload;
   /*
   class GuiConstructor { //конструктор создания glui-объектов
   public:
@@ -156,7 +160,7 @@ private:
   Mat4            matrixTransform;  //матрица трансформации для получения позиции объекта
 
   Object          *_parent; //объект-родитель
-  ObjectChilds    *_childs; //дочерние объекты
+  ObjectList      *_childs; //дочерние объекты
   std::string     name;     //имя объекта (root, item0001, player02...)
   std::string     nameFull; //полное имя с учетом иерархии (/root/player02/weapon0)
   ObjectForceList forces;   //перечень сил, действующих на объект
@@ -164,6 +168,7 @@ private:
   Collision       *collision;
   ObjectTrigger   *trigger;
   Tags            *tags;    //список тегов
+  std::string     luaScript;  //скрипты
 
   /*
   struct {
@@ -217,6 +222,8 @@ public:
   void                RemoveForce         ( long forceId );
   const Mat4&         GetMatrixTransform  ();
   Object*             GetObjectInPoint    ( const Vec2& pos );
+  void                GetObjectsInRect    ( int type, const Vec2 &leftTop, const Vec2 &rightBottom, ObjectList& result );
+  bool                TestInRect          ( int type, const Vec2 &leftTop, const Vec2 &rightBottom, bool recursive );
 
   Renderable*         EnableRenderable    ( RenderableType renderType );
   bool                DisableRenderable   ();
@@ -234,8 +241,12 @@ public:
   ObjectTrigger*      EnableTrigger       ();
   void                DisableTrigger      ();
   ObjectTrigger*      GetTrigger          ();
+  inline bool         IsTrigger           () { return this->trigger != NULL; }
+  inline bool         IsSaveable          () { return this->isSaveable; }
+  inline Object*      GetParent           () { return this->_parent; }
+  void                SetLuaScript        ( const std::string& setScript );
   inline
-    bool              IsTrigger           () { return this->trigger != NULL; }
+  const std::string&  GetLuaScript        () { return this->luaScript; }
 
   static
     RenderableQuad*   CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );
@@ -268,6 +279,9 @@ public:
   virtual Vec3& GetCollisionSquareSize() {
     return ( this->IsCollision() ? this->GetCollision()->GetSquareSizeModifier() : this->EnableCollision()->InitSquare( Vec3( 1.0f, 1.0f, 0.0f ) )->GetSquareSizeModifier() );
   }
+  virtual Vec3& GetCollisionOffsetPtr() {
+    return ( this->IsCollision() ? this->GetCollision()->GetOffsetModifier() : this->EnableCollision()->InitSquare( Vec3( 1.0f, 1.0f, 0.0f ) )->GetOffsetModifier() );
+  }
   virtual IAnimationObject* MakeInstance( const std::string& setName );
 
   /*
@@ -285,10 +299,9 @@ public:
 
   Object*             GetObject           ( const std::string& name, Object *parent = NULL );
 
-  inline
-    Object*           SetLockToDelete     ( bool lock ) { this->_isLockedToDelete = lock; return this; }
-  inline
-    bool              IsLockedToDelete    () { return this->_isLockedToDelete; }
+  inline Object*      SetLockToDelete     ( bool lock ) { this->_isLockedToDelete = lock; return this; }
+  inline Object*      SetSaveable         ( bool saveable ) { this->isSaveable = saveable; return this; }
+  inline bool         IsLockedToDelete    () { return this->_isLockedToDelete; }
 
   bool                IsHasTag            ( const std::string& tag ) const;
   void                AddTag              ( const std::string& tag );

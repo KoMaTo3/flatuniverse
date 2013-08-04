@@ -46,6 +46,7 @@ LUAFUNCPROC_GetCollisionStatic*LUAFUNC_GetCollisionStatic   = NULL;
 LUAFUNCPROC_SetCollisionStatic*LUAFUNC_SetCollisionStatic   = NULL;
 LUAFUNCPROC_DebugRender       *LUAFUNC_DebugRender          = NULL;
 LUAFUNCPROC_GetObjectByPoint  *LUAFUNC_GetObjectByPoint     = NULL;
+LUAFUNCPROC_GetObjectByRect   *LUAFUNC_GetObjectByRect      = NULL;
 //LUAFUNCPROC_SetGuiVisibility  *LUAFUNC_SetGuiVisibility     = NULL;
 LUAFUNCPROC_SelectObject      *LUAFUNC_SelectObject         = NULL;
 LUAFUNCPROC_GetSelectedObject *LUAFUNC_GetSelectedObject    = NULL;
@@ -141,6 +142,7 @@ bool Lua::Init()
   lua_register( this->luaState, "CollisionSetStatic", Lua::LUA_SetCollisionStatic );
   lua_register( this->luaState, "DebugRender",      Lua::LUA_DebugRender );
   lua_register( this->luaState, "GetObjectByPoint", Lua::LUA_GetObjectByPoint );
+  lua_register( this->luaState, "GetObjectByRect",  Lua::LUA_GetObjectByRect );
   lua_register( this->luaState, "SelectObject",     Lua::LUA_SelectObject );
   lua_register( this->luaState, "GetSelectedObject",Lua::LUA_GetSelectedObject );
   //lua_register( this->luaState, "GuiAttr",          Lua::LUA_GuiAttr );
@@ -266,6 +268,29 @@ bool Lua::RunFile( const std::string &fileName )
 
 /*
 =============
+  RunScript
+=============
+*/
+bool Lua::RunScript( const std::string &script )
+{
+  if( !this->luaState ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::RunScript( '%s' ) => lua-state not initialized", script.c_str() );
+    return false;
+  }
+
+  if( luaL_dostring( this->luaState, script.c_str() ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::RunScript( '%s' ) => luaL_dostring failed:\n%s", script.c_str(), lua_tostring( this->luaState, -1 ) );
+    return false;
+  }
+
+  return true;
+}//RunScript
+
+
+
+
+/*
+=============
   CallFunction
 =============
 */
@@ -289,6 +314,45 @@ bool Lua::CallFunction( const std::string &funcName )
   return true;
 }//CallFunction
 
+
+
+
+/*
+=============
+  CallTableTableFunction
+  Вызывает lua-функцию из таблицы, находящейся в таблице:
+  table[ key ].function()
+=============
+*/
+bool Lua::CallTableTableFunction( const std::string &table, const std::string &key, const std::string &function ) {
+  __log.PrintInfo( Filelevel_DEBUG, "CallTableTableFunction => %s[%s].%s()", table.c_str(), key.c_str(), function.c_str() );
+  LuaStateCheck state( this->luaState );
+
+  lua_getglobal( this->luaState, table.c_str() );  //stack: table
+  if( !lua_istable( this->luaState, -1 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "CallTableTableFunction => '%s' is not a table", table.c_str() );
+    lua_pop( this->luaState, 1 );
+    return false;
+  }
+  lua_pushstring( this->luaState, key.c_str() );  //stack: table key
+  lua_gettable( this->luaState, -2 ); //stack: table[key]
+  if( !lua_istable( this->luaState, -1 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "CallTableTableFunction => '%s[%s]' is not a table", table.c_str(), key.c_str() );
+    lua_pop( this->luaState, 2 );
+    return false;
+  }
+  lua_pushstring( this->luaState, function.c_str() ); //stack: table[key] function
+  lua_gettable( this->luaState, -2 ); //stack: table[key][function]
+  if( !lua_isfunction( this->luaState, -1 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "CallTableTableFunction => %s[%s].'%s' is not a function", table.c_str(), key.c_str(), function.c_str() );
+    lua_pop( this->luaState, 1 );
+    return false;
+  }
+  lua_pcall( this->luaState, 0, 0, 0 );
+  lua_pop( this->luaState, 2 ); //pop function and result
+
+  return true;
+}//CallTableTableFunction
 
 
 
@@ -1529,6 +1593,32 @@ int Lua::LUA_GetObjectByPoint( lua_State *lua )
 
   return 1;
 }//LUA_GetObjectByPoint
+
+
+
+/*
+=============
+  LUA_GetObjectByRect
+=============
+*/
+int Lua::LUA_GetObjectByRect( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 5 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GetObjectByRect => not enough parameters" );
+    return 0;
+  }
+  int type = lua_tointeger( lua, 1 );
+  Vec2 leftTop, rightBottom;
+  leftTop.Set( ( float ) lua_tonumber( lua, 2 ), ( float ) lua_tonumber( lua, 3 ) );
+  rightBottom.Set( ( float ) lua_tonumber( lua, 4 ), ( float ) lua_tonumber( lua, 5 ) );
+  std::string objectName;
+  objectName = LUAFUNC_GetObjectByRect( type, leftTop, rightBottom );
+  lua_pushstring( lua, objectName.c_str() );
+
+  return 1;
+}//LUA_GetObjectByRect
 
 
 

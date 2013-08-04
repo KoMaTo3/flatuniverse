@@ -117,6 +117,7 @@ public:
   CollisionElementPolygon( Vec3 *setPos, CollisionRect *setRect );
   void Update ();
   void SetPointList( const PointList &setPoints );
+  void GetPointList( PointList &points );
   void __Dump     ();
   bool TestIntersect            ( CollisionElement &object, Vec3 *outSolver );
   bool TestIntersectWithSquare  ( CollisionElement &object, Vec3 *outSolver );

@@ -12,6 +12,17 @@ extern CollisionList *__collisionList;
 #define COLLISION_UPDATE_FREQUENCY ( 1.0f / 100.0f )
 
 
+struct CollisionPair {
+  Collision
+    *platform,
+    *target;
+
+  CollisionPair( Collision* setPlatform, Collision *setTarget )
+  :platform( setPlatform ), target( setTarget )
+  { }
+};
+typedef std::vector< CollisionPair > CollisionPairList;
+
 
 class CollisionManager
 {

@@ -6,6 +6,7 @@
 #include "lua.h"
 #include <vector>
 #include <map>
+#include <list>
 
 class Lua;
 
@@ -34,7 +35,7 @@ public:
   std::vector< GameLuaTimer > luaTimers;
 
   //lua-слушатели клавиатуры и мыши
-  typedef std::deque< std::string > luaKeyboardListenersList;
+  typedef std::vector< std::string > luaKeyboardListenersList;
   luaKeyboardListenersList
       luaKeyboardListeners,
       luaMouseKeyListeners,
@@ -85,6 +86,7 @@ public:
   static void   LUA_SetCollisionStatic( const std::string &name, bool isStatic );
   static void   LUA_DebugRender       ( int flags );
   static std::string LUA_GetObjectByPoint   ( int type, const Vec2 &point, const std::string &afterObject );
+  static std::string LUA_GetObjectByRect    ( int type, const Vec2 &leftTop, const Vec2 &rightBottom );
   static void   LUA_SelectObject            ( const std::string &name );
   static std::string LUA_GetSelectedObject  ();
   static void   LUA_LoadScript        ( const std::string &fileName );
@@ -104,6 +106,8 @@ public:
   void UpdateLuaTimers();
   void SetActive( bool setActive );
   void ClearLuaTimers();
+  void StringToObjectList( const std::string &str, ObjectList &list ) const;
+  std::string ObjectListToString( const ObjectList &list ) const;
 
   static void   KeyboardProc          ( Dword keyId, bool isPressed );
   static void   MouseKeyProc          ( Dword keyId, bool isPressed );
@@ -111,6 +115,9 @@ public:
   static void   OnRemoveTrigger       ( ObjectTrigger *trigger );
   static void   CollisionProc         ( Collision *a, Collision *b, Byte flags, const Vec3 &velocity );
   static void   TriggerProc           ( ObjectTrigger *trigger, Collision *collision, bool isInTrigger );
+
+  static void   ObjectOnLoad          ( Object* obj );
+  static void   ObjectOnUnload        ( Object* obj );
 
   //debug/test
 };

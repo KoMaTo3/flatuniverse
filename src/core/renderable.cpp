@@ -318,6 +318,33 @@ bool RenderableQuad::IsHasPoint( const Vec2& pos )
 }//IsHasPoint
 
 
+
+/*
+=============
+  IsIntersectRect
+=============
+*/
+bool RenderableQuad::IsIntersectRect( const Vec2& leftTop, const Vec2& rightBottom )
+{
+  Vec4 resRect;
+  Vec2 halfSize;
+  halfSize = this->size * 0.5f;
+  halfSize.x *= this->scale.x;
+  halfSize.y *= this->scale.y;
+  resRect.x = this->position.x - halfSize.x;
+  resRect.y = this->position.y - halfSize.y;
+  resRect.z = this->position.x + halfSize.x;
+  resRect.w = this->position.y + halfSize.y;
+
+  return !(
+    resRect.z < leftTop.x ||
+    resRect.x > rightBottom.x ||
+    resRect.y > rightBottom.y ||
+    resRect.w < leftTop.y
+    );
+}//IsIntersectRect
+
+
 /*
 =============
   CalculateRect

@@ -51,6 +51,7 @@ typedef bool  LUAFUNCPROC_GetCollisionStatic( const std::string &name );
 typedef void  LUAFUNCPROC_SetCollisionStatic( const std::string &name, const bool isStatic );
 typedef void  LUAFUNCPROC_DebugRender       ( int flags );
 typedef std::string LUAFUNCPROC_GetObjectByPoint  ( int type, const Vec2 &point, const std::string &afterObject );
+typedef std::string LUAFUNCPROC_GetObjectByRect   ( int type, const Vec2 &leftTop, const Vec2 &rightBottom );
 //typedef void  LUAFUNCPROC_SetGuiVisibility        ( int show );
 typedef void  LUAFUNCPROC_SelectObject            ( const std::string &name );
 typedef std::string LUAFUNCPROC_GetSelectedObject ();
@@ -103,6 +104,7 @@ extern LUAFUNCPROC_GetCollisionStatic       *LUAFUNC_GetCollisionStatic;
 extern LUAFUNCPROC_SetCollisionStatic       *LUAFUNC_SetCollisionStatic;
 extern LUAFUNCPROC_DebugRender      *LUAFUNC_DebugRender;
 extern LUAFUNCPROC_GetObjectByPoint *LUAFUNC_GetObjectByPoint;
+extern LUAFUNCPROC_GetObjectByRect  *LUAFUNC_GetObjectByRect;
 //extern LUAFUNCPROC_SetGuiVisibility *LUAFUNC_SetGuiVisibility;
 extern LUAFUNCPROC_SelectObject     *LUAFUNC_SelectObject;
 extern LUAFUNCPROC_GetSelectedObject        *LUAFUNC_GetSelectedObject;
@@ -146,7 +148,9 @@ public:
   bool  Init          ();
   void  Destroy       ();
   bool  RunFile       ( const std::string &fileName );
+  bool  RunScript     ( const std::string &script );
   bool  CallFunction  ( const std::string &funcName );
+  bool  CallTableTableFunction    ( const std::string &table, const std::string &key, const std::string &function );
 
   void  ShowError     ( const std::string &comment, const std::string &errorName );
 
@@ -185,6 +189,7 @@ public:
   static int LUA_SetCollisionStatic ( lua_State *lua );
   static int LUA_DebugRender      ( lua_State *lua );
   static int LUA_GetObjectByPoint ( lua_State *lua );
+  static int LUA_GetObjectByRect  ( lua_State *lua );
   //static int LUA_SetGuiVisibility ( lua_State *lua );
   static int LUA_SelectObject     ( lua_State *lua );
   static int LUA_GetSelectedObject( lua_State *lua );

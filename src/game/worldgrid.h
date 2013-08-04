@@ -15,7 +15,7 @@
 
 #include "core/object.h"
 #include "core/objectpointer.h"
-#include <deque>
+#include <list>
 
 
 class WorldGrid;

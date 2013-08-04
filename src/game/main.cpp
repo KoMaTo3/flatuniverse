@@ -44,20 +44,20 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->core->CheckGLError( __LINE__, __FILE__ );
   game->lua->Init();
 
-  game->core->CreateObject( "gui" )->SetLockToDelete( true );
+  game->core->CreateObject( "gui" )->SetLockToDelete( true )->SetSaveable( false );
 
   game->core->CheckGLError( __LINE__, __FILE__ );
   game->world->LoadFromFile( "data/temp/testworld.fu" );
 
   game->core->CheckGLError( __LINE__, __FILE__ );
-  game->core->mouse.SetCursor( "data/temp/cursor_hw.png", game->core->CreateObject( "mouse-cursor", game->core->GetObject( "gui" ) )->SetLockToDelete( true ), __config->GetBoolean( "cursor_hardware", true ) );
+  game->core->mouse.SetCursor( "data/temp/cursor_hw.png", game->core->CreateObject( "mouse-cursor", game->core->GetObject( "gui" ) )->SetLockToDelete( true )->SetSaveable( false ), __config->GetBoolean( "cursor_hardware", true ) );
   //__log.PrintInfo( Filelevel_DEBUG, "test: %s", core->GetObject( "gui" )->GetNameFull().c_str() );
   //game->core->CreateObject( "bottom-block", game->core->GetObject( "gui" ) )->SetPosition( Vec3( 50.0f, 85.0f, 2.0f ) )->EnableRenderableGUI()->SetSize( Vec2( 100.0f, 30.0f ) )->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha * 0.5f ) )
   //  ->SetTexture( "data/temp/ui-bg-0.png" );
   //game->core->CreateObject( "tooltips" )->SetLockToDelete( true );
   //game->core->CreateObject( "mouse-grid", game->core->GetObject( "tooltips" ) );
-  game->core->CreateObject( "defaults" )->SetLockToDelete( true );
-  game->core->CreateObject( "camera", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->SetLockToDelete( true );
+  game->core->CreateObject( "defaults" )->SetLockToDelete( true )->SetSaveable( false );
+  game->core->CreateObject( "camera", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->SetLockToDelete( true )->SetSaveable( false );
   game->core->CreateObject( "active-object", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
   game->world->AddActiveObject( game->core->GetObject( "defaults/camera" ) );
@@ -99,181 +99,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //quad->scale.Set( 0.5f, 1.0f );
   game->core->SetCamera( obj );
 
-  /*
-  obj = game->core->CreateObject( "collision-test-0" );
-  col = obj->EnableCollision();
-  //col->SetSize( Vec3( 20.0f, 20.0f, 0.0f ) );
-  col->InitCircle( 20.0f );
-  col->SetPosition( Vec3( 5.0f, 40.0f, 0.0f ) );
-  //col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
-  col->SetIsStatic( true );
-  //col->SetMass( 1000.0f );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetColor( Vec4( 0.0f, 0.0f, 0.0f, 0.5f ) );
-  quad->SetSize( Vec2( 20.0f, 20.0f ) );
-  quad->SetTexture( "data/temp/T_VFX_FLOWER.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
 
-  obj = game->core->CreateObject( "collision-test-1" );
-  col = obj->EnableCollision();
-  //col->SetSize( Vec3( 20.0f, 20.0f, 0.0f ) );
-  polyPoints.clear();
-  polyPoints.push_back( CollisionElementPolygon::Point( -50.0f,  10.0f ) );
-  polyPoints.push_back( CollisionElementPolygon::Point( -10.0f, -10.0f ) );
-  polyPoints.push_back( CollisionElementPolygon::Point(  10.0f, -10.0f ) );
-  polyPoints.push_back( CollisionElementPolygon::Point(  10.0f,  10.0f ) );
-  col->InitPolygon( polyPoints );
-  col->SetPosition( Vec3( -50.0f, 40.0f, 0.0f ) );
-  //col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
-  col->SetIsStatic( true );
-  //col->SetMass( 1000.0f );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetColor( Vec4( 0.0f, 0.0f, 0.0f, 0.5f ) );
-  quad->SetSize( Vec2( 20.0f, 20.0f ) );
-  quad->SetTexture( "data/temp/T_VFX_FLOWER.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  */
-
-  /*
-  obj = game->core->CreateObject( "wall-top" );
-  obj->SetPosition( Vec3( 53.0f, 0.0f, 0.0f ) );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetTexture( "data/temp/brick0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  col = obj->EnableCollision();
-  col->SetSize( Vec3( 50.0f, 10.0f, 0.0f ) );
-  col->SetIsStatic( true );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-  quad->SetSize( Vec2( 50.0f, 10.0f ) );
-  game->world->AttachObjectToGrid( 0, 0, obj );
-  */
-
-  /*
-  obj = game->core->CreateObject( "wall-bottom" );
-  obj->SetPosition( Vec3( 103.0f, 100.0f, 0.0f ) );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetTexture( "data/temp/brick0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  col = obj->EnableCollision();
-  col->SetSize( Vec3( 150.0f, 10.0f, 0.0f ) );
-  col->SetIsStatic( true );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-  quad->SetSize( Vec2( 150.0f, 10.0f ) );
-  game->world->AttachObjectToGrid( 0, 0, obj );
-  */
-
-  /*
-  obj = game->core->CreateObject( "wall-left" );
-  obj->SetPosition( Vec3( 15.0f, 50.0f, 0.0f ) );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetTexture( "data/temp/brick3.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  col = obj->EnableCollision();
-  col->SetSize( Vec3( 10.0f, 55.0f, 0.0f ) );
-  col->SetIsStatic( true );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-  quad->SetSize( Vec2( 10.0f, 55.0f ) );
-  ObjectTrigger* trig = obj->EnableTrigger()->SetSize( Vec3( 10.0f, 55.0f, 0.0f ) + Vec3( 2.0f, 2.0f, 0.0f ) );
-  //trig->AddHandler( Game::TestTrigger );
-  //game->world->AttachObjectToGrid( 0, 0, obj );
-  */
-
-  /*
-  obj = game->core->CreateObject( "wall-right" );
-  obj->SetPosition( Vec3( 185.0f, 50.0f, 0.0f ) );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetTexture( "data/temp/brick3.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  col = obj->EnableCollision();
-  col->SetSize( Vec3( 10.0f, 50.0f, 0.0f ) );
-  col->SetIsStatic( true );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-  quad->SetSize( Vec2( 10.0f, 50.0f ) );
-  game->world->AttachObjectToGrid( 0, 0, obj );
-  */
-
-  /*
-  obj = game->core->CreateObject( "enemy" );
-  col = obj->EnableCollision();
-  col->SetSize( Vec3( 10.0f, 10.0f, 0.0f ) );
-  col->SetPosition( Vec3( 45.0f, 30.0f, 0.0f ) );
-  col->SetAcceleration( Vec3( 0.0f, 400.0f, 0.0f ) );
-  col->SetIsStatic( false );
-  col->SetMass( 1000.0f );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-  //quad->SetPosition( Vec3( 50.0f, 50.0f, 0.0f ) );
-  quad->SetSize( Vec2( 10.0f, 10.0f ) );
-  quad->SetTexture( "data/temp/enemy0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  //quad->scale.Set( 0.5f, 1.0f );
-  game->world->AttachObjectToGrid( 0, 0, obj );
-  */
-
-  /*
-  obj = game->core->CreateObject( "enemy" );
-  col = obj->EnableCollision();
-  col->SetSize( Vec3( 20.0f, 20.0f, 0.0f ) );
-  col->SetPosition( Vec3( 40.0f, 0.0f, 0.0f ) );
-  col->SetAcceleration( Vec3( 0.0f, 400.0f, 0.0f ) );
-  col->SetIsStatic( false );
-  col->SetMass( 1000.0f );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-  quad->SetSize( Vec2( 20.0f, 20.0f ) );
-  quad->SetTexture( "data/temp/enemy0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  game->world->AttachObjectToGrid( 0, 0, obj );
-  */
-
-  /*
-  obj = game->core->CreateObject( "lift", game->core->GetObject( "lifts" ) );
-  obj->SetPosition( Vec3( -5.0f, 40.0f, 0.0f ) );
-  col = obj->EnableCollision();
-  col->SetSize( Vec3( 30.0f, 10.0f, 0.0f ) );
-  col->SetIsStatic( true );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetTexture( "data/temp/brick2.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-  quad->SetSize( Vec2( 30.0f, 10.0f ) );
-
-  obj = game->core->CreateObject( "lift-2", game->core->GetObject( "lifts" ) );
-  obj->SetPosition( Vec3( -35.0f, 50.0f, 0.0f ) );
-  col = obj->EnableCollision();
-  col->SetSize( Vec3( 30.0f, 10.0f, 0.0f ) );
-  col->SetIsStatic( true );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetTexture( "data/temp/brick3.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  quad->SetColor( Vec4( 0.0f, 0.0f, 1.0f, worldAlpha ) );
-  quad->SetSize( Vec2( 30.0f, 10.0f ) );
-
-  obj = game->core->CreateObject( "test-bg-0" );
-  obj->SetPosition( Vec3( 90.0f, 85.0f, -1.0f ) );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetTexture( "data/temp/brick2.png" );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-  quad->SetSize( Vec2( 20.0f, 20.0f ) );
-
-  obj = game->core->CreateObject( "test-bg-1" );
-  obj->SetPosition( Vec3( 100.0f, 85.0f, 1.0f ) );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetTexture( "data/temp/brick2.png" );
-  quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
-  quad->SetSize( Vec2( 20.0f, 20.0f ) );
-  */
-
-  //game->world->AttachObjectToGrid( WorldGrid::WorldGridPosition( 0, 0 ), game->core->GetObject( "wall-left" ) );
   game->world->AddActiveObject( game->core->GetObject( "player" ) );
 
-
-  /*
-  for( int q = 0; q < 10; ++q )
-  {
-    char t[ 1024 ];
-    sprintf_s( t, sizeof( t ), "block%d", q );
-    Vec3 pos = Vec3( float( q ), -2.0f, 0.0f ) * float( WORLD_GRID_BLOCK_SIZE );
-    obj = game->core->CreateObject( t );
-    col = obj->EnableCollision();
-    col->SetPosition( pos )->SetIsStatic( true )->SetSize( Vec3( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE, 0.0f ) );
-    quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-    quad->SetColor( Vec4( ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, ( rand() % 256 ) / 256.0f, 1.0f ) );
-    quad->SetSize( Vec2( WORLD_GRID_BLOCK_SIZE, WORLD_GRID_BLOCK_SIZE ) );
-    quad->SetTexture( "data/temp/brick0.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-    game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
-  }
-  */
 
   //фоновая картинка
 
@@ -284,18 +112,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetTexture( "data/temp/thu128.jpg" );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
   quad->SetSize( Vec2( 320.0f, 320.0f ) );
-  */
-
-  /*
-  obj = game->core->CreateObject( "cube" );
-  obj->SetPosition( Vec3( 55.0f, 50.0f, 0.0f ) );
-  quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  col = obj->EnableCollision();
-  col->SetSize( Vec3( 10.0f, 10.0f, 0.0f ) );
-  col->SetAcceleration( Vec3( 0.0f, 150.0f, 0.0f ) );
-  col->SetIsStatic( false );
-  quad->SetColor( Vec4( 0.0f, 0.0f, 1.0f, 0worldAlpha1f ) );
-  quad->SetSize( Vec2( 10.0f, 10.0f ) );
   */
 
   float t = 0.0f, rot = 0.0f;
@@ -332,9 +148,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   */
-  //g2Button* MyButton = game->core->gui->AddButton( 5, 5, "Hello, World!", testButton );
-  //g2TextField *it = game->core->gui->AddTextField( 100, 100, "test" );
-  //MyButton = game->core->gui->AddButton( 5, 30, "test2", testButton );
   float renderTime = 0.0f, renderPeriod = 1.0f / 60.0f;
 
   while( game->core->Update() )
@@ -644,6 +457,8 @@ Game::Game()
   memset( this->gridTooltipUnderMouse.obj, 0, sizeof( this->gridTooltipUnderMouse.obj ) );
   this->core = new Core();
   this->lua = new Lua();
+  Object::OnLoad = Game::ObjectOnLoad;
+  Object::OnUnload = Game::ObjectOnUnload;
 
   LUAFUNC_RemoveObject      = Game::LUA_RemoveObject;
   LUAFUNC_GetObjectPos      = Game::LUA_GetObjectPos;
@@ -673,6 +488,7 @@ Game::Game()
   LUAFUNC_SetCollisionStatic= Game::LUA_SetCollisionStatic;
   LUAFUNC_DebugRender       = Game::LUA_DebugRender;
   LUAFUNC_GetObjectByPoint  = Game::LUA_GetObjectByPoint;
+  LUAFUNC_GetObjectByRect   = Game::LUA_GetObjectByRect;
   LUAFUNC_SelectObject      = Game::LUA_SelectObject;
   LUAFUNC_GetSelectedObject = Game::LUA_GetSelectedObject;
   LUAFUNC_LoadScript        = Game::LUA_LoadScript;
@@ -778,6 +594,75 @@ void Game::UpdateLuaTimers()
     }
   }//for q
 }//UpdateLuaTimers
+
+
+
+/*
+=============
+  StringToObjectList
+=============
+*/
+void Game::StringToObjectList( const std::string &str, ObjectList &list ) const {
+  list.clear();
+  auto nameList = tools::Explode( str, "//" );
+  for( auto &oneName: nameList ) {
+    Object *object = this->core->GetObject( oneName );
+    if( object ) {
+      list.push_back( object );
+    } else {
+      __log.PrintInfo( Filelevel_WARNING, "Game::StringToObjectList => object '%s' not found", oneName.c_str() );
+    }
+  }
+}//StringToObjectList
+
+
+
+/*
+=============
+  ObjectListToString
+=============
+*/
+std::string Game::ObjectListToString( const ObjectList &list ) const {
+  std::string result = "";
+  int num = 0;
+  for( auto &obj: list ) {
+    if( num ) {
+      result += "//";
+    }
+    result += obj->GetNameFull();
+    ++num;
+  }
+  return result;
+}//ObjectListToString
+
+
+
+/*
+=============
+  ObjectOnLoad
+=============
+*/
+void Game::ObjectOnLoad( Object* obj ) {
+  if( obj->GetLuaScript().size() ) {
+    game->lua->RunScript( obj->GetLuaScript() );
+    game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "OnLoad" );
+  }
+}//ObjectOnLoad
+
+
+
+
+/*
+=============
+  ObjectOnUnload
+=============
+*/
+void Game::ObjectOnUnload( Object* obj ) {
+  if( obj->GetLuaScript().size() ) {
+    game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "OnUnload" );
+    game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "__fu_destroy" );
+  }
+}//ObjectOnUnload
 
 
 /*
@@ -889,7 +774,11 @@ void Game::LUA_StopTimer( Dword id )
 */
 bool Game::LUA_RemoveObject( const std::string &name )
 {
-  return game->core->RemoveObject( name );
+  auto nameList = tools::Explode( name, "//" );
+  for( auto &oneName: nameList ) {
+    game->core->RemoveObject( oneName, true );
+  }
+  return true;
 }//LUA_RemoveObject
 
 
@@ -906,8 +795,8 @@ void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos, int notIn
   Object *obj       = NULL;
   if( slashPos > 0 ) {
     std::string fullPath = &name[ slashPos ];
-    std::deque< std::string > path = tools::Explode( name, "/" );
-    std::deque< std::string >::iterator iter, iterEnd = path.end();
+    std::vector< std::string > path = tools::Explode( name, "/" );
+    std::vector< std::string >::iterator iter, iterEnd = path.end();
     std::string currentPath = "";
     for( iter = path.begin(); iter != iterEnd; ++iter ) {
       //__log.PrintInfo( Filelevel_DEBUG, ". iter: '%s'", iter->c_str() );
@@ -1401,15 +1290,20 @@ void Game::LUA_DebugRender( int flags )
 */
 std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::string &afterObject )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "test123: point[%3.3f; %3.3f]", point.x, point.y );
   switch( type ) {
     case 1: { //renderable
       Object *object = game->core->GetRenderableInPoint( point, afterObject );
+      while( object && !object->IsSaveable() ) {
+        object = object->GetParent();
+      }
       if( object ) {
         return object->GetNameFull();
       } else {
         if( afterObject.length() ) {
           object = game->core->GetRenderableInPoint( point, "" );
+          while( object && !object->IsSaveable() ) {
+            object = object->GetParent();
+          }
           if( object ) {
             return object->GetNameFull();
           }
@@ -1419,11 +1313,17 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
     }//renderable
     case 2: { //collision
       Object *object = game->core->GetCollisionInPoint( point, afterObject );
+      while( object && !object->IsSaveable() ) {
+        object = object->GetParent();
+      }
       if( object ) {
         return object->GetNameFull();
       } else {
         if( afterObject.length() ) {
           object = game->core->GetCollisionInPoint( point, "" );
+          while( object && !object->IsSaveable() ) {
+            object = object->GetParent();
+          }
           if( object ) {
             return object->GetNameFull();
           }
@@ -1433,11 +1333,17 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
     }//collision
     case 3: { //trigger
       Object *object = game->core->GetTriggerInPoint( point, afterObject );
+      while( object && !object->IsSaveable() ) {
+        object = object->GetParent();
+      }
       if( object ) {
         return object->GetNameFull();
       } else {
         if( afterObject.length() ) {
           object = game->core->GetTriggerInPoint( point, "" );
+          while( object && !object->IsSaveable() ) {
+            object = object->GetParent();
+          }
           if( object ) {
             return object->GetNameFull();
           }
@@ -1450,6 +1356,29 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
 }//LUA_GetObjectByPoint
 
 
+/*
+=============
+  LUA_GetObjectByRect
+=============
+*/
+std::string Game::LUA_GetObjectByRect( int type, const Vec2 &leftTop, const Vec2 &rightBottom )
+{
+  ObjectList objectList;
+  game->core->GetObjectsInRect( type, leftTop, rightBottom, objectList );
+  std::string result = "";
+  int num = 0;
+
+  for( auto &object: objectList ) {
+    if( num ) {
+      result += "//";
+    }
+    result += object->GetNameFull();
+    ++num;
+  }
+  return result;
+}//LUA_GetObjectByRect
+
+
 
 /*
 =============
@@ -1458,15 +1387,30 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
 */
 void Game::LUA_SelectObject( const std::string &name )
 {
+  game->core->debug.selectedObjects.clear();
   if( !name.length() ) {
-    game->core->debug.selectedObject = NULL;
+    //game->core->debug.selectedObject = NULL;
+    game->core->debug.selectedObjects.clear();
   } else {
+    auto nameList = tools::Explode( name, "//" );
+    for( auto &oneName: nameList ) {
+      Object *object = game->core->GetObject( oneName );
+      if( !object ) {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SelectObject => object '%s' not found", oneName.c_str() );
+      } else {
+        game->core->debug.selectedObjects.push_back( object );
+      }
+    }
+    /*
     Object *object = game->core->GetObject( name );
     if( !object ) {
       __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SelectObject => object '%s' not found", name.c_str() );
     } else {
-      game->core->debug.selectedObject = object;
+      //game->core->debug.selectedObject = object;
+      game->core->debug.selectedObjects.clear();
+      game->core->debug.selectedObjects.push_back( object );
     }
+    */
   }
 }//LUA_SelectObject
 
@@ -1478,7 +1422,17 @@ void Game::LUA_SelectObject( const std::string &name )
 */
 std::string Game::LUA_GetSelectedObject()
 {
-  return ( game->core->debug.selectedObject ? game->core->debug.selectedObject->GetNameFull() : "" );
+  std::string result = "";
+  int num = 0;
+  for( auto &obj: game->core->debug.selectedObjects ) {
+    if( num ) {
+      result += "//";
+    }
+    result += obj->GetNameFull();
+    ++num;
+  }
+  return result;
+  //return ( game->core->debug.selectedObject ? game->core->debug.selectedObject->GetNameFull() : "" );
 }//LUA_GetSelectedObject
 
 
@@ -1863,6 +1817,26 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
     }//collisionForce
 
     //trigger
+    if( name == "triggerType" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        CollisionElementType type = trigger->GetType();
+        std::string typeName = "";
+        switch( type ) {
+        case COLLISION_ELEMENT_TYPE_SQUARE:
+          typeName = "square";
+          break;
+        case COLLISION_ELEMENT_TYPE_CIRCLE:
+          typeName = "circle";
+          break;
+        case COLLISION_ELEMENT_TYPE_POLYGON:
+          typeName = "polygon";
+          break;
+        }
+        value.SetString( typeName );
+      }
+      continue;
+    }//triggerType
     if( name == "triggerSize" ) {
       trigger = object->GetTrigger();
       if( trigger ) {
@@ -1871,6 +1845,24 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       }
       continue;
     }//triggerSize
+    if( name == "triggerPolygon" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        CollisionElementPolygon::PointList pointList;
+        if( trigger->GetPolygon( pointList ) ) {
+          std::string result = "";
+          char temp[ 1024 ];
+          for( auto &point: pointList ) {
+            sprintf_s( temp, sizeof( temp ), "%s%3.3f %3.3f", result.size() ? " " : "", point.x, point.y );
+            result += temp;
+          }
+          value.SetString( result );
+        } else {
+          value.SetString( "" );
+        }
+      }
+      continue;
+    }//triggerPolygon
 
   }
 }//LUA_ObjectAttr

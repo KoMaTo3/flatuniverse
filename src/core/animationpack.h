@@ -3,6 +3,8 @@
 
 
 #include "animationset.h"
+#include "memorywriter.h"
+#include "memoryreader.h"
 
 
 #include <hash_map>
@@ -17,6 +19,7 @@ namespace Animation {
 
 
 class AnimationPack;
+class Object;
 
 
 void Update( float dt );
@@ -40,6 +43,7 @@ public:
   void SetEnabled( bool setEnabled );
   template< class T >
   void MakeFromTemplate( const Animation::AnimationPack& templatePack, SetParameterFunc* setParameterFunc, IAnimationObject *object );
+  void SaveToBuffer   ( MemoryWriter &writer );
 
 private:
   typedef std::shared_ptr< AnimationSet > AnimationSetPtr;
@@ -64,6 +68,7 @@ void AnimationPack::MakeFromTemplate( const Animation::AnimationPack& templatePa
   }
 
   this->SetEnabled( templatePack._isEnabled );
+  this->_name = templatePack._name;
 }//MakeFromTemplate
 
 
