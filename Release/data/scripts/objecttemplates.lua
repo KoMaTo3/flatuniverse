@@ -2,6 +2,17 @@ function GetObjectsTemplates()
   return {
     --
     {
+      name = 'Точка спавна игрока',
+      icon = 'data/textures/editor/respawn.png',
+      attr = {
+      },
+      animation = { 'editor/respawn', 'default' },
+      tags = {
+        'respawn',
+      },
+    },
+    --
+    {
       name = 'Кирпич, бьётся головой',
       icon = 'data/textures/tiles/bricks/brick0.png',
       attr = {
