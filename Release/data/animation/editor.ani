@@ -3,13 +3,23 @@ template "editor/respawn" {
     sprite "main" {
       renderable_size {
         0( 24, 32 )
-        0.5 linear( 32, 24 )
+        0.25 linear( 32, 24 )
+        0.5 linear( 24, 32 )
+        0.75 linear( 32, 24 )
         1 linear( 24, 32 )
       }
+      position {
+        0( 0, 0 )
+        0.25 linear( 2, 5 )
+        0.5 linear( 0, 0 )
+        0.75 linear( -2, 5 )
+        1 linear( 0, 0 )
+      }
       renderable_rotation {
-        0( -0.15 )
-        0.5 linear( 0.15 )
-        1 linear( -0.15 )
+        0( 0 )
+        0.33 linear( -0.15 )
+        0.66 linear( 0.15 )
+        1 linear( 0 )
       }
       renderable_texture( "data/textures/editor/respawn-sprite.png" )
       renderable_texture_coords {
