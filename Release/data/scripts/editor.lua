@@ -1116,6 +1116,9 @@ function EditorInsertItemByTemplate( px, py )
   if GUI.templates.items[ GUI.templates.currentItem ].creationScript ~= nil then
     GUI.templates.items[ GUI.templates.currentItem ].creationScript( name )
   end
+  if type( GUI.templates.items[ GUI.templates.currentItem ].animation ) == 'table' then
+    ObjectSetAnimation( name, GUI.templates.items[ GUI.templates.currentItem ].animation[ 1 ], GUI.templates.items[ GUI.templates.currentItem ].animation[ 2 ] )
+  end
 
   if tags ~= nil then
     for q = 1,#tags do
