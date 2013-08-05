@@ -29,6 +29,10 @@ function table.copy( t )
   return t2
 end
 
+function TestFunc123( object )
+  Alert('',object)
+end
+
 --[[ Main ]]
 function Main()
   LoadScript( 'data/scripts/gui.lua' )
@@ -65,9 +69,10 @@ function Main()
   -- ObjectCreate( 'camera-mario-style', 0, 0, 0 )
   -- SetCamera( 'camera-mario-style' )
   -- SetTimer( 1/60, 'UpdateCamera' )
-
-  -- reset bricks
-
+  -- local dump = serialize( Main )
+  -- Alert( '', dump )
+  -- local test = load( dump )()
+  -- Alert('',test('player','player',false))
 end -- Main
 Main()
 

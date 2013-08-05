@@ -141,7 +141,7 @@ GUI = {
 
 -- Инициализация
 function EditorInit()
-  LoadScript( 'data/scripts/math.lua' )
+  LoadScript( 'data/scripts/tools.lua' )
   LoadScript( 'data/scripts/objecttemplates.lua' )
   math.randomseed( GetRandomSeed() )
   local x,y = GetWindowSize()

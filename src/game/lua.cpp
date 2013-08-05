@@ -197,7 +197,7 @@ void Lua::LoadLibs() {
     {LUA_STRLIBNAME, luaopen_string},
     {LUA_BITLIBNAME, luaopen_bit32},
     {LUA_MATHLIBNAME, luaopen_math},
-    //{LUA_DBLIBNAME, luaopen_debug},
+    {LUA_DBLIBNAME, luaopen_debug},
     {NULL, NULL}
   };
 
