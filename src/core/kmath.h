@@ -49,6 +49,12 @@ public:
   static Void         Init( Void );
 
   static Float        RSqrt( Float x );      // reciprocal square root, returns huge number when x == 0.0
+  template < class T >
+  static void         Swap( T& a, T& b );   //swap values a and b
+  template < class T >
+  static bool         Between( T l, T r, T x, float epsilon );  //test  l-E <= x <= r+E
+  template < class T >
+  static bool Intersect1D( T a, T b, T c, T d, float epsilon = 0.01f ); //test on intersect [a; b] and [c; d]
 
   static Float        InvSqrt( Float x );      // inverse square root with 32 bits precision, returns huge number when x == 0.0
   static Float        InvSqrt16( Float x );    // inverse square root with 16 bits precision, returns huge number when x == 0.0
@@ -788,4 +794,27 @@ KM_INLINE Float Math::AngleNormalize180( Float angle ) {
 
 KM_INLINE Float Math::AngleDelta( Float angle1, Float angle2 ) {
   return AngleNormalize180( angle1 - angle2 );
+}
+
+template < class T >
+KM_INLINE void Math::Swap( T& a, T& b ) {
+  const T c = a;
+  a = b;
+  b = c;
+}
+
+template < class T >
+KM_INLINE static Bool Math::Between( T _l, T _r, T _x, Float epsilon ) {
+  return min( _l, _r ) <= _x + epsilon && _x <= max( _l, _r ) + epsilon;
+}
+
+template < class T >
+KM_INLINE static Bool Math::Intersect1D( T a, T b, T c, T d, Float epsilon ) {
+	if( a > b ) {
+    Math::Swap( a, b );
+  }
+	if( c > d ) {
+    Math::Swap( c, d );
+  }
+  return max( a, c ) <= min( b, d ) + epsilon;
 }

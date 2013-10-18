@@ -14,7 +14,6 @@
 #include "object.h"
 #include "font.h"
 #include "renderable.h"
-#include "externgl.h"
 #include "timer.h"
 #include "file.h"
 #include "tools.h"
@@ -23,6 +22,7 @@
 #include "mouse.h"
 #include "filemanager.h"
 #include "textureatlas.h"
+#include "lightrenderer.h"
 
 //
 extern CoreRenderableList *__coreRenderableList;
@@ -118,6 +118,8 @@ private:
   ObjectTriggerManager  *triggerManager;
   Pointer               *camera;  //текущая камера
   Animation::Manager    *animationMgr;
+  LightRenderer         *lightRenderer;
+  LightList             *lightList;
 
 public:
   Keyboard  keyboard;

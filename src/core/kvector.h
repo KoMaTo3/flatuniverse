@@ -52,6 +52,9 @@ public:
   Void      Rotate90CCW();  //k
   Vec2      Projection( Vec2 &a );  //k
   Float     Dot( const Vec2 &a ) const; //k
+  Bool      IsLess( const Vec2 &a ) const;
+  static Float  IntersectDet( Float a, Float b, Float c, Float d );
+  static Bool   TestIntersect( const Vec2& a, const Vec2& b, const Vec2& c, const Vec2& d, Vec2 *result, Float epsilon = 0.0001f );
 
   Int       GetDimension( Void ) const;
 
@@ -124,6 +127,14 @@ KM_INLINE Float Vec2::operator[]( Int index ) const {
 
 KM_INLINE Float& Vec2::operator[]( Int index ) {
   return ( &x )[ index ];
+}
+
+KM_INLINE bool Vec2::IsLess( const Vec2 &a ) const {
+  return x < a.x - Math::FLT_EPSILON_NUM || Math::Fabs( x - a.x ) < Math::FLT_EPSILON_NUM && y < a.y - Math::FLT_EPSILON_NUM;
+}
+
+KM_INLINE float Vec2::IntersectDet( float a, float b, float c, float d ) {
+  return  ( a * d - b * c );
 }
 
 KM_INLINE Float Vec2::Length( Void ) const {
@@ -1083,6 +1094,59 @@ KM_INLINE Vec3 Polar3::ToVec3( Void ) const {
   Math::SinCos( phi, sp, cp );
   Math::SinCos( theta, st, ct );
    return Vec3( cp * radius * ct, cp * radius * st, radius * sp );
+}
+
+
+
+
+class Line2 {
+public:
+	float a, b, c;
+ 
+	Line2();
+	Line2 (Vec2 p, Vec2 q);
+	void Normalize();
+	float Dist( Vec2 p ) const;
+};
+
+KM_INLINE Bool Vec2::TestIntersect( const Vec2& a, const Vec2& b, const Vec2& c, const Vec2& d, Vec2 *result, Float epsilon ) {
+  if ( !Math::Intersect1D( a.x, b.x, c.x, d.x, epsilon ) || !Math::Intersect1D( a.y, b.y, c.y, d.y, epsilon ) ) {
+		return false;
+  }
+	Line2 m( a, b );
+	Line2 n( c, d );
+	float zn = Vec2::IntersectDet( m.a, m.b, n.a, n.b );
+  if( Math::Fabs(zn) < epsilon ) {
+		if( Math::Fabs(m.Dist (c)) > epsilon || Math::Fabs(n.Dist (a)) > epsilon ) {
+			return false;
+    }
+    Vec2 resA, resB, resC, resD;
+    if (b.IsLess( a )) {
+      resA = b;
+      resB = a;
+    } else {
+      resA = a;
+      resB = b;
+    }
+    if (d.IsLess( c )) {
+      resC = d;
+      resD = c;
+    } else {
+      resC = c;
+      resD = d;
+    }
+    *result = ( resA.IsLess( resC ) ? resC : resA );
+		//*right = ( resB.IsLess( resD ) ? resB : resD );
+		return true;
+	}
+	else {
+		result->x = -Vec2::IntersectDet(m.c, m.b, n.c, n.b) / zn;
+		result->y = -Vec2::IntersectDet(m.a, m.c, n.a, n.c) / zn;
+    return Math::Between( a.x, b.x, result->x, epsilon )
+			&& Math::Between( a.y, b.y, result->y, epsilon )
+			&& Math::Between( c.x, d.x, result->x, epsilon )
+			&& Math::Between( c.y, d.y, result->y, epsilon );
+	}
 }
 
 

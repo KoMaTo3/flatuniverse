@@ -238,3 +238,28 @@ Void Vec3::ProjectSelfOntoSphere( const Float radius ) {
     z = rsqr / ( 2.0f * sqrt( len ) );
   }
 }
+
+
+Line2::Line2() {
+}
+
+Line2::Line2( Vec2 p, Vec2 q ) {
+	a = p.y - q.y;
+	b = q.x - p.x;
+	c = - a * p.x - b * p.y;
+	Normalize();
+}
+
+void Line2::Normalize() {
+  float z = Math::Sqrt( a * a + b * b );
+  if( Math::Fabs( z ) > Math::FLT_EPSILON_NUM ) {
+    float invZ = 1.0f / z;
+		a *= invZ;
+    b *= invZ;
+    c *= invZ;
+  }
+}
+
+float Line2::Dist( Vec2 p ) const {
+	return a * p.x + b * p.y + c;
+}

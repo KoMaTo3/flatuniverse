@@ -5,7 +5,11 @@
 
 #include "core.h"
 #include "tools.h"
+
+#define INTERNGL_H_PREFIX
+#define INTERNGL_H_POSTFIX = NULL
 #include "interngl.h"
+
 #include "file.h"
 #include "config.h"
 #include "debugrenderer.h"
@@ -29,6 +33,98 @@ CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободны
 ConfigFile* __config = NULL;
 
 extern DebugRenderer* __debugRender;
+
+
+class LightBlock: public LightMap::ILightBlock {
+public:
+  Vec2 position;
+  Vec2
+    size,
+    lastSize;
+  Vec2 halfSize;
+  const float epsilon;
+
+  LightBlock( const Vec2& setPosition, const Vec2& setSize )
+  :position( setPosition ), size( setSize ), halfSize( setSize * 0.5f ), epsilon( 1.0f ), lastSize( -setSize )
+  {
+  }
+
+  virtual inline const Vec2& GetPosition() const {
+    return this->position;
+  }
+  virtual inline const Vec2& GetSize() const {
+    return this->size;
+  }
+  virtual inline const Vec2& GetHalfSize() const {
+    return this->halfSize;
+  }
+
+  virtual void FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) {
+    //default
+    if( lightPosition.x < this->position.x + this->halfSize.x ) { //add right edge
+      this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->position.x + this->halfSize.x, this->position.y - this->halfSize.y - this->epsilon ), Vec2( this->position.x + this->halfSize.x, this->position.y + this->halfSize.y + this->epsilon ), cache );
+    }
+    if( lightPosition.x > this->position.x - this->halfSize.x ) { //add left edge
+      this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->position.x - this->halfSize.x, this->position.y - this->halfSize.y - this->epsilon ), Vec2( this->position.x - this->halfSize.x, this->position.y + this->halfSize.y + this->epsilon ), cache );
+    }
+    if( lightPosition.y < this->position.y + this->halfSize.y ) { //add bottom edge
+      this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->position.x - this->halfSize.x - this->epsilon, this->position.y + this->halfSize.y ), Vec2( this->position.x + this->halfSize.x + this->epsilon, this->position.y + this->halfSize.y ), cache );
+    }
+    if( lightPosition.y > this->position.y - this->halfSize.y ) { //add top edge
+      this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->position.x - this->halfSize.x - this->epsilon, this->position.y - this->halfSize.y ), Vec2( this->position.x + this->halfSize.x + this->epsilon, this->position.y - this->halfSize.y ), cache );
+    }
+
+    /*/darkness
+    if( lightPosition.x < this->position.x - this->halfSize.x ) { //add right edge
+      this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->position.x - this->halfSize.x, this->position.y - this->halfSize.y - this->epsilon ), Vec2( this->position.x - this->halfSize.x, this->position.y + this->halfSize.y + this->epsilon ) );
+    }
+    if( lightPosition.x > this->position.x + this->halfSize.x ) { //add left edge
+      this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->position.x + this->halfSize.x, this->position.y - this->halfSize.y - this->epsilon ), Vec2( this->position.x + this->halfSize.x, this->position.y + this->halfSize.y + this->epsilon ) );
+    }
+    if( lightPosition.y < this->position.y - this->halfSize.y ) { //add bottom edge
+      this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->position.x - this->halfSize.x - this->epsilon, this->position.y - this->halfSize.y ), Vec2( this->position.x + this->halfSize.x + this->epsilon, this->position.y - this->halfSize.y ) );
+    }
+    if( lightPosition.y > this->position.y + this->halfSize.y ) { //add top edge
+      this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->position.x - this->halfSize.x - this->epsilon, this->position.y + this->halfSize.y ), Vec2( this->position.x + this->halfSize.x + this->epsilon, this->position.y + this->halfSize.y ) );
+    }
+    */
+  }
+
+  virtual void SetPosition( const Vec2& setPosition ) {
+    this->position = setPosition;
+  }
+
+  void SetSize( const Vec2& setSize ) {
+    this->size = setSize;
+  }
+
+  virtual void Update() {
+    if( this->lastSize != this->size ) {
+      this->halfSize = this->size * 0.5f;
+      this->lastSize = this->size;
+    }
+  }
+
+  virtual void Redraw() {
+    glBegin( GL_QUADS );
+    Vec2 v2 = this->GetPosition();
+    Vec2 sz = this->GetHalfSize();
+
+    glTexCoord2f( 0.0f, 0.0f );
+    glVertex3f( v2.x - sz.x, v2.y - sz.y, 0.0f );
+
+    glTexCoord2f( 1.0f, 0.0f );
+    glVertex3f( v2.x + sz.x, v2.y - sz.y, 0.0f );
+
+    glTexCoord2f( 1.0f, 1.0f );
+    glVertex3f( v2.x + sz.x, v2.y + sz.y, 0.0f );
+
+    glTexCoord2f( 0.0f, 1.0f );
+    glVertex3f( v2.x - sz.x, v2.y + sz.y, 0.0f );
+    glEnd();
+  }
+};
+
 
 
 Core::Core()
@@ -79,6 +175,8 @@ bool Core::Destroy()
   DEF_DELETE( this->collisionManager );
   DEF_DELETE( this->triggerManager );
   DEF_DELETE( this->animationMgr );
+  DEF_DELETE( this->lightList );
+  DEF_DELETE( this->lightRenderer );
   //DEF_DELETE( this->gui.context );
   DEF_DELETE( __coreRenderableList );
   DEF_DELETE( __coreRenderableListIndicies );
@@ -236,6 +334,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   __objectByCollision     = new ObjectByCollisionList();
   __objectByTrigger       = new ObjectByTriggerList();
   this->animationMgr      = new Animation::Manager(  );
+  this->lightList         = new LightList;
   //__objectByGui           = new ObjectByGuiList();
   //__guiList               = new GuiList();
   //
@@ -248,6 +347,19 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     this->SetState( CORE_STATE_EXIT );
     return false;
   }
+
+  __log.PrintInfo( Filelevel_DEBUG, "new LightRenderer..." );
+  this->lightRenderer     = new LightRenderer(
+    Vec2( float( this->_window.windowSize.width ), float( this->_window.windowSize.height ) ),
+    "data/shaders/shader0.vs",
+    "data/shaders/shader0.fs",
+    "data/shaders/shader2.vs",
+    "data/shaders/shader2.fs",
+    this->lightList
+    );
+  this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 1.0f );
+  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 0.0f, 0.0f ), Vec4( 0.0f, 1.0f, 1.0f, 1.0f ), Vec2( 1300.0f, 1300.0f ), 0.7f, 1024 ) );
+  this->lightRenderer->GetLightManager()->lightBlocks.push_back( new LightBlock( Vec2( 50.0f, 50.0f ), Vec2( 20.0f, 20.0f ) ) );
 
   FileManager::FilesList animationFiles;
   __fileManager->FindFiles( "ani", animationFiles );
@@ -577,7 +689,12 @@ void Core::_InitExtensions()
   this->LoadExtension( "glUniform3f", ( void** ) &glUniform3f );
   this->LoadExtension( "glUniform4f", ( void** ) &glUniform4f );
   this->LoadExtension( "glUniform4fv", ( void** ) &glUniform4fv );
+  this->LoadExtension( "glUniform1i", ( void** ) &glUniform1i );
   this->LoadExtension( "glUniformMatrix4fv", ( void** ) &glUniformMatrix4fv );
+  this->LoadExtension( "glVertexAttrib1f", ( void** ) &glVertexAttrib1f );
+  this->LoadExtension( "glVertexAttrib2f", ( void** ) &glVertexAttrib2f );
+  this->LoadExtension( "glVertexAttrib3f", ( void** ) &glVertexAttrib3f );
+  this->LoadExtension( "glVertexAttrib4f", ( void** ) &glVertexAttrib4f );
   this->LoadExtension( "glGetObjectParameterfvARB", ( void** ) &glGetObjectParameterfvARB );
   this->LoadExtension( "glGetObjectParameterivARB", ( void** ) &glGetObjectParameterivARB );
   this->LoadExtension( "glGetInfoLogARB", ( void** ) &glGetInfoLogARB );
@@ -594,6 +711,15 @@ void Core::_InitExtensions()
   this->LoadExtension( "glVertexAttribPointer", ( void** ) &glVertexAttribPointer );
   this->LoadExtension( "glActiveTexture", ( void** ) &glActiveTexture );
   this->LoadExtension( "glGetAttribLocation", ( void** ) &glGetAttribLocation );
+  this->LoadExtension( "glGenFramebuffers", ( void** ) &glGenFramebuffers );
+  this->LoadExtension( "glBindFramebuffer", ( void** ) &glBindFramebuffer );
+  this->LoadExtension( "glFramebufferTexture", ( void** ) &glFramebufferTexture );
+  this->LoadExtension( "glFramebufferTexture2D", ( void** ) &glFramebufferTexture2D );
+  this->LoadExtension( "glCheckFramebufferStatus", ( void** ) &glCheckFramebufferStatus );
+  this->LoadExtension( "glDeleteFramebuffers", ( void** ) &glDeleteFramebuffers );
+  this->LoadExtension( "glDrawBuffers", ( void** ) &glDrawBuffers );
+  this->LoadExtension( "glDeleteBuffers", ( void** ) &glDeleteBuffers );
+  this->LoadExtension( "glDeleteVertexArrays", ( void** ) &glDeleteVertexArrays );
 
 
   /* WGL_EXT_swap_control */
@@ -644,7 +770,7 @@ void Core::_InitViewport()
   //UPD 2012.12.12: это уже не нужно т.к. проекционна€ и мирова€ матрица передаютс€ в шейдер
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
-  glOrtho( 0.0, 100.0, 100.0, 0.0, -10.0, 10.0 ); // -10.0f - ближайша€ к зрителю точка
+  glOrtho( 0.0, 100.0, 100.0, 0.0, 0.01, 10.0 ); // -10.0f - ближайша€ к зрителю точка
   glMatrixMode( GL_MODELVIEW );
   GL_CHECK_ERROR;
   //*/
@@ -919,6 +1045,23 @@ bool Core::Redraw()
     //__log.PrintInfo( Filelevel_ERROR, "Core::Redraw => glRC is NULL" );
     return false;
   }
+
+  this->lightRenderer->BeginScene();
+
+  //
+  glClearColor( 1.0f, 1.0f, 1.0f, 0.0f );
+  glDepthFunc( GL_LEQUAL );
+  glEnable( GL_DEPTH_TEST );
+  glEnable( GL_TEXTURE_2D );
+  glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
+  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+  glEnable( GL_BLEND );
+  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );  //отрисовка всех сторон. м.б. стоит сделать только FRONT, нужно тестировать
+  glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+  glDisableClientState( GL_COLOR_ARRAY );
+  glDisableClientState( GL_VERTEX_ARRAY);
+  //
 
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //GL_STENCIL_BUFFER_BIT
   GL_CHECK_ERROR;
@@ -1249,6 +1392,7 @@ bool Core::Redraw()
   //далее рисуем интерфейс
   //glLoadIdentity();
 
+  this->lightRenderer->EndScene();
   SwapBuffers( this->_window.dc );
 
   return true;
@@ -1341,6 +1485,13 @@ bool Core::Update()
   //обновл€ем объекты. они обновл€ют положени€ спрайтов
   this->_rootObject->Update( delta );
   //this->_rootGUIObject->Update( sTimer.GetDeltaF() );
+
+  if( this->camera ) {
+    const Object *objCamera = this->camera->GetObject< Object >();
+    const Vec2 halfSize( float( this->_window.windowSize.width >> 1 ), float( this->_window.windowSize.height >> 1 ) );
+    this->lightRenderer->SetRect( this->_window.windowCenter - halfSize, this->_window.windowCenter + halfSize );
+  }
+  this->lightRenderer->Update();
 
   //__log.PrintInfo( Filelevel_DEBUG, "============" );
   return true;

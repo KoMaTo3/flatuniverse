@@ -573,6 +573,30 @@
     <ClCompile Include="..\src\core\animationobject.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\lbuffer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\lbuffercache.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\fbo.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\lightmap.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\lightmgr.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\lightrenderer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\shaderprogram.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\vertexarray.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\collision.h">
@@ -594,9 +618,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\debugrendererobjects.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\externgl.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\file.h">
@@ -870,6 +891,30 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\animationobject.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\lbuffer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\lbuffercache.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\fbo.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\lightmap.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\lightmgr.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\lightrenderer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\shaderprogram.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\vertexarray.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

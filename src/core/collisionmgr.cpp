@@ -42,7 +42,7 @@ bool CollisionManager::Update( float dt )
   while( this->time > COLLISION_UPDATE_FREQUENCY || forceUpdate )
   {
     //Обновляем позиции, сбрасываем решения коллизий
-    __log.PrintInfo( Filelevel_DEBUG, "__collisionPairList => count[%d]", __collisionPairList.size() );
+    //__log.PrintInfo( Filelevel_DEBUG, "__collisionPairList => count[%d]", __collisionPairList.size() );
     for( auto &pair: __collisionPairList ) {
       int exists = 0;
       auto iterEnd = __collisionList->end();
@@ -53,7 +53,7 @@ bool CollisionManager::Update( float dt )
       }
       if( exists == 2 ) {
         pair.target->SetPositionBy( pair.platform->GetOffsetFromLastPosition() );
-        __log.PrintInfo( Filelevel_DEBUG, "__collisionPairList => move by[%3.3f; %3.3f]", pair.platform->GetOffsetFromLastPosition().x, pair.platform->GetOffsetFromLastPosition().y );
+        //__log.PrintInfo( Filelevel_DEBUG, "__collisionPairList => move by[%3.3f; %3.3f]", pair.platform->GetOffsetFromLastPosition().x, pair.platform->GetOffsetFromLastPosition().y );
       }
     }
     __collisionPairList.clear();

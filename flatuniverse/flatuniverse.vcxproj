@@ -100,12 +100,18 @@
     <ClCompile Include="..\src\core\core.cpp" />
     <ClCompile Include="..\src\core\debugrenderer.cpp" />
     <ClCompile Include="..\src\core\debugrendererobjects.cpp" />
+    <ClCompile Include="..\src\core\fbo.cpp" />
     <ClCompile Include="..\src\core\file.cpp" />
     <ClCompile Include="..\src\core\filemanager.cpp" />
     <ClCompile Include="..\src\core\font.cpp" />
     <ClCompile Include="..\src\core\imageloader.cpp" />
     <ClCompile Include="..\src\core\interpolation.cpp" />
     <ClCompile Include="..\src\core\keyboard.cpp" />
+    <ClCompile Include="..\src\core\lbuffer.cpp" />
+    <ClCompile Include="..\src\core\lbuffercache.cpp" />
+    <ClCompile Include="..\src\core\lightmap.cpp" />
+    <ClCompile Include="..\src\core\lightmgr.cpp" />
+    <ClCompile Include="..\src\core\lightrenderer.cpp" />
     <ClCompile Include="..\src\core\memory.cpp" />
     <ClCompile Include="..\src\core\memoryreader.cpp" />
     <ClCompile Include="..\src\core\memorywriter.cpp" />
@@ -115,6 +121,7 @@
     <ClCompile Include="..\src\core\objecttrigger.cpp" />
     <ClCompile Include="..\src\core\objecttriggermgr.cpp" />
     <ClCompile Include="..\src\core\renderable.cpp" />
+    <ClCompile Include="..\src\core\shaderprogram.cpp" />
     <ClCompile Include="..\src\core\singleton.cpp" />
     <ClCompile Include="..\src\core\squareatlas.cpp" />
     <ClCompile Include="..\src\core\state.cpp" />
@@ -131,6 +138,7 @@
     <ClCompile Include="..\src\core\kmath.cpp" />
     <ClCompile Include="..\src\core\kmatrix.cpp" />
     <ClCompile Include="..\src\core\kvector.cpp" />
+    <ClCompile Include="..\src\core\vertexarray.cpp" />
     <ClCompile Include="..\src\game\lua.cpp" />
     <ClCompile Include="..\src\game\luastatecheck.cpp" />
     <ClCompile Include="..\src\game\main.cpp" />
@@ -287,7 +295,7 @@
     <ClInclude Include="..\src\core\core.h" />
     <ClInclude Include="..\src\core\debugrenderer.h" />
     <ClInclude Include="..\src\core\debugrendererobjects.h" />
-    <ClInclude Include="..\src\core\externgl.h" />
+    <ClInclude Include="..\src\core\fbo.h" />
     <ClInclude Include="..\src\core\file.h" />
     <ClInclude Include="..\src\core\filemanager.h" />
     <ClInclude Include="..\src\core\font.h" />
@@ -295,6 +303,11 @@
     <ClInclude Include="..\src\core\interngl.h" />
     <ClInclude Include="..\src\core\interpolation.h" />
     <ClInclude Include="..\src\core\keyboard.h" />
+    <ClInclude Include="..\src\core\lbuffer.h" />
+    <ClInclude Include="..\src\core\lbuffercache.h" />
+    <ClInclude Include="..\src\core\lightmap.h" />
+    <ClInclude Include="..\src\core\lightmgr.h" />
+    <ClInclude Include="..\src\core\lightrenderer.h" />
     <ClInclude Include="..\src\core\memory.h" />
     <ClInclude Include="..\src\core\memoryreader.h" />
     <ClInclude Include="..\src\core\memorywriter.h" />
@@ -304,6 +317,7 @@
     <ClInclude Include="..\src\core\objecttrigger.h" />
     <ClInclude Include="..\src\core\objecttriggermgr.h" />
     <ClInclude Include="..\src\core\renderable.h" />
+    <ClInclude Include="..\src\core\shaderprogram.h" />
     <ClInclude Include="..\src\core\singleton.h" />
     <ClInclude Include="..\src\core\squareatlas.h" />
     <ClInclude Include="..\src\core\state.h" />
@@ -321,6 +335,7 @@
     <ClInclude Include="..\src\core\kmatrix.h" />
     <ClInclude Include="..\src\core\ktypes.h" />
     <ClInclude Include="..\src\core\kvector.h" />
+    <ClInclude Include="..\src\core\vertexarray.h" />
     <ClInclude Include="..\src\game\game.h" />
     <ClInclude Include="..\src\game\lua.h" />
     <ClInclude Include="..\src\game\luastatecheck.h" />

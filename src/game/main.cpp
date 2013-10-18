@@ -6,6 +6,7 @@
 #include "game.h"
 #include "core/animationpack.h"
 #include "core/textparser.h"
+#include "core/interngl.h"
 
 Game *game = NULL;
 
@@ -148,7 +149,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   */
-  float renderTime = 0.0f, renderPeriod = 1.0f / 50.0f;
+  float renderTime = 0.0f, renderPeriod = 1.0f / 60.0f;
 
   while( game->core->Update() )
   {
