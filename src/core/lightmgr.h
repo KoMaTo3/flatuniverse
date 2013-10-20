@@ -58,7 +58,7 @@ private:
       textureBrightness;
   } _shaderUniforms;
 
-  static Vec2 _ambientLightVertices[ 4 ];
+  static Vec3 _ambientLightVertices[ 4 ];
   VertexArray *vao;
 };
 

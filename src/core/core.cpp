@@ -357,9 +357,9 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     "data/shaders/shader2.fs",
     this->lightList
     );
-  this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 1.0f );
-  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 0.0f, 0.0f ), Vec4( 0.0f, 1.0f, 1.0f, 1.0f ), Vec2( 1300.0f, 1300.0f ), 0.7f, 1024 ) );
-  this->lightRenderer->GetLightManager()->lightBlocks.push_back( new LightBlock( Vec2( 50.0f, 50.0f ), Vec2( 20.0f, 20.0f ) ) );
+  this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 0.2f );
+  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 150.0f, 150.0f ), Vec4( 0.0f, 1.0f, 1.0f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.7f, 1024 ) );
+  this->lightRenderer->GetLightManager()->lightBlocks.push_back( new LightBlock( Vec2( 200.0f, 50.0f ), Vec2( 20.0f, 20.0f ) ) );
 
   FileManager::FilesList animationFiles;
   __fileManager->FindFiles( "ani", animationFiles );
@@ -1376,7 +1376,6 @@ bool Core::Redraw()
     glDisableVertexAttribArray( 2 );
     glDisableVertexAttribArray( 3 );
 
-    //glBindVertexArray( NULL );
     glBindBuffer( GL_ARRAY_BUFFER, NULL );
 
     glDisableClientState( GL_VERTEX_ARRAY );
@@ -1487,9 +1486,15 @@ bool Core::Update()
   //this->_rootGUIObject->Update( sTimer.GetDeltaF() );
 
   if( this->camera ) {
-    const Object *objCamera = this->camera->GetObject< Object >();
-    const Vec2 halfSize( float( this->_window.windowSize.width >> 1 ), float( this->_window.windowSize.height >> 1 ) );
-    this->lightRenderer->SetRect( this->_window.windowCenter - halfSize, this->_window.windowCenter + halfSize );
+    //this->lightRenderer->SetRect( Vec2( 0.0f, 0.0f ), Vec2( 1024.0f, 768.0f ) );
+    this->lightRenderer->SetRect(
+      Vec2( this->camera->GetObject< Object >()->GetPosition().x - ( this->_window.windowSize.width >> 1 ), -this->camera->GetObject< Object >()->GetPosition().y - ( this->_window.windowSize.height >> 1 ) ),
+      Vec2( this->camera->GetObject< Object >()->GetPosition().x + ( this->_window.windowSize.width >> 1 ), -this->camera->GetObject< Object >()->GetPosition().y + ( this->_window.windowSize.height >> 1 ) )
+      );
+    ( *this->lightRenderer->GetLightManager()->lightList->begin() )->position.Set(
+      this->GetObject( "player" )->GetPosition().x,
+      -this->GetObject( "player" )->GetPosition().y
+      );
   }
   this->lightRenderer->Update();
 

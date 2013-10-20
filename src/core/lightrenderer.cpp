@@ -60,6 +60,7 @@ void LightRenderer::EndScene() {
   glDrawBuffer( GL_FRONT );
   glEnable( GL_TEXTURE_2D );
   glDisable( GL_BLEND );
+  glDisable(GL_DEPTH_TEST);
 
   this->shader.shaderProgram->UseProgram();
   //this->vao->Bind();
