@@ -3,27 +3,21 @@
 #include "windows.h"
 
 typedef void          Void;
-
 typedef bool          Bool;
-
 typedef char          Char;
 typedef unsigned char Byte;
-
 typedef int           Int;
 //typedef unsigned int  Word;
 typedef unsigned short Word;
 typedef short         Short;
-
 typedef unsigned int  Dword;
-
 typedef long          Long;
 typedef unsigned long uLong;
-
 typedef float         Float;
-
 typedef double        Double;
-
 typedef __int64       Int64;
+
+typedef int HashValue;
 
 
 #define ONEBY255  ( 1.0f / 255.0f )

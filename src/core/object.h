@@ -13,6 +13,7 @@
 #include "objecttriggermgr.h"
 #include "tags.h"
 #include "animationobject.h"
+#include "objectwidget.h"
 //#include "glui2/g2Theme.h"
 //#include "glui2/g2Spinner.h"
 

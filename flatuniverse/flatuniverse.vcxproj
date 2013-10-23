@@ -120,6 +120,7 @@
     <ClCompile Include="..\src\core\objectpointer.cpp" />
     <ClCompile Include="..\src\core\objecttrigger.cpp" />
     <ClCompile Include="..\src\core\objecttriggermgr.cpp" />
+    <ClCompile Include="..\src\core\objectwidget.cpp" />
     <ClCompile Include="..\src\core\renderable.cpp" />
     <ClCompile Include="..\src\core\shaderprogram.cpp" />
     <ClCompile Include="..\src\core\singleton.cpp" />
@@ -316,6 +317,7 @@
     <ClInclude Include="..\src\core\objectpointer.h" />
     <ClInclude Include="..\src\core\objecttrigger.h" />
     <ClInclude Include="..\src\core\objecttriggermgr.h" />
+    <ClInclude Include="..\src\core\objectwidget.h" />
     <ClInclude Include="..\src\core\renderable.h" />
     <ClInclude Include="..\src\core\shaderprogram.h" />
     <ClInclude Include="..\src\core\singleton.h" />
