@@ -14,6 +14,7 @@
 #include "config.h"
 #include "debugrenderer.h"
 #include "animationmanager.h"
+#include "objectwidget.h"
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -189,6 +190,7 @@ bool Core::Destroy()
   DEF_DELETE( __triggerList );
   DEF_DELETE( __objectByCollision );
   DEF_DELETE( __objectByTrigger );
+  ObjectWidget::Destroy();
   //DEF_DELETE( __objectByGui );
   //DEF_DELETE( __guiList );
 
@@ -321,6 +323,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   this->mouse.Init( Size( screenWidth, screenHeight ) );
 
   //
+  ObjectWidget::Init();
   __coreRenderableList    = new CoreRenderableList();
   __coreRenderableListIndicies = new CoreRenderableListIndicies();
   __coreRenderableListFreeIndicies = new CoreRenderableListIndicies();

@@ -95,7 +95,7 @@ enum ObjectGuiType {
 
 
 
-class Object: public IPointerOwner, public ITags, public IObject
+class Object: public IPointerOwner, public ITags, public IObject, public ObjectWidget::WidgetOwner
 {
 public:
   struct ObjectForce  //вектор силы
@@ -170,6 +170,7 @@ private:
   ObjectTrigger   *trigger;
   Tags            *tags;    //список тегов
   std::string     luaScript;  //скрипты
+  ObjectWidget::WidgetMgr *widget;  //набор виджетов
 
   /*
   struct {
@@ -307,4 +308,6 @@ public:
   bool                IsHasTag            ( const std::string& tag ) const;
   void                AddTag              ( const std::string& tag );
   void                RemoveTag           ( const std::string& tag );
+
+  void __Test();
 };
