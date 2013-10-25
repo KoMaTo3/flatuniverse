@@ -99,6 +99,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   */
   //quad->scale.Set( 0.5f, 1.0f );
   game->core->SetCamera( obj );
+  obj->__Test();
 
 
   game->world->AddActiveObject( game->core->GetObject( "player" ) );

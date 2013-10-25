@@ -170,7 +170,6 @@ private:
   ObjectTrigger   *trigger;
   Tags            *tags;    //список тегов
   std::string     luaScript;  //скрипты
-  ObjectWidget::WidgetMgr *widget;  //набор виджетов
 
   /*
   struct {

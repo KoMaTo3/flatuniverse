@@ -15,6 +15,7 @@ void Destroy();
 
 
 class Widget;
+class WidgetMgr;
 enum ObjectWidgetGUID {
   OBJECT_WIDGET_RENDERABLE  = 1,
   OBJECT_WIDGET_COLLISION   = 2,
@@ -33,6 +34,9 @@ class WidgetOwner {
 public:
   WidgetOwner();
   virtual ~WidgetOwner();
+
+protected:
+  WidgetMgr *widget;
 
 private:
   WidgetOwner( const WidgetOwner& );
@@ -61,16 +65,12 @@ private:
 class WidgetMgr {
 public:
   typedef std::vector< Widget* > ObjectWidgetList;
-  typedef Widget* (WidgetMgr::WidgetInitializator)();
-  //typedef std::vector< WidgetInitializator* > WidgetInitializatorList;
 
   WidgetMgr( const WidgetOwner *setOwner );
   virtual ~WidgetMgr();
-  Widget* AddWidget( const ObjectWidgetGUID guid );
+  bool AddWidget( Widget *newWidget );
 
 private:
-  //WidgetInitializatorList _widgetInitializator;
-
   Widget* AddWidgetLightBlock();
 
   WidgetMgr();

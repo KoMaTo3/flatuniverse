@@ -173,7 +173,6 @@ Object::Object()
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
-  this->widget = new ObjectWidget::WidgetMgr( this );
   //__log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%p]", this );
 }//constructor
 
@@ -185,7 +184,6 @@ Object::Object( const std::string &objectName, Object* parentObject, bool setIsS
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
-  this->widget = new ObjectWidget::WidgetMgr( this );
   if( this->_parent )
   {
     this->nameFull = ( this->_parent->_parent ? this->_parent->GetNameFull() + "/" : "" ) + this->name;
@@ -213,7 +211,6 @@ Object::~Object()
   this->UnAttachThisFromParent();
 
   DEF_DELETE( this->tags );
-  DEF_DELETE( this->widget );
 
   //__log.PrintInfo( Filelevel_DEBUG, "Object x%p deleted", this );
 }//destructor
@@ -1756,5 +1753,5 @@ void Object::SetLuaScript( const std::string& setScript ) {
 
 
 void Object::__Test() {
-  //this->widget->
+  this->widget->AddWidget( new ObjectWidget::WidgetLightBlock( this ) );
 }
