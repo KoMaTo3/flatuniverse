@@ -40,8 +40,7 @@ public:
   }
 
 private:
-  typedef std::shared_ptr< IAnimation > AnimationPtr;
-  typedef std::vector< AnimationPtr > AnimationList;
+  typedef std::vector< IAnimation* > AnimationList;
   AnimationList _animationList;
   std::string _name;
   float

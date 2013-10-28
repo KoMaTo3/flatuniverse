@@ -29,15 +29,21 @@ AnimationPack::~AnimationPack() {
   if( this->_isTemplate ) {
     __animationPackTemplatesList.erase( this->_name );
   }
+  for( auto &setList: this->_animationSetList ) {
+    delete setList.second;
+  }
   this->_animationSetList.clear();
 }
 
 
 AnimationSet* AnimationPack::CreateAnimationSet( const std::string& animationName, float animationLength ) {
-  AnimationSetPtr animationSet( new AnimationSet( animationName, animationLength ) );
+  __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::CreateAnimationSet => new AnimationSet..." );
+  AnimationSet *newSet = new AnimationSet( animationName, animationLength );
+  __log.PrintInfo( Filelevel_DEBUG, "AnimationPack::CreateAnimationSet => new AnimationSet x%p", newSet );
+  AnimationSetPtr animationSet( newSet );
   this->_animationSetList.insert( std::make_pair( animationName, animationSet ) );
 
-  return &( *animationSet );
+  return newSet;
 }//CreateAnimationSet
 
 

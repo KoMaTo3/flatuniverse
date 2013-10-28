@@ -46,7 +46,8 @@ public:
   void SaveToBuffer   ( MemoryWriter &writer );
 
 private:
-  typedef std::shared_ptr< AnimationSet > AnimationSetPtr;
+  //typedef std::shared_ptr< AnimationSet > AnimationSetPtr;
+  typedef AnimationSet* AnimationSetPtr;
   typedef std::hash_map< std::string, AnimationSetPtr > AnimationSetList;
 
   AnimationSetList _animationSetList;

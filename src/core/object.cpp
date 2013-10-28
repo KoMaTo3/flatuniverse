@@ -1753,5 +1753,9 @@ void Object::SetLuaScript( const std::string& setScript ) {
 
 
 void Object::__Test() {
-  this->widget->AddWidget( new ObjectWidget::WidgetLightBlock( this ) );
+  __log.PrintInfo( Filelevel_DEBUG, "Object::__Test..." );
+  auto w = new ObjectWidget::WidgetLightBlock( this );
+  __log.PrintInfo( Filelevel_DEBUG, "lightblock created x%p", w );
+  this->widget->AddWidget( w );
+  __log.PrintInfo( Filelevel_DEBUG, "Object::__Test ok" );
 }

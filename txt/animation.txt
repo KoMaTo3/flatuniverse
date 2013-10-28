@@ -1,0 +1,36 @@
+IObject
+    > IAnimationObject (MakeInstance) abstract
+    .AnimationPack *_animation
+    .AnimationPack *_animationTemplate
+
+AnimationObject( MakeFromTemplate )
+    > AnimationTemplate( MakeFromTemplate )
+        .IObject *_object
+        > IAnimation (MakeFromTemplate) abstract
+            . _parameters
+            . _name
+
+AnimationPack
+    .MakeFromTemplate< T >
+    .hash_map< std::string, shared_ptr< AnimationSet > > _animationSetList
+    .AnimationSet *_currentAnimation
+    ._name
+
+AnimationSet( MakeFromTemplate< T > )
+    .vector< IAnimation* > _animationList
+    ._name
+    ._time
+
+AnimationParameter###TYPENAME###
+    > IAnimationParameter( MakeFromTemplate )
+        .vector< KeyFrame > _keyFrames
+
+AnimationPack хранит AnimationSet и указатель на текущую анимацию-AnimationSet
+AnimationSet хранит IAnimation и параметры своего воспроизведения
+
+
+ApplyAnimation =>
+    _animation = new AnimationPack()
+    _animation->MakeFromTemplate< AnimationObject >( AnimationPack )
+        AnimationPack->CreateAnimationSet->MakeFromTemplate< AnimationObject >
+создаётся новый AnimationPack => новые AnimationSet => новые AnimationObject, наследуемые от object->MakeInstance, затем AnimationObject->MakeFromTemplate

@@ -1,23 +1,33 @@
 #include "animationset.h"
 #include "animation.h"
+#include "file.h"
 
 
 AnimationSet::AnimationSet( const std::string &setName, float setAnimationLength )
 :_name( setName ), _time( 0.0f ), _animationLength( setAnimationLength ), _cycled( true )
 {
+  __log.PrintInfo( Filelevel_DEBUG, "AnimationSet +1 x%p", this );
 }
 
 
 AnimationSet::~AnimationSet() {
-  this->_animationList.clear();
+  __log.PrintInfo( Filelevel_DEBUG, "AnimationSet -1 x%p", this );
+  if( !this->_animationList.empty() ) {
+    for( auto &animation: this->_animationList ) {
+      delete animation;
+    }
+    this->_animationList.clear();
+  }
 }
 
 
 IAnimation* AnimationSet::AddAnimation( IAnimation* newAnimation ) {
   if( !newAnimation ) {
+    __log.PrintInfo( Filelevel_ERROR, "AnimationSet::AddAnimation => is NULL" );
+    return NULL;
   }
 
-  this->_animationList.push_back( std::shared_ptr< IAnimation >( newAnimation ) );
+  this->_animationList.push_back( newAnimation );
 
   return newAnimation;
 }//AddAnimation
