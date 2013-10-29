@@ -6,12 +6,10 @@
 AnimationSet::AnimationSet( const std::string &setName, float setAnimationLength )
 :_name( setName ), _time( 0.0f ), _animationLength( setAnimationLength ), _cycled( true )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "AnimationSet +1 x%p", this );
 }
 
 
 AnimationSet::~AnimationSet() {
-  __log.PrintInfo( Filelevel_DEBUG, "AnimationSet -1 x%p", this );
   if( !this->_animationList.empty() ) {
     for( auto &animation: this->_animationList ) {
       delete animation;

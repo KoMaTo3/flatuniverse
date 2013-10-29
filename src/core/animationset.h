@@ -48,6 +48,7 @@ private:
     _animationLength;
   bool _cycled;
 
+  AnimationSet();
   AnimationSet( const AnimationSet& );
   AnimationSet& operator=( const AnimationSet& );
 };

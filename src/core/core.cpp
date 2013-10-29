@@ -191,6 +191,22 @@ bool Core::Destroy()
   DEF_DELETE( __objectByCollision );
   DEF_DELETE( __objectByTrigger );
   ObjectWidget::Destroy();
+  glDeleteBuffers( 1, &this->_buffers.vbo );
+  glDeleteBuffers( 1, &this->_buffers.ibo );
+  glDeleteBuffers( 1, &this->_buffers.iboGUI );
+  glDeleteVertexArrays( 1, &this->_buffers.vao );
+  glDetachShader( this->_shaders.programm, this->_shaders.vertex );
+  glDetachShader( this->_shaders.programm, this->_shaders.fragment );
+  glDetachShader( this->_shaders.programm, this->_shaders.geometry );
+  glDeleteShader( this->_shaders.vertex );
+  glDeleteShader( this->_shaders.fragment );
+  glDeleteShader( this->_shaders.geometry );
+  glDeleteProgram( this->_shaders.programm );
+  wglMakeCurrent( NULL, NULL );
+  wglDeleteContext( this->_window.glRC );
+  this->_window.glRC = NULL;
+  ReleaseDC( this->_window.hwnd, this->_window.dc );
+  this->_window.dc = NULL;
   //DEF_DELETE( __objectByGui );
   //DEF_DELETE( __guiList );
 
@@ -409,7 +425,7 @@ bool Core::_InitGraphics()
   //__log.PrintInfo( Filelevel_INFO, "OpenGL 4.1 detected" );
 #endif
 
-  if( !( this->_window.glRC = ::wglCreateContext( this->_window.dc ) ) )
+  if( !( this->_window.glRC = wglCreateContext( this->_window.dc ) ) )
   {
     __log.PrintInfo( Filelevel_CRITICALERROR, "Core::_InitGraphics => wglCreateContext failed" );
     this->SetState( CORE_STATE_EXIT );
@@ -417,7 +433,7 @@ bool Core::_InitGraphics()
   }
 
   //__log.PrintInfo( Filelevel_CRITICALERROR, "Core::InitGraphics => wglCreateContext" );
-  ::wglMakeCurrent( this->_window.dc, this->_window.glRC );
+  wglMakeCurrent( this->_window.dc, this->_window.glRC );
   this->_InitViewport();
 
   const char* version = ( const char* ) ::glGetString( GL_VERSION );

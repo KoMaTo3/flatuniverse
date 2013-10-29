@@ -73,9 +73,9 @@ AnimationObject::AnimationObject( IAnimationObject* object, const std::string& s
 
 
 AnimationObject::~AnimationObject() {
-  if( this->_object ) {
-    delete this->_object;
-  }
+  //if( this->_object ) {
+  //  delete this->_object;
+  //}
 }
 
 
@@ -217,7 +217,6 @@ IAnimationObject* AnimationObject::MakeObjectInstance( const std::string& setNam
 
 
 void AnimationObject::MakeFromTemplate( const IAnimation &animation ) {
-  __log.PrintInfo( Filelevel_DEBUG, "AnimationObject::MakeFromTemplate => name['%s']", this->_name.c_str() );
   const AnimationObject *anim = static_cast< const AnimationObject* >( &animation );
   for( auto &parameter: anim->_parameters ) {
     this->SetParameter( parameter.first )->MakeFromTemplate( *parameter.second );

@@ -19,6 +19,9 @@ TextureAtlas::TextureAtlas()
 
 TextureAtlas::~TextureAtlas()
 {
+  if( this->textureId ) {
+    glDeleteTextures( 1, &this->textureId );
+  }
 }//destructor
 
 

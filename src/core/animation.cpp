@@ -4,7 +4,6 @@
 IAnimation::IAnimation( const std::string& setName )
 :_name( setName )
 {
-  printf( "+IAnimation %p\n", this );
 }
 
 
@@ -15,7 +14,6 @@ IAnimation::~IAnimation() {
     this->_parameters.erase( this->_parameters.begin() );
   }
   */
-  printf( "-IAnimation %p\n", this );
 }
 
 
