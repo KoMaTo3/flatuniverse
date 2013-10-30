@@ -7,6 +7,10 @@
 #include "ktypes.h"
 
 
+class Collision;
+class LightRenderer;
+
+
 namespace ObjectWidget {
 
 
@@ -22,6 +26,7 @@ enum ObjectWidgetGUID {
   OBJECT_WIDGET_TRIGGER     = 3,
   OBJECT_WIDGET_LIGHT       = 4,
   OBJECT_WIDGET_LIGHTBLOCK  = 5,
+  OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION  = 6,
   OBJECT_WIDGET_COUNT__,
 };
 
@@ -88,6 +93,21 @@ private:
   WidgetLightBlock();
   WidgetLightBlock( const WidgetLightBlock& );
   WidgetLightBlock& operator=( const WidgetLightBlock& );
+};
+
+
+class WidgetLightBlockByCollision: public Widget {
+public:
+  WidgetLightBlockByCollision( const WidgetOwner *setOwner, LightRenderer *setLightRenderer, Collision *setCollision );
+  virtual ~WidgetLightBlockByCollision();
+
+private:
+  WidgetLightBlockByCollision();
+  WidgetLightBlockByCollision( const WidgetLightBlockByCollision& );
+  WidgetLightBlockByCollision& operator=( const WidgetLightBlockByCollision& );
+
+  Collision *_collision;
+  LightRenderer *_lightRenderer;
 };
 
 

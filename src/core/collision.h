@@ -118,6 +118,7 @@ public:
   void        ResolveCollision();
   void        AddHandler      ( CollisionHandler *handler );
   inline CollisionElementType GetType() { return ( this->collisionElement ? this->collisionElement->GetType() : COLLISION_ELEMENT_TYPE_UNDEFINED ); }
+  inline CollisionElement*    GetCollisionElement() { return this->collisionElement; }
 
   void        SaveToBuffer    ( MemoryWriter &writer );
   void        LoadFromBuffer  ( MemoryReader &reader, const std::string &thisObjectName, const Dword version );

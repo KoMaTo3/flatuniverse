@@ -51,7 +51,7 @@ public:
   virtual void FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) = 0;
   virtual void SetPosition( const Vec2& setPosition ) = 0;
   virtual void Update() = 0;
-  virtual void Redraw() = 0;
+  //virtual void Redraw() = 0;
 };
 typedef std::deque< LightMap::ILightBlock* > LightBlocksList;
 

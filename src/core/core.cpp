@@ -34,6 +34,7 @@ CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободны
 ConfigFile* __config = NULL;
 
 extern DebugRenderer* __debugRender;
+LightRenderer *__lightLenderer = NULL;
 
 
 class LightBlock: public LightMap::ILightBlock {
@@ -178,6 +179,7 @@ bool Core::Destroy()
   DEF_DELETE( this->animationMgr );
   DEF_DELETE( this->lightList );
   DEF_DELETE( this->lightRenderer );
+  __lightLenderer = NULL;
   //DEF_DELETE( this->gui.context );
   DEF_DELETE( __coreRenderableList );
   DEF_DELETE( __coreRenderableListIndicies );
@@ -376,9 +378,10 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     "data/shaders/shader2.fs",
     this->lightList
     );
-  this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 0.2f );
-  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 150.0f, 150.0f ), Vec4( 0.0f, 1.0f, 1.0f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.7f, 1024 ) );
-  this->lightRenderer->GetLightManager()->lightBlocks.push_back( new LightBlock( Vec2( 200.0f, 50.0f ), Vec2( 20.0f, 20.0f ) ) );
+  this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 0.5f );
+  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 150.0f, 150.0f ), Vec4( 1.0f, 1.0f, 1.0f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.5f, 1024 ) );
+  //this->lightRenderer->GetLightManager()->lightBlocks.push_back( new LightBlock( Vec2( 200.0f, 50.0f ), Vec2( 20.0f, 20.0f ) ) );
+  __lightLenderer = this->lightRenderer;
 
   FileManager::FilesList animationFiles;
   __fileManager->FindFiles( "ani", animationFiles );
@@ -1510,10 +1513,12 @@ bool Core::Update()
       Vec2( this->camera->GetObject< Object >()->GetPosition().x - ( this->_window.windowSize.width >> 1 ), -this->camera->GetObject< Object >()->GetPosition().y - ( this->_window.windowSize.height >> 1 ) ),
       Vec2( this->camera->GetObject< Object >()->GetPosition().x + ( this->_window.windowSize.width >> 1 ), -this->camera->GetObject< Object >()->GetPosition().y + ( this->_window.windowSize.height >> 1 ) )
       );
+    /*
     ( *this->lightRenderer->GetLightManager()->lightList->begin() )->position.Set(
       this->GetObject( "player" )->GetPosition().x,
       -this->GetObject( "player" )->GetPosition().y
       );
+      */
   }
   this->lightRenderer->Update();
 

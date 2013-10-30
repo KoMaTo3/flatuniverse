@@ -9,6 +9,7 @@
 
 
 const float COLLISION_POLYGON_AXIS_E = 0.01f;
+const float CollisionElement::epsilon = 1.0f;
 
 /*
 //=============
@@ -25,6 +26,51 @@ CollisionElement::CollisionElement( CollisionElementType setType, Vec3 *setPos, 
     __log.PrintInfo( Filelevel_ERROR, "CollisionElement => rect is NULL" );
   }
 }//constructor
+
+
+
+/*
+=============
+  GetPosition
+=============
+*/
+const Vec2& CollisionElement::GetPosition() const {
+  return this->_lastPosition;
+}//GetPosition
+
+
+
+/*
+=============
+  GetSize
+=============
+*/
+const Vec2& CollisionElement::GetSize() const {
+  return this->_lastSize;
+}//GetSize
+
+
+
+/*
+=============
+  GetHalfSize
+=============
+*/
+const Vec2& CollisionElement::GetHalfSize() const {
+  return this->_lastHalfSize;
+}//GetHalfSize
+
+
+
+/*
+=============
+  SetPosition
+=============
+*/
+void CollisionElement::SetPosition( const Vec2& setPosition ) {
+  this->position->x = setPosition.x;
+  this->position->y = setPosition.y;
+}//SetPosition
 
 
 
@@ -53,10 +99,12 @@ CollisionElementSquare::CollisionElementSquare( Vec3 *setPos, CollisionRect *set
 */
 void CollisionElementSquare::Update() {
   Vec3 halfSize = this->size * 0.5f;
-  //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::Update => size[%3.1f; %3.1f]", this->size.x, this->size.y );
   this->_rect->leftTop = Vec3( this->position->x - halfSize.x, this->position->y - halfSize.y, 0.0f );
   this->_rect->rightBottom = Vec3( this->position->x + halfSize.x, this->position->y + halfSize.y, 0.0f );
   this->_rect->radius2 = this->size.x * this->size.x + this->size.y * this->size.y;
+  this->_lastPosition.Set( this->position->x, -this->position->y );
+  this->_lastSize.Set( this->size.x, this->size.y );
+  this->_lastHalfSize = this->_lastSize * 0.5f;
 }
 
 
@@ -198,6 +246,28 @@ void CollisionElementSquare::SaveToBuffer( MemoryWriter &writer ) {
 
 
 
+/*
+=============
+  FillBuffer
+=============
+*/
+void CollisionElementSquare::FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) {
+  if( lightPosition.x < this->_lastPosition.x + this->_lastHalfSize.x ) { //add right edge
+    this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x + this->_lastHalfSize.x, this->_lastPosition.y - this->_lastHalfSize.y - this->epsilon ), Vec2( this->_lastPosition.x + this->_lastHalfSize.x, this->_lastPosition.y + this->_lastHalfSize.y + this->epsilon ), cache );
+  }
+  if( lightPosition.x > this->_lastPosition.x - this->_lastHalfSize.x ) { //add left edge
+    this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x - this->_lastHalfSize.x, this->_lastPosition.y - this->_lastHalfSize.y - this->epsilon ), Vec2( this->_lastPosition.x - this->_lastHalfSize.x, this->_lastPosition.y + this->_lastHalfSize.y + this->epsilon ), cache );
+  }
+  if( lightPosition.y < this->_lastPosition.y + this->_lastHalfSize.y ) { //add bottom edge
+    this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x - this->_lastHalfSize.x - this->epsilon, this->_lastPosition.y + this->_lastHalfSize.y ), Vec2( this->_lastPosition.x + this->_lastHalfSize.x + this->epsilon, this->_lastPosition.y + this->_lastHalfSize.y ), cache );
+  }
+  if( lightPosition.y > this->_lastPosition.y - this->_lastHalfSize.y ) { //add top edge
+    this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x - this->_lastHalfSize.x - this->epsilon, this->_lastPosition.y - this->_lastHalfSize.y ), Vec2( this->_lastPosition.x + this->_lastHalfSize.x + this->epsilon, this->_lastPosition.y - this->_lastHalfSize.y ), cache );
+  }
+}//FillBuffer
+
+
+
 
 
 //
@@ -233,6 +303,9 @@ void CollisionElementCircle::Update() {
   this->_rect->leftTop = Vec3( this->position->x - halfSize, this->position->y - halfSize, 0.0f );
   this->_rect->rightBottom = Vec3( this->position->x + halfSize, this->position->y + halfSize, 0.0f );
   this->_rect->radius2 = halfSize * halfSize * 4.0f;
+  this->_lastPosition.Set( this->position->x, -this->position->y );
+  this->_lastHalfSize.Set( halfSize, halfSize );
+  this->_lastSize = this->_lastHalfSize * 2.0f;
 }
 
 
@@ -434,6 +507,17 @@ void CollisionElementCircle::SaveToBuffer( MemoryWriter &writer ) {
 
 
 
+/*
+=============
+  FillBuffer
+=============
+*/
+void CollisionElementCircle::FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) {
+  //NOTE: !!!!!!
+}//FillBuffer
+
+
+
 
 
 
@@ -568,6 +652,9 @@ void CollisionElementPolygon::Update() {
     this->pointsResult[ this->pointsResult.size() - 1 ] = this->pointsResult[ 0 ];
     this->_rect->leftTop.Set( min.x, min.y, 0.0f );
     this->_rect->rightBottom.Set( max.x, max.y, 0.0f );
+    this->_lastPosition.Set( this->position->x, -this->position->y );
+    this->_lastSize.Set( radius.x, radius.y );
+    this->_lastHalfSize = this->_lastSize * 0.5f;
     //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => rect[%3.1f; %3.1f]-[%3.1f; %3.1f]", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y );
   } else {
     __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::Update => not enough points" );
@@ -932,3 +1019,14 @@ void CollisionElementPolygon::SaveToBuffer( MemoryWriter &writer ) {
     writer << *iter;
   }
 }//SaveToBuffer
+
+
+
+/*
+=============
+  FillBuffer
+=============
+*/
+void CollisionElementPolygon::FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) {
+  //NOTE: !!!!!!
+}//FillBuffer

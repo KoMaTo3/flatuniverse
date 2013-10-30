@@ -4,6 +4,7 @@
 #include "tools.h"
 #include <vector>
 #include "file.h"
+#include "lightmap.h"
 
 
 
@@ -28,7 +29,7 @@ struct CollisionRect {
 
 
 //"болванка" для различных видов коллизий
-class CollisionElement {
+class CollisionElement: public LightMap::ILightBlock {
   friend class CollisionElementSquare;
   friend class CollisionElementCircle;
   friend class CollisionElementPolygon;
@@ -42,10 +43,22 @@ public:
   virtual void  _Render ( const Vec3 &offset ) = 0;
   virtual void  SaveToBuffer  ( MemoryWriter &writer ) = NULL;
 
+//ILightBlock
+  virtual const Vec2& GetPosition() const;          //center
+  virtual const Vec2& GetSize() const;              //AABB
+  virtual inline const Vec2& GetHalfSize() const;   //AABB/2
+  virtual void FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) = 0;
+  virtual void SetPosition( const Vec2& setPosition );
+
 protected:
   Vec3 *position;
   CollisionRect *_rect; //рассчитанный контур объекта (квадрат)
   CollisionElementType  type; //тип коллизии: квадрат, полигон, круг...
+  Vec2                //параметры, необходимые для передачи в LightMap
+    _lastPosition,
+    _lastSize,
+    _lastHalfSize;
+  static const float epsilon;
 
 
   DISALLOW_COPY_AND_ASSIGN( CollisionElement );
@@ -69,6 +82,9 @@ public:
   inline Vec3& GetSizeModifier() {
     return this->size;
   }
+
+//ILightBlock
+  virtual void FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache );
 
 protected:
   virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );
@@ -95,6 +111,9 @@ public:
   bool TestIntersectWithCircle( CollisionElement &object, Vec3 *outSolver );
   virtual void _Render( const Vec3 &offset );
   virtual void  SaveToBuffer  ( MemoryWriter &writer );
+
+//ILightBlock
+  virtual void FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache );
 
 protected:
   virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );
@@ -125,6 +144,9 @@ public:
   bool TestIntersectWithPolygon ( CollisionElement &object, Vec3 *outSolver );
   virtual void  _Render( const Vec3 &offset );
   virtual void  SaveToBuffer    ( MemoryWriter &writer );
+
+//ILightBlock
+  virtual void FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache );
 
 protected:
   virtual void _ProjectObjectToAxis( const Vec2 &axis, FU_OUT float *min, FU_OUT float *max );

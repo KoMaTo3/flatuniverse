@@ -2,6 +2,7 @@
 #include "file.h"
 #include "tools.h"
 #include "animationpack.h"
+#include "lightrenderer.h"
 //#include "glui2/glui2.h"
 
 extern CoreRenderableList *__coreRenderableList;
@@ -10,6 +11,7 @@ extern CoreRenderableListIndicies *__coreRenderableListFreeIndicies;
 extern CoreRenderableList *__coreGUI;
 extern CoreRenderableListIndicies *__coreGUIIndicies;
 extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
+extern LightRenderer *__lightLenderer;
 //extern GuiList *__guiList;
 //extern Glui2 *__coreGlui;
 
@@ -1344,6 +1346,9 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
 
   if( isCollision ) {
     this->EnableCollision()->LoadFromBuffer( reader, this->nameFull, version );
+
+    //test light block
+    this->widget->AddWidget( new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, this->GetCollision() ) );
   }
 
   if( isTrigger ) {
@@ -1753,9 +1758,6 @@ void Object::SetLuaScript( const std::string& setScript ) {
 
 
 void Object::__Test() {
-  __log.PrintInfo( Filelevel_DEBUG, "Object::__Test..." );
-  auto w = new ObjectWidget::WidgetLightBlock( this );
-  __log.PrintInfo( Filelevel_DEBUG, "lightblock created x%p", w );
+  auto w = new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, this->GetCollision() );
   this->widget->AddWidget( w );
-  __log.PrintInfo( Filelevel_DEBUG, "Object::__Test ok" );
 }

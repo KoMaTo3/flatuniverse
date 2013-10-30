@@ -1,6 +1,8 @@
 #include "objectwidget.h"
 #include "file.h"
 #include "tools.h"
+#include "collision.h"
+#include "lightrenderer.h"
 
 
 using namespace ObjectWidget;
@@ -78,6 +80,14 @@ bool WidgetMgr::AddWidget( Widget *newWidget ) {
   return true;
 }
 
+WidgetOwner::WidgetOwner() {
+  this->widget = new ObjectWidget::WidgetMgr( this );
+}
+
+WidgetOwner::~WidgetOwner() {
+  DEF_DELETE( this->widget );
+}
+
 
 WidgetLightBlock::WidgetLightBlock( const WidgetOwner *setOwner )
 :Widget( ObjectWidgetGUID::OBJECT_WIDGET_LIGHTBLOCK, setOwner ) {
@@ -88,10 +98,16 @@ WidgetLightBlock::~WidgetLightBlock() {
 }
 
 
-WidgetOwner::WidgetOwner() {
-  this->widget = new ObjectWidget::WidgetMgr( this );
+
+WidgetLightBlockByCollision::WidgetLightBlockByCollision( const WidgetOwner *setOwner, LightRenderer *setLightRenderer, Collision *setCollision )
+:Widget( ObjectWidgetGUID::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION, setOwner ), _collision( setCollision ), _lightRenderer( setLightRenderer ) {
+  if( !setCollision ) {
+    __log.PrintInfo( Filelevel_ERROR, "WidgetLightBlockByCollision => collision is NULL" );
+  }
+  this->_lightRenderer->GetLightManager()->lightBlocks.push_back( setCollision->GetCollisionElement() );
 }
 
-WidgetOwner::~WidgetOwner() {
-  DEF_DELETE( this->widget );
+
+WidgetLightBlockByCollision::~WidgetLightBlockByCollision() {
 }
+

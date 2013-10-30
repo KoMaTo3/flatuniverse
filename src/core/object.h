@@ -20,6 +20,7 @@
 
 
 class Object;
+class LightRenderer;
 //class g2Controller;
 //typedef std::deque< g2Controller* > GuiList;
 typedef std::deque< std::string > stdDequeString;

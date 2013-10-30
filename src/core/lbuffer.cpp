@@ -1,5 +1,6 @@
 #include "lbuffer.h"
 #include "math.h"
+#include "file.h"
 
 
 const Vec2 LBuffer::vecAxis( 1.0f, 0.0f );

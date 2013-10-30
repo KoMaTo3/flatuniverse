@@ -175,12 +175,9 @@ public:
   Object* GetTriggerInPoint   ( const Vec2& pos, const std::string &afterObject );
   Object* GetRenderableInPoint( const Vec2& pos, const std::string &afterObject );
   void    ClearScene          ();
-  inline HWND GetWindowHandle() const {
-    return this->_window.hwnd;
-  }
-  inline CoreStates GetState() {
-    return this->_state;
-  }
+  inline HWND GetWindowHandle() const { return this->_window.hwnd; }
+  inline CoreStates GetState() { return this->_state; }
+  inline LightRenderer* GetLightRenderer() { return this->lightRenderer; }
   /*
   inline
   void    SetGuiVisibility    ( bool setShow ) { this->gui.show = setShow; }
