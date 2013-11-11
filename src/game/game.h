@@ -82,6 +82,8 @@ public:
   static void   LUA_ObjectDisableCollision  ( const std::string &objectName );
   static void   LUA_ObjectEnableTrigger     ( const std::string &objectName, const Vec3 &size );
   static void   LUA_ObjectDisableTrigger    ( const std::string &objectName );
+  static void   LUA_ObjectEnableLightBlockByCollision ( const std::string &objectName );
+  static void   LUA_ObjectDisableLightBlockByCollision( const std::string &objectName );
   static bool   LUA_GetCollisionStatic( const std::string &name );
   static void   LUA_SetCollisionStatic( const std::string &name, bool isStatic );
   static void   LUA_DebugRender       ( int flags );

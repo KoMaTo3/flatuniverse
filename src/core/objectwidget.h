@@ -7,7 +7,7 @@
 #include "ktypes.h"
 
 
-class Collision;
+class CollisionElement;
 class LightRenderer;
 
 
@@ -29,6 +29,10 @@ enum ObjectWidgetGUID {
   OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION  = 6,
   OBJECT_WIDGET_COUNT__,
 };
+enum ObjectWidgetEvent {
+  OBJECT_WIDGET_EVENT_UPDATE = 0,
+  OBJECT_WIDGET_EVENT_COUNT__,
+};
 
 
 typedef std::deque< Widget* > WidgetList;
@@ -39,6 +43,7 @@ class WidgetOwner {
 public:
   WidgetOwner();
   virtual ~WidgetOwner();
+  void ListenEvent( const ObjectWidgetEvent &event, Widget *newWidget );
 
 protected:
   WidgetMgr *widget;
@@ -52,15 +57,17 @@ private:
 class Widget
 {
 public:
-  Widget( const ObjectWidgetGUID setGuid, const WidgetOwner *setOwner );
+  Widget( const ObjectWidgetGUID setGuid, WidgetOwner *setOwner );
   virtual ~Widget();
+  virtual void OnEvent( const ObjectWidgetEvent &event ) = 0;
 
   const ObjectWidgetGUID guid;
   static WidgetMatrix* _widgetList;
 
-private:
-  const WidgetOwner *owner;
+protected:
+  WidgetOwner *owner;
 
+private:
   Widget();
   Widget( const Widget& );
   Widget& operator=( const Widget& );
@@ -70,10 +77,15 @@ private:
 class WidgetMgr {
 public:
   typedef std::vector< Widget* > ObjectWidgetList;
+  typedef std::vector< ObjectWidgetList* > ObjectWidgetEventListenersList;
 
   WidgetMgr( const WidgetOwner *setOwner );
   virtual ~WidgetMgr();
   bool AddWidget( Widget *newWidget );
+  bool DeleteWidget( const ObjectWidgetGUID &guid );
+  bool WidgetExists( const ObjectWidgetGUID &guid );
+  void ListenEvent( const ObjectWidgetEvent &event, Widget *newWidget );
+  void TouchEvent( const ObjectWidgetEvent &event );
 
 private:
   Widget* AddWidgetLightBlock();
@@ -81,13 +93,15 @@ private:
   WidgetMgr();
   ObjectWidgetList _widgetList;
   const WidgetOwner *owner;
+  ObjectWidgetEventListenersList *_eventListenersList;
 };
 
 
 class WidgetLightBlock: public Widget {
 public:
-  WidgetLightBlock( const WidgetOwner *setOwner );
+  WidgetLightBlock( WidgetOwner *setOwner );
   virtual ~WidgetLightBlock();
+  virtual void OnEvent( const ObjectWidgetEvent &event );
 
 private:
   WidgetLightBlock();
@@ -98,15 +112,16 @@ private:
 
 class WidgetLightBlockByCollision: public Widget {
 public:
-  WidgetLightBlockByCollision( const WidgetOwner *setOwner, LightRenderer *setLightRenderer, Collision *setCollision );
+  WidgetLightBlockByCollision( WidgetOwner *setOwner, LightRenderer *setLightRenderer, CollisionElement *setCollision );
   virtual ~WidgetLightBlockByCollision();
+  virtual void OnEvent( const ObjectWidgetEvent &event );
 
 private:
   WidgetLightBlockByCollision();
   WidgetLightBlockByCollision( const WidgetLightBlockByCollision& );
   WidgetLightBlockByCollision& operator=( const WidgetLightBlockByCollision& );
 
-  Collision *_collision;
+  CollisionElement *_collisionElement;
   LightRenderer *_lightRenderer;
 };
 

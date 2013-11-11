@@ -22,6 +22,7 @@ LightRenderer::LightRenderer(
   this->shader.uniformTextureScene = this->shader.shaderProgram->GetUniformLocation( "texture0" );
   this->shader.uniformTextureLight = this->shader.shaderProgram->GetUniformLocation( "texture1" );
   this->shader.uniformTextureBrightness = this->shader.shaderProgram->GetUniformLocation( "texture2" );
+  this->shader.uniformOneByWindowSize = this->shader.shaderProgram->GetUniformLocation( "oneByWindowCoeff" );
 
   glGenBuffers( 1, &this->sceneVertexBuffer );
   const Vertice vertices[] = {
@@ -67,6 +68,8 @@ void LightRenderer::EndScene() {
 
   glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+  glUniform2f( this->shader.uniformOneByWindowSize, this->manager->GetOneByWindowSize().x, this->manager->GetOneByWindowSize().y );
 
   glActiveTexture( GL_TEXTURE0 + 0 );
   this->fbo->BindTexture( 0 );

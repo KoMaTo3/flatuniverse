@@ -1028,5 +1028,34 @@ void CollisionElementPolygon::SaveToBuffer( MemoryWriter &writer ) {
 =============
 */
 void CollisionElementPolygon::FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) {
-  //NOTE: !!!!!!
+  if( this->pointsResult.size() < 2 ) {
+    return;
+  }
+  PointList::const_iterator
+    iter = this->pointsResult.begin() + 1,
+    iterEnd = this->pointsResult.end(),
+    iterPrev = this->pointsResult.begin();
+  for(; iter != iterEnd; ++iter ) {
+    Vec2 pointCurrent( iter->x, -iter->y );
+    Vec2 pointPrev( iterPrev->x, -iterPrev->y );
+    Vec2 vec( pointCurrent - pointPrev );
+    vec.Rotate90CCW();
+    if( vec.Dot( lightPosition - pointCurrent ) > 0.0f ) {
+      //this->AddEdgeToBuffer( lightPosition, buffer, pointCurrent, pointPrev, cache );
+      Vec2
+        vec0( pointCurrent - pointPrev ),
+        vec1( pointPrev - pointCurrent )
+        ;
+      vec0.NormalizeFast();
+      vec1.NormalizeFast();
+      vec.NormalizeFast();
+      vec *= ( 1.0f + this->epsilon );  //углубляем ребро на 1+epsilon
+      vec0 *= ( 1.0f + this->epsilon ); //удлинняем ребро на 1+epsilon
+      vec1 *= ( 1.0f + this->epsilon );
+      Vec2 resVec0 = pointCurrent + vec0 + vec;
+      Vec2 resVec1 = pointPrev + vec1 + vec;
+      this->AddEdgeToBuffer( lightPosition, buffer, resVec0, resVec1, cache );
+    }
+    iterPrev = iter;
+  }
 }//FillBuffer

@@ -1137,6 +1137,8 @@ void Object::Update( float dt )
     this->collision->SetForce( force );
   }
 
+  this->widget->TouchEvent( ObjectWidget::OBJECT_WIDGET_EVENT_UPDATE );
+
   //обновляем дочерние объекты
   if( this->_childs && this->_childs->size() )
   {
@@ -1240,7 +1242,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
     this->OnUnload( this );
   }
 
-  bool isRenderable, isCollision, isTrigger, isAnimation;
+  bool isRenderable, isCollision, isTrigger, isAnimation, isLightBlockByCollision;
 
   isRenderable = this->IsRenderable();
   writer << isRenderable;  //renderable true/false
@@ -1304,6 +1306,10 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   //scripts
   //тут нужна сериализация объекта посредством вызова lua-функции
   writer << this->luaScript;
+
+  //Width::LightBlockByCollision
+  isLightBlockByCollision = this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION );
+  writer << isLightBlockByCollision;
 }//SaveToBuffer
 
 
@@ -1316,7 +1322,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 */
 void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dword version )
 {
-  bool isRenderable, isCollision, isTrigger, isAnimation;
+  bool isRenderable, isCollision, isTrigger, isAnimation, isLightBlockByCollision;
   std::string tmpName, parentName;
   Vec3 position;
 
@@ -1348,7 +1354,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     this->EnableCollision()->LoadFromBuffer( reader, this->nameFull, version );
 
     //test light block
-    this->widget->AddWidget( new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, this->GetCollision() ) );
+    //this->widget->AddWidget( new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, this->GetCollision() ) );
   }
 
   if( isTrigger ) {
@@ -1391,6 +1397,13 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
 
     if( version >= 0x00000007 ) {
       reader >> this->luaScript;
+
+      if( version >= 0x00000008 ) {
+        reader >> isLightBlockByCollision;
+        if( isLightBlockByCollision ) {
+          this->EnableLightBlockByCollision();
+        }
+      }//8
     }//7
   }//6
 
@@ -1757,7 +1770,41 @@ void Object::SetLuaScript( const std::string& setScript ) {
 }//SetLuaScript
 
 
+
+/*
+=============
+  EnableLightBlockByCollision
+=============
+*/
+ObjectWidget::WidgetLightBlockByCollision* Object::EnableLightBlockByCollision() {
+  if( !this->GetCollision() ) {
+    __log.PrintInfo( Filelevel_WARNING, "Object::EnableLightBlockByCollision => collision is NULL" );
+    return NULL;
+  }
+  auto w = new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, this->GetCollision()->GetCollisionElement() );
+  this->widget->AddWidget( w );
+  return w;
+}//EnableLightBlockByCollision
+
+
+void Object::DisableLightBlockByCollision() {
+  this->widget->DeleteWidget( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION );
+}
+
+
 void Object::__Test() {
-  auto w = new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, this->GetCollision() );
+  CollisionRect *rect = new CollisionRect();  //!!! memleak
+  CollisionElementPolygon *elem = new CollisionElementPolygon( &this->position, rect );
+  CollisionElementPolygon::PointList pointList;
+  pointList.push_back( CollisionElementPolygon::Point(  3.0f, -10.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point(  8.0f, -7.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point(  8.0f,  12.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point(  6.0f,  14.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point( -6.0f,  14.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point( -8.0f,  12.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point( -8.0f, -7.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point( -3.0f, -10.0f ) );
+  elem->SetPointList( pointList );
+  auto w = new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, elem );
   this->widget->AddWidget( w );
 }

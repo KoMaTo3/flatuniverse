@@ -29,6 +29,9 @@ public:
   inline Fbo* GetFBO() {
     return this->fboLight;
   }
+  inline const Vec2& GetOneByWindowSize() const {
+    return this->oneByWindowSize;
+  }
 
   LightsListPtr lightList;
   LightMap::LightBlocksList lightBlocks;

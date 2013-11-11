@@ -39,7 +39,8 @@ private:
     GLint
       uniformTextureScene,
       uniformTextureLight,
-      uniformTextureBrightness;
+      uniformTextureBrightness,
+      uniformOneByWindowSize;
   } shader;
   #pragma pack( push, 4 )
   struct Vertice {

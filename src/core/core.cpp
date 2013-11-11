@@ -378,8 +378,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     "data/shaders/shader2.fs",
     this->lightList
     );
-  this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 0.5f );
-  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 150.0f, 150.0f ), Vec4( 1.0f, 1.0f, 1.0f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.5f, 1024 ) );
+  this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 0.7f );
+  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 150.0f, 50.0f ), Vec4( 1.0f, 0.6f, 0.6f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.5f, 1024 ) );
   //this->lightRenderer->GetLightManager()->lightBlocks.push_back( new LightBlock( Vec2( 200.0f, 50.0f ), Vec2( 20.0f, 20.0f ) ) );
   __lightLenderer = this->lightRenderer;
 
@@ -1098,9 +1098,7 @@ bool Core::Redraw()
   {
     //__log.PrintInfo( Filelevel_DEBUG, "this->_shaders.programm = x%X", this->_shaders.programm );
     glUseProgram( this->_shaders.programm );
-    GL_CHECK_ERROR;
     glEnableClientState( GL_VERTEX_ARRAY );
-    GL_CHECK_ERROR;
 
     //std::deque< CoreRenderableList* > renderableLists;
     //std::deque< CoreRenderableList* >::iterator renderableListsIter, renderableListsIterEnd;
@@ -1113,7 +1111,6 @@ bool Core::Redraw()
     //renderableListsIterEnd = renderableLists.end();
 
     __textureAtlas->Bind();
-    GL_CHECK_ERROR;
 
     glEnableVertexAttribArray( 0 );
     glEnableVertexAttribArray( 1 );
@@ -1210,6 +1207,50 @@ bool Core::Redraw()
     }
     //End Основной мир
 
+    __textureAtlas->Unbind();
+
+    glDisableVertexAttribArray( 0 );
+    glDisableVertexAttribArray( 1 );
+    glDisableVertexAttribArray( 2 );
+    glDisableVertexAttribArray( 3 );
+
+    glBindBuffer( GL_ARRAY_BUFFER, NULL );
+
+    glDisableClientState( GL_VERTEX_ARRAY );
+    glUseProgram( NULL );
+
+    //glEnableClientState( GL_VERTEX_ARRAY );
+    //glVertexPointer( 3, GL_FLOAT, sizeof( RenderableQuad ), ( *__coreRenderableList->begin() ).GetPointerToVertex() );
+    //glDrawArrays( GL_POINTS, 0, __coreRenderableList->size() );
+    //glDisableClientState( GL_VERTEX_ARRAY );
+    //glDrawElements(  );
+  }
+
+  //далее рисуем интерфейс
+  //glLoadIdentity();
+
+  this->lightRenderer->EndScene();
+
+  if( !__coreRenderableList->empty() || !__coreGUI->empty() ) {
+    glUseProgram( this->_shaders.programm );
+    glEnableClientState( GL_VERTEX_ARRAY );
+
+    //std::deque< CoreRenderableList* > renderableLists;
+    //std::deque< CoreRenderableList* >::iterator renderableListsIter, renderableListsIterEnd;
+
+    //if( __coreRenderableList->size() )
+    //  renderableLists.push_back( __coreRenderableList );
+    //if( __coreGUI->size() )
+    //  renderableLists.push_back( __coreGUI );
+
+    //renderableListsIterEnd = renderableLists.end();
+
+    __textureAtlas->Bind();
+
+    glEnableVertexAttribArray( 0 );
+    glEnableVertexAttribArray( 1 );
+    glEnableVertexAttribArray( 2 );
+    glEnableVertexAttribArray( 3 );
     //editor gui
     //if( this->gui.context && this->gui.show )
     if( true )
@@ -1402,18 +1443,8 @@ bool Core::Redraw()
 
     glDisableClientState( GL_VERTEX_ARRAY );
     glUseProgram( NULL );
-
-    //glEnableClientState( GL_VERTEX_ARRAY );
-    //glVertexPointer( 3, GL_FLOAT, sizeof( RenderableQuad ), ( *__coreRenderableList->begin() ).GetPointerToVertex() );
-    //glDrawArrays( GL_POINTS, 0, __coreRenderableList->size() );
-    //glDisableClientState( GL_VERTEX_ARRAY );
-    //glDrawElements(  );
   }
 
-  //далее рисуем интерфейс
-  //glLoadIdentity();
-
-  this->lightRenderer->EndScene();
   SwapBuffers( this->_window.dc );
 
   return true;

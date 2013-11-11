@@ -41,6 +41,8 @@ LUAFUNCPROC_ObjectEnableCollision   *LUAFUNC_ObjectEnableCollision    = NULL;
 LUAFUNCPROC_ObjectDisableCollision  *LUAFUNC_ObjectDisableCollision   = NULL;
 LUAFUNCPROC_ObjectEnableTrigger     *LUAFUNC_ObjectEnableTrigger      = NULL;
 LUAFUNCPROC_ObjectDisableTrigger    *LUAFUNC_ObjectDisableTrigger     = NULL;
+LUAFUNCPROC_ObjectEnableLightBlockByCollision   *LUAFUNC_ObjectEnableLightBlockByCollision  = NULL;
+LUAFUNCPROC_ObjectDisableLightBlockByCollision  *LUAFUNC_ObjectDisableLightBlockByCollision = NULL;
 //LUAFUNCPROC_GuiGetChecked     *LUAFUNC_GuiGetChecked        = NULL;
 LUAFUNCPROC_GetCollisionStatic*LUAFUNC_GetCollisionStatic   = NULL;
 LUAFUNCPROC_SetCollisionStatic*LUAFUNC_SetCollisionStatic   = NULL;
@@ -137,6 +139,7 @@ bool Lua::Init()
   lua_register( this->luaState, "ObjectRenderable", Lua::LUA_ObjectRenderable );
   lua_register( this->luaState, "ObjectCollision",  Lua::LUA_ObjectCollision );
   lua_register( this->luaState, "ObjectTrigger",    Lua::LUA_ObjectTrigger );
+  lua_register( this->luaState, "ObjectLightBlockByCollision",  Lua::LUA_ObjectLightBlockByCollision );
   //lua_register( this->luaState, "GuiGetChecked",    Lua::LUA_GuiGetChecked );
   lua_register( this->luaState, "CollisionGetStatic", Lua::LUA_GetCollisionStatic );
   lua_register( this->luaState, "CollisionSetStatic", Lua::LUA_SetCollisionStatic );
@@ -876,6 +879,37 @@ int Lua::LUA_ObjectTrigger( lua_State *lua )
 
 /*
 =============
+  LUA_ObjectLightBlockByCollision
+
+  1:    bool    isEnable
+  2:    string  objectName
+  3-4:  Vec2    size
+=============
+*/
+int Lua::LUA_ObjectLightBlockByCollision( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 2 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectLightBlockByCollision => not enough parameters" );
+    return 0;
+  }
+  int enable = lua_toboolean( lua, 1 );
+  std::string objectName = lua_tostring( lua, 2 );
+  if( enable ) {  //enable
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectLightBlockByCollision => enable, params[%d]", parmsCount );
+    LUAFUNC_ObjectEnableLightBlockByCollision( objectName );
+  } else {        //disable
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ObjectLightBlockByCollision => disable" );
+    LUAFUNC_ObjectDisableLightBlockByCollision( objectName );
+  }
+  return 0;
+}//LUA_ObjectLightBlockByCollision
+
+
+
+/*
+=============
   LUA_ListenKeyboard
 =============
 */
@@ -1419,7 +1453,8 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
             if(
               attr->name == "renderable"  ||
               attr->name == "collision"   ||
-              attr->name == "trigger"
+              attr->name == "trigger"   ||
+              attr->name == "lightBlockByCollision"
               ) {
               setAttrs.push_front( attr );
             }

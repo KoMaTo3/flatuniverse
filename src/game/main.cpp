@@ -100,6 +100,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //quad->scale.Set( 0.5f, 1.0f );
   game->core->SetCamera( obj );
   obj->__Test();
+  //obj->EnableLightBlockByCollision();
 
 
   game->world->AddActiveObject( game->core->GetObject( "player" ) );
@@ -161,9 +162,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     } else { //limited FPS
       renderTime += sTimer.GetDeltaF();
       if( renderTime >= renderPeriod ) {
+        /*
         while( renderTime >= renderPeriod ) {
           renderTime -= renderPeriod;
         }
+        */
+        renderTime = 0.0f;
         game->core->Redraw();
         ++currentFps;
       }
@@ -486,6 +490,8 @@ Game::Game()
   LUAFUNC_ObjectDisableCollision  = Game::LUA_ObjectDisableCollision;
   LUAFUNC_ObjectEnableTrigger     = Game::LUA_ObjectEnableTrigger;
   LUAFUNC_ObjectDisableTrigger    = Game::LUA_ObjectDisableTrigger;
+  LUAFUNC_ObjectEnableLightBlockByCollision   = Game::LUA_ObjectEnableLightBlockByCollision;
+  LUAFUNC_ObjectDisableLightBlockByCollision  = Game::LUA_ObjectDisableLightBlockByCollision;
   LUAFUNC_GetCollisionStatic= Game::LUA_GetCollisionStatic;
   LUAFUNC_SetCollisionStatic= Game::LUA_SetCollisionStatic;
   LUAFUNC_DebugRender       = Game::LUA_DebugRender;
@@ -944,6 +950,42 @@ void Game::LUA_ObjectDisableTrigger( const std::string &objectName )
   }
   object->DisableTrigger();
 }//LUA_ObjectDisableTrigger
+
+
+
+/*
+=============
+  LUA_ObjectEnableLightBlockByCollision
+=============
+*/
+void Game::LUA_ObjectEnableLightBlockByCollision( const std::string &objectName )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectEnableLightBlockByCollision => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  if( object->GetCollision() ) {
+    object->EnableLightBlockByCollision();
+  }
+}//LUA_ObjectEnableLightBlockByCollision
+
+
+
+/*
+=============
+  LUA_ObjectDisableLightBlockByCollision
+=============
+*/
+void Game::LUA_ObjectDisableLightBlockByCollision( const std::string &objectName )
+{
+  Object *object = game->core->GetObject( objectName );
+  if( !object ) {
+    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectDisableLightBlockByCollision => object '%s' not found", objectName.c_str() );
+    return;
+  }
+  object->DisableLightBlockByCollision();
+}//LUA_ObjectDisableLightBlockByCollision
 
 
 
@@ -1506,6 +1548,14 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       }
       continue;
     }//trigger
+    if( name == "lightBlockByCollision" ) {
+      if( value.GetBoolean() ) {
+        object->EnableLightBlockByCollision();
+      } else {
+        object->DisableLightBlockByCollision();
+      }
+      continue;
+    }//lightBlockByCollision
     if( name == "position" ) {
       Vec3 pos = object->GetPosition();
       sscanf_s( value.GetString().c_str(), "%f %f", &pos.x, &pos.y );
@@ -1726,6 +1776,10 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       value.SetBoolean( object->IsTrigger() );
       continue;
     }//trigger
+    if( name == "lightBlockByCollision" ) {
+      value.SetBoolean( object->IsLightBlockByCollision() );
+      continue;
+    }//lightBlockByCollision
     if( name == "position" ) {
       value.SetVec3( object->GetPosition() );
       continue;

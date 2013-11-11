@@ -244,6 +244,9 @@ public:
   void                DisableTrigger      ();
   ObjectTrigger*      GetTrigger          ();
   inline bool         IsTrigger           () { return this->trigger != NULL; }
+  ObjectWidget::WidgetLightBlockByCollision*  EnableLightBlockByCollision();
+  inline bool         IsLightBlockByCollision () { return this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION ) != NULL; }
+  void                DisableLightBlockByCollision();
   inline bool         IsSaveable          () { return this->isSaveable; }
   inline Object*      GetParent           () { return this->_parent; }
   void                SetLuaScript        ( const std::string& setScript );

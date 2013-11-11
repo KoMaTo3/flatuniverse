@@ -46,6 +46,8 @@ typedef void  LUAFUNCPROC_ObjectEnableCollision   ( const std::string &objectNam
 typedef void  LUAFUNCPROC_ObjectDisableCollision  ( const std::string &objectName );
 typedef void  LUAFUNCPROC_ObjectEnableTrigger     ( const std::string &objectName, const Vec3 &size );
 typedef void  LUAFUNCPROC_ObjectDisableTrigger    ( const std::string &objectName );
+typedef void  LUAFUNCPROC_ObjectEnableLightBlockByCollision ( const std::string &objectName );
+typedef void  LUAFUNCPROC_ObjectDisableLightBlockByCollision( const std::string &objectName );
 //typedef bool  LUAFUNCPROC_GuiGetChecked     ( const std::string &guiName );
 typedef bool  LUAFUNCPROC_GetCollisionStatic( const std::string &name );
 typedef void  LUAFUNCPROC_SetCollisionStatic( const std::string &name, const bool isStatic );
@@ -99,6 +101,8 @@ extern LUAFUNCPROC_ObjectEnableCollision    *LUAFUNC_ObjectEnableCollision;
 extern LUAFUNCPROC_ObjectDisableCollision   *LUAFUNC_ObjectDisableCollision;
 extern LUAFUNCPROC_ObjectEnableTrigger      *LUAFUNC_ObjectEnableTrigger;
 extern LUAFUNCPROC_ObjectDisableTrigger     *LUAFUNC_ObjectDisableTrigger;
+extern LUAFUNCPROC_ObjectEnableLightBlockByCollision  *LUAFUNC_ObjectEnableLightBlockByCollision;
+extern LUAFUNCPROC_ObjectDisableLightBlockByCollision *LUAFUNC_ObjectDisableLightBlockByCollision;
 //extern LUAFUNCPROC_GuiGetChecked            *LUAFUNC_GuiGetChecked;
 extern LUAFUNCPROC_GetCollisionStatic       *LUAFUNC_GetCollisionStatic;
 extern LUAFUNCPROC_SetCollisionStatic       *LUAFUNC_SetCollisionStatic;
@@ -184,6 +188,7 @@ public:
   static int LUA_ObjectRenderable ( lua_State *lua );
   static int LUA_ObjectCollision  ( lua_State *lua );
   static int LUA_ObjectTrigger    ( lua_State *lua );
+  static int LUA_ObjectLightBlockByCollision( lua_State *lua );
   //static int LUA_GuiGetChecked    ( lua_State *lua );
   static int LUA_GetCollisionStatic ( lua_State *lua );
   static int LUA_SetCollisionStatic ( lua_State *lua );
