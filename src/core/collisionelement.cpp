@@ -252,6 +252,22 @@ void CollisionElementSquare::SaveToBuffer( MemoryWriter &writer ) {
 =============
 */
 void CollisionElementSquare::FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) {
+  //outer light
+  if( lightPosition.x < this->_lastPosition.x - this->_lastHalfSize.x ) { //add right edge
+    this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x - this->_lastHalfSize.x, this->_lastPosition.y - this->_lastHalfSize.y - this->epsilon ), Vec2( this->_lastPosition.x - this->_lastHalfSize.x, this->_lastPosition.y + this->_lastHalfSize.y + this->epsilon ), cache );
+  }
+  if( lightPosition.x > this->_lastPosition.x + this->_lastHalfSize.x ) { //add left edge
+    this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x + this->_lastHalfSize.x, this->_lastPosition.y - this->_lastHalfSize.y - this->epsilon ), Vec2( this->_lastPosition.x + this->_lastHalfSize.x, this->_lastPosition.y + this->_lastHalfSize.y + this->epsilon ), cache );
+  }
+  if( lightPosition.y < this->_lastPosition.y - this->_lastHalfSize.y ) { //add bottom edge
+    this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x - this->_lastHalfSize.x - this->epsilon, this->_lastPosition.y - this->_lastHalfSize.y ), Vec2( this->_lastPosition.x + this->_lastHalfSize.x + this->epsilon, this->_lastPosition.y - this->_lastHalfSize.y ), cache );
+  }
+  if( lightPosition.y > this->_lastPosition.y + this->_lastHalfSize.y ) { //add top edge
+    this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x - this->_lastHalfSize.x - this->epsilon, this->_lastPosition.y + this->_lastHalfSize.y ), Vec2( this->_lastPosition.x + this->_lastHalfSize.x + this->epsilon, this->_lastPosition.y + this->_lastHalfSize.y ), cache );
+  }
+
+  /*
+  //inner light
   if( lightPosition.x < this->_lastPosition.x + this->_lastHalfSize.x ) { //add right edge
     this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x + this->_lastHalfSize.x, this->_lastPosition.y - this->_lastHalfSize.y - this->epsilon ), Vec2( this->_lastPosition.x + this->_lastHalfSize.x, this->_lastPosition.y + this->_lastHalfSize.y + this->epsilon ), cache );
   }
@@ -264,6 +280,7 @@ void CollisionElementSquare::FillBuffer( const Vec2& lightPosition, const Vec2& 
   if( lightPosition.y > this->_lastPosition.y - this->_lastHalfSize.y ) { //add top edge
     this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x - this->_lastHalfSize.x - this->epsilon, this->_lastPosition.y - this->_lastHalfSize.y ), Vec2( this->_lastPosition.x + this->_lastHalfSize.x + this->epsilon, this->_lastPosition.y - this->_lastHalfSize.y ), cache );
   }
+  */
 }//FillBuffer
 
 
@@ -1040,7 +1057,7 @@ void CollisionElementPolygon::FillBuffer( const Vec2& lightPosition, const Vec2&
     Vec2 pointPrev( iterPrev->x, -iterPrev->y );
     Vec2 vec( pointCurrent - pointPrev );
     vec.Rotate90CCW();
-    if( vec.Dot( lightPosition - pointCurrent ) > 0.0f ) {
+    if( vec.Dot( lightPosition - pointCurrent ) <= 0.0f ) {
       //this->AddEdgeToBuffer( lightPosition, buffer, pointCurrent, pointPrev, cache );
       Vec2
         vec0( pointCurrent - pointPrev ),

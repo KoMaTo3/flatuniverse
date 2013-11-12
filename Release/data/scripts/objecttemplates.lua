@@ -18,6 +18,7 @@ function GetObjectsTemplates()
       attr = {
         renderable = true, textureName = 'textures/tiles/bricks/brick0.png',
         collision = true, _collisionScale = 1, collisionStatic = true,
+        lightBlockByCollision = true,
         -- trigger = true, _triggerFunc = 'TestFunc', triggerPolygon = '-12 -12  12 -12  0 12'
         -- trigger = true, _triggerFunc = 'TestFunc', _triggerPolygon = { -1,-1, 1,-1, 0,1 }, _triggerScale = 1,
       },
@@ -33,6 +34,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/bricks/brick1.png',
         collision = true, _collisionScale = 1, collisionStatic = true,
         trigger = false,
+        lightBlockByCollision = true,
       },
     },
     --
@@ -43,6 +45,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'temp/brick3.png',
         collision = true, _collisionScale = 1, collisionStatic = true,
         trigger = false,
+        lightBlockByCollision = true,
       },
     },
     --
@@ -53,6 +56,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'temp/enemy0.png',
         collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 300',
         trigger = false,
+        lightBlockByCollision = true,
       },
       creationScript = function( name )
       end,
@@ -65,6 +69,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/tile000a.png',
         collision = false,
         trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -0.8,-1, 0.8,-1, 0,1 }, _triggerScale = 1,
+        lightBlockByCollision = true,
       },
     },
     -- Tile000b
@@ -74,6 +79,7 @@ function GetObjectsTemplates()
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000b.png',
         trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 0.8,1, -0.8,1, 0,-1 }, _triggerScale = 1,
+        lightBlockByCollision = true,
       },
     },
     -- Tile000c
@@ -83,6 +89,7 @@ function GetObjectsTemplates()
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000c.png',
         trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 1,-0.8, 1,0.8, -1,0 }, _triggerScale = 1,
+        lightBlockByCollision = true,
       },
     },
     -- Tile000d
@@ -92,6 +99,7 @@ function GetObjectsTemplates()
       attr = {
         renderable = true, textureName = 'textures/tiles/tile000d.png',
         trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -1,-0.8, 1,0, -1,0.8 }, _triggerScale = 1,
+        lightBlockByCollision = true,
       },
     },
     -- Question-brick
@@ -102,6 +110,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/question0.png',
         collision = true, _collisionScale = 1, collisionStatic = true,
         trigger = false,
+        lightBlockByCollision = true,
       },
       tags = {
         'has-mushroom',
@@ -115,6 +124,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/question0.png',
         collision = true, _collisionScale = 1, collisionStatic = true,
         trigger = false,
+        lightBlockByCollision = true,
       },
       tags = {
         'has-coin',
@@ -192,6 +202,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/bricks/tube0-tl.png',
         collision = true, _collisionScale = 1, collisionStatic = true,
         trigger = false,
+        lightBlockByCollision = true,
       },
     },
     -- Tube0
@@ -202,6 +213,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/bricks/tube0-tr.png',
         collision = true, _collisionScale = 1, collisionStatic = true,
         trigger = false,
+        lightBlockByCollision = true,
       },
     },
     -- Tube0
@@ -212,6 +224,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/bricks/tube0-left.png',
         collision = true, _collisionScale = 1, collisionStatic = true,
         trigger = false,
+        lightBlockByCollision = true,
       },
     },
     -- Tube0
@@ -222,6 +235,7 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/bricks/tube0-right.png',
         collision = true, _collisionScale = 1, collisionStatic = true,
         trigger = false,
+        lightBlockByCollision = true,
       },
     },
     -- Clouds0

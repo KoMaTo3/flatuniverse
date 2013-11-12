@@ -379,7 +379,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     this->lightList
     );
   this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 0.7f );
-  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 150.0f, 50.0f ), Vec4( 1.0f, 0.6f, 0.6f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.5f, 1024 ) );
+  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 100.0f, 100.0f ), Vec4( 1.0f, 0.6f, 0.6f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.5f, 1024 ) );
+  this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 250.0f, 0.0f ), Vec4( 0.2f, 1.0f, 0.2f, 1.0f ), Vec2( 400.0f, 300.0f ), 0.5f, 1024 ) );
   //this->lightRenderer->GetLightManager()->lightBlocks.push_back( new LightBlock( Vec2( 200.0f, 50.0f ), Vec2( 20.0f, 20.0f ) ) );
   __lightLenderer = this->lightRenderer;
 

@@ -62,7 +62,7 @@ private:
   } _shaderUniforms;
 
   static Vec3 _ambientLightVertices[ 4 ];
-  VertexArray *vao;
+  std::vector< VertexArray* > vao;
 };
 
 #endif

@@ -13,7 +13,7 @@ Vec3 LightMgr::_ambientLightVertices[ 4 ] = {
 
 
 LightMgr::LightMgr()
-:fboLight( NULL ), lightAmbient( Vec4One ), shader( NULL ), vao( new VertexArray() )
+:fboLight( NULL ), lightAmbient( Vec4One ), shader( NULL )
 {
 }
 
@@ -27,7 +27,9 @@ LightMgr::~LightMgr() {
     delete this->shader;
     this->shader = NULL;
   }
-  delete this->vao;
+  for( auto &vaoItem: this->vao ) {
+    delete vaoItem;
+  }
 }
 
 
@@ -106,31 +108,40 @@ void LightMgr::Render() {
   glVertexAttrib4f( 4, float( this->window.rightBottom.x + this->window.leftTop.x ) * 0.5f, float( this->window.rightBottom.y + this->window.leftTop.y ) * 0.5f, this->window.rightBottom.x - this->window.leftTop.x, this->window.rightBottom.y - this->window.leftTop.y );
 
   glEnableVertexAttribArray( 0 );
-  this->vao->SetData( LightMgr::_ambientLightVertices, 4 * sizeof( *LightMgr::_ambientLightVertices ) );
-  this->vao->Bind();
+  int
+    vaoCount = this->vao.size(),
+    vaoNeeded = this->lightList->size() + 1;
+  if( vaoCount < vaoNeeded ) {
+    this->vao.resize( this->lightList->size() + 1 );
+    while( vaoCount < vaoNeeded ) {
+      this->vao[ vaoCount ] = new VertexArray();
+      ++vaoCount;
+    }
+  }
+  this->vao[ 0 ]->SetData( LightMgr::_ambientLightVertices, 4 * sizeof( *LightMgr::_ambientLightVertices ) );
+  this->vao[ 0 ]->Bind();
   glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, 0 );
   glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
-  glDisableVertexAttribArray( 0 );
-  //this->vao->UnBind();
+  this->vao[ 0 ]->UnBind();
 
   //point lights
+  glEnableVertexAttribArray( 1 );
+  glEnableVertexAttribArray( 5 );
+  int lightNum = 1;
   for( auto &light: *this->lightList ) {
     if( light->CheckInRectPassed() ) {
       glDrawBuffer( GL_NONE );
       this->fboLight->Draw();
 
-      glEnableVertexAttribArray( 0 );
-      glEnableVertexAttribArray( 1 );
-      glEnableVertexAttribArray( 5 );
+      this->vao[ lightNum ]->SetData( &light->vertices[ 0 ].position.x, sizeof( LightMap::LightVertex ) * light->vertices.size() );
+      this->vao[ lightNum ]->Bind();
       glVertexAttribPointer( 0, 2, GL_FLOAT, GL_FALSE, sizeof( LightMap::LightVertex ), 0 );
       glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( LightMap::LightVertex ), (void*)( sizeof(Vec2) ) );
       glVertexAttribPointer( 5, 1, GL_FLOAT, GL_FALSE, sizeof( LightMap::LightVertex ), (void*)( sizeof(Vec2)+sizeof(Vec4) ) );
-      this->vao->SetData( &light->vertices[ 0 ], sizeof( LightMap::LightVertex ) * light->vertices.size() );
       glDrawArrays( GL_TRIANGLE_FAN, 0, light->vertices.size() );
-      glDisableVertexAttribArray( 0 );
-      glDisableVertexAttribArray( 1 );
-      glDisableVertexAttribArray( 5 );
+      this->vao[ lightNum ]->UnBind();
 
+      /*
       if( !light->verticesSoftEdges.empty() ) {
         glDrawBuffer( GL_NONE );
         this->fboLight->Draw();
@@ -145,8 +156,13 @@ void LightMgr::Render() {
         glDisableVertexAttribArray( 1 );
         glDisableVertexAttribArray( 5 );
       }
+      */
     }
+    ++lightNum;
   }
+  glDisableVertexAttribArray( 0 );
+  glDisableVertexAttribArray( 1 );
+  glDisableVertexAttribArray( 5 );
 
   this->fboLight->Unbind();
   //clear states

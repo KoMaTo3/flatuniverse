@@ -228,5 +228,6 @@ public:
 
 private:
   static int  GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color );
+  static VariableAttributesListByPrioritet attrsListByPrioritet;
   void        LoadLibs();
 };

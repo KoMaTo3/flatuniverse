@@ -11,6 +11,7 @@
 File Lua::log;
 Lua *__LuaCurrentContext = NULL;
 DebugRenderer* __debugRender = NULL;
+VariableAttributesListByPrioritet Lua::attrsListByPrioritet;
 
 LUAFUNCPROC_RemoveObject      *LUAFUNC_RemoveObject         = NULL;
 LUAFUNCPROC_GetObjectPos      *LUAFUNC_GetObjectPos         = NULL;
@@ -67,6 +68,18 @@ LUAFUNCPROC_ObjectStopAnimation *LUAFUNC_ObjectStopAnimation= NULL;
 LUAFUNCPROC_SetPause          *LUAFUNC_SetPause             = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
+
+
+//очерёдность применения атрибутов при вызове ObjectAttr({...})
+enum {
+  LUA_OBJECT_ATTRS_PRIORITET_RENDERABLE = 0,
+  LUA_OBJECT_ATTRS_PRIORITET_COLLISION,
+  LUA_OBJECT_ATTRS_PRIORITET_COLLISION_SIZE,
+  LUA_OBJECT_ATTRS_PRIORITET_LIGHTBLOCKBYCOLLISION,
+  LUA_OBJECT_ATTRS_PRIORITET_TRIGGER,
+  LUA_OBJECT_ATTRS_PRIORITET_DEFAULT,
+  __LUA_OBJECT_ATTRS_PRIORITET_COUNT
+};
 
 
 
@@ -173,6 +186,10 @@ bool Lua::Init()
 
   this->log.Open( "logs/lua.txt", File_mode_WRITE );
   this->log.EnableAutoFlush( true );
+
+  if( Lua::attrsListByPrioritet.empty() ) {
+    Lua::attrsListByPrioritet.resize( __LUA_OBJECT_ATTRS_PRIORITET_COUNT );
+  }
 
   return true;
 }//Init
@@ -1450,16 +1467,19 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
           }
           if( attr ) {
             attr->name = lua_tostring( lua, -1 );
-            if(
-              attr->name == "renderable"  ||
-              attr->name == "collision"   ||
-              attr->name == "trigger"   ||
-              attr->name == "lightBlockByCollision"
-              ) {
-              setAttrs.push_front( attr );
+            if( attr->name == "collision" ) {
+              Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_COLLISION ].push_back( attr );
+            } else if( attr->name == "collisionSize" ) {
+              Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_COLLISION_SIZE ].push_back( attr );
+            } else if( attr->name == "lightBlockByCollision" ) {
+              Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_LIGHTBLOCKBYCOLLISION ].push_back( attr );
+            } else if( attr->name == "renderable" ) {
+              Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_RENDERABLE ].push_back( attr );
+            } else if( attr->name == "trigger" ) {
+              Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_TRIGGER ].push_back( attr );
             }
             else {
-              setAttrs.push_back( attr );
+              Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_DEFAULT ].push_back( attr );
             }
             //__log.PrintInfo( Filelevel_DEBUG, ". '%s' => '%s'", attr->name.c_str(), attr->value.GetString().c_str() );
           }
@@ -1473,6 +1493,13 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
       lua_pop( lua, 2 );
       ++num;
     }//while
+
+    for( auto &attrsList: Lua::attrsListByPrioritet ) {
+      for( auto &attr: attrsList ) {
+        setAttrs.push_back( attr );
+      }
+      attrsList.clear();
+    }
 
     //__log.PrintInfo( Filelevel_DEBUG, "LUAFUNC_ObjectAttr => objectName['%s'] setAttrs[%d] getAttrs[%d]", objectName.c_str(), setAttrs.size(), getAttrs.size() );
     LUAFUNC_ObjectAttr( objectName, setAttrs, getAttrs );

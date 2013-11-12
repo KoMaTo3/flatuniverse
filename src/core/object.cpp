@@ -733,8 +733,10 @@ Collision* Object::EnableCollision()
   if( this->collision )
     return this->collision;
 
-  if( !__collisionList )
+  if( !__collisionList ) {
+    __log.PrintInfo( Filelevel_ERROR, "Object::EnableCollision => __collisionList is NULL" );
     return NULL;
+  }
 
   this->collision = new Collision( &this->positionSrc );
   __collisionList->push_back( this->collision );

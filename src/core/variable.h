@@ -2,10 +2,12 @@
 
 #include <string>
 #include <deque>
+#include <vector>
 #include "klib.h"
 
 struct VariableAttribute;
 typedef std::deque< VariableAttribute* > VariableAttributesList;
+typedef std::vector< VariableAttributesList > VariableAttributesListByPrioritet;
 
 
 
