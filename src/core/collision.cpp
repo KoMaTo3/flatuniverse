@@ -559,7 +559,7 @@ void Collision::ResolveCollision()
   }
   this->SetPositionBy( result->resolveVector * 0.99f );
   if( result->resolveVector.y != 0.0f && Sign( result->resolveVector.y ) != Sign( this->velocity.y ) ) {
-    float velocityYCoeff = 1.0f - ( 1.0f / Math::Fabs( result->resolveVector.y ) );
+    float velocityYCoeff = min( 1.0f, 1.0f / Math::Fabs( result->resolveVector.y ) );
     this->velocity.y *= velocityYCoeff;
   }
 

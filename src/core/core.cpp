@@ -395,7 +395,6 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   //MessageBox(0,"ok",0,0);
 
   //this->gui.context = new Glui2( "g2Blue.cfg", NULL, NULL, Core::_GluiKeyboardFunc, NULL, Core::_GluiMouseFunc, Core::_GluiHoverFunc );
-  GL_CHECK_ERROR;
   //this->gui.context->WindowWidth  = this->_window.windowSize.width;
   //this->gui.context->WindowHeight = this->_window.windowSize.height;
   //__coreGlui = this->gui.context;
@@ -441,7 +440,6 @@ bool Core::_InitGraphics()
   this->_InitViewport();
 
   const char* version = ( const char* ) ::glGetString( GL_VERSION );
-  GL_CHECK_ERROR;
 
   //check variable parameters
   //GLint i = 0;
@@ -456,11 +454,8 @@ bool Core::_InitGraphics()
 
   //shaders
   this->_shaders.vertex   = glCreateShader( GL_VERTEX_SHADER );
-  GL_CHECK_ERROR;
   this->_shaders.geometry = glCreateShader( GL_GEOMETRY_SHADER );
-  GL_CHECK_ERROR;
   this->_shaders.fragment = glCreateShader( GL_FRAGMENT_SHADER );
-  GL_CHECK_ERROR;
   memory
     memShaderVertex,
     memShaderGeometry,
@@ -479,17 +474,11 @@ bool Core::_InitGraphics()
   const GLchar* sourceShaderGeometry  = memShaderGeometry.getData();
   const GLchar* sourceShaderFragment  = memShaderFragment.getData();
   glShaderSource( this->_shaders.vertex,    1, ( const GLchar** ) &sourceShaderVertex, &lengthShaderVertex );
-  GL_CHECK_ERROR;
   glShaderSource( this->_shaders.geometry,  1, ( const GLchar** ) &sourceShaderGeometry, &lengthShaderGeometry );
-  GL_CHECK_ERROR;
   glShaderSource( this->_shaders.fragment,  1, ( const GLchar** ) &sourceShaderFragment, &lengthShaderFragment );
-  GL_CHECK_ERROR;
   glCompileShader( this->_shaders.vertex );
-  GL_CHECK_ERROR;
   glCompileShader( this->_shaders.geometry );
-  GL_CHECK_ERROR;
   glCompileShader( this->_shaders.fragment );
-  GL_CHECK_ERROR;
   if( this->_CheckShaderError( "Vertex shader", this->_shaders.vertex ) ) {
     this->SetState( CORE_STATE_EXIT );
   }
@@ -500,15 +489,10 @@ bool Core::_InitGraphics()
     this->SetState( CORE_STATE_EXIT );
   }
   this->_shaders.programm = glCreateProgram();
-  GL_CHECK_ERROR;
   glAttachShader( this->_shaders.programm, this->_shaders.vertex );
-  GL_CHECK_ERROR;
   glAttachShader( this->_shaders.programm, this->_shaders.geometry );
-  GL_CHECK_ERROR;
   glAttachShader( this->_shaders.programm, this->_shaders.fragment );
-  GL_CHECK_ERROR;
   glLinkProgram( this->_shaders.programm );
-  GL_CHECK_ERROR;
 
   //this->_shaders.locVertexPos = glGetAttribLocation( this->_shaders.programm, "vertexPosition_local" );
 
@@ -535,29 +519,21 @@ bool Core::_InitGraphics()
   */
 
   this->_shaders.matrModelLoc = glGetUniformLocation( this->_shaders.programm, "matModel" );
-  GL_CHECK_ERROR;
   __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => matrModelLoc[ %d ]", this->_shaders.matrModelLoc );
   this->_shaders.matrProjectionLoc = glGetUniformLocation( this->_shaders.programm, "matProj" );
-  GL_CHECK_ERROR;
   __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => matrProjectionLoc[ %d ]", this->_shaders.matrProjectionLoc );
 
   glGenBuffers( 1, &this->_buffers.vbo );
-  GL_CHECK_ERROR;
   glGenBuffers( 1, &this->_buffers.ibo );
-  GL_CHECK_ERROR;
   glGenBuffers( 1, &this->_buffers.iboGUI );
-  GL_CHECK_ERROR;
   glGenVertexArrays( 1, &this->_buffers.vao );
-  GL_CHECK_ERROR;
 
   if( __textureAtlas )
   {
     GLint texSize;
     glGetIntegerv( GL_MAX_TEXTURE_SIZE, &texSize );
-    GL_CHECK_ERROR;
     texSize = min( texSize, 1024 );
     __textureAtlas->Init( Size( texSize, texSize ), 1 );
-    GL_CHECK_ERROR;
   }
 
   return true;
@@ -795,7 +771,6 @@ void Core::_InitViewport()
   glLoadIdentity();
   glOrtho( 0.0, 100.0, 100.0, 0.0, 0.01, 10.0 ); // -10.0f - ближайшая к зрителю точка
   glMatrixMode( GL_MODELVIEW );
-  GL_CHECK_ERROR;
   //*/
 
   /* position viewer */
@@ -877,7 +852,6 @@ void Core::_InitViewport()
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
   glDisableClientState( GL_COLOR_ARRAY );
   glDisableClientState( GL_VERTEX_ARRAY);
-  GL_CHECK_ERROR;
 }//_InitViewport
 
 
@@ -1073,21 +1047,20 @@ bool Core::Redraw()
 
   //
   glClearColor( 1.0f, 1.0f, 1.0f, 0.0f );
-  glDepthFunc( GL_LEQUAL );
+  //glDepthFunc( GL_LEQUAL );
   glEnable( GL_DEPTH_TEST );
-  glEnable( GL_TEXTURE_2D );
-  glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
+  //glEnable( GL_TEXTURE_2D );
+  //glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glEnable( GL_BLEND );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );  //отрисовка всех сторон. м.б. стоит сделать только FRONT, нужно тестировать
+  //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );  //отрисовка всех сторон. м.б. стоит сделать только FRONT, нужно тестировать
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
   glDisableClientState( GL_COLOR_ARRAY );
   glDisableClientState( GL_VERTEX_ARRAY);
   //
 
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //GL_STENCIL_BUFFER_BIT
-  GL_CHECK_ERROR;
 
   //glUseProgram( this->_shaders.programm );
   //glBegin( GL_QUADS );
@@ -1164,47 +1137,33 @@ bool Core::Redraw()
 
       //__log.PrintInfo( Filelevel_DEBUG, "glBindVertexArray" );
       glBindVertexArray( this->_buffers.vao );
-      GL_CHECK_ERROR;
 
       //__log.PrintInfo( Filelevel_DEBUG, "glBindBuffer:GL_ARRAY_BUFFER => %d", this->_buffers.vbo );
       //__log.PrintInfo( Filelevel_DEBUG, "vbo" );
       glBindBuffer( GL_ARRAY_BUFFER, this->_buffers.vbo );
-      GL_CHECK_ERROR;
       //__log.PrintInfo( Filelevel_DEBUG, "glBufferData: __coreRenderableList[x%X] size[%d]", __coreRenderableList, __coreRenderableList->size() );
       glBufferData( GL_ARRAY_BUFFER, sizeof( RenderableQuad ) * __coreRenderableList->size(), ( *__coreRenderableList->begin() ).GetPointerToVertex(), GL_DYNAMIC_DRAW );
-      GL_CHECK_ERROR;
 
       //__log.PrintInfo( Filelevel_DEBUG, "ibo" );
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->_buffers.ibo );
-      GL_CHECK_ERROR;
       //__log.PrintInfo( Filelevel_DEBUG, "glBufferData" );
       glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( *__coreRenderableListIndicies->begin() ) * __coreRenderableListIndicies->size(), &*__coreRenderableListIndicies->begin(), GL_DYNAMIC_DRAW );
-      GL_CHECK_ERROR;
 
-      GL_CHECK_ERROR;
       //__log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 0" );
       glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), 0 );
-      GL_CHECK_ERROR;
 
-      GL_CHECK_ERROR;
       //__log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 1" );
       glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 4 ) );
-      GL_CHECK_ERROR;
 
-      GL_CHECK_ERROR;
       //__log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 2" );
       glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 8 ) );
-      GL_CHECK_ERROR;
 
-      GL_CHECK_ERROR;
       //__log.PrintInfo( Filelevel_DEBUG, "glVertexAttribPointer 3" );
       glVertexAttribPointer( 3, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 12 ) );
-      GL_CHECK_ERROR;
 
       //glDrawElements( GL_POINTS, __coreRenderableListIndicies->size(), GL_UNSIGNED_SHORT, &( *( __coreRenderableListIndicies->begin() ) ) );
       glDrawElements( GL_POINTS, __coreRenderableListIndicies->size(), GL_UNSIGNED_SHORT, NULL );
       //glDrawArrays( GL_POINTS, 0, __coreRenderableList->size() );
-      GL_CHECK_ERROR;
     }
     //End Основной мир
 
@@ -1368,6 +1327,7 @@ bool Core::Redraw()
         }//trigger
 
         glEnable( GL_DEPTH_TEST );
+        glEnable( GL_TEXTURE_2D );
       }
 
       if( __debugRender ) {
@@ -1396,15 +1356,12 @@ bool Core::Redraw()
       glUniformMatrix4fv( this->_shaders.matrModelLoc, 1, false, &matrix[ 0 ][ 0 ] );
 
       glBindVertexArray( this->_buffers.vao );
-      GL_CHECK_ERROR;
 
       glBindBuffer( GL_ARRAY_BUFFER, this->_buffers.vbo );
       glBufferData( GL_ARRAY_BUFFER, sizeof( RenderableQuad ) * __coreGUI->size(), ( *__coreGUI->begin() ).GetPointerToVertex(), GL_DYNAMIC_DRAW );
 
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->_buffers.iboGUI );
-      GL_CHECK_ERROR;
       glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( *__coreGUIIndicies->begin() ) * __coreGUIIndicies->size(), &*__coreGUIIndicies->begin(), GL_DYNAMIC_DRAW );
-      GL_CHECK_ERROR;
   
       //glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 0 ) );
       //glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 4 * sizeof( float ) ) );
@@ -1412,23 +1369,14 @@ bool Core::Redraw()
       //glVertexAttribPointer( 3, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( 12 * sizeof( float ) ) );
 
       glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), 0 );
-      GL_CHECK_ERROR;
       glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 4 ) );
-      GL_CHECK_ERROR;
       glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 8 ) );
-      GL_CHECK_ERROR;
       glVertexAttribPointer( 3, 4, GL_FLOAT, GL_FALSE, sizeof( RenderableQuad ), BUFFER_OFFSET( sizeof( float ) * 12 ) );
-      GL_CHECK_ERROR;
 
       glDrawElements( GL_POINTS, __coreGUIIndicies->size(), GL_UNSIGNED_SHORT, NULL );
 
       //glDrawElements( GL_POINTS, __coreGUIIndicies->size(), GL_UNSIGNED_SHORT, &( *( __coreGUIIndicies->begin() ) ) );
       //glDrawArrays( GL_POINTS, 0, ( *renderableListsIter )->size() );
-      if( glGetError() )
-      {
-        __log.PrintInfo( Filelevel_CRITICALERROR, "Core::Redraw => glDrawArrays failed" );
-          this->SetState( CORE_STATE_EXIT );
-      }
     }
     //__log.PrintInfo( Filelevel_DEBUG, "end test gui" );
     //End GUI

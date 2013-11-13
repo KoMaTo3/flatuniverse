@@ -37,7 +37,9 @@ void DebugRenderer::Clrscr() {
 =============
 */
 void DebugRenderer::Render() {
-  glLineWidth( 1.0f );
+  if( !this->pipeline.empty() ) {
+    glLineWidth( 1.0f );
+  }
 
   ObjectsList::const_iterator iter, iterEnd = this->pipeline.end();
   for( iter = this->pipeline.begin(); iter != iterEnd; ++iter ) {

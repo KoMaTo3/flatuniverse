@@ -59,7 +59,7 @@ void LightRenderer::EndScene() {
   glPopAttrib();
   this->fbo->Unbind();
   glDrawBuffer( GL_FRONT );
-  glEnable( GL_TEXTURE_2D );
+  //glEnable( GL_TEXTURE_2D );
   glDisable( GL_BLEND );
   glDisable(GL_DEPTH_TEST);
 
@@ -71,13 +71,13 @@ void LightRenderer::EndScene() {
 
   glUniform2f( this->shader.uniformOneByWindowSize, this->manager->GetOneByWindowSize().x, this->manager->GetOneByWindowSize().y );
 
-  glActiveTexture( GL_TEXTURE0 + 0 );
-  this->fbo->BindTexture( 0 );
-  glUniform1i( this->shader.uniformTextureScene, 0 );
-
   glActiveTexture( GL_TEXTURE0 + 1 );
   this->manager->GetFBO()->BindTexture( 0 );
   glUniform1i( this->shader.uniformTextureLight, 1 );
+
+  glActiveTexture( GL_TEXTURE0 + 0 );
+  this->fbo->BindTexture( 0 );
+  glUniform1i( this->shader.uniformTextureScene, 0 );
 
   //glActiveTexture( GL_TEXTURE0 + 2 );
   //this->manager->GetFBO()->BindTexture( 1 );
@@ -100,10 +100,10 @@ void LightRenderer::EndScene() {
   glUseProgram( 0 );
   //glActiveTexture( GL_TEXTURE0 + 2 );
   //glBindTexture( GL_TEXTURE_2D, 0 );
-  glActiveTexture( GL_TEXTURE0 + 1 );
-  glBindTexture( GL_TEXTURE_2D, 0 );
-  glActiveTexture( GL_TEXTURE0 + 0 );
-  glBindTexture( GL_TEXTURE_2D, 0 );
+  //glActiveTexture( GL_TEXTURE0 + 1 );
+  //glBindTexture( GL_TEXTURE_2D, 0 );
+  //glActiveTexture( GL_TEXTURE0 + 0 );
+  //glBindTexture( GL_TEXTURE_2D, 0 );
 }//EndScene
 
 

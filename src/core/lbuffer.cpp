@@ -161,7 +161,6 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
         xEnd = this->Round( this->FloatToSize( pointEnd.x + Math::TWO_PI ) );
 
   if( xBegin == xEnd ) { //вырожденная линия
-    __log.PrintInfo( Filelevel_DEBUG, "LBuffer::DrawLine => xBegin == xEnd" );
     this->_PushValue( xBegin, pointBegin.y, cache );
     return;
   }
@@ -178,6 +177,8 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
   Vec2 intersectPoint;
   bool firstIntersectFinded = false;
   int xValue;
+  xBegin += this->size - 2;
+  xEnd += this->size + 2;
   for( int x = xBegin; x <= xEnd; ++x ) {
     xValue = x % this->size;
     float a = this->SizeToFloat( xValue, 0.001f );

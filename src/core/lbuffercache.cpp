@@ -50,13 +50,10 @@ bool LBufferCache::CheckCache( void *object, const Vec2& position, const Vec2& s
   auto element = this->cache.find( object );
   if( element == this->cache.end() ) {
     LBufferCacheEntity *newElement = this->AddElement( object, position, size );
-    __log.PrintInfo( Filelevel_DEBUG, "LBufferCache::CheckCache => new cached object[%p]", object );
     if( outCacheElement ) {
       *outCacheElement = newElement;
     }
     return false;
-  } else {
-    __log.PrintInfo( Filelevel_DEBUG, "LBufferCache::CheckCache => already cached object[%p]", object );
   }
   element->second->lifeTime = 0;
   if( outCacheElement ) {
@@ -73,7 +70,6 @@ void LBufferCache::ClearCache() {
     delete element.second;
   }
   this->cache.clear();
-  __log.PrintInfo( Filelevel_DEBUG, "LBufferCache::ClearCache" );
 }//ClearCache
 
 
@@ -81,9 +77,6 @@ void LBufferCache::ClearCache( void* object ) {
   auto element = this->cache.find( object );
   if( element != this->cache.end() ) {
     this->cache.erase( element );
-    __log.PrintInfo( Filelevel_DEBUG, ". delete" );
-  } else {
-    __log.PrintInfo( Filelevel_DEBUG, ". not found" );
   }
 }//ClearCache
 

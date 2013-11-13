@@ -96,8 +96,8 @@ void LightMgr::Render() {
   glEnable( GL_BLEND );
   glBlendFunc( GL_ONE, GL_ONE );
 
-  glEnable( GL_TEXTURE_2D );
-  glActiveTexture( GL_TEXTURE0 + 0 );
+  //glEnable( GL_TEXTURE_2D );
+  //glActiveTexture( GL_TEXTURE0 + 0 );
   this->BindColorTexture();
   glUniform1i( this->_shaderUniforms.textureColor, 0 );
   //glActiveTexture( GL_TEXTURE0 + 1 );
@@ -175,8 +175,8 @@ void LightMgr::Render() {
   glUseProgram( 0 );
   //glActiveTexture( GL_TEXTURE0 + 1 );
   //glBindTexture( GL_TEXTURE_2D, 0 );
-  glActiveTexture( GL_TEXTURE0 + 0 );
-  glBindTexture( GL_TEXTURE_2D, 0 );
+  //glActiveTexture( GL_TEXTURE0 + 0 );
+  //glBindTexture( GL_TEXTURE_2D, 0 );
 }//Render
 
 
@@ -195,7 +195,6 @@ void LightMgr::BindBrightnessTexture() {
 
 
 void LightMgr::ClearCacheByBlock( ILBufferProjectedObject *object ) {
-  __log.PrintInfo( Filelevel_DEBUG, "LightMgr::ClearCacheByBlock => object[%p]", object );
   for( auto &light: *this->lightList ) {
     light->lbuffer.ClearCache( object );
   }

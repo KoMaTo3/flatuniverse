@@ -1021,7 +1021,6 @@ void CollisionElementPolygon::FillBuffer( const Vec2& lightPosition, const Vec2&
   if( this->pointsResult.size() < 2 ) {
     return;
   }
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::FillBuffer..." );
   PointList::const_iterator
     iter = this->pointsResult.begin() + 1,
     iterEnd = this->pointsResult.end(),

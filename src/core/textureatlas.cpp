@@ -96,11 +96,8 @@ bool TextureAtlas::CheckGLError( int line, const std::string& fileName )
 */
 void TextureAtlas::Bind()
 {
-  GL_CHECK_ERROR;
   glEnable      ( GL_TEXTURE_2D );
-  GL_CHECK_ERROR;
   glBindTexture ( GL_TEXTURE_2D, this->textureId );
-  GL_CHECK_ERROR;
 }//Bind
 
 
@@ -114,7 +111,6 @@ void TextureAtlas::Unbind()
 {
   glDisable     ( GL_TEXTURE_2D );
   glBindTexture ( GL_TEXTURE_2D, NULL );
-  GL_CHECK_ERROR;
 }//Unbind
 
 
@@ -127,7 +123,6 @@ void TextureAtlas::Unbind()
 */
 Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const Vec4& textureCoords )
 {
-  GL_CHECK_ERROR;
   TextureAtlasItem *item = this->IsTextureLoaded( textureFileName );
   if( item )
   {
@@ -139,9 +134,7 @@ Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const V
   }
   else
   {
-    GL_CHECK_ERROR;
     TextureAtlasItem *item = this->LoadTexture( textureFileName );
-    GL_CHECK_ERROR;
     Vec3 tex0( textureCoords.x, textureCoords.y, 0 ), tex1( textureCoords.z, textureCoords.w, 0 );
     tex0 *= item->matTransform;
     tex1 *= item->matTransform;
@@ -292,7 +285,6 @@ Vec2 TextureAtlas::GetTextureSize( const std::string& textureFileName )
 */
 TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& textureFileName )
 {
-  GL_CHECK_ERROR;
   ImageLoader image;
   if( !image.LoadFromFile( textureFileName ) )
   {
@@ -342,16 +334,13 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
   item->matInvTransform = matInvScale * matInvTranslate;
 
   //размещение картинки в текстуре
-  GL_CHECK_ERROR;
   this->Bind();
   Dword *dst = ( Dword* ) this->textureData.getData(),
     *src = ( Dword* ) image.GetImageData();
   for( Dword y = 0; y < image.GetImageSize()->height; ++y )
     memcpy( dst + ( item->rect.top + y ) * this->size.width + item->rect.left, src + y * image.GetImageSize()->width, image.GetImageSize()->width * 4 );
   glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
-  GL_CHECK_ERROR;
   this->Unbind();
-  GL_CHECK_ERROR;
 
   this->textures.push_back( item );
   return item;
