@@ -1800,10 +1800,10 @@ void Object::__Test() {
   CollisionElementPolygon::PointList pointList;
   pointList.push_back( CollisionElementPolygon::Point(  3.0f, -10.0f ) );
   pointList.push_back( CollisionElementPolygon::Point(  8.0f, -7.0f ) );
-  pointList.push_back( CollisionElementPolygon::Point(  8.0f,  12.0f ) );
-  pointList.push_back( CollisionElementPolygon::Point(  6.0f,  14.0f ) );
-  pointList.push_back( CollisionElementPolygon::Point( -6.0f,  14.0f ) );
-  pointList.push_back( CollisionElementPolygon::Point( -8.0f,  12.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point(  8.0f,  10.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point(  6.0f,  12.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point( -6.0f,  12.0f ) );
+  pointList.push_back( CollisionElementPolygon::Point( -8.0f,  10.0f ) );
   pointList.push_back( CollisionElementPolygon::Point( -8.0f, -7.0f ) );
   pointList.push_back( CollisionElementPolygon::Point( -3.0f, -10.0f ) );
   elem->SetPointList( pointList );

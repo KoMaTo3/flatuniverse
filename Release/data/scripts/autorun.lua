@@ -389,7 +389,7 @@ function DoAnimationMushroom( timerId )
     else
       -- ObjectAddTag( anim.tile, 'has-mushroom' )
       animation[ keyByTimer ] = nil
-      ObjectAttr( anim.object, { collision = true, collisionSize = '32 32', collisionVelocity = '150 0', collisionAcceleration = '0 1200', collisionStatic = false } )
+      ObjectAttr( anim.object, { collision = true, collisionSize = '32 32', collisionVelocity = '150 0', collisionAcceleration = '0 1200', collisionStatic = false, lightBlockByCollision } )
       ObjectAddTag( anim.object, 'mushroom' )
       ObjectAddTag( anim.object, 'no-reset-player-velocity' )
       ListenCollision( anim.object, 'CollisionMushroom' )

@@ -210,8 +210,6 @@ void CollisionElementSquare::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT floa
       *max = resultPoints[ q ];
     }
   }
-
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::_ProjectObjectToAxis" );
 }//_ProjectObjectToAxis
 
 
@@ -304,7 +302,6 @@ CollisionElementCircle::CollisionElementCircle( Vec3 *setPos, CollisionRect *set
 =============
 */
 void CollisionElementCircle::SetDiameter( float setDiameter ) {
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::SetDiameter => diameter[%3.1f]", setDiameter );
   this->diameter = setDiameter;
 }//SetDiameter
 
@@ -316,7 +313,6 @@ void CollisionElementCircle::SetDiameter( float setDiameter ) {
 */
 void CollisionElementCircle::Update() {
   float halfSize = this->diameter * 0.5f;
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::Update => diameter[%3.1f]", this->diameter );
   this->_rect->leftTop = Vec3( this->position->x - halfSize, this->position->y - halfSize, 0.0f );
   this->_rect->rightBottom = Vec3( this->position->x + halfSize, this->position->y + halfSize, 0.0f );
   this->_rect->radius2 = halfSize * halfSize * 4.0f;
@@ -355,11 +351,8 @@ bool CollisionElementCircle::TestIntersect( CollisionElement &object, Vec3 *outS
     this->_rect->leftTop.y        >= object._rect->rightBottom.y
     )
   {
-    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersect => first square test: false" );
     return false;
   }
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersect => first square test: true" );
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersect => diameters: %3.1f : %3.1f", this->diameter, ( ( CollisionElementCircle* ) &object )->diameter );
 
   switch( object.GetType() ) {
     case COLLISION_ELEMENT_TYPE_SQUARE: {
@@ -391,7 +384,6 @@ bool CollisionElementCircle::TestIntersectWithSquare( CollisionElement &object, 
     if( outSolver ) {
       float dy = this->position->y - object.position->y;
       float xDivY = ( fabs( dy ) < 0.01f ? 10.0f : fabs( ( this->position->x - object.position->x ) / dy ) );
-      __log.PrintInfo( Filelevel_DEBUG, ". xDivY[%3.1f] dy[%3.1f]", xDivY, dy );
       if( xDivY > 1.0f ) {  //горизонтально
         outSolver->Set(
           this->position->x < object.position->x ? object._rect->leftTop.x - this->_rect->rightBottom.x : object._rect->rightBottom.x - this->_rect->leftTop.x,
@@ -402,7 +394,6 @@ bool CollisionElementCircle::TestIntersectWithSquare( CollisionElement &object, 
           0.0f );
       }
     }
-    __log.PrintInfo( Filelevel_DEBUG, ". linear: solve[%3.1f; %3.1f]", ( outSolver ? outSolver->x : 0.0f ), ( outSolver ? outSolver->y : 0.0f ) );
   } else {  //круг находится по диагонали от квадрата
     Vec3 point( Vec3Null );
     if( this->position->x < object.position->x ) {
@@ -418,7 +409,6 @@ bool CollisionElementCircle::TestIntersectWithSquare( CollisionElement &object, 
     Vec3 dir = *this->position - point;
     float distance = this->diameter * 0.5f - dir.Length();
     if( distance < 0.0f ) {
-      __log.PrintInfo( Filelevel_DEBUG, ". no collision" );
       return false;
     } else {
       if( outSolver ) {
@@ -426,7 +416,6 @@ bool CollisionElementCircle::TestIntersectWithSquare( CollisionElement &object, 
         dir *= distance;
         *outSolver = dir;
       }
-    __log.PrintInfo( Filelevel_DEBUG, ". diagonal: solve[%3.1f; %3.1f]", dir.x, dir.y );
     }
   }
   /*
@@ -455,21 +444,15 @@ bool CollisionElementCircle::TestIntersectWithCircle( CollisionElement &object, 
   float minDistance = summRadius * summRadius;
   Vec3 distance       = *obj->position - *this->position;
   float distance2     = distance.x * distance.x + distance.y * distance.y;
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersectWithCircle => %3.1f >= %3.1f", minDistance, distance2 );
   if( minDistance < distance2 ) {
-    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersectWithCircle => no intersect" );
     return false;
   }
 
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersectWithCircle => intersected, solvnig" );
   if( outSolver ) {
     float currentDistance = Vec3( *obj->position - *this->position ).Length();
     float minDistance = ( this->diameter + obj->diameter ) * 0.5f;
-    __log.PrintInfo( Filelevel_DEBUG, ". currentDistance[%3.1f]", currentDistance );
-    __log.PrintInfo( Filelevel_DEBUG, ". minDistance[%3.1f]", minDistance );
     distance.Normalize();
     *outSolver = -distance * ( minDistance - currentDistance + 1.0f );
-    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::TestIntersectWithCircle => solvation[%3.1f; %3.1f]", outSolver->x, outSolver->y );
   }
 
   return true;
@@ -490,8 +473,6 @@ void CollisionElementCircle::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT floa
   float center = axis.Dot( Vec2( this->position->x, this->position->y ) );
   *min = center - this->diameter * 0.5f;
   *max = center + this->diameter * 0.5f;
-
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementCircle::_ProjectObjectToAxis" );
 }//_ProjectObjectToAxis
 
 
@@ -614,11 +595,8 @@ void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
     axis.Normalize();
     if( !this->_IsAxisExists( axis ) ) {
       this->axes.push_back( axis );
-      __log.PrintInfo( Filelevel_DEBUG, ". axis[%3.1f; %3.1f]", axis.x, axis.y );
     }
   }//foreach pointsSource
-
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::SetPointList => raduis2[%3.1f]", this->_rect->radius2 );
 }//SetPointList
 
 
@@ -769,9 +747,6 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
     }
     curIntersectPower = Math::Fabs( max( projectMin[ 0 ], projectMin[ 1 ] ) - min( projectMax[ 0 ], projectMax[ 1 ] ) );
 
-    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 0 ], projectMax[ 0 ], iter->x, iter->y, curIntersectPower );
-    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 1 ], projectMax[ 1 ], iter->x, iter->y, curIntersectPower );
-
     if( intersectResultInitialized ) {
       if( curIntersectPower < lastIntersectPower ) {
         lastIntersectPower = curIntersectPower;
@@ -799,9 +774,6 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
     }
     curIntersectPower = Math::Fabs( max( projectMin[ 0 ], projectMin[ 1 ] ) - min( projectMax[ 0 ], projectMax[ 1 ] ) );
 
-    __log.PrintInfo( Filelevel_DEBUG, ". projectionObject[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 0 ], projectMax[ 0 ], squareAxis[ axisNum ].x, squareAxis[ axisNum ].y, curIntersectPower );
-    __log.PrintInfo( Filelevel_DEBUG, ". projectionThis[%3.1f; %3.1f] to axis[%3.1f; %3.1f] curIntersectPower[%3.1f]", projectMin[ 1 ], projectMax[ 1 ], squareAxis[ axisNum ].x, squareAxis[ axisNum ].y, curIntersectPower );
-
     if( intersectResultInitialized ) {
       if( curIntersectPower < lastIntersectPower ) {
         lastIntersectPower = curIntersectPower;
@@ -817,17 +789,13 @@ bool CollisionElementPolygon::TestIntersectWithSquare( CollisionElement &object,
   }//foreach axes
 
   if( isIntersected ) {
-    __log.PrintInfo( Filelevel_DEBUG, ". lastIntersectPower[%3.1f] intersectAxis[%3.1f; %3.1f] inverseSolver[%d]", lastIntersectPower, intersectAxis.x, intersectAxis.y, inverseSolver );
     if( outSolver ) {
       outSolver->Set( intersectAxis.x * lastIntersectPower, intersectAxis.y * lastIntersectPower, 0.0f );
       if( inverseSolver ) {
         *outSolver *= -1.0f;
       }
-      __log.PrintInfo( Filelevel_DEBUG, ". resultsolveIntersect[%3.1f; %3.1f]", outSolver->x, outSolver->y );
     }
-    __log.PrintInfo( Filelevel_DEBUG, ". result[%d] power[%3.1f] axis[%3.1f; %3.1f]", isIntersected, lastIntersectPower, intersectAxis.x, intersectAxis.y );
   } else {
-    __log.PrintInfo( Filelevel_DEBUG, ". no intersect" );
     return false;
   }
 
@@ -1048,6 +1016,7 @@ void CollisionElementPolygon::FillBuffer( const Vec2& lightPosition, const Vec2&
   if( this->pointsResult.size() < 2 ) {
     return;
   }
+  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::FillBuffer..." );
   PointList::const_iterator
     iter = this->pointsResult.begin() + 1,
     iterEnd = this->pointsResult.end(),

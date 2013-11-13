@@ -79,10 +79,10 @@ void LightRenderer::EndScene() {
   this->manager->GetFBO()->BindTexture( 0 );
   glUniform1i( this->shader.uniformTextureLight, 1 );
 
-  glActiveTexture( GL_TEXTURE0 + 2 );
-  this->manager->GetFBO()->BindTexture( 1 );
-  glUniform1i( this->shader.uniformTextureBrightness, 2 );
-  glActiveTexture( GL_TEXTURE0 + 0 );
+  //glActiveTexture( GL_TEXTURE0 + 2 );
+  //this->manager->GetFBO()->BindTexture( 1 );
+  //glUniform1i( this->shader.uniformTextureBrightness, 2 );
+  //glActiveTexture( GL_TEXTURE0 + 0 );
 
   glBindBuffer( GL_ARRAY_BUFFER, this->sceneVertexBuffer );
   glEnableVertexAttribArray( 0 );
@@ -98,8 +98,8 @@ void LightRenderer::EndScene() {
 
   //this->vao->UnBind();
   glUseProgram( 0 );
-  glActiveTexture( GL_TEXTURE0 + 2 );
-  glBindTexture( GL_TEXTURE_2D, 0 );
+  //glActiveTexture( GL_TEXTURE0 + 2 );
+  //glBindTexture( GL_TEXTURE_2D, 0 );
   glActiveTexture( GL_TEXTURE0 + 1 );
   glBindTexture( GL_TEXTURE_2D, 0 );
   glActiveTexture( GL_TEXTURE0 + 0 );

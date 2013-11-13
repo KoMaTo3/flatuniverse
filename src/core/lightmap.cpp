@@ -29,16 +29,7 @@ float LightMap::GetDegreeOfPoint( const Vec2& point ) {
 
 
 void ILightBlock::AddEdgeToBuffer( const Vec2& lightPosition, LBuffer *buffer, const Vec2& point0, const Vec2& point1, LBufferCacheEntity *cache ) {
-  float degStart = LightMap::GetDegreeOfPoint( lightPosition - point0);
-  float degEnd = LightMap::GetDegreeOfPoint( lightPosition - point1 );
-  if( degEnd - degStart > Math::PI ) {
-    float t = ( lightPosition.y - point0.y ) / ( point1.y - point0.y );
-    Vec2 pointMiddle = point0 * ( 1.0f - t ) + point1 * t - lightPosition;
-    buffer->DrawLine( cache, Vec2( pointMiddle.x, -0.00000001f ), point0 - lightPosition );
-    buffer->DrawLine( cache, Vec2( pointMiddle.x, 0.00000001f ), point1 - lightPosition );
-  } else {
-    buffer->DrawLine( cache, point0 - lightPosition, point1 - lightPosition );
-  }
+  buffer->DrawLine( cache, point0 - lightPosition, point1 - lightPosition );
 }//AddEdgeToBuffer
 
 
@@ -82,10 +73,10 @@ void LightEntity::AddVertice( const LightVertex& vertex ) {
 bool LightEntity::CheckBlockDistance( const Vec2& blockPos, const Vec2& blockHalfSize ) {
   return
     !(
-    blockPos.x + blockHalfSize.x < this->position.x - this->size.x ||
-    blockPos.x - blockHalfSize.x > this->position.x + this->size.x ||
-    blockPos.y + blockHalfSize.y < this->position.y - this->size.y ||
-    blockPos.y - blockHalfSize.y > this->position.y + this->size.y
+    blockPos.x + blockHalfSize.x < this->position.x - this->size.x * 2.0f ||
+    blockPos.x - blockHalfSize.x > this->position.x + this->size.x * 2.0f ||
+    blockPos.y + blockHalfSize.y < this->position.y - this->size.y * 2.0f ||
+    blockPos.y - blockHalfSize.y > this->position.y + this->size.y * 2.0f
     );
 }//CheckBlockDistance
 
