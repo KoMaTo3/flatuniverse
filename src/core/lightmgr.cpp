@@ -192,3 +192,11 @@ void LightMgr::BindBrightnessTexture() {
     this->fboLight->BindTexture( 1 );
   }
 }//BindBrightnessTexture
+
+
+void LightMgr::ClearCacheByBlock( ILBufferProjectedObject *object ) {
+  __log.PrintInfo( Filelevel_DEBUG, "LightMgr::ClearCacheByBlock => object[%p]", object );
+  for( auto &light: *this->lightList ) {
+    light->lbuffer.ClearCache( object );
+  }
+}//ClearCacheByBlock

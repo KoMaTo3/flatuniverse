@@ -247,6 +247,9 @@ public:
   ObjectWidget::WidgetLightBlockByCollision*  EnableLightBlockByCollision();
   inline bool         IsLightBlockByCollision () { return this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION ) != NULL; }
   void                DisableLightBlockByCollision();
+  ObjectWidget::WidgetLightPoint*         EnableLightPoint();
+  inline bool         IsLightPoint        () { return this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT ) != NULL; }
+  void                DisableLightPoint   ();
   inline bool         IsSaveable          () { return this->isSaveable; }
   inline Object*      GetParent           () { return this->_parent; }
   void                SetLuaScript        ( const std::string& setScript );

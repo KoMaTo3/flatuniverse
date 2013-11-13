@@ -29,6 +29,11 @@ CollisionElement::CollisionElement( CollisionElementType setType, Vec3 *setPos, 
 
 
 
+CollisionElement::~CollisionElement() {
+}
+
+
+
 /*
 =============
   GetPosition

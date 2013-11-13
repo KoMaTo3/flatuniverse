@@ -79,6 +79,7 @@ public:
 
   void Set( const LightType &setType, const Vec2& setPosition, const Vec4& setColor, const Vec2& setSize, float setBrightness );
   void SetSize( const Vec2& setSize );
+  void SetPosition( const Vec2& setPosition );
   LightEntity* Clone();
   void AddVertice( const LightVertex& vertex );
   bool CheckBlockDistance( const Vec2& blockPos, const Vec2& blockHalfSize );

@@ -50,6 +50,7 @@ public:
   float GetDegreeOfPoint( const Vec2& point );
   void WriteFromCache( LBufferCacheEntity *cacheEntity );
   void ClearCache();
+  void ClearCache( ILBufferProjectedObject *object );
 
 private:
   LBuffer();

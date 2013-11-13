@@ -551,17 +551,16 @@ void Collision::ResolveCollision()
     } else { //смещаем по y
       result->resolveVector.x = 0.0f;
       if( result->resolveVector.y < 0.0f && this->velocity.y > 0.0f ) {
-        this->velocity.y = 0.0f;
         flags |= 4;
       } else if( result->resolveVector.y > 0.0f && this->velocity.y < 0.0f ) {
-        this->velocity.y = 0.0f;
         flags |= 1;
       }
     }
   }
-  this->SetPositionBy( result->resolveVector );
+  this->SetPositionBy( result->resolveVector * 0.99f );
   if( result->resolveVector.y != 0.0f && Sign( result->resolveVector.y ) != Sign( this->velocity.y ) ) {
-    this->velocity.y *= 0.5f;
+    float velocityYCoeff = 1.0f - ( 1.0f / Math::Fabs( result->resolveVector.y ) );
+    this->velocity.y *= velocityYCoeff;
   }
 
   //call handlers

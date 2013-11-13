@@ -169,6 +169,7 @@ WidgetLightBlockByCollision::~WidgetLightBlockByCollision() {
       ++iter;
     }
   }
+  this->_lightRenderer->GetLightManager()->ClearCacheByBlock( this->_collisionElement );
 }
 
 
@@ -180,3 +181,35 @@ void WidgetLightBlockByCollision::OnEvent( const ObjectWidgetEvent &event ) {
   break;
   }//switch
 }
+
+
+
+WidgetLightPoint::WidgetLightPoint( WidgetOwner *setOwner, LightsListPtr *setLightList, const Vec3 *setPosition, const Vec4 &setColor, const Vec2 &setSize, const float setBrightness, const int bufferSize )
+:Widget( ObjectWidgetGUID::OBJECT_WIDGET_LIGHTPOINT, setOwner ), _lightList( setLightList ), _position( setPosition ) {
+  this->_lightEntity = new LightMap::LightEntity( LightMap::LT_POINT, Vec2( setPosition->x, setPosition->y ), setColor, setSize, setBrightness, bufferSize );
+  ( *setLightList )->push_back( this->_lightEntity );
+  this->owner->ListenEvent( OBJECT_WIDGET_EVENT_UPDATE, this );
+}
+
+
+WidgetLightPoint::~WidgetLightPoint() {
+  auto
+    iter = ( *this->_lightList )->begin(),
+    iterEnd = ( *this->_lightList )->end();
+  for(; iter != iterEnd; ++iter ) {
+    if( *iter == this->_lightEntity ) {
+      ( *this->_lightList )->erase( iter );
+      break;
+    }
+  }
+  delete this->_lightEntity;
+}
+
+
+void WidgetLightPoint::OnEvent( const ObjectWidgetEvent &event ) {
+  switch( event ) {
+  case OBJECT_WIDGET_EVENT_UPDATE:
+    this->_lightEntity->SetPosition( Vec2( this->_position->x, -this->_position->y ) );
+  break;
+  }//switch
+}//OnEvent

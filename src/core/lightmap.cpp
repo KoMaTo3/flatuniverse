@@ -59,6 +59,11 @@ void LightEntity::SetSize( const Vec2& setSize ) {
 }//SetSize
 
 
+void LightEntity::SetPosition( const Vec2& setPosition ) {
+  this->position = setPosition;
+}//SetSize
+
+
 LightEntity* LightEntity::Clone() {
   LightEntity *light = new LightEntity( this->type, this->position, this->color, this->size, this->brightness );
   return light;

@@ -206,6 +206,8 @@ Object::~Object()
   //  __log.PrintInfo( Filelevel_DEBUG, "is a root object" );
 
   this->DisableRenderable();
+  this->DisableLightBlockByCollision();
+  this->DisableLightPoint();
   this->DisableCollision();
   this->DisableTrigger();
   //this->DisableGui();
@@ -1791,7 +1793,25 @@ ObjectWidget::WidgetLightBlockByCollision* Object::EnableLightBlockByCollision()
 
 void Object::DisableLightBlockByCollision() {
   this->widget->DeleteWidget( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION );
-}
+}//DisableLightBlockByCollision
+
+
+
+/*
+=============
+  EnableLightPoint
+=============
+*/
+ObjectWidget::WidgetLightPoint* Object::EnableLightPoint() {
+  auto w = new ObjectWidget::WidgetLightPoint( this, &__lightLenderer->GetLightManager()->lightList, &this->position, Vec4( 1.0f, 1.0f, 1.0f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.5f );
+  this->widget->AddWidget( w );
+  return w;
+}//EnableLightPoint
+
+
+void Object::DisableLightPoint() {
+  this->widget->DeleteWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT );
+}//DisableLightPoint
 
 
 void Object::__Test() {
@@ -1807,6 +1827,6 @@ void Object::__Test() {
   pointList.push_back( CollisionElementPolygon::Point( -8.0f, -7.0f ) );
   pointList.push_back( CollisionElementPolygon::Point( -3.0f, -10.0f ) );
   elem->SetPointList( pointList );
-  auto w = new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, elem );
-  this->widget->AddWidget( w );
+  this->widget->AddWidget( new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, elem ) );
+  this->widget->AddWidget( new ObjectWidget::WidgetLightPoint( this, &__lightLenderer->GetLightManager()->lightList, &this->position, Vec4( 1.0f, 1.0f, 1.0f, 0.2f ), Vec2( 300.0f, 300.0f ), 1.0f ) );
 }

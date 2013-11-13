@@ -46,6 +46,7 @@ public:
   virtual ~LBufferCache();
   bool CheckCache( void *object, const Vec2& position, const Vec2& size, LBufferCacheEntity **outCacheElement = NULL );
   void ClearCache();
+  void ClearCache( void* object );
   void Update();
 
 private:

@@ -26,6 +26,7 @@ public:
   void BindColorTexture();
   void BindBrightnessTexture();
   void SetRect( const Vec2& setLeftTop, const Vec2& setRightBottom );
+  void ClearCacheByBlock( ILBufferProjectedObject *object );
   inline Fbo* GetFBO() {
     return this->fboLight;
   }

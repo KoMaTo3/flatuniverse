@@ -35,7 +35,7 @@ class CollisionElement: public LightMap::ILightBlock {
   friend class CollisionElementPolygon;
 public:
   CollisionElement( CollisionElementType setType, Vec3 *setPos, CollisionRect *setRect );
-  virtual ~CollisionElement(){}
+  virtual ~CollisionElement();
   inline        CollisionElementType GetType(){ return this->type; }
   virtual void  Update  () = 0;
   virtual void  __Dump  () = 0;

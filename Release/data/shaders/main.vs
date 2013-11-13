@@ -23,7 +23,7 @@ out VertexData
 void main( void )
 {
   //outData.pos = vec4( position.xyz, 1 );
-  outData.pos = vec4( round( position.xyz ) + vec3( 0.5, 0.5, 0 ), 1 );
+  outData.pos = vec4( floor( position.xy ), position.z, 1 );
   gl_Position = vec4(0,0,0,1);
   outData.size = size_local2.xy;
   outData.scale = size_local2.zw;

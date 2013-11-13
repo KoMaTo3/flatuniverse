@@ -101,6 +101,12 @@ void LBuffer::ClearCache() {
 
 
 
+void LBuffer::ClearCache( ILBufferProjectedObject *object ) {
+  this->cache.ClearCache( object );
+}//ClearCache
+
+
+
 bool LBuffer::IsObjectCached( ILBufferProjectedObject *object, LBufferCacheEntity** outCache ) {
   return this->cache.CheckCache( object, object->GetPosition(), object->GetSize(), outCache );
 }//IsObjectCached

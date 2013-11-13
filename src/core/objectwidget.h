@@ -5,6 +5,8 @@
 #include <vector>
 #include <deque>
 #include "ktypes.h"
+#include "kvector.h"
+#include "lightmgr.h"
 
 
 class CollisionElement;
@@ -27,6 +29,7 @@ enum ObjectWidgetGUID {
   OBJECT_WIDGET_LIGHT       = 4,
   OBJECT_WIDGET_LIGHTBLOCK  = 5,
   OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION  = 6,
+  OBJECT_WIDGET_LIGHTPOINT  = 7,
   OBJECT_WIDGET_COUNT__,
 };
 enum ObjectWidgetEvent {
@@ -123,6 +126,23 @@ private:
 
   CollisionElement *_collisionElement;
   LightRenderer *_lightRenderer;
+};
+
+
+class WidgetLightPoint: public Widget {
+public:
+  WidgetLightPoint( WidgetOwner *setOwner, LightsListPtr *setLightList, const Vec3 *setPosition, const Vec4 &setColor, const Vec2 &setSize, const float setBrightness, const int bufferSize = 1024 );
+  virtual ~WidgetLightPoint();
+  virtual void OnEvent( const ObjectWidgetEvent &event );
+
+private:
+  WidgetLightPoint();
+  WidgetLightPoint( const WidgetLightPoint& );
+  WidgetLightPoint& operator=( const WidgetLightPoint& );
+
+  LightMap::LightEntity *_lightEntity;
+  LightsListPtr *_lightList;
+  const Vec3 *_position;
 };
 
 
