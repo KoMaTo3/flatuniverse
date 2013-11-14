@@ -77,6 +77,7 @@ enum {
   LUA_OBJECT_ATTRS_PRIORITET_COLLISION_SIZE,
   LUA_OBJECT_ATTRS_PRIORITET_LIGHTBLOCKBYCOLLISION,
   LUA_OBJECT_ATTRS_PRIORITET_TRIGGER,
+  LUA_OBJECT_ATTRS_PRIORITET_LIGHTPOINT,
   LUA_OBJECT_ATTRS_PRIORITET_DEFAULT,
   __LUA_OBJECT_ATTRS_PRIORITET_COUNT
 };
@@ -1477,6 +1478,8 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
               Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_RENDERABLE ].push_back( attr );
             } else if( attr->name == "trigger" ) {
               Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_TRIGGER ].push_back( attr );
+            } else if( attr->name == "lightPoint" ) {
+              Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_LIGHTPOINT ].push_back( attr );
             }
             else {
               Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_DEFAULT ].push_back( attr );

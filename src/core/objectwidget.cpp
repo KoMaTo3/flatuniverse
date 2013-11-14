@@ -91,6 +91,11 @@ bool WidgetMgr::AddWidget( Widget *newWidget ) {
 }
 
 
+Widget* WidgetMgr::GetWidget( const ObjectWidgetGUID &guid ) {
+  return this->_widgetList[ guid ];
+}//GetWidget
+
+
 bool WidgetMgr::DeleteWidget( const ObjectWidgetGUID &guid ) {
   if( this->_widgetList[ guid ] ) {
     delete this->_widgetList[ guid ];
@@ -108,6 +113,27 @@ bool WidgetMgr::WidgetExists( const ObjectWidgetGUID &guid ) {
 
 void WidgetMgr::ListenEvent( const ObjectWidgetEvent &event, Widget *newWidget ) {
   this->_eventListenersList->at( event )->push_back( newWidget );
+}//ListenEvent
+
+
+void WidgetMgr::RemoveAllWidgetListeners( Widget *widget ) {
+  for( auto &widgetList: *this->_eventListenersList ) {
+    bool removed;
+    do {
+      removed = false;
+      auto
+        iter = widgetList->begin(),
+        iterEnd = widgetList->end();
+      while( iter != iterEnd ) {
+        if( *iter == widget ) {
+          widgetList->erase( iter );
+          removed = true;
+          break;
+        }
+        ++iter;
+      }
+    } while( removed );
+  }
 }//ListenEvent
 
 
@@ -142,6 +168,14 @@ WidgetLightBlock::~WidgetLightBlock() {
 
 void WidgetLightBlock::OnEvent( const ObjectWidgetEvent &event ) {
 }
+
+
+void WidgetLightBlock::SaveToBuffer( MemoryWriter &writer ) {
+}//SaveToBuffer
+
+
+void WidgetLightBlock::LoadFromBuffer( MemoryReader &reader ) {
+}//SaveToBuffer
 
 
 
@@ -183,6 +217,14 @@ void WidgetLightBlockByCollision::OnEvent( const ObjectWidgetEvent &event ) {
 }
 
 
+void WidgetLightBlockByCollision::SaveToBuffer( MemoryWriter &writer ) {
+}//SaveToBuffer
+
+
+void WidgetLightBlockByCollision::LoadFromBuffer( MemoryReader &reader ) {
+}//SaveToBuffer
+
+
 
 WidgetLightPoint::WidgetLightPoint( WidgetOwner *setOwner, LightsListPtr *setLightList, const Vec3 *setPosition, const Vec4 &setColor, const Vec2 &setSize, const float setBrightness, const int bufferSize )
 :Widget( ObjectWidgetGUID::OBJECT_WIDGET_LIGHTPOINT, setOwner ), _lightList( setLightList ), _position( setPosition ) {
@@ -203,6 +245,7 @@ WidgetLightPoint::~WidgetLightPoint() {
     }
   }
   delete this->_lightEntity;
+  this->owner->GetWidgetManager()->RemoveAllWidgetListeners( this );
 }
 
 
@@ -213,3 +256,28 @@ void WidgetLightPoint::OnEvent( const ObjectWidgetEvent &event ) {
   break;
   }//switch
 }//OnEvent
+
+
+void WidgetLightPoint::SetSize( const Vec2& setSize ) {
+  this->_lightEntity->SetSize( setSize );
+}//SetSize
+
+void WidgetLightPoint::SetColor( const Vec4& setColor ) {
+  this->_lightEntity->SetColor( setColor );
+}//SetColor
+
+
+void WidgetLightPoint::SaveToBuffer( MemoryWriter &writer ) {
+  writer << this->_lightEntity->GetSize();
+  writer << this->_lightEntity->GetColor();
+}//SaveToBuffer
+
+
+void WidgetLightPoint::LoadFromBuffer( MemoryReader &reader ) {
+  Vec2 size;
+  Vec4 color;
+  reader >> size;
+  reader >> color;
+  this->_lightEntity->SetSize( size );
+  this->_lightEntity->SetColor( color );
+}//SaveToBuffer

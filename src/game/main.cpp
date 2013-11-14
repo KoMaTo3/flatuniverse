@@ -1556,6 +1556,14 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       }
       continue;
     }//lightBlockByCollision
+    if( name == "lightPoint" ) {
+      if( value.GetBoolean() ) {
+        object->EnableLightPoint();
+      } else {
+        object->DisableLightPoint();
+      }
+      continue;
+    }//lightPoint
     if( name == "position" ) {
       Vec3 pos = object->GetPosition();
       sscanf_s( value.GetString().c_str(), "%f %f", &pos.x, &pos.y );
@@ -1752,6 +1760,36 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       }
       continue;
     }//triggerPolygon
+    if( name == "lightPointSize" ) {
+      ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
+      if( widget ) {
+        Vec2 size( 1.0f, 1.0f );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f", &size.x, &size.y );
+        __log.PrintInfo( Filelevel_DEBUG, "lightPointSize => [%3.3f; %3.3f]", size.x, size.y );
+        if( res < 2 ) {
+          size.y = size.x;
+        }
+        widget->SetSize( size );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => lightPointSize: object '%s' not lightBlock", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//lightPointSize
+    if( name == "lightPointColor" ) {
+      ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
+      if( widget ) {
+        Vec4 color( 1.0f, 1.0f, 1.0f, 1.0f );
+        int res = sscanf_s( value.GetString().c_str(), "%f %f %f %f", &color.x, &color.y, &color.z, &color.w );
+        if( res < 4 ) {
+          color.y = color.z = color.w = color.x;
+        }
+        __log.PrintInfo( Filelevel_DEBUG, "lightPointColor[%3.3f; %3.3f; %3.3f; %3.3f]", color.x, color.y, color.z, color.w );
+        widget->SetColor( color );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => color: object '%s' not lightPoint", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//lightPointColor
 
   }//for iter
 
@@ -1780,6 +1818,10 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       value.SetBoolean( object->IsLightBlockByCollision() );
       continue;
     }//lightBlockByCollision
+    if( name == "lightPoint" ) {
+      value.SetBoolean( object->IsLightPoint() );
+      continue;
+    }//lightPoint
     if( name == "position" ) {
       value.SetVec3( object->GetPosition() );
       continue;

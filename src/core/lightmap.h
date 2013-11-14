@@ -79,6 +79,7 @@ public:
 
   void Set( const LightType &setType, const Vec2& setPosition, const Vec4& setColor, const Vec2& setSize, float setBrightness );
   void SetSize( const Vec2& setSize );
+  void SetColor( const Vec4& setColor );
   void SetPosition( const Vec2& setPosition );
   LightEntity* Clone();
   void AddVertice( const LightVertex& vertex );
@@ -89,6 +90,12 @@ public:
   }
   void Update( LightBlocksList &blocks );
   bool IsChanged();
+  inline const Vec2& GetSize() {
+    return this->size;
+  }
+  inline const Vec4& GetColor() {
+    return this->color;
+  }
 
 private:
   LightEntity();
@@ -98,6 +105,7 @@ private:
   Vec2 size;
   Vec2 _lastPosition;
   Vec2 _lastSize;
+  Vec4 _lastColor;
 };
 
 

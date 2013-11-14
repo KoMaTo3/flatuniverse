@@ -1246,7 +1246,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
     this->OnUnload( this );
   }
 
-  bool isRenderable, isCollision, isTrigger, isAnimation, isLightBlockByCollision;
+  bool isRenderable, isCollision, isTrigger, isAnimation, isLightBlockByCollision, isLightPoint;
 
   isRenderable = this->IsRenderable();
   writer << isRenderable;  //renderable true/false
@@ -1314,6 +1314,13 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   //Width::LightBlockByCollision
   isLightBlockByCollision = this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION );
   writer << isLightBlockByCollision;
+
+  //Width::LightPoint
+  isLightPoint = this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT );
+  writer << isLightPoint;
+  if( isLightPoint ) {
+    this->widget->GetWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT )->SaveToBuffer( writer );
+  }
 }//SaveToBuffer
 
 
@@ -1326,7 +1333,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 */
 void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dword version )
 {
-  bool isRenderable, isCollision, isTrigger, isAnimation, isLightBlockByCollision;
+  bool isRenderable, isCollision, isTrigger, isAnimation, isLightBlockByCollision, isLightPoint;
   std::string tmpName, parentName;
   Vec3 position;
 
@@ -1407,6 +1414,14 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
         if( isLightBlockByCollision ) {
           this->EnableLightBlockByCollision();
         }
+
+        if( version >= 0x00000009 ) {
+          reader >> isLightPoint;
+          if( isLightPoint ) {
+            ObjectWidget::WidgetLightPoint *widget = this->EnableLightPoint();
+            widget->LoadFromBuffer( reader );
+          }
+        }//8
       }//8
     }//7
   }//6
@@ -1809,9 +1824,25 @@ ObjectWidget::WidgetLightPoint* Object::EnableLightPoint() {
 }//EnableLightPoint
 
 
+/*
+=============
+  DisableLightPoint
+=============
+*/
 void Object::DisableLightPoint() {
   this->widget->DeleteWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT );
 }//DisableLightPoint
+
+
+
+/*
+=============
+  GetLightPoint
+=============
+*/
+ObjectWidget::WidgetLightPoint* Object::GetLightPoint() {
+  return static_cast< ObjectWidget::WidgetLightPoint* >( this->widget->GetWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT ) );
+}//GetLightPoint
 
 
 void Object::__Test() {

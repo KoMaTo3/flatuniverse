@@ -36,11 +36,14 @@ void ILightBlock::AddEdgeToBuffer( const Vec2& lightPosition, LBuffer *buffer, c
 LightEntity::LightEntity( const LightType &setType, const Vec2& setPosition, const Vec4& setColor, const Vec2& setSize, float setBrightness, int lBufferSize, float setEpsilon )
   : position( setPosition ), color( setColor ), type( setType ), size( setSize ), halfSize( setSize * 0.5f ), brightness( setBrightness ), epsilon( setEpsilon )
   ,lbuffer( lBufferSize, Math::TWO_PI ), lastCheckInRect( true ), maxRange( Math::Sqrt16( setSize.x * setSize.y ) ), _lastPosition( -setPosition ), _lastSize( -setSize )
+  , _lastColor( Vec4Null )
 {
+  __log.PrintInfo( Filelevel_DEBUG, "+1 LightEntity %p", this );
 }
 
 
 LightEntity::~LightEntity() {
+  __log.PrintInfo( Filelevel_DEBUG, "~LightEntity %p", this );
 }
 
 
@@ -57,6 +60,11 @@ void LightEntity::SetSize( const Vec2& setSize ) {
   this->size = setSize;
   this->maxRange = Math::Sqrt16( this->size.x * this->size.y );
 }//SetSize
+
+
+void LightEntity::SetColor( const Vec4& setColor ) {
+  this->color = setColor;
+}//SetColor
 
 
 void LightEntity::SetPosition( const Vec2& setPosition ) {
@@ -101,6 +109,7 @@ bool LightEntity::IsChanged() {
   return
     this->position != this->_lastPosition
     || this->size != this->_lastSize
+    || this->color != this->_lastColor
     ;
 }//IsChanged
 
@@ -184,4 +193,5 @@ void LightEntity::Update( LightBlocksList &blocks ) {
   this->AddVertice( LightVertex( this->position + Vec2( this->lbuffer.GetValueByIndex( 0 ), 0.0f ) + verticeOffset, this->color, 1.0f - range / this->maxRange ) );
   this->_lastPosition = this->position;
   this->_lastSize = this->size;
+  this->_lastColor = this->color;
 }//Update

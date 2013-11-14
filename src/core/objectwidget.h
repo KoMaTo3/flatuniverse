@@ -7,6 +7,8 @@
 #include "ktypes.h"
 #include "kvector.h"
 #include "lightmgr.h"
+#include "memorywriter.h"
+#include "memoryreader.h"
 
 
 class CollisionElement;
@@ -47,6 +49,7 @@ public:
   WidgetOwner();
   virtual ~WidgetOwner();
   void ListenEvent( const ObjectWidgetEvent &event, Widget *newWidget );
+  inline WidgetMgr* GetWidgetManager() { return this->widget; }
 
 protected:
   WidgetMgr *widget;
@@ -63,6 +66,8 @@ public:
   Widget( const ObjectWidgetGUID setGuid, WidgetOwner *setOwner );
   virtual ~Widget();
   virtual void OnEvent( const ObjectWidgetEvent &event ) = 0;
+  virtual void SaveToBuffer( MemoryWriter &writer ) = 0;
+  virtual void LoadFromBuffer( MemoryReader &reader ) = 0;
 
   const ObjectWidgetGUID guid;
   static WidgetMatrix* _widgetList;
@@ -88,7 +93,9 @@ public:
   bool DeleteWidget( const ObjectWidgetGUID &guid );
   bool WidgetExists( const ObjectWidgetGUID &guid );
   void ListenEvent( const ObjectWidgetEvent &event, Widget *newWidget );
+  void RemoveAllWidgetListeners( Widget *widget );
   void TouchEvent( const ObjectWidgetEvent &event );
+  Widget *GetWidget( const ObjectWidgetGUID &guid );
 
 private:
   Widget* AddWidgetLightBlock();
@@ -105,6 +112,8 @@ public:
   WidgetLightBlock( WidgetOwner *setOwner );
   virtual ~WidgetLightBlock();
   virtual void OnEvent( const ObjectWidgetEvent &event );
+  virtual void SaveToBuffer( MemoryWriter &writer );
+  virtual void LoadFromBuffer( MemoryReader &reader );
 
 private:
   WidgetLightBlock();
@@ -118,6 +127,8 @@ public:
   WidgetLightBlockByCollision( WidgetOwner *setOwner, LightRenderer *setLightRenderer, CollisionElement *setCollision );
   virtual ~WidgetLightBlockByCollision();
   virtual void OnEvent( const ObjectWidgetEvent &event );
+  virtual void SaveToBuffer( MemoryWriter &writer );
+  virtual void LoadFromBuffer( MemoryReader &reader );
 
 private:
   WidgetLightBlockByCollision();
@@ -134,6 +145,10 @@ public:
   WidgetLightPoint( WidgetOwner *setOwner, LightsListPtr *setLightList, const Vec3 *setPosition, const Vec4 &setColor, const Vec2 &setSize, const float setBrightness, const int bufferSize = 1024 );
   virtual ~WidgetLightPoint();
   virtual void OnEvent( const ObjectWidgetEvent &event );
+  virtual void SaveToBuffer( MemoryWriter &writer );
+  virtual void LoadFromBuffer( MemoryReader &reader );
+  void SetSize( const Vec2& setSize );
+  void SetColor( const Vec4& setColor );
 
 private:
   WidgetLightPoint();

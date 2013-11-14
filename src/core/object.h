@@ -248,6 +248,7 @@ public:
   inline bool         IsLightBlockByCollision () { return this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION ) != NULL; }
   void                DisableLightBlockByCollision();
   ObjectWidget::WidgetLightPoint*         EnableLightPoint();
+  ObjectWidget::WidgetLightPoint*         GetLightPoint();
   inline bool         IsLightPoint        () { return this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT ) != NULL; }
   void                DisableLightPoint   ();
   inline bool         IsSaveable          () { return this->isSaveable; }

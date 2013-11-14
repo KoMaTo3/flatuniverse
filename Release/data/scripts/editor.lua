@@ -202,13 +202,14 @@ function EditorInit()
   GUI.elements.layer = GUISelect:Create( 55, 20, 90, 1, list, OnChangeLayer, GUI.elements.windowSettings )
 
   -- object block
-  GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 95, 'Object' )
+  GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 110, 'Object' )
   GUILabel:Create( 1, 18, 0, 0, 'Name:', GUI.elements.windowObject )
   GUI.elements.objectName   = GUIEdit:Create( 50, 18, 165, '', function( obj ) Alert( obj:GetText() ) end, GUI.elements.windowObject )
   GUI.elements.isRenderable = GUICheckbox:Create( 5, 35, 'Renderable', false, nil, GUI.elements.windowObject, false )
   GUI.elements.isCollision  = GUICheckbox:Create( 5, 50, 'Collision', false, OnChangeIsCollision, GUI.elements.windowObject, false )
   GUI.elements.isTrigger    = GUICheckbox:Create( 5, 65, 'Trigger', false, OnChangeIsTrigger, GUI.elements.windowObject, false )
   GUI.elements.isLightBlockByCollision = GUICheckbox:Create( 5, 80, 'Light block by collision', false, OnChangeIsLightBlockByCollision, GUI.elements.windowObject, false )
+  GUI.elements.isLightPoint = GUICheckbox:Create( 5, 95, 'Light point', false, OnChangeIsLightPoint, GUI.elements.windowObject, false )
 
   -- GUIEdit:Create( 200, 50, 100, 'test123', function() Alert(2) end )
 
@@ -321,13 +322,13 @@ function OnEditorKey( id, isPressed )
           -- buffer
           local
             x, y, z
-            , isRenderable, isCollision, isTrigger, isLightBlockByCollision
+            , isRenderable, isCollision, isTrigger, isLightBlockByCollision, isLightPoint
             , setTextureName, renderableSizeX, renderableSizeY, renderablePositionX, renderablePositionY, colorR, colorG, colorB, colorA, renderableScaleX, renderableScaleY, setRenderableRotation
             , collisionSizeX, collisionSizeY, collisionAccelerationX, collisionAccelerationY
             =
             ObjectAttr( name, {
               'position'
-              , 'renderable', 'collision', 'trigger', 'lightBlockByCollision'
+              , 'renderable', 'collision', 'trigger', 'lightBlockByCollision', 'lightPoint'
               , 'textureName', 'renderableSize', 'renderablePosition', 'color', 'renderableScale', 'renderableRotation'
               , 'collisionSize', 'collisionAcceleration'
             } )
@@ -346,7 +347,7 @@ function OnEditorKey( id, isPressed )
           PushToBuffer( function()
             end, function()
               ObjectCreate( name, x, y, z )
-              ObjectAttr( name, { renderable = isRenderable, collision = isCollision, trigger = isTrigger, lightBlockByCollision = isLightBlockByCollision } )
+              ObjectAttr( name, { renderable = isRenderable, collision = isCollision, trigger = isTrigger, lightBlockByCollision = isLightBlockByCollision, lightPoint = isLightPoint } )
               if isRenderable then
                 ObjectAttr( name, {
                   textureName = setTextureName, renderableSize = renderableSizeX..' '..renderableSizeY, renderablePosition = renderablePositionX..' '..renderablePositionY
@@ -899,6 +900,7 @@ function UpdateGuiBySelectedObject()
           , isCollision
           , isTrigger
           , isLightBlockByCollision
+          , isLightPoint
           , textureName
           , renderableSizeX
           , renderableSizeY
@@ -907,6 +909,7 @@ function UpdateGuiBySelectedObject()
             'collision',
             'trigger',
             'lightBlockByCollision',
+            'lightPoint',
             'textureName',
             'renderableSize',
           } )
@@ -920,14 +923,17 @@ function UpdateGuiBySelectedObject()
       GUI.elements.isTrigger:SetIsChecked( isTrigger )
       GUI.elements.isLightBlockByCollision:SetEnabled( true )
       GUI.elements.isLightBlockByCollision:SetIsChecked( isLightBlockByCollision )
+      GUI.elements.isLightPoint:SetEnabled( true )
+      GUI.elements.isLightPoint:SetIsChecked( isLightPoint )
     end
   else --)( multi-object
-    local isRenderable, isCollision, isTrigger, isLightBlockByCollision = false, false, false, false
+    local isRenderable, isCollision, isTrigger, isLightBlockByCollision, isLightPoint = false, false, false, false, false
     for num,name in pairs( objectList ) do
       isRenderable = isRenderable or ObjectAttr( name, { 'renderable' } )
       isCollision = isCollision or ObjectAttr( name, { 'collision' } )
       isTrigger = isTrigger or ObjectAttr( name, { 'trigger' } )
       isLightBlockByCollision = isLightBlockByCollision or ObjectAttr( name, { 'lightBlockByCollision' } )
+      isLightPoint = isLightPoint or ObjectAttr( name, { 'lightPoint' } )
     end
     GUI.elements.objectName:SetEnabled( false )
     GUI.elements.objectName:SetText( '' )
@@ -939,6 +945,8 @@ function UpdateGuiBySelectedObject()
     GUI.elements.isTrigger:SetIsChecked( isTrigger )
     GUI.elements.isLightBlockByCollision:SetEnabled( true )
     GUI.elements.isLightBlockByCollision:SetIsChecked( isLightBlockByCollision )
+    GUI.elements.isLightPoint:SetEnabled( true )
+    GUI.elements.isLightPoint:SetIsChecked( isLightPoint )
   end --)
   if doReset then
     GUI.elements.objectName:SetEnabled( false )
@@ -951,6 +959,8 @@ function UpdateGuiBySelectedObject()
     GUI.elements.isTrigger:SetIsChecked( false )
     GUI.elements.isLightBlockByCollision:SetEnabled( false )
     GUI.elements.isLightBlockByCollision:SetIsChecked( false )
+    GUI.elements.isLightPoint:SetEnabled( false )
+    GUI.elements.isLightPoint:SetIsChecked( false )
   end
 end --UpdateGuiBySelectedObject
 
@@ -1167,9 +1177,9 @@ end -- PopFromBuffer
 function OnChangeIsCollision( isCollisionGuiElement )
   local object = GetSelectedObject()
   local checked = isCollisionGuiElement:GetIsChecked()
-  local tileSize = GetTileSize()
   ObjectAttr( object, { collision = checked } )
   if checked then
+    local tileSize = GetTileSize()
     ObjectAttr( object, { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
   end
 end -- OnChangeIsCollision
@@ -1178,9 +1188,9 @@ end -- OnChangeIsCollision
 function OnChangeIsTrigger( isTriggerGuiElement )
   local object = GetSelectedObject()
   local checked = isTriggerGuiElement:GetIsChecked()
-  local tileSize = GetTileSize()
   ObjectAttr( object, { trigger = checked } )
   if checked then
+    local tileSize = GetTileSize()
     ObjectAttr( object, { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
   end
 end -- OnChangeIsCollision
@@ -1189,9 +1199,18 @@ end -- OnChangeIsCollision
 function OnChangeIsLightBlockByCollision( isLightBlockByCollisionGuiElement )
   local object = GetSelectedObject()
   local checked = isLightBlockByCollisionGuiElement:GetIsChecked()
-  local tileSize = GetTileSize()
   ObjectAttr( object, { lightBlockByCollision = checked } )
 end -- OnChangeIsLightBlockByCollision
+
+--[[ OnChangeIsLightPoint ]]
+function OnChangeIsLightPoint( isLightPointGuiElement )
+  local object = GetSelectedObject()
+  local checked = isLightPointGuiElement:GetIsChecked()
+  ObjectAttr( object, { lightPoint = checked } )
+  if checked then
+    ObjectAttr( object, { lightPointSize = 200, lightPointColor = ( math.random( 0, 1000 ) / 1000 )..' '..( math.random( 0, 1000 ) / 1000 )..' '..( math.random( 0, 1000 ) / 1000 )..' 1' } )
+  end
+end -- OnChangeIsLightPoint
 
 --[[ OnChangeLayer ]]
 function OnChangeLayer( obj )
