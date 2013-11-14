@@ -1051,7 +1051,7 @@ bool Core::Redraw()
   glEnable( GL_DEPTH_TEST );
   //glEnable( GL_TEXTURE_2D );
   //glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
-  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+  //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glEnable( GL_BLEND );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );  //отрисовка всех сторон. м.б. стоит сделать только FRONT, нужно тестировать
@@ -1061,6 +1061,7 @@ bool Core::Redraw()
   //
 
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //GL_STENCIL_BUFFER_BIT
+  __textureAtlas->Bind();
 
   //glUseProgram( this->_shaders.programm );
   //glBegin( GL_QUADS );
@@ -1083,8 +1084,6 @@ bool Core::Redraw()
     //  renderableLists.push_back( __coreGUI );
 
     //renderableListsIterEnd = renderableLists.end();
-
-    __textureAtlas->Bind();
 
     glEnableVertexAttribArray( 0 );
     glEnableVertexAttribArray( 1 );
@@ -1167,8 +1166,6 @@ bool Core::Redraw()
     }
     //End Основной мир
 
-    __textureAtlas->Unbind();
-
     glDisableVertexAttribArray( 0 );
     glDisableVertexAttribArray( 1 );
     glDisableVertexAttribArray( 2 );
@@ -1194,6 +1191,9 @@ bool Core::Redraw()
   if( !__coreRenderableList->empty() || !__coreGUI->empty() ) {
     glUseProgram( this->_shaders.programm );
     glEnableClientState( GL_VERTEX_ARRAY );
+    glEnable( GL_BLEND );
+    glEnable(GL_DEPTH_TEST);
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     //std::deque< CoreRenderableList* > renderableLists;
     //std::deque< CoreRenderableList* >::iterator renderableListsIter, renderableListsIterEnd;
@@ -1204,8 +1204,6 @@ bool Core::Redraw()
     //  renderableLists.push_back( __coreGUI );
 
     //renderableListsIterEnd = renderableLists.end();
-
-    __textureAtlas->Bind();
 
     glEnableVertexAttribArray( 0 );
     glEnableVertexAttribArray( 1 );
@@ -1342,7 +1340,6 @@ bool Core::Redraw()
     if( __coreGUI->size() )
     {
       glUseProgram( this->_shaders.programm );
-      __textureAtlas->Bind();
       //glLoadIdentity();
       Mat4 matrix;
       matrix.Identity();
@@ -1380,8 +1377,6 @@ bool Core::Redraw()
     }
     //__log.PrintInfo( Filelevel_DEBUG, "end test gui" );
     //End GUI
-
-    __textureAtlas->Unbind();
 
     glDisableVertexAttribArray( 0 );
     glDisableVertexAttribArray( 1 );

@@ -96,8 +96,7 @@ bool TextureAtlas::CheckGLError( int line, const std::string& fileName )
 */
 void TextureAtlas::Bind()
 {
-  glEnable      ( GL_TEXTURE_2D );
-  glBindTexture ( GL_TEXTURE_2D, this->textureId );
+  glBindTexture( GL_TEXTURE_2D, this->textureId );
 }//Bind
 
 
@@ -109,7 +108,6 @@ void TextureAtlas::Bind()
 */
 void TextureAtlas::Unbind()
 {
-  glDisable     ( GL_TEXTURE_2D );
   glBindTexture ( GL_TEXTURE_2D, NULL );
 }//Unbind
 

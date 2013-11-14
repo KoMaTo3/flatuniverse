@@ -1,6 +1,7 @@
 #include "debugrenderer.h"
 #include "debugrendererobjects.h"
 #include "gl/gl.h"
+#include "interngl.h"
 
 
 
@@ -39,6 +40,7 @@ void DebugRenderer::Clrscr() {
 void DebugRenderer::Render() {
   if( !this->pipeline.empty() ) {
     glLineWidth( 1.0f );
+    glActiveTexture( GL_TEXTURE0 + 0 );
   }
 
   ObjectsList::const_iterator iter, iterEnd = this->pipeline.end();

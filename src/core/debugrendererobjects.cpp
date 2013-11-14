@@ -118,8 +118,6 @@ DebugRendererText::~DebugRendererText() {
 void DebugRendererText::Render() {
   __textureAtlas->Bind();
   glColor4f( this->color.x, this->color.y, this->color.z, this->color.w );
-  glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
   static bool isFontInitialized = false;
   static bool isProportional = false;
