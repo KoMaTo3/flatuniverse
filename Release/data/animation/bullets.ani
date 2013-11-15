@@ -1,0 +1,15 @@
+template "bullet/test000" {
+  animation "default" 0 {
+  }
+  animation "do" 1 {
+    sprite "coin" {
+      renderable_texture( "data/textures/items/coin0.png" )
+      renderable_texture_coords ( 0,0, 0.25,1 )
+      renderable_size( 24, 24 )
+      renderable_rotation {
+        0.0( 0 )
+        1 linear( 360 )
+      }
+    }
+  }
+}

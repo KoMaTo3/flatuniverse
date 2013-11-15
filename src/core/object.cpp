@@ -169,7 +169,8 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 =============
 */
 Object::Object()
-:name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
+:IPointerOwner(), ITags(), IObject(), WidgetOwner()
+, name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 ,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( true )
 {
@@ -180,7 +181,8 @@ Object::Object()
 
 
 Object::Object( const std::string &objectName, Object* parentObject, bool setIsSaveable )
-:name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
+:IPointerOwner(), ITags(), IObject(), WidgetOwner()
+,name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 ,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( setIsSaveable )
 {
@@ -1141,15 +1143,19 @@ void Object::Update( float dt )
     this->collision->SetForce( force );
   }
 
-  this->widget->TouchEvent( ObjectWidget::OBJECT_WIDGET_EVENT_UPDATE );
+  if( this->widget ) {
+    this->widget->TouchEvent( ObjectWidget::OBJECT_WIDGET_EVENT_UPDATE );
+  }
 
   //обновляем дочерние объекты
-  if( this->_childs && this->_childs->size() )
+  if( this->_childs && !this->_childs->empty() )
   {
+    __log.PrintInfo( Filelevel_DEBUG, "Object::Update => childs[%d] ...", this->_childs->size() );
     ObjectList::iterator iter, iterEnd = this->_childs->end();
     for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
       ( *iter )->Update( dt );
     }
+    __log.PrintInfo( Filelevel_DEBUG, "Object::Update => childs[%d] done", this->_childs->size() );
   }
 }//Update
 
@@ -1312,11 +1318,11 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   writer << this->luaScript;
 
   //Width::LightBlockByCollision
-  isLightBlockByCollision = this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION );
+  isLightBlockByCollision = ( this->widget && this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION ) );
   writer << isLightBlockByCollision;
 
   //Width::LightPoint
-  isLightPoint = this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT );
+  isLightPoint = ( this->widget && this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT ) );
   writer << isLightPoint;
   if( isLightPoint ) {
     this->widget->GetWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT )->SaveToBuffer( writer );
@@ -1800,6 +1806,10 @@ ObjectWidget::WidgetLightBlockByCollision* Object::EnableLightBlockByCollision()
     __log.PrintInfo( Filelevel_WARNING, "Object::EnableLightBlockByCollision => collision is NULL" );
     return NULL;
   }
+  if( !this->widget ) {
+    __log.PrintInfo( Filelevel_WARNING, "Object::EnableLightBlockByCollision => this->widget is NULL" );
+    return NULL;
+  }
   auto w = new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, this->GetCollision()->GetCollisionElement() );
   this->widget->AddWidget( w );
   return w;
@@ -1807,7 +1817,13 @@ ObjectWidget::WidgetLightBlockByCollision* Object::EnableLightBlockByCollision()
 
 
 void Object::DisableLightBlockByCollision() {
+  if( !this->widget ) {
+    __log.PrintInfo( Filelevel_WARNING, "Object::DisableLightBlockByCollision => this->widget is NULL" );
+    return;
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableLightBlockByCollision => widget[%p] ...", this->widget );
   this->widget->DeleteWidget( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION );
+  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableLightBlockByCollision => widget[%p] done", this->widget );
 }//DisableLightBlockByCollision
 
 
@@ -1818,6 +1834,10 @@ void Object::DisableLightBlockByCollision() {
 =============
 */
 ObjectWidget::WidgetLightPoint* Object::EnableLightPoint() {
+  if( !this->widget ) {
+    __log.PrintInfo( Filelevel_WARNING, "Object::EnableLightPoint => this->widget is NULL" );
+    return NULL;
+  }
   auto w = new ObjectWidget::WidgetLightPoint( this, &__lightLenderer->GetLightManager()->lightList, &this->position, Vec4( 1.0f, 1.0f, 1.0f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.5f );
   this->widget->AddWidget( w );
   return w;
@@ -1830,6 +1850,10 @@ ObjectWidget::WidgetLightPoint* Object::EnableLightPoint() {
 =============
 */
 void Object::DisableLightPoint() {
+  if( !this->widget ) {
+    __log.PrintInfo( Filelevel_WARNING, "Object::DisableLightPoint => this->widget is NULL" );
+    return;
+  }
   this->widget->DeleteWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT );
 }//DisableLightPoint
 
@@ -1841,6 +1865,10 @@ void Object::DisableLightPoint() {
 =============
 */
 ObjectWidget::WidgetLightPoint* Object::GetLightPoint() {
+  if( !this->widget ) {
+    __log.PrintInfo( Filelevel_WARNING, "Object::GetLightPoint => this->widget is NULL" );
+    return NULL;
+  }
   return static_cast< ObjectWidget::WidgetLightPoint* >( this->widget->GetWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT ) );
 }//GetLightPoint
 
@@ -1859,5 +1887,5 @@ void Object::__Test() {
   pointList.push_back( CollisionElementPolygon::Point( -3.0f, -10.0f ) );
   elem->SetPointList( pointList );
   this->widget->AddWidget( new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, elem ) );
-  this->widget->AddWidget( new ObjectWidget::WidgetLightPoint( this, &__lightLenderer->GetLightManager()->lightList, &this->position, Vec4( 1.0f, 1.0f, 1.0f, 0.2f ), Vec2( 300.0f, 300.0f ), 1.0f ) );
+  this->widget->AddWidget( new ObjectWidget::WidgetLightPoint( this, &__lightLenderer->GetLightManager()->lightList, &this->position, Vec4( 1.0f, 1.0f, 1.0f, 0.4f ), Vec2( 300.0f, 300.0f ), 1.0f ) );
 }

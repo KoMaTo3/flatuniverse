@@ -1177,10 +1177,15 @@ end -- PopFromBuffer
 function OnChangeIsCollision( isCollisionGuiElement )
   local object = GetSelectedObject()
   local checked = isCollisionGuiElement:GetIsChecked()
-  ObjectAttr( object, { collision = checked } )
+  local objectList = Explode( object, '//' )
+  for num,name in pairs( objectList ) do --(
+    ObjectAttr( name, { collision = checked } )
+  end
   if checked then
     local tileSize = GetTileSize()
-    ObjectAttr( object, { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
+    for num,name in pairs( objectList ) do --(
+      ObjectAttr( name, { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
+    end
   end
 end -- OnChangeIsCollision
 
@@ -1188,10 +1193,15 @@ end -- OnChangeIsCollision
 function OnChangeIsTrigger( isTriggerGuiElement )
   local object = GetSelectedObject()
   local checked = isTriggerGuiElement:GetIsChecked()
-  ObjectAttr( object, { trigger = checked } )
+  local objectList = Explode( object, '//' )
+  for num,name in pairs( objectList ) do --(
+    ObjectAttr( name, { trigger = checked } )
+  end
   if checked then
     local tileSize = GetTileSize()
-    ObjectAttr( object, { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
+    for num,name in pairs( objectList ) do --(
+      ObjectAttr( name, { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
+    end
   end
 end -- OnChangeIsCollision
 
@@ -1199,16 +1209,24 @@ end -- OnChangeIsCollision
 function OnChangeIsLightBlockByCollision( isLightBlockByCollisionGuiElement )
   local object = GetSelectedObject()
   local checked = isLightBlockByCollisionGuiElement:GetIsChecked()
-  ObjectAttr( object, { lightBlockByCollision = checked } )
+  local objectList = Explode( object, '//' )
+  for num,name in pairs( objectList ) do --(
+    ObjectAttr( name, { lightBlockByCollision = checked } )
+  end
 end -- OnChangeIsLightBlockByCollision
 
 --[[ OnChangeIsLightPoint ]]
 function OnChangeIsLightPoint( isLightPointGuiElement )
   local object = GetSelectedObject()
   local checked = isLightPointGuiElement:GetIsChecked()
-  ObjectAttr( object, { lightPoint = checked } )
+  local objectList = Explode( object, '//' )
+  for num,name in pairs( objectList ) do --(
+    ObjectAttr( name, { lightPoint = checked } )
+  end
   if checked then
-    ObjectAttr( object, { lightPointSize = 200, lightPointColor = ( math.random( 0, 1000 ) / 1000 )..' '..( math.random( 0, 1000 ) / 1000 )..' '..( math.random( 0, 1000 ) / 1000 )..' 1' } )
+    for num,name in pairs( objectList ) do --(
+      ObjectAttr( name, { lightPointSize = 200, lightPointColor = ( math.random( 0, 1000 ) / 1000 )..' '..( math.random( 0, 1000 ) / 1000 )..' '..( math.random( 0, 1000 ) / 1000 )..' 1' } )
+    end
   end
 end -- OnChangeIsLightPoint
 

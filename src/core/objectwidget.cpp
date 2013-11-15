@@ -68,6 +68,7 @@ WidgetMgr::~WidgetMgr() {
       delete widgetInstance;
     }
   }
+  this->_widgetList.clear();
   for( int num = 0; num < OBJECT_WIDGET_EVENT_COUNT__; ++num ) {
     this->_eventListenersList->at( num )->clear();
     delete this->_eventListenersList->at( num );
@@ -97,11 +98,14 @@ Widget* WidgetMgr::GetWidget( const ObjectWidgetGUID &guid ) {
 
 
 bool WidgetMgr::DeleteWidget( const ObjectWidgetGUID &guid ) {
+  __log.PrintInfo( Filelevel_DEBUG, "WidgetMgr::DeleteWidget ..." );
   if( this->_widgetList[ guid ] ) {
+  __log.PrintInfo( Filelevel_DEBUG, "WidgetMgr::DeleteWidget => delete widget %p...", this->_widgetList[ guid ] );
     delete this->_widgetList[ guid ];
     this->_widgetList[ guid ] = NULL;
     return true;
   }
+  __log.PrintInfo( Filelevel_DEBUG, "WidgetMgr::DeleteWidget => widget not found" );
   return false;
 }//DeleteWidget
 
@@ -150,6 +154,7 @@ WidgetOwner::WidgetOwner() {
 
 WidgetOwner::~WidgetOwner() {
   DEF_DELETE( this->widget );
+  this->widget = NULL;
 }
 
 void WidgetOwner::ListenEvent( const ObjectWidgetEvent &event, Widget *newWidget ) {

@@ -38,6 +38,7 @@ public:
   AnimationSet* CreateAnimationSet( const std::string& animationName, float animationLength = 0.0f );
   void __Dump( const std::string &prefix = "" );
   bool SetCurrentAnimation( const std::string &animationName, float startTime = 0.0f );
+  inline bool IsTemplate() { return this->_isTemplate; }
   void Reset();
   void Update( float dt );
   void SetEnabled( bool setEnabled );

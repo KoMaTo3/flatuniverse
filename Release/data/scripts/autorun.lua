@@ -224,6 +224,18 @@ function PlayerControl( id, isPressed )
       end
     end
 
+    if id == 0x46 then  -- F - fire
+      if isPressed then
+        local x,y = ObjectAttr( 'player', { 'position' } )
+        local object = 'player-bullet-.'..x..'.'..y..'.'..string.format( '%f', settings.timer )
+        ObjectCreate( object, x + 20, y, 0 )
+        ObjectAttr( object, {
+          collision = true, collisionSize = '22 22', collisionAcceleration = '0 500', collisionVelocity = '150 -200', collisionStatic = false
+          } )
+        -- ObjectSetAnimation( object, 'bullet/test000', 'default' )
+      end
+    end
+
     if id == 0x10 and isPressed then  -- test
       local object = 'wall.161.63.2.010000'
       ObjectSetAnimation( object, 'lift/small', 'down' )

@@ -135,9 +135,9 @@ void Animation::Destroy() {
   while( __animationPackActiveList.size() ) {
     ( *__animationPackActiveList.begin() )->SetEnabled( false );
   }
+
   while( !__animationPackTemplatesList.empty() ) {
     delete __animationPackTemplatesList.begin()->second;
-    __animationPackTemplatesList.erase( __animationPackTemplatesList.begin() );
   }
 }//Destroy
 

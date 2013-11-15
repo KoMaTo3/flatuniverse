@@ -378,7 +378,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     "data/shaders/shader2.fs",
     this->lightList
     );
-  this->lightRenderer->GetLightManager()->lightAmbient.Set( 0.3f, 0.3f, 1.0f, 0.7f );
+  this->lightRenderer->GetLightManager()->lightAmbient.Set( 0.3f, 0.3f, 1.0f, 0.5f );
   //this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( -100.0f, 100.0f ), Vec4( 1.0f, 0.6f, 0.6f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.3f, 1024 ) );
   //this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 350.0f, -40.0f ), Vec4( 0.2f, 1.0f, 0.2f, 1.0f ), Vec2( 400.0f, 300.0f ), 0.3f, 1024 ) );
   //this->lightRenderer->GetLightManager()->lightBlocks.push_back( new LightBlock( Vec2( 200.0f, 50.0f ), Vec2( 20.0f, 20.0f ) ) );
@@ -815,7 +815,7 @@ void Core::_InitViewport()
 
   
   glShadeModel( GL_SMOOTH );
-  glClearColor( 1.0f, 1.0f, 1.0f, 0.0f );
+  glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
   glClearDepth( 1.0f );
   glDepthFunc( GL_LEQUAL );
   //glDepthFunc( GL_NICEST );
@@ -1046,7 +1046,7 @@ bool Core::Redraw()
   this->lightRenderer->BeginScene();
 
   //
-  glClearColor( 1.0f, 1.0f, 1.0f, 0.0f );
+  glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
   //glDepthFunc( GL_LEQUAL );
   glEnable( GL_DEPTH_TEST );
   //glEnable( GL_TEXTURE_2D );
