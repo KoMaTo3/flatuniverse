@@ -9,13 +9,11 @@ layout(location = 5) in float alpha;
 
 const vec4 constOffset = vec4( -1.0, -1.0, 0,0 );
 smooth out vec4 vColor;
-smooth out float brightness;
 out vec2 invertWindowSize;
 
 void main( void )
 {
   vColor = color;
-  brightness = alpha;
   invertWindowSize.xy = oneByWindowCoeff.xy;
 
   vec2 cameraPos = vec2( cameraInfo.x, cameraInfo.y );
