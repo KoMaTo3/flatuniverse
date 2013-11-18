@@ -3,7 +3,7 @@
 layout(location = 0) out vec4 fragData0;
 //layout(location = 1) out vec4 fragData1;
 
-in vec4 vColor;
+smooth in vec4 vColor;
 in vec2 invertWindowSize;
 
 void main()

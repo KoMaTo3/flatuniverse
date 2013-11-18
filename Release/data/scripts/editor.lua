@@ -1225,7 +1225,7 @@ function OnChangeIsLightPoint( isLightPointGuiElement )
   end
   if checked then
     for num,name in pairs( objectList ) do --(
-      ObjectAttr( name, { lightPointSize = 200, lightPointColor = ( math.random( 0, 1000 ) / 1000 )..' '..( math.random( 0, 1000 ) / 1000 )..' '..( math.random( 0, 1000 ) / 1000 )..' 1' } )
+      ObjectAttr( name, { lightPointSize = 400, lightPointColor = ( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' 1' } )
     end
   end
 end -- OnChangeIsLightPoint

@@ -1150,12 +1150,10 @@ void Object::Update( float dt )
   //обновляем дочерние объекты
   if( this->_childs && !this->_childs->empty() )
   {
-    __log.PrintInfo( Filelevel_DEBUG, "Object::Update => childs[%d] ...", this->_childs->size() );
     ObjectList::iterator iter, iterEnd = this->_childs->end();
     for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
       ( *iter )->Update( dt );
     }
-    __log.PrintInfo( Filelevel_DEBUG, "Object::Update => childs[%d] done", this->_childs->size() );
   }
 }//Update
 

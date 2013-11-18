@@ -35,8 +35,6 @@ void main()
   brightness = min( brightness, brightnessOriginal );
   */
   
-  //color0 += vec4( 0.1, 0.1, 0.1, 0.0 );
-
   //vec4 br = normalize( color1 ) * brightness;
   //fragData0 = vec4( color0.rgb * br.rgb, 1 );
   //fragData0 = color1;
@@ -53,5 +51,5 @@ void main()
     + texture( texture1, vec2( texCoords.x - offset.x, texCoords.y + offset.y ) ) * 0.7
     + texture( texture1, vec2( texCoords.x, texCoords.y + offset.y ) )
     + texture( texture1, vec2( texCoords.x + offset.x, texCoords.y + offset.y ) ) * 0.7
-  ) / ( 5 + 4 * 0.7 ) - coeff;
+  ) / ( 5 + 4 * 0.7 );
 }

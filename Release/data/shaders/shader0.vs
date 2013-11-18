@@ -13,7 +13,7 @@ out vec2 invertWindowSize;
 
 void main( void )
 {
-  vColor = color;
+  vColor = color * alpha;
   invertWindowSize.xy = oneByWindowCoeff.xy;
 
   vec2 cameraPos = vec2( cameraInfo.x, cameraInfo.y );
