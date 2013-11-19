@@ -1885,5 +1885,5 @@ void Object::__Test() {
   pointList.push_back( CollisionElementPolygon::Point( -3.0f, -10.0f ) );
   elem->SetPointList( pointList );
   this->widget->AddWidget( new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, elem ) );
-  this->widget->AddWidget( new ObjectWidget::WidgetLightPoint( this, &__lightLenderer->GetLightManager()->lightList, &this->position, Vec4( 1.0f, 1.0f, 1.0f, 0.4f ), Vec2( 300.0f, 300.0f ), 1.0f ) );
+  //this->widget->AddWidget( new ObjectWidget::WidgetLightPoint( this, &__lightLenderer->GetLightManager()->lightList, &this->position, Vec4( 1.0f, 1.0f, 1.0f, 0.4f ), Vec2( 300.0f, 300.0f ), 1.0f ) );
 }

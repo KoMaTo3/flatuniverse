@@ -378,7 +378,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
     "data/shaders/shader2.fs",
     this->lightList
     );
-  this->lightRenderer->GetLightManager()->lightAmbient.Set( 0.3f, 0.3f, 1.0f, 0.5f );
+  this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 0.5f );
   //this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( -100.0f, 100.0f ), Vec4( 1.0f, 0.6f, 0.6f, 1.0f ), Vec2( 300.0f, 300.0f ), 0.3f, 1024 ) );
   //this->lightRenderer->GetLightManager()->lightList->push_back( new LightMap::LightEntity( LightMap::LT_POINT, Vec2( 350.0f, -40.0f ), Vec4( 0.2f, 1.0f, 0.2f, 1.0f ), Vec2( 400.0f, 300.0f ), 0.3f, 1024 ) );
   //this->lightRenderer->GetLightManager()->lightBlocks.push_back( new LightBlock( Vec2( 200.0f, 50.0f ), Vec2( 20.0f, 20.0f ) ) );
@@ -769,7 +769,7 @@ void Core::_InitViewport()
   //UPD 2012.12.12: это уже не нужно т.к. проекционная и мировая матрица передаются в шейдер
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
-  glOrtho( 0.0, 100.0, 100.0, 0.0, 0.01, 10.0 ); // -10.0f - ближайшая к зрителю точка
+  glOrtho( 0.0, 100.0, 100.0, 0.0, 0.01, 10.0 ); // 0.01f - ближайшая к зрителю точка
   glMatrixMode( GL_MODELVIEW );
   //*/
 

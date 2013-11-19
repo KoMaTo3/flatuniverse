@@ -103,6 +103,16 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //obj->EnableLightBlockByCollision();
 
 
+  Object *background = game->core->CreateObject( "background" );
+  background->SetLockToDelete( true );
+  background->SetPosition( Vec3( 0.0f, 0.0f, 9.9f ) );
+  RenderableQuad *render = ( RenderableQuad* ) background->EnableRenderable( RENDERABLE_TYPE_QUAD );
+  render->SetTexture( "data/temp/bg0.png" );
+  render->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
+  render->SetEnabled( true );
+  render->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
+  render->SetSize( Vec2( ( float ) game->core->GetWindowSize().width, ( float ) game->core->GetWindowSize().height ) );
+
   game->world->AddActiveObject( game->core->GetObject( "player" ) );
 
 
@@ -187,6 +197,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       currentFps = 0;
     }
 
+    background->SetPosition( Vec3( game->core->GetObject( "player" )->GetPosition().x, game->core->GetObject( "player" )->GetPosition().y * 0.75f, 0.0f ) );
 
     if( game->core->keyboard.IsPressed( VK_F9 ) ) { //Clear world
       game->world->ClearWorld();
