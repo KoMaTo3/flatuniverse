@@ -70,6 +70,7 @@ public:
   bool lastCheckInRect;
   float epsilon;
   float maxRange;
+  float penetration;  //величина проникновения света в объекты
 
   std::vector< LightVertex > vertices;
   std::vector< LightVertex > verticesSoftEdges;
@@ -81,6 +82,8 @@ public:
   void SetSize( const Vec2& setSize );
   void SetColor( const Vec4& setColor );
   void SetPosition( const Vec2& setPosition );
+  inline void SetPenetration( const float newPenetration ) { this->penetration = newPenetration; }
+  inline float GetPenetration() { return this->penetration; }
   LightEntity* Clone();
   void AddVertice( const LightVertex& vertex );
   bool CheckBlockDistance( const Vec2& blockPos, const Vec2& blockHalfSize );

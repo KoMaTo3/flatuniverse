@@ -36,7 +36,7 @@ void ILightBlock::AddEdgeToBuffer( const Vec2& lightPosition, LBuffer *buffer, c
 LightEntity::LightEntity( const LightType &setType, const Vec2& setPosition, const Vec4& setColor, const Vec2& setSize, float setBrightness, int lBufferSize, float setEpsilon )
   : position( setPosition ), color( setColor ), type( setType ), size( setSize ), halfSize( setSize * 0.5f ), brightness( setBrightness ), epsilon( setEpsilon )
   ,lbuffer( lBufferSize, Math::TWO_PI ), lastCheckInRect( true ), maxRange( Math::Sqrt16( setSize.x * setSize.y ) ), _lastPosition( -setPosition ), _lastSize( -setSize )
-  , _lastColor( Vec4Null )
+  , _lastColor( Vec4Null ), penetration( 0.0f )
 {
   __log.PrintInfo( Filelevel_DEBUG, "+1 LightEntity %p", this );
 }
@@ -137,10 +137,9 @@ void LightEntity::Update( LightBlocksList &blocks ) {
 
   this->vertices.clear();
   this->verticesSoftEdges.clear();
-  Vec2 verticeOffset( 0.0f, 0.0f );
-  this->AddVertice( LightVertex( this->position + verticeOffset, this->color, 1.0f ) );
+  this->AddVertice( LightVertex( this->position, this->color, 1.0f ) );
   float step = max( 0.01f, Math::TWO_PI / float( this->lbuffer.GetSize() ) );
-  Vec2 pos;
+  Vec2 pos, posNormalized;
   float lastRange = this->maxRange, range;
   float rangeHistory[ 2 ] = { -1.0f, -1.0f };
   int
@@ -150,9 +149,14 @@ void LightEntity::Update( LightBlocksList &blocks ) {
   bool skipped;
   for( float degree = 0.0f; degree < Math::TWO_PI; degree += step ) {
     range = this->lbuffer.GetValue( degree );
+    posNormalized.Set( Math::Cos16( degree ), Math::Sin16( degree ) );
+    if( this->penetration > this->epsilon ) {
+      //pos += posNormalized * this->penetration;
+      range = min( this->maxRange, range + this->penetration );
+    }
     pos.Set(
-      this->position.x + Math::Cos16( degree ) * range,
-      this->position.y - Math::Sin16( degree ) * range
+      this->position.x + posNormalized.x * range,
+      this->position.y - posNormalized.y * range
       );
     //пропустить вертексы, идущие подряд на одном расстоянии от центра
     skipped = false;
@@ -184,13 +188,13 @@ void LightEntity::Update( LightBlocksList &blocks ) {
     if( !skipped ) {
       skipsCount = 0;
     }
-    this->AddVertice( LightVertex( pos + verticeOffset, this->color, 1.0f - range / this->maxRange ) );
+    this->AddVertice( LightVertex( pos, this->color, 1.0f - range / this->maxRange ) );
     ++verticesCount;
     rangeHistory[ 1 ] = rangeHistory[ 0 ];
     rangeHistory[ 0 ] = lastRange;
     lastRange = range;
   }
-  this->AddVertice( LightVertex( this->position + Vec2( this->lbuffer.GetValueByIndex( 0 ), 0.0f ) + verticeOffset, this->color, 1.0f - range / this->maxRange ) );
+  this->AddVertice( LightVertex( this->position + Vec2( this->lbuffer.GetValueByIndex( 0 ), 0.0f ), this->color, 1.0f - range / this->maxRange ) );
   this->_lastPosition = this->position;
   this->_lastSize = this->size;
   this->_lastColor = this->color;

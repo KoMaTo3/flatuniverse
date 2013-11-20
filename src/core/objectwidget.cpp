@@ -271,6 +271,10 @@ void WidgetLightPoint::SetColor( const Vec4& setColor ) {
   this->_lightEntity->SetColor( setColor );
 }//SetColor
 
+void WidgetLightPoint::SetPenetration( const float setPenetration ) {
+  this->_lightEntity->SetPenetration( setPenetration );
+}//SetPenetration
+
 
 void WidgetLightPoint::SaveToBuffer( MemoryWriter &writer ) {
   writer << this->_lightEntity->GetSize();

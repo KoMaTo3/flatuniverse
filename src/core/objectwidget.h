@@ -149,6 +149,7 @@ public:
   virtual void LoadFromBuffer( MemoryReader &reader );
   void SetSize( const Vec2& setSize );
   void SetColor( const Vec4& setColor );
+  void SetPenetration( const float setPenetration);
 
 private:
   WidgetLightPoint();

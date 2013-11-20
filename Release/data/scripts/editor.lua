@@ -77,6 +77,7 @@ GUI = {
     itemSize = 32,
     items = {},
     currentItem = 0,
+    zIndex = 9.0,
     Draw = function()
       GUI.templates.maxScroll = ( #GUI.templates.items * ( GUI.templates.itemSize + 5 ) + 10 ) - ( GUI.templates.height - 15 )
       if GUI.templates.maxScroll < 1 then
@@ -85,14 +86,14 @@ GUI = {
       local y
       local i
       -- bg
-      Render( 'sprite', GUI.templates.x, GUI.templates.y, 0, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, 0, 'data/temp/blank.png', '333333FF' )
+      Render( 'sprite', GUI.templates.x, GUI.templates.y, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, GUI.templates.zIndex, 'data/temp/blank.png', '333333FF' )
       -- scroll bg
-      Render( 'sprite', GUI.templates.x + GUI.templates.width - 15, GUI.templates.y, 0, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, 0, 'data/temp/blank.png', '555555FF' )
+      Render( 'sprite', GUI.templates.x + GUI.templates.width - 15, GUI.templates.y, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, GUI.templates.zIndex, 'data/temp/blank.png', '555555FF' )
       -- scroll bar
       y = GUI.templates.y + 15 + GUI.templates.scroll*(GUI.templates.height-29)
-      Render( 'sprite', GUI.templates.x + GUI.templates.width - 14, y + 1, 0, GUI.templates.x + GUI.templates.width - 1, y + 13, 0, 'data/temp/blank.png', '888888FF' )
+      Render( 'sprite', GUI.templates.x + GUI.templates.width - 14, y + 1, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width - 1, y + 13, GUI.templates.zIndex, 'data/temp/blank.png', '888888FF' )
       -- header
-      Render( 'sprite', GUI.templates.x, GUI.templates.y, 0, GUI.templates.x + GUI.templates.width, GUI.templates.y + 15, 0, 'data/temp/blank.png', '999999FF' )
+      Render( 'sprite', GUI.templates.x, GUI.templates.y, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width, GUI.templates.y + 15, GUI.templates.zIndex, 'data/temp/blank.png', '999999FF' )
       -- items
       -- Render( 'scissorEnable', GUI.templates.x, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 0 ), GUI.templates.x + GUI.templates.width - 15, settings.windowSize.y - 16 )
       Render( 'scissorEnable', GUI.templates.x + 1, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 1 ), GUI.templates.x + GUI.templates.width - 17, settings.windowSize.y - ( GUI.templates.y + 17 ) )
@@ -102,16 +103,17 @@ GUI = {
       end
       if GUI.templates.currentItem > 0 and GUI.templates.currentItem <= #GUI.templates.items then
         y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + ( GUI.templates.currentItem - 1 ) * ( GUI.templates.itemSize + 5 ) + 20
-        Render( 'rect', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, '00ff00ff' )
+        Render( 'rect', GUI.templates.x + 5, y, GUI.templates.zIndex, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, GUI.templates.zIndex, '00ff00ff' )
       end
       Render( 'scissorDisable' )
     end,
     DrawItem = function( i, item )
       y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + ( i - 1 ) * ( GUI.templates.itemSize + 5 ) + 20
-      Render( 'sprite', GUI.templates.x + 5, y, 0, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, 0, item.icon, 'ffffffff' )
+      Render( 'sprite', GUI.templates.x + 5, y, GUI.templates.zIndex, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, GUI.templates.zIndex, item.icon, 'ffffffff' )
     end,
   }, -- templates
   grid = {
+    zIndex = 8.5,
     Render = function()
       local tileSize = GetTileSize()
       local offsetX, offsetY = GetTileOffset()
@@ -121,18 +123,18 @@ GUI = {
       sy = ( math.floor( settings.windowSize.y * 0.5 - cameraY ) ) % tileSize + tileSize * 0.5 + offsetY
       local halfTileSize = tileSize * 0.5
       for x = 0, settings.windowSize.x, tileSize do
-        Render( 'line', sx + x, 0, 0, sx + x, settings.windowSize.y, 0, '00FF0044' )
+        Render( 'line', sx + x, 0, GUI.grid.zIndex, sx + x, settings.windowSize.y, GUI.grid.zIndex, '00FF0044' )
       end
       for y = 0, settings.windowSize.y, tileSize do
-        Render( 'line', 0, sy + y, 0, settings.windowSize.x, sy + y, 0, '00FF0044' )
+        Render( 'line', 0, sy + y, GUI.grid.zIndex, settings.windowSize.x, sy + y, GUI.grid.zIndex, '00FF0044' )
       end
       for gx = 0,1 do
         local x = ( math.floor( cameraX / settings.gridSize ) + gx ) * settings.gridSize - cameraX + settings.windowSize.x * 0.5
-        Render( 'line', x, 0, 0, x, settings.windowSize.y, 0, 'FF0000FF' )
+        Render( 'line', x, 0, GUI.grid.zIndex, x, settings.windowSize.y, GUI.grid.zIndex, 'FF0000FF' )
       end
       for gy = 0,1 do
         local y = ( math.floor( cameraY / settings.gridSize ) + gy ) * settings.gridSize - cameraY + settings.windowSize.y * 0.5
-        Render( 'line', 0, y, 0, settings.windowSize.x, y, 0, 'FF0000FF' )
+        Render( 'line', 0, y, GUI.grid.zIndex, settings.windowSize.x, y, GUI.grid.zIndex, 'FF0000FF' )
       end
     end,
   }, -- grid
@@ -203,13 +205,22 @@ function EditorInit()
 
   -- object block
   GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 110, 'Object' )
-  GUILabel:Create( 1, 18, 0, 0, 'Name:', GUI.elements.windowObject )
-  GUI.elements.objectName   = GUIEdit:Create( 50, 18, 165, '', function( obj ) Alert( obj:GetText() ) end, GUI.elements.windowObject )
-  GUI.elements.isRenderable = GUICheckbox:Create( 5, 35, 'Renderable', false, nil, GUI.elements.windowObject, false )
-  GUI.elements.isCollision  = GUICheckbox:Create( 5, 50, 'Collision', false, OnChangeIsCollision, GUI.elements.windowObject, false )
-  GUI.elements.isTrigger    = GUICheckbox:Create( 5, 65, 'Trigger', false, OnChangeIsTrigger, GUI.elements.windowObject, false )
-  GUI.elements.isLightBlockByCollision = GUICheckbox:Create( 5, 80, 'Light block by collision', false, OnChangeIsLightBlockByCollision, GUI.elements.windowObject, false )
-  GUI.elements.isLightPoint = GUICheckbox:Create( 5, 95, 'Light point', false, OnChangeIsLightPoint, GUI.elements.windowObject, false )
+  local y = 18
+  GUILabel:Create( 1, y, 0, 0, 'Name:', GUI.elements.windowObject )
+  GUI.elements.objectName   = GUIEdit:Create( 50, y, 165, '', function( obj ) Alert( obj:GetText() ) end, GUI.elements.windowObject )
+  y = y + 20
+  GUILabel:Create( 1, y, 0, 0, 'Z:', GUI.elements.windowObject )
+  GUI.elements.objectZ = GUIEdit:Create( 20, y, 40, '', function( obj ) OnChangeZ( obj:GetText() ) end, GUI.elements.windowObject )
+  y = y + 17
+  GUI.elements.isRenderable = GUICheckbox:Create( 5, y, 'Renderable', false, nil, GUI.elements.windowObject, false )
+  y = y + 15
+  GUI.elements.isCollision  = GUICheckbox:Create( 5, y, 'Collision', false, OnChangeIsCollision, GUI.elements.windowObject, false )
+  y = y + 15
+  GUI.elements.isTrigger    = GUICheckbox:Create( 5, y, 'Trigger', false, OnChangeIsTrigger, GUI.elements.windowObject, false )
+  y = y + 15
+  GUI.elements.isLightBlockByCollision = GUICheckbox:Create( 5, y, 'Light block by collision', false, OnChangeIsLightBlockByCollision, GUI.elements.windowObject, false )
+  y = y + 15
+  GUI.elements.isLightPoint = GUICheckbox:Create( 5, y, 'Light point', false, OnChangeIsLightPoint, GUI.elements.windowObject, false )
 
   -- GUIEdit:Create( 200, 50, 100, 'test123', function() Alert(2) end )
 
@@ -532,6 +543,7 @@ function OnEditorMouseKey( id, isPressed )
           ]]
         else
           local object = GetObjectUnderCursorByMode()
+          LogWrite( 'GetObjectUnderCursorByMode => '..object )
           SelectObject( object )
           UpdateGuiBySelectedObject()
           if #object > 0 then
@@ -761,6 +773,7 @@ function GetObjectUnderCursorByMode()
     local name = GetSelectedObject()
     if settings.editorType == 1 then
       name = GetObjectByPoint( 1, pos.x, pos.y, name )
+      LogWrite( string.format( 'GetObjectByPoint => [1][%3.1f][%3.1f]["%s"]', pos.x, pos.y, name ) )
     end
     if settings.editorType == 2 then
       name = GetObjectByPoint( 2, pos.x, pos.y, name )
@@ -897,24 +910,28 @@ function UpdateGuiBySelectedObject()
       doReset = true
     else
       local isRenderable
-          , isCollision
-          , isTrigger
-          , isLightBlockByCollision
-          , isLightPoint
-          , textureName
-          , renderableSizeX
-          , renderableSizeY
-          = ObjectAttr( object, {
-            'renderable',
-            'collision',
-            'trigger',
-            'lightBlockByCollision',
-            'lightPoint',
-            'textureName',
-            'renderableSize',
-          } )
+        , isCollision
+        , isTrigger
+        , isLightBlockByCollision
+        , isLightPoint
+        , textureName
+        , renderableSizeX
+        , renderableSizeY
+        , objectZ
+        = ObjectAttr( object, {
+          'renderable',
+          'collision',
+          'trigger',
+          'lightBlockByCollision',
+          'lightPoint',
+          'textureName',
+          'renderableSize',
+          'z',
+        } )
       GUI.elements.objectName:SetEnabled( true )
       GUI.elements.objectName:SetText( object )
+      GUI.elements.objectZ:SetEnabled( true )
+      GUI.elements.objectZ:SetText( string.format( '%.3f', objectZ ) )
       GUI.elements.isRenderable:SetEnabled( true )
       GUI.elements.isRenderable:SetIsChecked( isRenderable )
       GUI.elements.isCollision:SetEnabled( true )
@@ -927,16 +944,19 @@ function UpdateGuiBySelectedObject()
       GUI.elements.isLightPoint:SetIsChecked( isLightPoint )
     end
   else --)( multi-object
-    local isRenderable, isCollision, isTrigger, isLightBlockByCollision, isLightPoint = false, false, false, false, false
+    local isRenderable, isCollision, isTrigger, isLightBlockByCollision, isLightPoint, objectZ = false, false, false, false, false, 0.0
     for num,name in pairs( objectList ) do
       isRenderable = isRenderable or ObjectAttr( name, { 'renderable' } )
       isCollision = isCollision or ObjectAttr( name, { 'collision' } )
       isTrigger = isTrigger or ObjectAttr( name, { 'trigger' } )
       isLightBlockByCollision = isLightBlockByCollision or ObjectAttr( name, { 'lightBlockByCollision' } )
       isLightPoint = isLightPoint or ObjectAttr( name, { 'lightPoint' } )
+      objectZ = ObjectAttr( name, { 'z' } )
     end
     GUI.elements.objectName:SetEnabled( false )
     GUI.elements.objectName:SetText( '' )
+    GUI.elements.objectZ:SetEnabled( true )
+    GUI.elements.objectZ:SetText( string.format( '%.3f', objectZ ) )
     GUI.elements.isRenderable:SetEnabled( true )
     GUI.elements.isRenderable:SetIsChecked( isRenderable )
     GUI.elements.isCollision:SetEnabled( true )
@@ -951,6 +971,8 @@ function UpdateGuiBySelectedObject()
   if doReset then
     GUI.elements.objectName:SetEnabled( false )
     GUI.elements.objectName:SetText( '' )
+    GUI.elements.objectZ:SetEnabled( false )
+    GUI.elements.objectZ:SetText( '' )
     GUI.elements.isRenderable:SetEnabled( false )
     GUI.elements.isRenderable:SetIsChecked( false )
     GUI.elements.isCollision:SetEnabled( false )
@@ -989,7 +1011,7 @@ function RenderGUI()
     local y = settings.move.mouseStart.y - cy + settings.windowSize.y * 0.5
     local newX = mousePos.x
     local newY = mousePos.y
-    Render( 'rect', x, y, 0, newX, newY, 0, '00ff00ff' )
+    Render( 'rect', x, y, 8.0, newX, newY, 8.0, '00ff00ff' )
     local left   = x < newX and x or newX
     local right  = x < newX and newX or x
     local top    = y < newY and y or newY
@@ -1002,7 +1024,7 @@ function RenderGUI()
     for tx = left, right do
     for ty = top, bottom do
       x, y = GetPixelByTile( tx, ty )
-      Render( 'sprite', x, y, 0, x + tileSize, y + tileSize, 0, texture, 'ffffff44' )
+      Render( 'sprite', x, y, 8.0, x + tileSize, y + tileSize, 8.0, texture, 'ffffff44' )
     end
     end
   end --)
@@ -1011,7 +1033,7 @@ function RenderGUI()
     x, y = GetTilePosByPixel( mousePos.x, mousePos.y )
     left, top = GetPixelByTile( x, y )
     right, bottom = GetPixelByTile( x + 1, y + 1 )
-    Render( 'rect', left, top, 0, right, bottom, 0, 'ff0000ff' )
+    Render( 'rect', left, top, 8.0, right, bottom, 8.0, 'ff0000ff' )
   end --)
 
   --( рамка мультиселекта
@@ -1027,7 +1049,7 @@ function RenderGUI()
     if top > bottom then
       top, bottom = bottom, top
     end
-    Render( 'rect', left, top, 0, right, bottom, 0, 'ff0000ff' )
+    Render( 'rect', left, top, 8.0, right, bottom, 8.0, 'ff0000ff' )
   end --)
 
   if settings.guiVisibility then
@@ -1229,6 +1251,15 @@ function OnChangeIsLightPoint( isLightPointGuiElement )
     end
   end
 end -- OnChangeIsLightPoint
+
+--[[ OnChangeZ ]]
+function OnChangeZ( setZ )
+  local object = GetSelectedObject()
+  local objectList = Explode( object, '//' )
+  for num,name in pairs( objectList ) do --(
+    ObjectAttr( name, { z = tonumber( setZ ) } )
+  end
+end -- OnChangeZ
 
 --[[ OnChangeLayer ]]
 function OnChangeLayer( obj )

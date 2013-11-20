@@ -218,6 +218,7 @@ public:
   void                ClearChilds         ( bool forceDelete = true );
   Object*             SetPosition         ( const Vec3& newPosition );
   Object*             SetPosition2D       ( const Vec2& newPosition );
+  Object*             SetZ                ( const float z );
   inline const Vec3&  GetPosition         () const { return this->position; }
   Object*             GetChild            ( const std::string& name );
   void                SetForce            ( long forceId, const Vec3& vec );
@@ -256,6 +257,7 @@ public:
   void                SetLuaScript        ( const std::string& setScript );
   inline
   const std::string&  GetLuaScript        () { return this->luaScript; }
+  void                RecalculateRenderableZ( const float z );
 
   static
     RenderableQuad*   CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );

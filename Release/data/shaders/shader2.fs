@@ -14,32 +14,6 @@ void main()
   vec4 color0 = texture( texture0, texCoords );
   vec4 color1 = texture( texture1, texCoords );
   vec4 coeff = vec4( 0.05, 0.05, 0.05, 0.0 );
-  //float brightness = texture( texture2, texCoords ).r;
-
-  //smooth
-  /*
-  vec2 offset = oneByWindowCoeff.xy * 2.0f;
-  float brightnessOriginal = texture( texture2, texCoords ).r;
-  float brightness = (
-    brightnessOriginal
-    + texture( texture2, vec2( texCoords.x - offset.x, texCoords.y - offset.y ) ).r
-    + texture( texture2, vec2( texCoords.x, texCoords.y - offset.y ) ).r
-    + texture( texture2, vec2( texCoords.x + offset.x, texCoords.y - offset.y ) ).r
-    + texture( texture2, vec2( texCoords.x - offset.x, texCoords.y ) ).r
-    + texture( texture2, vec2( texCoords.x + offset.x, texCoords.y ) ).r
-    + texture( texture2, vec2( texCoords.x - offset.x, texCoords.y + offset.y ) ).r
-    + texture( texture2, vec2( texCoords.x, texCoords.y + offset.y ) ).r
-    + texture( texture2, vec2( texCoords.x + offset.x, texCoords.y + offset.y ) ).r
-    ) / 9.0
-    ;
-  brightness = min( brightness, brightnessOriginal );
-  */
-  
-  //vec4 br = normalize( color1 ) * brightness;
-  //fragData0 = vec4( color0.rgb * br.rgb, 1 );
-  //fragData0 = color1;
-  //fragData0 = vec4(brightness,0,0,1);
-  //fragData0 = color0 * color1;
   vec2 offset = oneByWindowCoeff.xy * 1.5f;
   fragData0 = ( color0 + coeff ) * (
     color1
@@ -52,4 +26,8 @@ void main()
     + texture( texture1, vec2( texCoords.x, texCoords.y + offset.y ) )
     + texture( texture1, vec2( texCoords.x + offset.x, texCoords.y + offset.y ) ) * 0.7
   ) / ( 5 + 4 * 0.7 );
+
+  //lightness
+  float lightness = 0.7;
+  fragData0 = fragData0 * ( 1.0 - lightness ) + vec4( 1.0, 1.0, 1.0, 1.0 ) * lightness;
 }

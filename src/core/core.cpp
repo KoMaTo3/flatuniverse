@@ -1047,7 +1047,8 @@ bool Core::Redraw()
 
   //
   glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-  //glDepthFunc( GL_LEQUAL );
+  glDepthFunc( GL_LEQUAL );
+  //glDepthFunc( GL_GEQUAL );
   glEnable( GL_DEPTH_TEST );
   //glEnable( GL_TEXTURE_2D );
   //glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
@@ -1215,7 +1216,7 @@ bool Core::Redraw()
     {
       glMatrixMode( GL_PROJECTION );
       glLoadIdentity();
-      glOrtho( 0.0, this->_window.windowSize.width, this->_window.windowSize.height, 0.0, -10.0, 10.0 ); // -10.0f - ближайшая к зрителю точка
+      glOrtho( 0.0, this->_window.windowSize.width, this->_window.windowSize.height, 0.0, -10.0f, 10.0f );
       glMatrixMode( GL_MODELVIEW );
 
       //debug-render
@@ -1849,13 +1850,13 @@ Object* Core::GetTriggerInPoint( const Vec2& pos, const std::string &afterObject
 Object* Core::GetRenderableInPoint( const Vec2& pos, const std::string &afterObject )
 {
   //__log.PrintInfo( Filelevel_DEBUG, "Core::GetRenderableInPoint => pos[%3.3f; %3.3f]", pos.x, pos.y );
-  CoreRenderableListIndicies::reverse_iterator iter, iterEnd = __coreRenderableListIndicies->rend();
+  CoreRenderableListIndicies::iterator iter, iterEnd = __coreRenderableListIndicies->end();
   RenderableQuad *quad;
   Vec2 leftTop, rightBottom;
-  bool returnFirst = ( afterObject.length() ? false : true );
+  bool returnFirst = afterObject.empty();
   Object *object;
 
-  for( iter = __coreRenderableListIndicies->rbegin(); iter != iterEnd; ++iter ) {
+  for( iter = __coreRenderableListIndicies->begin(); iter != iterEnd; ++iter ) {
     quad = &( *__coreRenderableList )[ *iter ];
     //__log.PrintInfo( Filelevel_DEBUG, ". index[%d] quad[x%p]", *iter, quad );
     quad->CalculateRect( leftTop, rightBottom );

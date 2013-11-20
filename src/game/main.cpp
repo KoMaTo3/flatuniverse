@@ -105,12 +105,11 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   Object *background = game->core->CreateObject( "background" );
   background->SetLockToDelete( true );
-  background->SetPosition( Vec3( 0.0f, 0.0f, 9.9f ) );
+  background->SetPosition( Vec3( 0.0f, 0.0f, -9.0f ) );
   RenderableQuad *render = ( RenderableQuad* ) background->EnableRenderable( RENDERABLE_TYPE_QUAD );
   render->SetTexture( "data/temp/bg0.png" );
   render->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
   render->SetEnabled( true );
-  render->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   render->SetSize( Vec2( ( float ) game->core->GetWindowSize().width, ( float ) game->core->GetWindowSize().height ) );
 
   game->world->AddActiveObject( game->core->GetObject( "player" ) );
@@ -1347,23 +1346,25 @@ std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::
 {
   switch( type ) {
     case 1: { //renderable
+      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GetObjectByPoint => type[%d] point[%3.3f; %3.3f] after['%s'] ...", type, point.x, point.y, afterObject.c_str() );
       Object *object = game->core->GetRenderableInPoint( point, afterObject );
       while( object && !object->IsSaveable() ) {
         object = object->GetParent();
       }
       if( object ) {
+        __log.PrintInfo( Filelevel_DEBUG, ". found['%s']", object->GetNameFull().c_str() );
         return object->GetNameFull();
       } else {
-        if( afterObject.length() ) {
-          object = game->core->GetRenderableInPoint( point, "" );
-          while( object && !object->IsSaveable() ) {
-            object = object->GetParent();
-          }
-          if( object ) {
-            return object->GetNameFull();
-          }
+        object = game->core->GetRenderableInPoint( point, afterObject );
+        while( object && !object->IsSaveable() ) {
+          object = object->GetParent();
+        }
+        if( object ) {
+          __log.PrintInfo( Filelevel_DEBUG, ". found['%s']", object->GetNameFull().c_str() );
+          return object->GetNameFull();
         }
       }
+      __log.PrintInfo( Filelevel_DEBUG, ". not found" );
       break;
     }//renderable
     case 2: { //collision
@@ -1453,6 +1454,7 @@ void Game::LUA_SelectObject( const std::string &name )
       if( !object ) {
         __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SelectObject => object '%s' not found", oneName.c_str() );
       } else {
+        __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SelectObject => object '%s'", object->GetNameFull().c_str() );
         game->core->debug.selectedObjects.push_back( object );
       }
     }
@@ -1782,7 +1784,7 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
         }
         widget->SetSize( size );
       } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => lightPointSize: object '%s' not lightBlock", object->GetNameFull().c_str() );
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => lightPointSize: object '%s' not lightPoint", object->GetNameFull().c_str() );
       }
       continue;
     }//lightPointSize
@@ -1801,6 +1803,22 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       }
       continue;
     }//lightPointColor
+    if( name == "lightPointPenetration" ) {
+      ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
+      if( widget ) {
+        float penetration;
+        int res = sscanf_s( value.GetString().c_str(), "%f", &penetration );
+        __log.PrintInfo( Filelevel_DEBUG, "lightPointPenetration => %3.3f", penetration );
+        widget->SetPenetration( penetration );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => lightPointPenetration: object '%s' not lightPoint", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//lightPointPenetration
+    if( name == "z" ) {
+      object->SetZ( value.GetNumber() );
+      continue;
+    }//z
 
   }//for iter
 
@@ -1843,7 +1861,9 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       renderable = ( RenderableQuad* ) object->GetRenderable();
       if( renderable ) {
         const std::string &texture = renderable->GetTextureFileName();
-        value.SetString( texture.length() ? &renderable->GetTextureFileName()[ strlen( FileManager_DATADIRECTORY ) + 1 ] : texture );
+        value.SetString( texture.empty() ? texture : &renderable->GetTextureFileName()[ strlen( FileManager_DATADIRECTORY ) + 1 ] );
+      } else {
+        value.SetString( "" );
       }
       continue;
     }//textureName
@@ -1851,6 +1871,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       renderable = ( RenderableQuad* ) object->GetRenderable();
       if( renderable ) {
         value.SetVec2( renderable->GetSize() );
+      } else {
+        value.SetVec2( Vec2Null );
       }
       continue;
     }//renderableSize
@@ -1859,6 +1881,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       if( renderable ) {
         const Vec3 &pos = renderable->GetPosition();
         value.SetVec2( Vec2( pos.x, pos.y ) );
+      } else {
+        value.SetVec2( Vec2Null );
       }
       continue;
     }//renderablePosition
@@ -1866,6 +1890,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       renderable = ( RenderableQuad* ) object->GetRenderable();
       if( renderable ) {
         value.SetVec4( renderable->GetColor() );
+      } else {
+        value.SetVec4( Vec4Null );
       }
       continue;
     }//color
@@ -1873,6 +1899,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       renderable = ( RenderableQuad* ) object->GetRenderable();
       if( renderable ) {
         value.SetVec2( renderable->GetScale() );
+      } else {
+        value.SetVec2( Vec2Null );
       }
       continue;
     }//renderableScale
@@ -1880,6 +1908,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       renderable = ( RenderableQuad* ) object->GetRenderable();
       if( renderable ) {
         value.SetNumber( renderable->GetRotation() );
+      } else {
+        value.SetNumber( 0.0f );
       }
       continue;
     }//renderableRotation
@@ -1890,6 +1920,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       if( collision ) {
         const Vec3 &size = collision->GetSize();
         value.SetVec2( Vec2( size.x, size.y ) );
+      } else {
+        value.SetVec2( Vec2Null );
       }
       continue;
     }//collisionSize
@@ -1898,6 +1930,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       if( collision ) {
         Vec3 acceleration = collision->GetAcceleration();
         value.SetVec2( Vec2( acceleration.x, acceleration.y ) );
+      } else {
+        value.SetVec2( Vec2Null );
       }
       continue;
     }//collisionAcceleration
@@ -1906,6 +1940,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       if( collision ) {
         Vec3 velocity = collision->GetVelocity();
         value.SetVec2( Vec2( velocity.x, velocity.y ) );
+      } else {
+        value.SetVec2( Vec2Null );
       }
       continue;
     }//collisionVelocity
@@ -1913,6 +1949,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       collision = object->GetCollision();
       if( collision ) {
         value.SetBoolean( collision->IsStatic() );
+      } else {
+        value.SetBoolean( false );
       }
       continue;
     }//collisionStatic
@@ -1921,6 +1959,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       if( collision ) {
         Vec3 force = collision->GetForce();
         value.SetVec2( Vec2( force.x, force.y ) );
+      } else {
+        value.SetVec2( Vec2Null );
       }
       continue;
     }//collisionForce
@@ -1943,6 +1983,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
           break;
         }
         value.SetString( typeName );
+      } else {
+        value.SetString( "" );
       }
       continue;
     }//triggerType
@@ -1951,6 +1993,8 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
       if( trigger ) {
         Vec3 size = trigger->GetSize();
         value.SetVec2( Vec2( size.x, size.y ) );
+      } else {
+        value.SetVec2( Vec2Null );
       }
       continue;
     }//triggerSize
@@ -1969,9 +2013,16 @@ void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList
         } else {
           value.SetString( "" );
         }
+      } else {
+        value.SetString( "" );
       }
       continue;
     }//triggerPolygon
+    if( name == "z" ) {
+      float z = object->GetPosition().z;
+      value.SetNumber( z );
+      continue;
+    }//z
 
   }
 }//LUA_ObjectAttr

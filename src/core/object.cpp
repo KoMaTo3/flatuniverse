@@ -545,15 +545,20 @@ RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRender
 
   CoreRenderableListIndicies::iterator iter, iterEnd = inRenderableIndicies->end(), iterBegin = inRenderableIndicies->begin();
   bool added = false;
-  for( iter = iterBegin; iter != iterEnd; ++iter )
+  for( iter = iterBegin; iter != iterEnd; ++iter ) {
+    __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => z[%3.3f] vs iter->z[%3.3f] index[%d]", z, ( *( inRenderableList->begin() + *iter ) ).GetPosition().z, *iter );
     if( z < ( *( inRenderableList->begin() + *iter ) ).GetPosition().z )
     {
       inRenderableIndicies->insert( iter, index );
+      __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => inserted z %3.3f to index %d", zIndex, index );
       added = true;
       break;
     }
-  if( !added )
+  }
+  if( !added ) {
     inRenderableIndicies->push_back( index );
+    __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => %3.3f pushed to end index %d", zIndex, index );
+  }
   quad->SetIndexInRenderableList( index );
 
   //__log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => Done" );
@@ -586,6 +591,7 @@ bool Object::DestroyExternalRenderableInList( CoreRenderableList *inRenderableLi
       //__log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%p", *iter, inRenderableFreeIndicies );
       inRenderableFreeIndicies->push_back( *iter );
       inRenderableIndicies->erase( iter );
+      __log.PrintInfo( Filelevel_DEBUG, "DestroyExternalRenderableInList => erased index %d", index );
       break;
     }
   }
@@ -1167,7 +1173,7 @@ void Object::Update( float dt )
 */
 Object* Object::SetPosition( const Vec3& newPosition )
 {
-  this->positionSrc = newPosition;
+  this->position = this->positionSrc = newPosition;
   return this;
 }//SetPosition
 
@@ -1181,11 +1187,45 @@ Object* Object::SetPosition( const Vec3& newPosition )
 */
 Object* Object::SetPosition2D( const Vec2& newPosition )
 {
-  this->positionSrc.x = newPosition.x;
-  this->positionSrc.y = newPosition.y;
+  this->position.x = this->positionSrc.x = newPosition.x;
+  this->position.y = this->positionSrc.y = newPosition.y;
   return this;
 }//SetPosition2D
 
+
+
+
+/*
+=============
+  SetZ
+=============
+*/
+Object* Object::SetZ( const float z ) {
+  __log.PrintInfo( Filelevel_DEBUG, "Object::SetZ => name['%s'] z['%3.3f']", this->GetNameFull().c_str(), z );
+  this->position.z = this->positionSrc.z = z;
+  if( this->IsRenderable() ) {
+    this->RecalculateRenderableZ( z );
+  }
+  if( this->_childs && !this->_childs->empty() ) {
+    for( auto &child: *this->_childs ) {
+      child->SetZ( z );
+    }
+  }
+  return this;
+}//SetZ
+
+
+
+
+/*
+=============
+  RecalculateRenderableZ
+=============
+*/
+void Object::RecalculateRenderableZ( const float z ) {
+  Object::DestroyExternalRenderableInList( this->_renderableList, this->_renderableIndicies, this->_renderableFreeIndicies, this->renderable.num );
+  Object::CreateExternalRenderableInList( z, this->_renderableList, this->_renderableIndicies, this->_renderableFreeIndicies, &this->renderable.num );
+}//RecalculateRenderableZ
 
 
 
