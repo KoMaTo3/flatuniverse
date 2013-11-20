@@ -196,7 +196,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       currentFps = 0;
     }
 
-    background->SetPosition( Vec3( game->core->GetObject( "player" )->GetPosition().x, game->core->GetObject( "player" )->GetPosition().y * 0.75f, 0.0f ) );
+    background->SetPosition2D( Vec2( game->core->GetObject( "player" )->GetPosition().x, game->core->GetObject( "player" )->GetPosition().y * 0.75f ) );
 
     if( game->core->keyboard.IsPressed( VK_F9 ) ) { //Clear world
       game->world->ClearWorld();

@@ -54,7 +54,7 @@ function GetObjectsTemplates()
       icon = 'data/temp/enemy0.png',
       attr = {
         renderable = true, textureName = 'temp/enemy0.png',
-        collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 300',
+        collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1000',
         trigger = false,
         lightBlockByCollision = true,
       },

@@ -522,23 +522,19 @@ RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRender
   }
 
   GLushort index = RENDERABLE_INDEX_UNDEFINED;
-  if( inRenderableFreeIndicies->size() )
-  {
+  if( inRenderableFreeIndicies->empty() ) {
+    inRenderableList->push_back( RenderableQuad() );
+    result = &( *inRenderableList->rbegin() );
+    index = inRenderableList->size() - 1;
+  } else {
     index = *inRenderableFreeIndicies->rbegin();
     inRenderableFreeIndicies->pop_back();
     result = &( *( inRenderableList->begin() + index ) );
     *result = RenderableQuad();
   }
-  else
-  {
-    inRenderableList->push_back( RenderableQuad() );
-    result = &( *inRenderableList->rbegin() );
-    index = inRenderableList->size() - 1;
-  }
 
   RenderableQuad *quad = ( RenderableQuad* ) result;
   quad->SetPosition( Vec3( 0.0f, 0.0f, zIndex ) );
-  float z = quad->GetPosition().z;
   if( outIndex ) {
     *outIndex = index;
   }
@@ -546,8 +542,8 @@ RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRender
   CoreRenderableListIndicies::iterator iter, iterEnd = inRenderableIndicies->end(), iterBegin = inRenderableIndicies->begin();
   bool added = false;
   for( iter = iterBegin; iter != iterEnd; ++iter ) {
-    __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => z[%3.3f] vs iter->z[%3.3f] index[%d]", z, ( *( inRenderableList->begin() + *iter ) ).GetPosition().z, *iter );
-    if( z < ( *( inRenderableList->begin() + *iter ) ).GetPosition().z )
+    __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => z[%3.3f] vs iter->z[%3.3f] index[%d]", zIndex, ( *( inRenderableList->begin() + *iter ) ).GetPosition().z, *iter );
+    if( zIndex < ( *( inRenderableList->begin() + *iter ) ).GetPosition().z )
     {
       inRenderableIndicies->insert( iter, index );
       __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => inserted z %3.3f to index %d", zIndex, index );
@@ -1223,8 +1219,32 @@ Object* Object::SetZ( const float z ) {
 =============
 */
 void Object::RecalculateRenderableZ( const float z ) {
-  Object::DestroyExternalRenderableInList( this->_renderableList, this->_renderableIndicies, this->_renderableFreeIndicies, this->renderable.num );
-  Object::CreateExternalRenderableInList( z, this->_renderableList, this->_renderableIndicies, this->_renderableFreeIndicies, &this->renderable.num );
+  //remove index
+  CoreRenderableListIndicies::iterator iter, iterEnd = this->_renderableIndicies->end();
+  for( iter = this->_renderableIndicies->begin(); iter != iterEnd; ++iter ) {
+    if( *iter == this->renderable.num ) {
+      this->_renderableFreeIndicies->push_back( *iter );
+      this->_renderableIndicies->erase( iter );
+      break;
+    }
+  }
+
+  //add
+  iterEnd = this->_renderableIndicies->end();
+  bool added = false;
+  for( iter = this->_renderableIndicies->begin(); iter != iterEnd; ++iter ) {
+    if( z < ( *( this->_renderableList->begin() + *iter ) ).GetPosition().z )
+    {
+      this->_renderableIndicies->insert( iter, this->renderable.num );
+      added = true;
+      break;
+    }
+  }
+  if( !added ) {
+    this->_renderableIndicies->push_back( this->renderable.num );
+  }
+
+  ( ( RenderableQuad* ) this->GetRenderable() )->SetZ( z );
 }//RecalculateRenderableZ
 
 

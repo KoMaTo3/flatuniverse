@@ -849,9 +849,9 @@ void Core::_InitViewport()
   //glEnable( GL_COLOR_MATERIAL );//материал
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );  //отрисовка всех сторон. м.б. стоит сделать только FRONT, нужно тестировать
 
-  glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-  glDisableClientState( GL_COLOR_ARRAY );
-  glDisableClientState( GL_VERTEX_ARRAY);
+  //glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+  //glDisableClientState( GL_COLOR_ARRAY );
+  //glDisableClientState( GL_VERTEX_ARRAY);
 }//_InitViewport
 
 
@@ -1056,9 +1056,9 @@ bool Core::Redraw()
   glEnable( GL_BLEND );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );  //отрисовка всех сторон. м.б. стоит сделать только FRONT, нужно тестировать
-  glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-  glDisableClientState( GL_COLOR_ARRAY );
-  glDisableClientState( GL_VERTEX_ARRAY);
+  //glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+  //glDisableClientState( GL_COLOR_ARRAY );
+  //glDisableClientState( GL_VERTEX_ARRAY);
   //
 
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //GL_STENCIL_BUFFER_BIT
@@ -1333,7 +1333,6 @@ bool Core::Redraw()
         glUseProgram( 0 );
         __debugRender->Render();
       }
-
     }
 
     //GUI
