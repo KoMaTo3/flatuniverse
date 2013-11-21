@@ -118,6 +118,25 @@ Collision* Collision::SetPosition( const Vec3& newPosition )
 
 /*
 =============
+  SetZ
+=============
+*/
+Collision* Collision::SetZ( const float newZ )
+{
+  if( !this->position )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Collision::SetZ => NULL pointer" );
+    return this;
+  }
+  this->position->z = newZ;
+  this->positionResult.z = this->position->z + this->offset.z;
+  return this;
+}//SetZ
+
+
+
+/*
+=============
   SetPositionBy
 =============
 */

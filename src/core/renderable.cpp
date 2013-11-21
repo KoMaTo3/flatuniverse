@@ -38,6 +38,21 @@ RenderableQuad* RenderableQuad::SetPosition( const Vec3& newPosition )
 
 /*
 =============
+  SetPosition2D
+=============
+*/
+RenderableQuad* RenderableQuad::SetPosition2D( const Vec2& newPosition )
+{
+  this->position.x = newPosition.x;
+  this->position.y = newPosition.y;
+  return this;
+}//SetPosition2D
+
+
+
+
+/*
+=============
   SetZ
 =============
 */

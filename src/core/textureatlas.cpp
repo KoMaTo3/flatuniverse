@@ -121,6 +121,7 @@ void TextureAtlas::Unbind()
 */
 Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const Vec4& textureCoords )
 {
+  __log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => textureFileName['%s'] textureCoords[%3.3f; %3.3f]-[%3.3f; %3.3f]", textureFileName.c_str(), textureCoords.x, textureCoords.y, textureCoords.z, textureCoords.w );
   TextureAtlasItem *item = this->IsTextureLoaded( textureFileName );
   if( item )
   {

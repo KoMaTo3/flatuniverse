@@ -86,7 +86,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   col->InitPolygon( polyPoints );
   */
   //col->InitCircle( 20.0f );
-  col->SetPosition( Vec3( 65.0f, 30.0f, 0.0f ) );
+  col->SetPosition( Vec3( 65.0f, 30.0f, 5.0f ) );
   col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
   col->SetIsStatic( false );
   col->SetMass( 1000.0f );
@@ -105,7 +105,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   Object *background = game->core->CreateObject( "background" );
   background->SetLockToDelete( true );
-  background->SetPosition( Vec3( 0.0f, 0.0f, -9.0f ) );
+  background->SetPosition( Vec3( 0.0f, 0.0f, -10.0f ) );
   RenderableQuad *render = ( RenderableQuad* ) background->EnableRenderable( RENDERABLE_TYPE_QUAD );
   render->SetTexture( "data/temp/bg0.png" );
   render->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
@@ -114,6 +114,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   game->world->AddActiveObject( game->core->GetObject( "player" ) );
 
+  __log.PrintInfo( Filelevel_DEBUG, "sizeof( RenderableQuad ) = %d", sizeof( RenderableQuad ) );
 
   //фоновая картинка
 
@@ -457,6 +458,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     game->core->SetWindowTitle( tempChar );
   }
   //MessageBox( NULL, "Ok", "Debug", MB_OK );
+  game->core->__Test();
 
   game->world->SaveToFile( "data/temp/testworld.fu" );
   DEF_DELETE( game );

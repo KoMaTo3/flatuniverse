@@ -579,13 +579,11 @@ bool Object::DestroyExternalRenderableInList( CoreRenderableList *inRenderableLi
     return false;
   }
 
-  //__coreRenderableList->erase( __coreRenderableList->begin() + this->renderable.num );
-
+  inRenderableFreeIndicies->push_back( index );
   CoreRenderableListIndicies::iterator iter, iterEnd = inRenderableIndicies->end();
   for( iter = inRenderableIndicies->begin(); iter != iterEnd; ++iter ) {
     if( *iter == index ) {
       //__log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%p", *iter, inRenderableFreeIndicies );
-      inRenderableFreeIndicies->push_back( *iter );
       inRenderableIndicies->erase( iter );
       __log.PrintInfo( Filelevel_DEBUG, "DestroyExternalRenderableInList => erased index %d", index );
       break;
@@ -1120,7 +1118,7 @@ void Object::Update( float dt )
       if( !renderable ) {
         break;
       }
-      renderable->SetPosition( Vec3( Math::Floor( this->position.x ), Math::Floor( this->position.y ), this->position.z ) );
+      renderable->SetPosition2D( Vec2( Math::Floor( this->position.x ), Math::Floor( this->position.y ) ) );
       renderable->CheckChanges();
       /*
       if( *renderable->GetEnabledPtr() != *renderable->GetPrevEnabledPtr() ) {
@@ -1198,6 +1196,9 @@ Object* Object::SetPosition2D( const Vec2& newPosition )
 */
 Object* Object::SetZ( const float z ) {
   __log.PrintInfo( Filelevel_DEBUG, "Object::SetZ => name['%s'] z['%3.3f']", this->GetNameFull().c_str(), z );
+  if( this->IsCollision() ) {
+    this->GetCollision()->SetZ( z );
+  }
   this->position.z = this->positionSrc.z = z;
   if( this->IsRenderable() ) {
     this->RecalculateRenderableZ( z );
@@ -1223,7 +1224,6 @@ void Object::RecalculateRenderableZ( const float z ) {
   CoreRenderableListIndicies::iterator iter, iterEnd = this->_renderableIndicies->end();
   for( iter = this->_renderableIndicies->begin(); iter != iterEnd; ++iter ) {
     if( *iter == this->renderable.num ) {
-      this->_renderableFreeIndicies->push_back( *iter );
       this->_renderableIndicies->erase( iter );
       break;
     }
@@ -1399,14 +1399,14 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
 {
   bool isRenderable, isCollision, isTrigger, isAnimation, isLightBlockByCollision, isLightPoint;
   std::string tmpName, parentName;
-  Vec3 position;
+  Vec3 newPosition;
 
   reader >> isRenderable;
   reader >> isCollision;
   reader >> isTrigger;
   reader >> tmpName;
   reader >> parentName;
-  reader >> position;
+  reader >> newPosition;
   //__log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => name['%s'] parent['%s']", tmpName.c_str(), parentName.c_str() );
 
   this->name = tmpName;
@@ -1419,7 +1419,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     this->nameFull = "/" + this->name;
   }
 
-  this->SetPosition( position );
+  this->SetPosition( newPosition );
 
   if( isRenderable ) {
     ( ( RenderableQuad* ) this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->LoadFromBuffer( reader );
@@ -1837,7 +1837,7 @@ IAnimationObject* Object::MakeInstance( const std::string& setName ) {
   if( !child ) {
     child = new Object( setName, this, false );
   }
-  child->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
+  child->SetPosition( Vec3( 0.0f, 0.0f, this->position.z ) );
   return child;
 }
 

@@ -769,7 +769,7 @@ void Core::_InitViewport()
   //UPD 2012.12.12: это уже не нужно т.к. проекционная и мировая матрица передаются в шейдер
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
-  glOrtho( 0.0, 100.0, 100.0, 0.0, 0.01, 10.0 ); // 0.01f - ближайшая к зрителю точка
+  glOrtho( 0.0, 100.0, 100.0, 0.0, 10.0, -100.0 ); // 0.01f - ближайшая к зрителю точка
   glMatrixMode( GL_MODELVIEW );
   //*/
 
@@ -1116,7 +1116,7 @@ bool Core::Redraw()
         float top = 0.0f;
         float bottom = this->_window.windowCenter.y * 2.0f;
         float nearZ = 10.0f;
-        float farZ = -10.0f;
+        float farZ = -100.0f;
 	      float r_l = right - left;
 	      float t_b = top - bottom;
 	      float f_n = farZ - nearZ;
@@ -1216,7 +1216,7 @@ bool Core::Redraw()
     {
       glMatrixMode( GL_PROJECTION );
       glLoadIdentity();
-      glOrtho( 0.0, this->_window.windowSize.width, this->_window.windowSize.height, 0.0, -10.0f, 10.0f );
+      glOrtho( 0.0, this->_window.windowSize.width, this->_window.windowSize.height, 0.0, 10.0f, -100.0f );
       glMatrixMode( GL_MODELVIEW );
 
       //debug-render
@@ -1940,6 +1940,14 @@ void Core::_GluiKeyboardFunc( unsigned char key, int x, int y )
 void Core::_GluiHoverFunc( int x, int y )
 {
 }//_GluiHoverFunc
+
+
+
+void Core::__Test() {
+  for( auto &index: *__coreRenderableListIndicies ) {
+    __log.PrintInfo( Filelevel_DEBUG, "__coreRenderableListIndicies: %d", index );
+  }
+}//__Test
 
 
 

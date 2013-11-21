@@ -195,6 +195,7 @@ public:
   static void _GluiHoverFunc  ( int x, int y );
 
   bool    CheckGLError        ( int line = -1, const std::string& fileName = "" );
+  void    __Test              ();
 };
 
 

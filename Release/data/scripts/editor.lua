@@ -204,7 +204,7 @@ function EditorInit()
   GUI.elements.layer = GUISelect:Create( 55, 20, 90, 1, list, OnChangeLayer, GUI.elements.windowSettings )
 
   -- object block
-  GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 110, 'Object' )
+  GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 130, 'Object' )
   local y = 18
   GUILabel:Create( 1, y, 0, 0, 'Name:', GUI.elements.windowObject )
   GUI.elements.objectName   = GUIEdit:Create( 50, y, 165, '', function( obj ) Alert( obj:GetText() ) end, GUI.elements.windowObject )

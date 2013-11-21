@@ -91,6 +91,7 @@ public:
   void operator=( RenderableQuad &src );
 
   RenderableQuad* SetPosition     ( const Vec3& newPosition );
+  RenderableQuad* SetPosition2D   ( const Vec2& newPosition );
   RenderableQuad* SetZ            ( const float newZ );
   RenderableQuad* SetSize         ( const Vec2& newSize );
   RenderableQuad* SetColor        ( const Vec4& newColor );

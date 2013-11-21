@@ -87,6 +87,7 @@ public:
   Collision*  SetVelocity     ( const Vec3& newVelocity );
   Collision*  SetPosition     ( const Vec3& newPosition );
   Collision*  SetPositionBy   ( const Vec3& deltaPosition );
+  Collision*  SetZ            ( const float newZ );
   //Collision*  SetSize         ( const Vec3& newSize );
   Collision*  SetIsStatic     ( bool newIsStatic );
   Collision*  SetMass         ( float newMass );
