@@ -30,7 +30,7 @@ const char Filetime_align[13+1] = "             ";
 ----------
 */
 File::File()
-:_logLevel(Filelevel_ALL)
+:_file( NULL ), _name( NULL ), _mode( 0 ), _length( 0 ), _cur_pos( 0 ), _auto_flush( false ), _logLevel ( Filelevel_ALL )
 {
   memset(this, 0, sizeof(*this));
 }//constructor
@@ -42,8 +42,8 @@ File::File()
 ----------
 */
 File::File(const char *file_name, BYTE file_mode, BYTE warnLevel/* = Filelevel_all*/)
+:_file( NULL ), _name( NULL ), _mode( 0 ), _length( 0 ), _cur_pos( 0 ), _auto_flush( false ), _logLevel( 0 )
 {
-  memset(this, 0, sizeof(*this));
   this->Open(file_name, file_mode, warnLevel);
 }//constructor
 
@@ -54,8 +54,8 @@ File::File(const char *file_name, BYTE file_mode, BYTE warnLevel/* = Filelevel_a
 ----------
 */
 File::File(const std::string &file_name, BYTE file_mode, BYTE warnLevel/* = Filelevel_ALL*/)
+:_file( NULL ), _name( NULL ), _mode( 0 ), _length( 0 ), _cur_pos( 0 ), _auto_flush( false ), _logLevel( 0 )
 {
-  memset(this, 0, sizeof(*this));
   this->Open(file_name.data(), file_mode, warnLevel);
 }//constructor
 
@@ -634,7 +634,7 @@ File& File::operator<<(FileStream value)
   Rename
 ----------
 */
-void File::Rename( const std::string source, const std::string dest )
+void File::Rename( const std::string& source, const std::string& dest )
 {
   rename( source.c_str(), dest.c_str() );
 }//Rename

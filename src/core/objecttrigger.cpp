@@ -289,12 +289,12 @@ void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const std::string &thi
 
   if( version >= 0x00000005 ) {
     //handlers
-    Dword count, q;
+    Dword count;
     reader >> count;
     __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::LoadFromBuffer => handlers[%d]", count );
     std::string s;
     if( count && this->InitTriggerHandler && ObjectTrigger::triggerLintenersList ) { //something wrong...
-      for( q = 0; q < count; ++q ) {
+      for( Dword q = 0; q < count; ++q ) {
         reader >> s;
         __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::LoadFromBuffer => . handler['%s']", s.c_str() );
         this->InitTriggerHandler( thisObjectName, s );

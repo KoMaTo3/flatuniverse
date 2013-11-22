@@ -2,7 +2,7 @@
 #include "tools.h"
 
 
-Variable::Variable() :type( VariableType_UNDEFINED ) {
+Variable::Variable() :type( VariableType_UNDEFINED ), f( 0.0f ), b( false ) {
 }//constructor
 
 

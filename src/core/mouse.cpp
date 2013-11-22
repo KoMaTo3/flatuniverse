@@ -128,7 +128,7 @@ void Mouse::MoveCursor( const Vec2& newPosition )
       DEF_DELETE( this->cursor.sprite );
   }
 
-  if( this->moveListeners.size() )
+  if( !this->moveListeners.empty() )
   {
     MoveListenerList::iterator iter, iterEnd = this->moveListeners.end();
     for( iter = this->moveListeners.begin(); iter != iterEnd; ++iter )

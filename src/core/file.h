@@ -79,7 +79,7 @@ public:
   BYTE    SetLogLevel   (BYTE level) { return this->_logLevel = level; }
 
   static
-  void    Rename        ( const std::string source, const std::string dest );
+  void    Rename        ( const std::string& source, const std::string& dest );
 
   File& operator<<(char *str);
   File& operator<<(const std::string &str);

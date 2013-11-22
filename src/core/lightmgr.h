@@ -47,10 +47,12 @@ private:
       leftTop,
       rightBottom;
   } window;
-  struct {
+  struct TExtureSize {
     int
       width,
       height;
+
+    TExtureSize();
   } textureSize;
 
   LightMgr( const LightMgr& );

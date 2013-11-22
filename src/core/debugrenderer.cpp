@@ -130,7 +130,6 @@ void DebugRenderer::Text( const Vec3& pos, const Vec4& color, const std::string 
 =============
 */
 float DebugRenderer::GetTextWidh( const std::string &text, const std::string &fontProportionsFileName ) {
-  float width = 0.0f;
   FontWidthsList::iterator iter = this->fonts.find( fontProportionsFileName );
   Font *font;
   if( iter == this->fonts.end() ) {

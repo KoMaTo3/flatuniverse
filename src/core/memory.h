@@ -28,10 +28,10 @@ public:
   DWORD  getLength () const;
   char*  getData   ();
 
-  void operator=   (const char *str);
-  void operator=   (memory &src);
+  memory& operator=   (const char *str);
+  memory& operator=   (memory &src);
   char& operator[] (int num);
-  void operator+=  (memory &src);
+  memory& operator+=  (memory &src);
   operator char*   ();
 };
 

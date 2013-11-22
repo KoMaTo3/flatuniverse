@@ -39,7 +39,6 @@ bool ShaderProgram::_CheckShaderError( const std::string& text, GLuint shader ) 
   log[ maxLength ] = 0;
   glGetShaderInfoLog( shader, maxLength, &logLength, log );
   if( log[ 0 ] ) {
-    std::string tmpLog = log;
     __log.PrintInfo( Filelevel_ERROR, "[ERROR] LightMgr::_CheckShaderError => %s: %s\n", text.c_str(), log );
     result = true;
   }

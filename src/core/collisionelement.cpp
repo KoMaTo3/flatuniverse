@@ -161,7 +161,6 @@ bool CollisionElementSquare::TestIntersect( CollisionElement &object, Vec3 *outS
   switch( object.GetType() ) {
     case COLLISION_ELEMENT_TYPE_SQUARE: {
       return this->TestIntersectWithSquare( object, outSolver );
-      break;
     }
   }//type
 
@@ -295,7 +294,7 @@ void CollisionElementSquare::FillBuffer( const Vec2& lightPosition, const Vec2& 
 //
 
 CollisionElementCircle::CollisionElementCircle( Vec3 *setPos, CollisionRect *setRect )
-:CollisionElement( COLLISION_ELEMENT_TYPE_CIRCLE, setPos, setRect )
+  :CollisionElement( COLLISION_ELEMENT_TYPE_CIRCLE, setPos, setRect ), diameter( 0.0f )
 {
 }//constructor
 
@@ -362,11 +361,9 @@ bool CollisionElementCircle::TestIntersect( CollisionElement &object, Vec3 *outS
   switch( object.GetType() ) {
     case COLLISION_ELEMENT_TYPE_SQUARE: {
       return this->TestIntersectWithSquare( object, outSolver );
-      break;
     }
     case COLLISION_ELEMENT_TYPE_CIRCLE: {
       return this->TestIntersectWithCircle( object, outSolver );
-      break;
     }
   }//type
 
@@ -382,7 +379,6 @@ bool CollisionElementCircle::TestIntersect( CollisionElement &object, Vec3 *outS
 =============
 */
 bool CollisionElementCircle::TestIntersectWithSquare( CollisionElement &object, Vec3 *outSolver ) {
-  float radius = this->diameter * 0.5f;
   bool thisPosXInSquare = this->position->x >= object._rect->leftTop.x && this->position->x <= object._rect->rightBottom.x;
   bool thisPosYInSquare = this->position->y >= object._rect->leftTop.y && this->position->y <= object._rect->rightBottom.y;
   if( thisPosXInSquare || thisPosYInSquare ) {  //круг выталкиваетс€ либо вертикально, либо горизонтально
@@ -557,21 +553,19 @@ void CollisionElementPolygon::SetPointList( const PointList &setPoints ) {
   }
   this->pointsResult[ this->pointsResult.size() - 1 ] = this->pointsSource[ 0 ];
 
-  Point *point;
   Vec2 radiusVector( Vec2Null );
   Vec2 edge0, edge1, edge2;
-  float sign;
   num = 0;
   iterEnd = this->pointsResult.end();
   for( iter = this->pointsResult.begin(); iter != iterEnd; ++iter, ++num ) {
-    point = &( *iter );
+    Point *point = &( *iter );
     radiusVector.Set( max( fabs( point->x ), radiusVector.x ), max( fabs( point->y ), radiusVector.y ) );
     if( num > 1 ) {
       //нормальзовать не нужно т.к. нужно не значение, а только знак
       edge0 = this->pointsResult[ num - 1 ] - this->pointsResult[ num - 2 ];
       edge1 = this->pointsResult[ num ] - this->pointsResult[ num - 2 ];
       edge1.Rotate90CW();
-      sign = edge0.Dot( edge1 );
+      float sign = edge0.Dot( edge1 );
       if( sign > 0 ) {
         __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::SetPointList => points[%d] is not clockwise", num );
         this->pointsResult.clear();
@@ -628,12 +622,11 @@ void CollisionElementPolygon::Update() {
   //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => points[%d] pointsResult[%d]", count, this->pointsResult.size() );
   if( count > 2 ) {
     Vec2 min, max, radius;
-    Point *point;
     int num = 0;
     Vec2 pos2D( this->position->x, this->position->y );
     for( iter = this->pointsSource.begin(); iter != iterEnd; ++iter, ++num ) {
       this->pointsResult[ num ] = pos2D + *iter;
-      point = &this->pointsResult[ num ];
+      Point *point = &this->pointsResult[ num ];
       if( num == 0 ) {
         min.Set( point->x, point->y );
         max = min;
@@ -690,12 +683,10 @@ bool CollisionElementPolygon::TestIntersect( CollisionElement &object, Vec3 *out
     case COLLISION_ELEMENT_TYPE_SQUARE: {
       //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with square" );
       return this->TestIntersectWithSquare( object, outSolver );
-      break;
     }
     case COLLISION_ELEMENT_TYPE_CIRCLE: {
       //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with circle" );
       return this->TestIntersectWithCircle( object, outSolver );
-      break;
     }
     case COLLISION_ELEMENT_TYPE_POLYGON: {
       //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::TestIntersect => with polygon" );
@@ -860,14 +851,13 @@ bool CollisionElementPolygon::TestIntersectWithCircle( CollisionElement &object,
   }//foreach axes
 
   //ищем ближайшую точку полигона и проецируем объекты на ось точка=>центр руга
-  PointList::const_iterator iterPoint = this->pointsResult.begin(), iterPointEnd = this->pointsResult.end();
+  PointList::const_iterator iterPoint = this->pointsResult.begin();
   int pointsNum = this->pointsResult.size() - 1;
-  float minDistance = this->_rect->radius2 + object._rect->radius2,
-    curDistance;
+  float minDistance = this->_rect->radius2 + object._rect->radius2;
   minDistance *= minDistance;
   Vec2 axis( Vec2Null );
   for( int num = 0; num < pointsNum; ++num, ++iterPoint ) {
-    curDistance = ( *iterPoint - Vec2( object.position->x, object.position->y ) ).LengthSqr();
+    float curDistance = ( *iterPoint - Vec2( object.position->x, object.position->y ) ).LengthSqr();
     if( curDistance < minDistance ) {
       minDistance = curDistance;
       axis = *iterPoint;
@@ -897,7 +887,7 @@ bool CollisionElementPolygon::TestIntersectWithCircle( CollisionElement &object,
     } else {
       lastIntersectPower = curIntersectPower;
       intersectAxis = axis;
-      intersectResultInitialized = true;
+      //intersectResultInitialized = true;
     }
   }
   //
@@ -928,7 +918,7 @@ bool CollisionElementPolygon::TestIntersectWithCircle( CollisionElement &object,
 =============
 */
 bool CollisionElementPolygon::_IsAxisExists( const Vec2 &axis ) {
-  if( !this->axes.size() ) {
+  if( this->axes.empty() ) {
     return false;
   }
 
@@ -955,10 +945,9 @@ void CollisionElementPolygon::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT flo
   }
 
   bool isInitialized = false;
-  float dot;
   PointList::const_iterator iter, iterEnd = this->pointsResult.end();
   for( iter = this->pointsResult.begin(); iter != iterEnd; ++iter ) {
-    dot = axis.Dot( *iter );
+    float dot = axis.Dot( *iter );
     if( isInitialized ) {
       if( dot < *min ) {
         *min = dot;

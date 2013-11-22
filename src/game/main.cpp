@@ -109,7 +109,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   RenderableQuad *render = ( RenderableQuad* ) background->EnableRenderable( RENDERABLE_TYPE_QUAD );
   render->SetTexture( "data/temp/bg0.png" );
   render->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
-  render->SetEnabled( true );
   render->SetSize( Vec2( ( float ) game->core->GetWindowSize().width, ( float ) game->core->GetWindowSize().height ) );
 
   game->world->AddActiveObject( game->core->GetObject( "player" ) );
@@ -663,7 +662,7 @@ std::string Game::ObjectListToString( const ObjectList &list ) const {
 =============
 */
 void Game::ObjectOnLoad( Object* obj ) {
-  if( obj->GetLuaScript().size() ) {
+  if( !obj->GetLuaScript().empty() ) {
     game->lua->RunScript( obj->GetLuaScript() );
     game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "OnLoad" );
   }
@@ -678,7 +677,7 @@ void Game::ObjectOnLoad( Object* obj ) {
 =============
 */
 void Game::ObjectOnUnload( Object* obj ) {
-  if( obj->GetLuaScript().size() ) {
+  if( !obj->GetLuaScript().empty() ) {
     game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "OnUnload" );
     game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "__fu_destroy" );
   }
@@ -1056,7 +1055,7 @@ void Game::LUA_ListenMouseMove( const std::string &funcName )
 */
 void Game::KeyboardProc( Dword keyId, bool isPressed )
 {
-  if( !game->luaKeyboardListeners.size() )
+  if( game->luaKeyboardListeners.empty() )
     return;
   luaKeyboardListenersList::iterator iter, iterEnd = game->luaKeyboardListeners.end();
   for( iter = game->luaKeyboardListeners.begin(); iter != iterEnd; ++iter )
@@ -1071,7 +1070,7 @@ void Game::KeyboardProc( Dword keyId, bool isPressed )
 */
 void Game::MouseKeyProc( Dword keyId, bool isPressed )
 {
-  if( !game->luaMouseKeyListeners.size() )
+  if( game->luaMouseKeyListeners.empty() )
     return;
   luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseKeyListeners.end();
   for( iter = game->luaMouseKeyListeners.begin(); iter != iterEnd; ++iter )
@@ -1086,7 +1085,7 @@ void Game::MouseKeyProc( Dword keyId, bool isPressed )
 */
 void Game::MouseMoveProc( const Vec2 &pos )
 {
-  if( !game->luaMouseMoveListeners.size() )
+  if( game->luaMouseMoveListeners.empty() )
     return;
   luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseMoveListeners.end();
   for( iter = game->luaMouseMoveListeners.begin(); iter != iterEnd; ++iter )
@@ -2102,7 +2101,7 @@ void Game::CollisionProc( Collision *a, Collision *b, Byte flags, const Vec3 &ve
     //__log.PrintInfo( Filelevel_ERROR, "Game::CollisionProc => object B by collision x%p not found", b );
     return;
   }
-  if( !game->luaCollisionListeners.size() ) {
+  if( game->luaCollisionListeners.empty() ) {
     return;
   }
   //__log.PrintInfo( Filelevel_DEBUG, "Game::CollisionProc => a[x%p] b[x%p] objectA['%s'] objectB['%s']", a, b, objectA->GetNameFull().c_str(), objectB->GetNameFull().c_str() );
@@ -2133,7 +2132,7 @@ void Game::TriggerProc( ObjectTrigger *trigger, Collision *collision, bool isInT
     __log.PrintInfo( Filelevel_ERROR, "Game::TriggerProc => object B by trigger x%p not found", collision );
     return;
   }
-  if( !game->luaTriggerListeners.size() ) {
+  if( game->luaTriggerListeners.empty() ) {
     return;
   }
   __log.PrintInfo( Filelevel_DEBUG, "Game::TriggerProc => a[x%p] b[x%p] objectA['%s'] objectB['%s']", trigger, collision, objectA->GetNameFull().c_str(), objectB->GetNameFull().c_str() );

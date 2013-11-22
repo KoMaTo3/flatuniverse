@@ -43,7 +43,7 @@ WorldGrid::~WorldGrid()
     }
   //__log.PrintInfo( Filelevel_DEBUG, "~WorldGrid => clear pointers list" );
 
-  while( this->objects.size() )
+  while( !this->objects.empty() )
   {
     delete *this->objects.begin();
     this->objects.pop_front();
@@ -134,7 +134,7 @@ void WorldGrid::DetachObject( Object *object )
 */
 void WorldGrid::DetachAll()
 {
-  while( this->objects.size() )
+  while( !this->objects.empty() )
   {
     delete *this->objects.begin();
     this->objects.pop_front();

@@ -8,7 +8,7 @@ FileManager *__fileManager = NULL;
 
 
 FileManager::FileManagerItem::FileManagerItem()
-:type( FileManager_type_UNKNOWN )
+:type( FileManager_type_UNKNOWN ), timestamp( 0 ), size( 0 ), sizePacked( 0 ), start( 0 )
 {
 }
 
@@ -145,7 +145,6 @@ void FileManager::AddPack( const std::string& path, const std::string& fileName 
   __log.PrintInfo( Filelevel_DEBUG, "FileManager::AddPack( '%s' )", ( path + "/" + fileName ).c_str() );
 
   FILE *fHandle = NULL;
-  size_t  fileSize = 0;
   fopen_s( &fHandle, fileName.c_str(), "rb" );
   if( !fHandle )
   {
@@ -153,7 +152,6 @@ void FileManager::AddPack( const std::string& path, const std::string& fileName 
     tools::SetCurDirectory( oldDir );
     return;
   }
-  fileSize = tools::FileSize( fHandle );
   fclose( fHandle );
 
   Dword headerSize;
@@ -422,8 +420,7 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
 
       dest.alloc( file.size + ( addLastNull ? 1 : 0 ) );
       uLongf destSize = file.size;
-      int res;
-      if( Z_OK != ( res = uncompress( ( Byte* ) dest.getData(), &destSize, ( Byte* ) tmp.getData(), tmp.getLength() ) ) )
+      if( Z_OK != uncompress( ( Byte* ) dest.getData(), &destSize, ( Byte* ) tmp.getData(), tmp.getLength() ) )
       {
         //__log.PrintInfo( Filelevel_ERROR, "FileManager::GetFile => uncompress failed (%d)", res );
         dest.free();

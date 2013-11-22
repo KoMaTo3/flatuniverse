@@ -44,7 +44,7 @@ public:
   ImageLoader();
   virtual ~ImageLoader();
 
-  Bool        LoadFromFile  ( const string fileName );
+  Bool        LoadFromFile  ( const string &fileName );
   Bool        LoadFromBuffer( Byte *buffer, Dword length );
   const Size  *GetImageSize ();
   inline

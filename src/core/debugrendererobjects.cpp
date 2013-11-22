@@ -34,7 +34,7 @@ void DebugRendererLine::Render() {
 
 
 DebugRendererSprite::DebugRendererSprite( const Vec3& setLeftTop, const Vec3& setRightBottom, const std::string& setTextureName, const Vec4& setColor )
-:leftTop( setLeftTop ), rightBottom( setRightBottom ), textureName( setTextureName ), color( setColor )
+:DebugRendererObject(), leftTop( setLeftTop ), rightBottom( setRightBottom ), textureName( setTextureName ), color( setColor )
 {
 }//constructor
 
@@ -159,7 +159,6 @@ void DebugRendererText::Render() {
   //Vec4 texCoords = __textureAtlas->GetTextureCoords( "data/temp/font_default.tga", Vec4( 0.0f, 0.0f, 1.0f, 1.0f ) );
   int length = this->text.size();
   Vec2 scale( Vec2One );
-  Byte letterId;
   Vec2 t0, t1;
   float dtx = ( fontTexCoords.z - fontTexCoords.x ) / 16.0f, dty = ( fontTexCoords.w - fontTexCoords.y ) / 16.0f;
   if( isProportional ) {
@@ -171,7 +170,7 @@ void DebugRendererText::Render() {
 
   glBegin( GL_QUADS );
   for( int q = 0; q < length; ++q ) {
-    letterId = this->text[ q ];
+    Byte letterId = this->text[ q ];
     Pos< Byte > letterPos( letterId % 16, letterId >> 4 );  //позиция буквы в алфавите
     if( isProportional ) {
       dx = float( proportions[ letterId ].width );

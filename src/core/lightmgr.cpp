@@ -12,8 +12,14 @@ Vec3 LightMgr::_ambientLightVertices[ 4 ] = {
 };
 
 
+LightMgr::TExtureSize::TExtureSize()
+:width( 0 ), height( 0 )
+{
+}
+
+
 LightMgr::LightMgr()
-:fboLight( NULL ), lightAmbient( Vec4One ), shader( NULL )
+  :fboLight( NULL ), lightAmbient( Vec4One ), shader( NULL ), lightList( NULL )
 {
 }
 

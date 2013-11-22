@@ -101,6 +101,7 @@ bool WidgetMgr::DeleteWidget( const ObjectWidgetGUID &guid ) {
   __log.PrintInfo( Filelevel_DEBUG, "WidgetMgr::DeleteWidget ..." );
   if( this->_widgetList[ guid ] ) {
   __log.PrintInfo( Filelevel_DEBUG, "WidgetMgr::DeleteWidget => delete widget %p...", this->_widgetList[ guid ] );
+    this->RemoveAllWidgetListeners( this->_widgetList[ guid ] );
     delete this->_widgetList[ guid ];
     this->_widgetList[ guid ] = NULL;
     return true;
@@ -121,6 +122,7 @@ void WidgetMgr::ListenEvent( const ObjectWidgetEvent &event, Widget *newWidget )
 
 
 void WidgetMgr::RemoveAllWidgetListeners( Widget *widget ) {
+  __log.PrintInfo( Filelevel_DEBUG, "WidgetMgr::RemoveAllWidgetListeners => widget[%p]", widget );
   for( auto &widgetList: *this->_eventListenersList ) {
     bool removed;
     do {
@@ -131,6 +133,7 @@ void WidgetMgr::RemoveAllWidgetListeners( Widget *widget ) {
       while( iter != iterEnd ) {
         if( *iter == widget ) {
           widgetList->erase( iter );
+          __log.PrintInfo( Filelevel_DEBUG, "WidgetMgr::RemoveAllWidgetListeners => removed" );
           removed = true;
           break;
         }
@@ -138,6 +141,7 @@ void WidgetMgr::RemoveAllWidgetListeners( Widget *widget ) {
       }
     } while( removed );
   }
+  __log.PrintInfo( Filelevel_DEBUG, "WidgetMgr::RemoveAllWidgetListeners => widget[%p] done", widget );
 }//ListenEvent
 
 

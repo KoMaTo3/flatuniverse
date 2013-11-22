@@ -209,7 +209,7 @@ void WorldSaver::FreeGrid( Short x, Short y )
 */
 void WorldSaver::SaveToFile( const std::string& fileName )
 {
-  std::string resultFileName = ( fileName.size() ? fileName : this->fileName );
+  std::string resultFileName = ( fileName.empty() ? this->fileName : fileName );
   File f;
   if( f.Open( resultFileName, File_mode_WRITE ) ) {
     return;

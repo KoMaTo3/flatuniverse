@@ -110,4 +110,6 @@ public:
 
 private:
   void  _TouchHandlers( Collision *collision, bool isInTrigger );
+  ObjectTrigger( const ObjectTrigger& );
+  ObjectTrigger& operator=( const ObjectTrigger& );
 };

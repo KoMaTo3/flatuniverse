@@ -2,7 +2,7 @@
 
 
 MemoryReader::MemoryReader()
-:curPos( 0 )
+  :curPos( 0 ), curLength( 0 ), curData( NULL )
 {
 }//constructor
 

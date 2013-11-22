@@ -17,7 +17,7 @@ Collision::CollisionHandler *Collision::defaultCollisionHandler = NULL;
 
 Collision::Collision( Vec3* objectPosition )
 :position( NULL ), velocity( 0.0f, 0.0f, 0.0f ), acceleration( 0.0f, 0.0f, 0.0f ), isStatic( true ), mass( 1.0f )
-, force( 0.0f, 0.0f, 0.0f ), collisionElement( NULL ), handlers( NULL ), offset( Vec3Null ), positionLast( 0.0f, 0.0f, 0.0f )
+, force( 0.0f, 0.0f, 0.0f ), collisionElement( NULL ), handlers( NULL ), offset( Vec3Null ), positionLast( 0.0f, 0.0f, 0.0f ), _rect()
 {
   this->position = objectPosition;
   this->positionResult = *this->position + this->offset;
@@ -535,15 +535,15 @@ bool Collision::TestInPoint( const Vec2 &pos )
 void Collision::ResolveCollision()
 {
   //__log.PrintInfo( Filelevel_DEBUG, "Collision::ResolveCollision => %d", this->resolver.size() );
-  if( !this->resolver.size() )
+  if( this->resolver.empty() )
     return;
 
   CollisionResolver *result = &( *this->resolver.begin() );
-  float resultSquare = result->power.x * result->power.y, square;
+  float resultSquare = result->power.x * result->power.y;
   CollisionResolverList::iterator iter = this->resolver.begin(), iterEnd = this->resolver.end();
   for( ++iter; iter != iterEnd; ++iter )
   {
-    square = iter->power.x * iter->power.y;
+    float square = iter->power.x * iter->power.y;
     if( square > resultSquare )
     {
       resultSquare = square;
@@ -583,7 +583,7 @@ void Collision::ResolveCollision()
   }
 
   //call handlers
-  if( this->handlers && this->handlers->size() ) {
+  if( this->handlers && !this->handlers->empty() ) {
     CollisionHandlerList::const_iterator iter, iterEnd = this->handlers->end();
     for( iter = this->handlers->begin(); iter != iterEnd; ++iter ) {
       ( *iter )( this, result->target, flags, oldVelocity );
@@ -646,7 +646,7 @@ void Collision::LoadFromBuffer( MemoryReader &reader, const std::string &thisObj
   Vec2 v2;
   bool b;
   float f;
-  int i;
+  //int i;
   CollisionElementType cet;
 
   reader >> v3;
@@ -679,6 +679,7 @@ void Collision::LoadFromBuffer( MemoryReader &reader, const std::string &thisObj
       this->InitCircle( f );
       break;
     case COLLISION_ELEMENT_TYPE_POLYGON: {
+      int i;
       reader >> i;  //points in poly
       CollisionElementPolygon::PointList poly;
       for( int num = 0; num < i; ++num ) {
@@ -694,12 +695,12 @@ void Collision::LoadFromBuffer( MemoryReader &reader, const std::string &thisObj
 
   if( version >= 0x00000003 ) {
     //handlers
-    Dword count, q;
+    Dword count;
     reader >> count;
     //__log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => handlers[%d]", count );
     std::string s;
     if( count && this->InitCollisionHandler && Collision::collisionLintenersList ) { //something wrong...
-      for( q = 0; q < count; ++q ) {
+      for( Dword q = 0; q < count; ++q ) {
         reader >> s;
         //__log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => . handler['%s']", s.c_str() );
         //Collision::collisionLintenersList->push_back( luaCollisionListenerStruct( this, s ) );

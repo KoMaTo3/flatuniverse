@@ -140,20 +140,21 @@ DWORD memory::getLength() const
   operator = memory
 ----------
 */
-void memory::operator=(memory &src)
+memory& memory::operator=(memory &src)
 {
   if(&src == this)
-    return;
+    return *this;
   if(!src.length)
   {
     this->free();
-    return;
+    return *this;
   }
 
   if(this->length != src.length)
     this->alloc(src.length);
 
   memcpy(this->data, (char*) src, this->length);
+  return *this;
 }//operator = memory
 
 
@@ -162,12 +163,12 @@ void memory::operator=(memory &src)
   operator = char*
 ----------
 */
-void memory::operator=(const char *str)
+memory& memory::operator=(const char *str)
 {
   if(!str)
   {
     this->free();
-    return;
+    return *this;
   }
 
   DWORD len = (DWORD) strlen(str) + 1;
@@ -178,6 +179,7 @@ void memory::operator=(const char *str)
   }
   memcpy(this->data, str, len - 1);
   data[len - 1] = 0;
+  return *this;
 }//operator = char*
 
 
@@ -220,7 +222,7 @@ char& memory::operator[](Int num)
   operator += memory
 ----------
 */
-void memory::operator+=(memory &src)
+memory& memory::operator+=(memory &src)
 {
   if(this->length < 1)
     return this->operator=(src);
@@ -231,5 +233,6 @@ void memory::operator+=(memory &src)
   this->alloc(tmp.length + src.getLength());
   memcpy(this->getData(), tmp.getData(), tmp.getLength());
   memcpy(this->getData() + tmp.getLength(), src.getData(), src.getLength());
+  return *this;
 }//operator += memory
 

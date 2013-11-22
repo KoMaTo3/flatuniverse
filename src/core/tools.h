@@ -14,7 +14,7 @@
 //Запрещаем классам конструктор копирования и оператор присваивания
 #define DISALLOW_COPY_AND_ASSIGN( TypeName )  \
   TypeName( const TypeName& );                \
-  void operator=( const TypeName& )
+  TypeName& operator=( const TypeName& )
 
 
 namespace tools

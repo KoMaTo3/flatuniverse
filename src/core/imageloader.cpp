@@ -23,9 +23,9 @@ ImageLoader::~ImageLoader()
   LoadFromFile
 ----------
 */
-Bool ImageLoader::LoadFromFile( const string fileName )
+Bool ImageLoader::LoadFromFile( const string &fileName )
 {
-  if( !fileName.length() )
+  if( fileName.empty() )
   {
     __log.PrintInfo( Filelevel_ERROR, "ImageLoader::LoadFromFile => File not found ('%s')", fileName.c_str() );
     return false;
@@ -211,7 +211,7 @@ Bool ImageLoader::_LoadFromBufferTGA( Byte *buffer, Dword length )
     return false;
   //__log.PrintInfo( Filelevel_DEBUG, ". bpp: %d", bpp );
 
-  Dword src_pos = 18 + idLength, dest_pos = 0;
+  Dword src_pos = 18 + idLength;
 
   this->_size.width = *w;
   this->_size.height = *h;
@@ -227,7 +227,7 @@ Bool ImageLoader::_LoadFromBufferTGA( Byte *buffer, Dword length )
     for( y = 0; y < this->_size.height; y++)
     for( x = 0; x < this->_size.width; x++)
     {
-      dest_pos = ( x + y * this->_size.width ) << 2;
+      Dword dest_pos = ( x + y * this->_size.width ) << 2;
       //dest_pos = ( x + ( this->_size.height - y - 1 ) * this->_size.width ) << 2;
       src_pos  = ( x + y * this->_size.width ) * mult + 18;
       dest[ dest_pos     ] = tmp[ src_pos + 2 ];
@@ -240,13 +240,13 @@ Bool ImageLoader::_LoadFromBufferTGA( Byte *buffer, Dword length )
   {//RLE-compression 0x0A
     //__log.PrintInfo( Filelevel_DEBUG, ". compression: RLE" );
     Dword src_pos = 18 + idLength, dest_pos = 0;
-    Byte block, num, q;
+    Byte q;
     Byte r, g, b, a = 255;
     Word x = 0, y = 0;
     while( y < this->_size.height )
     {
-      block = tmp[ src_pos++ ];
-      num = block & 127;
+      Byte block = tmp[ src_pos++ ];
+      Byte num = block & 127;
 
       if( block & 128 )
       {//compressed block
@@ -403,7 +403,6 @@ Bool ImageLoader::_LoadFromBufferPNG( Byte *buffer, Dword length )
 
   png_structp   png_ptr;
   png_infop     info_ptr;
-  unsigned int  sig_read = 0;
   png_uint_32   img_width = 0, img_height = 0;
   int           bit_depth = 0, color_type = 0, interlace_type = 0;
 

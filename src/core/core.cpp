@@ -386,7 +386,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
 
   FileManager::FilesList animationFiles;
   __fileManager->FindFiles( "ani", animationFiles );
-  if( animationFiles.size() ) {
+  if( !animationFiles.empty() ) {
     for( auto &fileName: animationFiles ) {
       __log.PrintInfo( Filelevel_DEBUG, "Animation template files list: %s", fileName.c_str() );
       this->animationMgr->LoadFile( fileName );
@@ -439,7 +439,7 @@ bool Core::_InitGraphics()
   wglMakeCurrent( this->_window.dc, this->_window.glRC );
   this->_InitViewport();
 
-  const char* version = ( const char* ) ::glGetString( GL_VERSION );
+  //const char* version = ( const char* ) ::glGetString( GL_VERSION );
 
   //check variable parameters
   //GLint i = 0;
@@ -582,7 +582,7 @@ bool Core::_CheckShaderError( const std::string& text, GLuint shader )
   IsExtensionExist
 =============
 */
-bool Core::IsExtensionExist( const std::string extensionName )
+bool Core::IsExtensionExist( const std::string &extensionName )
 {
   //for( unsigned long num = 0; num < this->_extensions.size(); ++num )
   for( auto iter = this->_extensions.begin(); iter != this->_extensions.end(); ++iter )
@@ -611,7 +611,7 @@ void Core::_InitExtensions()
   {
     ::wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC) wglGetProcAddress ( "wglGetExtensionsStringARB" );
     //__log.PrintInfo( Filelevel_DEBUG, "Core::InitExtensions => wglGetExtensionsStringARB = x%X", wglGetExtensionsStringARB );
-    std::vector< std::string > ext = tools::Explode( std::string( ( const char* ) ::wglGetExtensionsStringARB( this->_window.dc ) ), " " );
+    //std::vector< std::string > ext = tools::Explode( std::string( ( const char* ) ::wglGetExtensionsStringARB( this->_window.dc ) ), " " );
     //__log.PrintInfo( Filelevel_INFO, "WGL extensions:\n. %s", Implode( ext, "\n. " ).c_str() );
   }
 
@@ -1070,7 +1070,7 @@ bool Core::Redraw()
   //    ( *renderable )->Render();
   //glEnd();
 
-  if( __coreRenderableList->size() || __coreGUI->size() )
+  if( !__coreRenderableList->empty() || !__coreGUI->empty() )
   {
     //__log.PrintInfo( Filelevel_DEBUG, "this->_shaders.programm = x%X", this->_shaders.programm );
     glUseProgram( this->_shaders.programm );
@@ -1092,7 +1092,7 @@ bool Core::Redraw()
     glEnableVertexAttribArray( 3 );
 
     //Основной мир
-    if( __coreRenderableList->size() )
+    if( !__coreRenderableList->empty() )
     {
       glLoadIdentity();
       //glScalef( this->_window.windowToWorld.x, this->_window.windowToWorld.y, this->_window.windowToWorld.z );
@@ -1228,7 +1228,7 @@ bool Core::Redraw()
         Vec4 selectedRect;
 
         //renderable
-        if( this->debug.renderRenderable && __coreRenderableListIndicies->size() )
+        if( this->debug.renderRenderable && !__coreRenderableListIndicies->empty() )
         {
           CoreRenderableListIndicies::iterator iterIndex, iterIndexEnd = __coreRenderableListIndicies->end();
           glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -1277,7 +1277,7 @@ bool Core::Redraw()
 
         Vec3 camera = this->GetCamera()->GetPosition() - Vec3( this->GetWindowHalfSize().x, this->GetWindowHalfSize().y, 0.0f );
         //collision
-        if( this->debug.renderCollision && __collisionList->size() )
+        if( this->debug.renderCollision && !__collisionList->empty() )
         {
           glLineWidth( 1.0f );
           CollisionList::iterator iter, iterEnd = __collisionList->end();
@@ -1293,7 +1293,7 @@ bool Core::Redraw()
         }//collisions
 
         //trigger
-        if( this->debug.renderTrigger && __triggerList->size() )
+        if( this->debug.renderTrigger && !__triggerList->empty() )
         {
           glLineWidth( 1.0f );
           ObjectTriggerList::iterator iter, iterEnd = __triggerList->end();
@@ -1337,7 +1337,7 @@ bool Core::Redraw()
 
     //GUI
     //__log.PrintInfo( Filelevel_DEBUG, "test gui: __coreGUI[x%X] size[%d]", __coreGUI, __coreGUI->size() );
-    if( __coreGUI->size() )
+    if( !__coreGUI->empty() )
     {
       glUseProgram( this->_shaders.programm );
       //glLoadIdentity();
@@ -1850,13 +1850,12 @@ Object* Core::GetRenderableInPoint( const Vec2& pos, const std::string &afterObj
 {
   //__log.PrintInfo( Filelevel_DEBUG, "Core::GetRenderableInPoint => pos[%3.3f; %3.3f]", pos.x, pos.y );
   CoreRenderableListIndicies::iterator iter, iterEnd = __coreRenderableListIndicies->end();
-  RenderableQuad *quad;
   Vec2 leftTop, rightBottom;
   bool returnFirst = afterObject.empty();
   Object *object;
 
   for( iter = __coreRenderableListIndicies->begin(); iter != iterEnd; ++iter ) {
-    quad = &( *__coreRenderableList )[ *iter ];
+    RenderableQuad *quad = &( *__coreRenderableList )[ *iter ];
     //__log.PrintInfo( Filelevel_DEBUG, ". index[%d] quad[x%p]", *iter, quad );
     quad->CalculateRect( leftTop, rightBottom );
     //__log.PrintInfo( Filelevel_DEBUG, ". . rect[%3.3f; %3.3f]-[%3.3f; %3.3f]", leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
@@ -1998,7 +1997,6 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
         core->keyboard.DoRelease( wParam );
       }
       return 0;
-      break;
     }
 
     case WM_ACTIVATE:

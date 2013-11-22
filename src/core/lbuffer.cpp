@@ -13,7 +13,7 @@ LBuffer::LBuffer( int setSize, float setFloatSize )
 
 
 LBuffer::~LBuffer() {
-  delete this->buffer;
+  delete [] this->buffer;
 }
 
 
@@ -60,13 +60,12 @@ void LBuffer::DrawPolarLine( const Vec2& lineBegin, const Vec2& lineEnd ) {
     return;
   }
 
-  float value, t;
   //begin
   this->_PushValue( xBegin, pointBegin.y );
   //middle
   for( int x = xBegin + 1; x < xEnd; ++x ) {
-    t = float( x - xBegin ) / float( xEnd - xBegin );
-    value = pointBegin.y * ( 1.0f - t ) + pointEnd.y * t;
+    float t = float( x - xBegin ) / float( xEnd - xBegin );
+    float value = pointBegin.y * ( 1.0f - t ) + pointEnd.y * t;
     this->_PushValue( x, value );
   }
   //end
@@ -175,12 +174,10 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
 
   float value;
   Vec2 intersectPoint;
-  bool firstIntersectFinded = false;
-  int xValue;
   xBegin += this->size - 2;
   xEnd += this->size + 2;
   for( int x = xBegin; x <= xEnd; ++x ) {
-    xValue = x % this->size;
+    int xValue = x % this->size;
     float a = this->SizeToFloat( xValue, 0.001f );
     if( Vec2::TestIntersect(
       Vec2Null,

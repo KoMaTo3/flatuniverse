@@ -367,7 +367,7 @@ bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition gridPos )
 */
 void WorldGridManager::SaveToFile( const std::string& fileName )
 {
-  while( __worldGridList->size() )
+  while( !__worldGridList->empty() )
     this->UnloadGrid( (  *__worldGridList->begin() )->GetPosition() );
   this->worldSaver.SaveToFile( fileName );
 }//SaveToFile

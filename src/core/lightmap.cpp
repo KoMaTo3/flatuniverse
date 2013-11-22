@@ -146,7 +146,6 @@ void LightEntity::Update( LightBlocksList &blocks ) {
     skipsCount = 0, //число пропущенных вершин
     maxSkipsCount = this->lbuffer.GetSize() / this->minimalEngesCountPerLight, //максимально допустимое число пропущенных подряд вершин. чем больше буффер, тем больше можно пропустить
     verticesCount = 0;
-  bool skipped;
   for( float degree = 0.0f; degree < Math::TWO_PI; degree += step ) {
     range = this->lbuffer.GetValue( degree );
     posNormalized.Set( Math::Cos16( degree ), Math::Sin16( degree ) );
@@ -159,7 +158,7 @@ void LightEntity::Update( LightBlocksList &blocks ) {
       this->position.y - posNormalized.y * range
       );
     //пропустить вертексы, идущие подряд на одном расстоянии от центра
-    skipped = false;
+    bool skipped = false;
     if( Math::Fabs( rangeHistory[ 1 ] - range ) < this->epsilon && Math::Fabs( rangeHistory[ 0 ] - range ) < this->epsilon && skipsCount < maxSkipsCount ) {
       ++skipsCount;
       this->vertices.pop_back();

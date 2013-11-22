@@ -132,7 +132,7 @@ void Animation::Update( float dt ) {
 * Отключение всех включенных анимаций
 */
 void Animation::Destroy() {
-  while( __animationPackActiveList.size() ) {
+  while( !__animationPackActiveList.empty() ) {
     ( *__animationPackActiveList.begin() )->SetEnabled( false );
   }
 

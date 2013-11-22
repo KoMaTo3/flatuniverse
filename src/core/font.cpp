@@ -92,7 +92,7 @@ Font* Font::SetFont( const std::string& fontFileName, const std::string &filePro
   SetText
 =============
 */
-void Font::SetText( const std::string setText )
+void Font::SetText( const std::string &setText )
 {
   this->ClearText();
   if( !this->_renderableList )
@@ -115,14 +115,13 @@ void Font::SetText( const std::string setText )
   Vec2 pointToTexCoords( 1.0f / textureSize.x, 1.0f / textureSize.y );  //перевод координат точек в текстуре в текстурные координаты
   Vec2 letterSize( textureSize.x / 16.0f * this->font.scale.x, textureSize.y / 16.0f * this->font.scale.y );
   float dx = 0.0f, letterWidth = letterSize.x;
-  Byte letterId;
 
   for( q = 0; q < length; ++q )
   {
-    letterId = setText[ q ];
+    Byte letterId = setText[ q ];
     GLshort index = -1;
     __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%X = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
-    if( this->_renderableFreeIndicies->size() )
+    if( !this->_renderableFreeIndicies->empty() )
     {
       index = *this->_renderableFreeIndicies->rbegin();
       this->_renderableFreeIndicies->pop_back();

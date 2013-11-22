@@ -88,7 +88,7 @@ public:
   RenderableQuad();
   RenderableQuad( RenderableQuad &src );
   virtual ~RenderableQuad();
-  void operator=( RenderableQuad &src );
+  RenderableQuad& operator=( RenderableQuad &src );
 
   RenderableQuad* SetPosition     ( const Vec3& newPosition );
   RenderableQuad* SetPosition2D   ( const Vec2& newPosition );

@@ -238,8 +238,7 @@ void Object::ClearChilds( bool forceDelete )
   //__log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => objects[%d]", this->_childs->size() );
   if( forceDelete ) //полная очистка
   {
-    ObjectList::iterator iter;
-    while( this->_childs->size() )
+    while( !this->_childs->empty() )
       delete *this->_childs->begin();
 
     DEF_DELETE( this->_childs );
@@ -266,7 +265,7 @@ void Object::ClearChilds( bool forceDelete )
         }
       }
     } while( deleted );
-    if( !this->_childs->size() )
+    if( this->_childs->empty() )
       DEF_DELETE( this->_childs );
   }
   //__log.PrintInfo( Filelevel_DEBUG, "Object::ClearChilds => Done" );
@@ -620,7 +619,7 @@ RenderableQuad* Object::EnableRenderableGUI()
   float zIndex = this->position.z;
   GLshort index = -1;
   __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%p = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
-  if( this->_renderableFreeIndicies->size() )
+  if( !this->_renderableFreeIndicies->empty() )
   {
     index = *this->_renderableFreeIndicies->rbegin();
     this->_renderableFreeIndicies->pop_back();
@@ -1397,7 +1396,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 */
 void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dword version )
 {
-  bool isRenderable, isCollision, isTrigger, isAnimation, isLightBlockByCollision, isLightPoint;
+  bool isRenderable, isCollision, isTrigger;
   std::string tmpName, parentName;
   Vec3 newPosition;
 
@@ -1459,6 +1458,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
 
   if( version >= 0x00000006 ) {
     //animation
+    bool isAnimation;
     reader >> isAnimation;
     if( isAnimation ) {
       std::string templateName = "", animationName = "";
@@ -1474,12 +1474,14 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
       reader >> this->luaScript;
 
       if( version >= 0x00000008 ) {
+        bool isLightBlockByCollision;
         reader >> isLightBlockByCollision;
         if( isLightBlockByCollision ) {
           this->EnableLightBlockByCollision();
         }
 
         if( version >= 0x00000009 ) {
+          bool isLightPoint;
           reader >> isLightPoint;
           if( isLightPoint ) {
             ObjectWidget::WidgetLightPoint *widget = this->EnableLightPoint();
@@ -1562,10 +1564,9 @@ Object* Object::GetObjectInPoint( const Vec2& pos )
   if( this->_childs )
   {
     ObjectList::iterator iter, iterEnd = this->_childs->end();
-    Object *obj;
     for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
     {
-      obj = ( *iter )->GetObjectInPoint( pos );
+      Object *obj = ( *iter )->GetObjectInPoint( pos );
       if( obj )
         return obj;
     }
@@ -1583,7 +1584,7 @@ Object* Object::GetObjectInPoint( const Vec2& pos )
 */
 void Object::GetObjectsInRect( int type, const Vec2 &leftTop, const Vec2 &rightBottom, ObjectList& result )
 {
-  if( !this->_childs || !this->_childs->size() ) {
+  if( !this->_childs || this->_childs->empty() ) {
     return;
   }
 
@@ -1650,7 +1651,7 @@ bool Object::TestInRect( int type, const Vec2 &leftTop, const Vec2 &rightBottom,
     }
   }//switch
 
-  if( recursive && this->_childs && this->_childs->size() ) {
+  if( recursive && this->_childs && !this->_childs->empty() ) {
     for( auto &child: *this->_childs ) {
       if( child->TestInRect( type, leftTop, rightBottom, recursive ) ) {
         return true;
@@ -1748,12 +1749,11 @@ Object* Object::GetObjectByRenderableIndex( CoreRenderableList *renderableList, 
   if( this->renderable.type != RENDERABLE_TYPE_UNKNOWN && this->renderable.num == index && this->_renderableList == renderableList ) {
     return this;
   }
-  if( this->_childs && this->_childs->size() ) {
+  if( this->_childs && !this->_childs->empty() ) {
     __log.PrintInfo( Filelevel_DEBUG, "Object::GetObjectByRenderableIndex => this[x%p] name['%s'] index[%d]", this, this->GetNameFull().c_str(), index );
     ObjectList::iterator iter, iterEnd = this->_childs->end();
-    Object *obj;
     for( iter = this->_childs->begin(); iter != iterEnd; ++iter ) {
-      obj = ( *iter )->GetObjectByRenderableIndex( renderableList, index );
+      Object *obj = ( *iter )->GetObjectByRenderableIndex( renderableList, index );
       if( obj ) {
         return obj;
       }

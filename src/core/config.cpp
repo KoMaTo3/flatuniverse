@@ -77,13 +77,13 @@ bool ConfigFile::LoadFromFile( const std::string &fileName )
     ConfigFile_OPERATION_ASSIGN   //=
   } operation = ConfigFile_OPERATION_UNKNOWN;
 
-  int result, resultIndex;
+  int resultIndex;
   std::string paramName, paramValue;
 
   //парсим данные
   do
   {
-    result = pcre_exec( re, NULL, &data[ offset ], data.size() - offset, 0, 0, reRes, sizeof( reRes ) / sizeof( int ) );
+    int result = pcre_exec( re, NULL, &data[ offset ], data.size() - offset, 0, 0, reRes, sizeof( reRes ) / sizeof( int ) );
 
     //по числу найденных блоков определяем, что мы нашли
     lexemType = ConfigFile_LEXEMTYPE_UNKNOWN;
@@ -192,7 +192,7 @@ bool ConfigFile::LoadFromFile( const std::string &fileName )
 */
 void ConfigFile::RemoveComments( std::string &str )
 {
-  int posBlock, posSide, posSingleQuote, posDoubleQuote, pos = 0, maxPos = str.length(), posEnd;
+  int pos = 0, maxPos = str.length(), posEnd;
   enum {
     ConfigFile_BLOCK_COMMENTBLOCK,  //блок комментариев /**/
     ConfigFile_BLOCK_COMMENTSIDE,   //боковой комментарий //
@@ -203,6 +203,7 @@ void ConfigFile::RemoveComments( std::string &str )
 
   do
   {
+    int posBlock, posSide, posSingleQuote, posDoubleQuote;
     posBlock        = str.find( "/*", pos );
     posSide         = str.find( "//", pos );
     posSingleQuote  = str.find( "'", pos );

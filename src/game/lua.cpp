@@ -1507,7 +1507,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
     //__log.PrintInfo( Filelevel_DEBUG, "LUAFUNC_ObjectAttr => objectName['%s'] setAttrs[%d] getAttrs[%d]", objectName.c_str(), setAttrs.size(), getAttrs.size() );
     LUAFUNC_ObjectAttr( objectName, setAttrs, getAttrs );
 
-    if( getAttrs.size() ) { //return parameters
+    if( !getAttrs.empty() ) { //return parameters
       //__log.PrintInfo( Filelevel_DEBUG, ". getAttrs[%d]", getAttrs.size() );
       VariableAttributesList::iterator iter, iterEnd = getAttrs.end();
       VariableAttribute *var;

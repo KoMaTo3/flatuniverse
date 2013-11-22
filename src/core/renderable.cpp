@@ -153,7 +153,7 @@ RenderableQuad::RenderableQuad( RenderableQuad &src )
 
 
 
-void RenderableQuad::operator=( RenderableQuad &src )
+RenderableQuad& RenderableQuad::operator=( RenderableQuad &src )
 {
   //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::operator= => this[%p] src[%p]", this, &src );
   this->position = src.position;
@@ -164,6 +164,8 @@ void RenderableQuad::operator=( RenderableQuad &src )
   this->texCoords = src.texCoords;
   this->info = src.info;
   src.info = nullptr;
+
+  return *this;
 }//operator=
 
 
@@ -249,7 +251,7 @@ RenderableQuad* RenderableQuad::SetTexture( const std::string& textureFileName, 
 =============
 */
 RenderableQuad* RenderableQuad::SetTextureCoords( const Vec2& texCoordsLeftTop, const Vec2& texCoordsRightBottom ) {
-  if( this->info->textureName.size() ) {
+  if( !this->info->textureName.empty() ) {
     const Vec4 v4( texCoordsLeftTop.x, texCoordsLeftTop.y, texCoordsRightBottom.x, texCoordsRightBottom.y );
     this->texCoords = __textureAtlas->GetTextureCoords( this->info->textureName, v4 );
     this->info->textureCoordsNew = this->info->textureCoordsPrev = v4;

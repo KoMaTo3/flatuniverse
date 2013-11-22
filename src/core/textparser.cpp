@@ -50,10 +50,10 @@ bool TextParser::GetNext( Result& result ) {
 
   //LOGD( "next..." );
   int resultIndex = 0, pcreResult = pcre_exec( re, NULL, this->_buffer.c_str() + this->_currentPos, this->AllowedToRead(), 0, 0, reRes, sizeof( reRes ) / sizeof( int ) );
-  TextParserLexem type = TPL_ERROR;
   //LOGD( "pcreResult[%d] firstByte[%d][%c]\n", pcreResult, this->_buffer[ this->_currentPos ], this->_buffer[ this->_currentPos ] );
 
   if( pcreResult > 0 ) {
+    TextParserLexem type = TPL_ERROR;
     switch( pcreResult ) {
     case 3: //name
       resultIndex = 2;
@@ -105,7 +105,7 @@ bool TextParser::GetNext( Result& result ) {
 */
 void TextParser::RemoveComments( std::string &str )
 {
-  int posBlock, posSide, posSingleQuote, posDoubleQuote, pos = 0, maxPos = str.length(), posEnd;
+  int pos = 0, maxPos = str.length(), posEnd;
   enum {
     ConfigFile_BLOCK_COMMENTBLOCK,  //блок комментариев /**/
     ConfigFile_BLOCK_COMMENTSIDE,   //боковой комментарий //
@@ -116,10 +116,10 @@ void TextParser::RemoveComments( std::string &str )
 
   do
   {
-    posBlock        = str.find( "/*", pos );
-    posSide         = str.find( "//", pos );
-    posSingleQuote  = str.find( "'", pos );
-    posDoubleQuote  = str.find( "\"", pos );
+    int posBlock        = str.find( "/*", pos );
+    int posSide         = str.find( "//", pos );
+    int posSingleQuote  = str.find( "'", pos );
+    int posDoubleQuote  = str.find( "\"", pos );
 
     pos = min( min( min( posBlock < 0 ? maxPos : posBlock, posSide < 0 ? maxPos : posSide ), posSingleQuote < 0 ? maxPos : posSingleQuote ), posDoubleQuote < 0 ? maxPos : posDoubleQuote );
     if( pos == maxPos ) {

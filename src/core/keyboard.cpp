@@ -69,7 +69,7 @@ void Keyboard::DoPress( Dword keyId )
     this->keysPressed.getData()[ keyId ] = true;
   __log.PrintInfo( Filelevel_DEBUG, "Keyboard::DoPress => x%X", keyId );
 
-  if( this->listeners.size() )
+  if( !this->listeners.empty() )
   {
     ListenerList::iterator iter, iterEnd = this->listeners.end();
     for( iter = this->listeners.begin(); iter != iterEnd; ++iter )
@@ -106,7 +106,7 @@ void Keyboard::DoRelease( Dword keyId )
   if( this->keysOld.getData()[ keyId ] )
     this->keysReleased.getData()[ keyId ] = true;
 
-  if( this->listeners.size() )
+  if( !this->listeners.empty() )
   {
     ListenerList::iterator iter, iterEnd = this->listeners.end();
     for( iter = this->listeners.begin(); iter != iterEnd; ++iter )

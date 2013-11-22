@@ -442,7 +442,7 @@ void AnimationParameterFloat4::MakeFromTemplate( const IAnimationParameter& para
 * String
 */
 AnimationParameterString::AnimationParameterString()
-:_value( NULL ), _valueChanged( NULL )
+:_value( NULL ), _valueChanged( NULL ), _valueHash( 0 )
 {
 }
 
@@ -474,7 +474,7 @@ void AnimationParameterString::Update( float animationTime ) {
     iter = this->_keyFrames.begin(),
     iterEnd = this->_keyFrames.end(),
     iterBegin = this->_keyFrames.begin(),
-    iterNext, iterPrev;
+    iterPrev;
   KeyFramesList::const_reverse_iterator
     iterLast = this->_keyFrames.rbegin();
 
@@ -488,9 +488,9 @@ void AnimationParameterString::Update( float animationTime ) {
     if( animationTime < iter->time ) {
       if( iter == iterBegin ) {
         iterPrev = iter;
-        iterNext = ++iter;
+        //iterNext = ++iter;
       } else {
-        iterNext = iter;
+        //iterNext = iter;
         iterPrev = --iter;
       }
       this->_SetValue( iterPrev->value );
@@ -571,7 +571,7 @@ void AnimationParameterBool::Update( float animationTime ) {
     iter = this->_keyFrames.begin(),
     iterEnd = this->_keyFrames.end(),
     iterBegin = this->_keyFrames.begin(),
-    iterNext, iterPrev;
+    iterPrev;
   KeyFramesList::const_reverse_iterator
     iterLast = this->_keyFrames.rbegin();
 
@@ -585,9 +585,9 @@ void AnimationParameterBool::Update( float animationTime ) {
     if( animationTime < iter->time ) {
       if( iter == iterBegin ) {
         iterPrev = iter;
-        iterNext = ++iter;
+        //iterNext = ++iter;
       } else {
-        iterNext = iter;
+        //iterNext = iter;
         iterPrev = --iter;
       }
       *this->_value = iterPrev->value;

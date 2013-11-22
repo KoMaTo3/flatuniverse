@@ -180,10 +180,9 @@ const std::string& TextureAtlas::GetTextureNameByCoords( Vec2 texCoords )
   //Pos< Dword > = 
   TextureAtlasItemsList::iterator iter, iterEnd = this->textures.end();
   Vec4 atlasPos( texCoords.x * float( this->size.width ), texCoords.y * float( this->size.height ), 0.0f, 0.0f );
-  TextureAtlasItem *item;
   for( iter = this->textures.begin(); iter != iterEnd; ++iter )
   {
-    item = *iter;
+    TextureAtlasItem *item = *iter;
     if(  atlasPos.x >= item->rect.right
       || atlasPos.x < item->rect.left
       || atlasPos.y >= item->rect.bottom

@@ -6,13 +6,13 @@ const int LBUFFER_CACHE_LIFE_PERIOD = 10;
 
 
 LBufferCacheEntity::LBufferCacheEntity()
-:lifeTime( 0 )
+:lifeTime( 0 ), object( NULL )
 {
 }
 
 
 LBufferCacheEntity::LBufferCacheEntity( void* const setObject, const Vec2& setPosition, const Vec2& setSize )
-:object( setObject ), position( setPosition ), size( setSize ) {
+  :object( setObject ), position( setPosition ), size( setSize ), lifeTime( 0 ) {
 }
 
 
@@ -46,45 +46,57 @@ void LBufferCacheEntity::WriteToBuffer( float *buffer ) {
 }//WriteToBuffer
 
 
+LBufferCacheEntity* LBufferCache::FindElement( void *object ) {
+  for( auto &item: this->cache ) {
+    if( item.object == object ) {
+      return &item;
+    }
+  }
+  return NULL;
+}//FindElement
+
+
 bool LBufferCache::CheckCache( void *object, const Vec2& position, const Vec2& size, LBufferCacheEntity **outCacheElement ) {
-  auto element = this->cache.find( object );
-  if( element == this->cache.end() ) {
+  auto element = this->FindElement( object );
+  if( !element ) {
     LBufferCacheEntity *newElement = this->AddElement( object, position, size );
     if( outCacheElement ) {
       *outCacheElement = newElement;
     }
     return false;
   }
-  element->second->lifeTime = 0;
+  element->lifeTime = 0;
   if( outCacheElement ) {
-    *outCacheElement = element->second;
+    *outCacheElement = element;
   }
   return
-    element->second->position == position &&
-    element->second->size == size;
+    element->position == position &&
+    element->size == size;
 }//CheckCache
 
 
 void LBufferCache::ClearCache() {
-  for( auto &element: this->cache ) {
-    delete element.second;
-  }
   this->cache.clear();
 }//ClearCache
 
 
 void LBufferCache::ClearCache( void* object ) {
-  auto element = this->cache.find( object );
-  if( element != this->cache.end() ) {
-    this->cache.erase( element );
+  auto
+    iter = this->cache.begin(),
+    iterEnd = this->cache.end();
+  while( iter != iterEnd ) {
+    if( iter->object == object ) {
+      this->cache.erase( iter );
+      break;
+    }
+    ++iter;
   }
 }//ClearCache
 
 
 LBufferCacheEntity* LBufferCache::AddElement( void *object, const Vec2& position, const Vec2& size ) {
-  LBufferCacheEntity *newEntity = new LBufferCacheEntity( object, position, size );
-  this->cache.insert( std::make_pair( object, newEntity ) );
-  return newEntity;
+  this->cache.push_back( LBufferCacheEntity( object, position, size ) );
+  return &*this->cache.rbegin();
 }//AddElement
 
 
@@ -94,10 +106,9 @@ void LBufferCache::Update() {
     iterEnd = this->cache.end(),
     iterNext;
   for( iter = this->cache.begin(); iter != iterEnd; ) {
-    if( ++iter->second->lifeTime > LBUFFER_CACHE_LIFE_PERIOD ) {
+    if( ++iter->lifeTime > LBUFFER_CACHE_LIFE_PERIOD ) {
       iterNext = iter;
       ++iterNext;
-      delete iter->second;
       this->cache.erase( iter );
       iter = iterNext;
     } else {

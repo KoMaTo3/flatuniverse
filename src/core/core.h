@@ -184,7 +184,7 @@ public:
   */
 
   bool    LoadExtension       ( const std::string &name, void** function );
-  bool    IsExtensionExist    ( const std::string extensionName );
+  bool    IsExtensionExist    ( const std::string &extensionName );
   Vec3    PixelToTexel        ( const Vec2& pos ) { return Vec3( pos.x * this->_window.windowToWorld.x, pos.y * this->_window.windowToWorld.y, 0.0f ); }
 
   LRESULT Signal              ( DWORD code, LPARAM lParam = 0, WPARAM wParam = 0, void *pointer = NULL ); //Don't use this function!
@@ -196,6 +196,10 @@ public:
 
   bool    CheckGLError        ( int line = -1, const std::string& fileName = "" );
   void    __Test              ();
+
+  private:
+    Core( const Core& );
+    Core& operator=( const Core& );
 };
 
 
