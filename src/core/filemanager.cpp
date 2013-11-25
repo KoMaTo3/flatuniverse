@@ -172,7 +172,7 @@ void FileManager::AddPack( const std::string& path, const std::string& fileName 
   {
     __log.PrintInfo( Filelevel_DEBUG, "FileManager::AddPack => read (next) file info..." );
     f.Read( &fileInfo, constHeaderSize );
-    tmp.realloc( fileInfo.nameLength + 1 );
+    tmp.Realloc( fileInfo.nameLength + 1 );
     f.Read( tmp.getData(), tmp.getLength() );
     __log.PrintInfo( Filelevel_DEBUG, "FileManager::AddPack => file in pack: '%s'", tmp.getData() );
     curPos += constHeaderSize + tmp.getLength();
@@ -301,7 +301,7 @@ void FileManager::SaveAll( const std::string& fileName, bool useCompression )
         if( useCompression )
         {
           fileInfo.type = FileManager_type_PACKED;
-          destBuffer.alloc( buffer.getLength() < 1024 * 1024 * 10 ? buffer.getLength() * 2 : buffer.getLength() + 1024 * 16 );  //16k на всякий случай
+          destBuffer.Alloc( buffer.getLength() < 1024 * 1024 * 10 ? buffer.getLength() * 2 : buffer.getLength() + 1024 * 16 );  //16k на всякий случай
           resLength = destBuffer.getLength();
           int compressResult;
           __log.PrintInfo( Filelevel_DEBUG, "FileManager::SaveAll => use compression" );
@@ -381,7 +381,7 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
       File f;
       if( f.Open( file.fullPath.c_str(), File_mode_READ ) != aOK )
         return false;
-      dest.alloc( f.GetLength() + ( addLastNull ? 1 : 0 ) );
+      dest.Alloc( f.GetLength() + ( addLastNull ? 1 : 0 ) );
       f.Read( dest.getData(), f.GetLength() );
       f.Close();
       if( addLastNull )
@@ -397,7 +397,7 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
         return false;
 
       f.SeekFromStart( file.start );
-      dest.alloc( file.size + ( addLastNull ? 1 : 0 ) );
+      dest.Alloc( file.size + ( addLastNull ? 1 : 0 ) );
       f.Read( dest.getData(), file.size );
       f.Close();
       if( addLastNull )
@@ -418,12 +418,12 @@ bool FileManager::GetFile( const std::string& fileName, memory& dest, bool addLa
       f.Read( tmp.getData(), tmp.getLength() );
       f.Close();
 
-      dest.alloc( file.size + ( addLastNull ? 1 : 0 ) );
+      dest.Alloc( file.size + ( addLastNull ? 1 : 0 ) );
       uLongf destSize = file.size;
       if( Z_OK != uncompress( ( Byte* ) dest.getData(), &destSize, ( Byte* ) tmp.getData(), tmp.getLength() ) )
       {
         //__log.PrintInfo( Filelevel_ERROR, "FileManager::GetFile => uncompress failed (%d)", res );
-        dest.free();
+        dest.Free();
         return false;
       }
       if( addLastNull )

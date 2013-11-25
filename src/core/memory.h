@@ -22,11 +22,11 @@ public:
   memory( const memory &src );
   virtual ~memory();
 
-  HRESULT alloc     (DWORD len);
-  HRESULT realloc   (DWORD len);
-  void   free      ();
-  DWORD  getLength () const;
-  char*  getData   ();
+  HRESULT Alloc     (DWORD len);
+  HRESULT Realloc   (DWORD len);
+  void    Free      ();
+  DWORD   getLength () const;
+  char*   getData   ();
 
   memory& operator=   (const char *str);
   memory& operator=   (memory &src);

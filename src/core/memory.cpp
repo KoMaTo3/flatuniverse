@@ -19,7 +19,7 @@ memory::memory()
 memory::memory(DWORD len)
 {
   this->init();
-  this->alloc(len);
+  this->Alloc(len);
 }//constructor
 
 memory::memory( const memory &src )
@@ -31,7 +31,7 @@ memory::memory( const memory &src )
 
 memory::~memory()
 {
-  this->free();
+  this->Free();
 }//destructor
 
 
@@ -66,9 +66,9 @@ memory::operator char*()
   Выделение памяти. Если уже выделено - высвобождение и новое выделение
 ----------
 */
-HRESULT memory::alloc(DWORD len)
+HRESULT memory::Alloc(DWORD len)
 {
-  this->free();
+  this->Free();
 
   if(!len)
   {
@@ -95,13 +95,13 @@ HRESULT memory::alloc(DWORD len)
   Перевыделение памяти
 ----------
 */
-HRESULT memory::realloc(DWORD len)
+HRESULT memory::Realloc(DWORD len)
 {
   if(this->data)//delete old mem
   {
-    this->free();
+    this->Free();
   }
-  return this->alloc(len);
+  return this->Alloc(len);
 }//realloc
 
 
@@ -111,7 +111,7 @@ HRESULT memory::realloc(DWORD len)
   Освобождение памяти
 ----------
 */
-void memory::free()
+void memory::Free()
 {
   if(this->data)
   {
@@ -146,12 +146,12 @@ memory& memory::operator=(memory &src)
     return *this;
   if(!src.length)
   {
-    this->free();
+    this->Free();
     return *this;
   }
 
   if(this->length != src.length)
-    this->alloc(src.length);
+    this->Alloc(src.length);
 
   memcpy(this->data, (char*) src, this->length);
   return *this;
@@ -167,15 +167,15 @@ memory& memory::operator=(const char *str)
 {
   if(!str)
   {
-    this->free();
+    this->Free();
     return *this;
   }
 
   DWORD len = (DWORD) strlen(str) + 1;
   if(this->length != len)
   {
-    this->free();
-    this->alloc(len);
+    this->Free();
+    this->Alloc(len);
   }
   memcpy(this->data, str, len - 1);
   data[len - 1] = 0;
@@ -230,7 +230,7 @@ memory& memory::operator+=(memory &src)
   memory tmp(this->length);
   memcpy((char*)tmp, this->getData(), this->length);
 
-  this->alloc(tmp.length + src.getLength());
+  this->Alloc(tmp.length + src.getLength());
   memcpy(this->getData(), tmp.getData(), tmp.getLength());
   memcpy(this->getData() + tmp.getLength(), src.getData(), src.getLength());
   return *this;

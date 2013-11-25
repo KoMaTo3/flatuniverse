@@ -3,12 +3,18 @@
 #include "file.h"
 #include "tools.h"
 
-#include "pcre/pcre.h"
 
 
-
-ConfigFile::ConfigFile()
-{
+ConfigFile::ConfigFile() {
+  const char *error;
+  int errorOffset;
+  this->regexp = pcre_compile(
+    "\\s*?((false|true|yes|no)|([a-zA-Z_][a-zA-Z_0-9]*)|([+\\-]?([0-9]*\\.)?[0-9]+)|([=])|('(.*?)')|(\"(.*?)\"))\\s*",
+    PCRE_MULTILINE | PCRE_DOTALL,//PCRE_CASELESS,// | PCRE_MULTILINE ,
+    &error,
+    &errorOffset,
+    NULL
+  );
 }//constructor
 
 
@@ -18,6 +24,8 @@ ConfigFile::~ConfigFile()
   for( iter = this->values.begin(); iter != iterEnd; ++iter )
     delete ( *iter ).second;
   this->values.clear();
+  pcre_free( this->regexp );
+  this->regexp = NULL;
 }//destructor
 
 
@@ -46,15 +54,6 @@ bool ConfigFile::LoadFromFile( const std::string &fileName )
   this->RemoveComments( data );
 
   //инициализируем PCRE
-  const char *error;
-  int errorOffset;
-  static pcre *re = pcre_compile(
-    "\\s*?((false|true|yes|no)|([a-zA-Z_][a-zA-Z_0-9]*)|([+\\-]?([0-9]*\\.)?[0-9]+)|([=])|('(.*?)')|(\"(.*?)\"))\\s*",
-    PCRE_MULTILINE | PCRE_DOTALL,//PCRE_CASELESS,// | PCRE_MULTILINE ,
-    &error,
-    &errorOffset,
-    NULL
-  );
   int reRes[ ( 20 /* кол-во пар скобок */ + 1 ) * 3 ];
   bool finded = false;
   Dword offset = 0;
@@ -83,7 +82,7 @@ bool ConfigFile::LoadFromFile( const std::string &fileName )
   //парсим данные
   do
   {
-    int result = pcre_exec( re, NULL, &data[ offset ], data.size() - offset, 0, 0, reRes, sizeof( reRes ) / sizeof( int ) );
+    int result = pcre_exec( this->regexp, NULL, &data[ offset ], data.size() - offset, 0, 0, reRes, sizeof( reRes ) / sizeof( int ) );
 
     //по числу найденных блоков определяем, что мы нашли
     lexemType = ConfigFile_LEXEMTYPE_UNKNOWN;

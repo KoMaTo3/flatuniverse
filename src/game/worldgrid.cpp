@@ -178,7 +178,7 @@ bool WorldGrid::IsThisObject( Object *object )
 bool WorldGrid::GetGridDump( FU_OUT memory& dump )
 {
   this->Update();
-  dump.free();
+  dump.Free();
   MemoryWriter writer( dump );
 
   //кол-во объектов

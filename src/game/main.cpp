@@ -1,3 +1,7 @@
+//#define _CRTDBG_MAP_ALLOC
+//#include <stdlib.h>
+//#include <crtdbg.h>
+
 #include <windows.h>
 #include "core/core.h"
 #include "core/imageloader.h"
@@ -7,6 +11,7 @@
 #include "core/animationpack.h"
 #include "core/textparser.h"
 #include "core/interngl.h"
+#include "lua.h"
 
 Game *game = NULL;
 
@@ -18,6 +23,7 @@ File __log;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
+  //_CrtSetDbgFlag(  _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
   game = new Game();
   float gridSize = 1024.0f;
   game->core->CheckGLError( __LINE__, __FILE__ );
@@ -462,6 +468,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->world->SaveToFile( "data/temp/testworld.fu" );
   DEF_DELETE( game );
 
+  //_CrtDumpMemoryLeaks();
   return 0;
 }
 
@@ -1255,7 +1262,10 @@ void Game::LUA_ObjectSetAnimation( const std::string &objectName, const std::str
     __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectSetAnimation => object '%s' not found", objectName.c_str() );
     return;
   }
-  object->ApplyAnimation( templateName, animation )->SetEnabled( true );
+  Animation::AnimationPack *pack = object->ApplyAnimation( templateName, animation );
+  if( pack ) {
+    pack->SetEnabled( true );
+  }
 }//LUA_ObjectSetAnimation
 
 

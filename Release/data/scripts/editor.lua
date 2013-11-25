@@ -242,14 +242,14 @@ function EditorInit()
 
   UpdateGuiBySelectedObject()
 
-  EditorUpdateDebug()
-  RenderGUI()
-  UpdateEditorCamera()
+  EditorUpdateDebug( 0 )
+  RenderGUI( 0 )
+  UpdateEditorCamera( 0 )
 end --EditorInit
 
 
 -- UpdateEditorCamera
-function UpdateEditorCamera( id )
+function UpdateEditorCamera( timerId )
   if settings.gamePaused then
     SetCamera( 'defaults/camera' )
   end
@@ -888,7 +888,7 @@ end --ToggleLayer
 --
 -- EditorUpdateDebug
 --
-function EditorUpdateDebug()
+function EditorUpdateDebug( timerId )
   local cx, cy = GetCameraPos()
   local mx, my = GetMousePos()
   local width, height = GetWindowSize()
@@ -998,7 +998,7 @@ function ToggleRenderableSize()
 end --ToggleRenderableSize
 ]]
 
-function RenderGUI()
+function RenderGUI( timerId )
   settings.timer = settings.timer + 0.01
   Render( 'clrscr' )
   if settings.showGrid then
@@ -1054,7 +1054,7 @@ function RenderGUI()
 
   if settings.guiVisibility then
     GUI.templates.Draw()
-    GUIRendererRender() -- additional GUI from gui.lua
+    GUIRendererRender( 0 ) -- additional GUI from gui.lua
   end
   SetTimer( 1/30, 'RenderGUI', true )
 end --RenderGUI

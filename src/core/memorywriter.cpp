@@ -47,10 +47,10 @@ void MemoryWriter::CheckSizeToWrite( Dword sizeToWrite )
       if( this->buffer.getLength() )
       {
         memory temp( this->buffer );
-        this->buffer.realloc( this->buffer.getLength() + toAdd );
+        this->buffer.Realloc( this->buffer.getLength() + toAdd );
         memcpy( this->buffer.getData(), temp.getData(), temp.getLength() );
       }
       else
-        this->buffer.alloc( toAdd );
+        this->buffer.Alloc( toAdd );
     }
 }//CheckSizeToWrite

@@ -139,7 +139,7 @@ Bool ImageLoader::_LoadFromBufferBMP( Byte *buffer, Dword length )
 
   this->_size.width = infoHeader->biWidth;
   this->_size.height = infoHeader->biHeight;
-  this->_data.alloc( this->_size.width * this->_size.height * 4 );
+  this->_data.Alloc( this->_size.width * this->_size.height * 4 );
 
   switch( infoHeader->biBitCount )
   {
@@ -216,7 +216,7 @@ Bool ImageLoader::_LoadFromBufferTGA( Byte *buffer, Dword length )
   this->_size.width = *w;
   this->_size.height = *h;
   //__log.PrintInfo( Filelevel_DEBUG, ". size: %d x %d", this->_size.width, this->_size.height );
-  this->_data.alloc( this->_size.width * this->_size.height * 4 );
+  this->_data.Alloc( this->_size.width * this->_size.height * 4 );
   Byte *dest = ( Byte* ) this->_data.getData();
 
   if( compressed == 2 )
@@ -366,7 +366,7 @@ Bool ImageLoader::_LoadFromBufferJPG( Byte *buffer, Dword length )
   {
     Dword x, y;
     Int pos3b, pos4b;
-    this->_data.alloc( this->_size.height * this->_size.width * 4 );
+    this->_data.Alloc( this->_size.height * this->_size.width * 4 );
     Byte *src_mem = (Byte*) temp_mem.getData(), *dest_mem = (Byte*) this->_data.getData();
     for( y = 0; y < this->_size.height; ++y )
     for( x = 0; x < this->_size.width; ++x )
@@ -380,7 +380,7 @@ Bool ImageLoader::_LoadFromBufferJPG( Byte *buffer, Dword length )
       dest_mem[ pos4b + 3] = 255;
     }
   }
-  temp_mem.free();
+  temp_mem.Free();
 
   jpeg_finish_decompress( &cinfo );
   jpeg_destroy_decompress( &cinfo );
@@ -461,7 +461,7 @@ Bool ImageLoader::_LoadFromBufferPNG( Byte *buffer, Dword length )
   png_read_update_info( png_ptr, info_ptr );
   png_get_IHDR( png_ptr, info_ptr, &img_width, &img_height, &bit_depth, &color_type, 0, 0, 0 );
   png_uint_32 row_bytes = png_get_rowbytes( png_ptr, info_ptr );
-  data_mem.alloc( img_height * row_bytes );
+  data_mem.Alloc( img_height * row_bytes );
   pdata = data_mem.getData();
   png_byte **row_pointers = new png_byte * [ img_height ];
   for( unsigned int i = 0; i < img_height; ++i )
@@ -473,7 +473,7 @@ Bool ImageLoader::_LoadFromBufferPNG( Byte *buffer, Dword length )
 
   this->_size.width = img_width;
   this->_size.height = img_height;
-  this->_data.alloc( this->_size.width * this->_size.height * 4 );
+  this->_data.Alloc( this->_size.width * this->_size.height * 4 );
 
   //__log.PrintInfo( Filelevel_DEBUG, "color_type = %d, interlace_type = %d", color_type, interlace_type );
   if( color_type == PNG_COLOR_TYPE_RGB )  //2

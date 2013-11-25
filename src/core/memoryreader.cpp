@@ -84,7 +84,7 @@ void MemoryReader::CopyFromSource( void *srcData, Dword length )
   if( !srcData )
     return;
 
-  this->data.alloc( length );
+  this->data.Alloc( length );
   this->curData = this->data.getData();
   memcpy( this->curData, srcData, length );
   this->curLength = length;
@@ -98,7 +98,7 @@ void MemoryReader::CopyFromSource( void *srcData, Dword length )
 */
 void MemoryReader::Free()
 {
-  this->data.free();
+  this->data.Free();
   this->curLength = this->curPos = 0;
   this->curData = 0;
 }//Free

@@ -541,18 +541,18 @@ RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRender
   CoreRenderableListIndicies::iterator iter, iterEnd = inRenderableIndicies->end(), iterBegin = inRenderableIndicies->begin();
   bool added = false;
   for( iter = iterBegin; iter != iterEnd; ++iter ) {
-    __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => z[%3.3f] vs iter->z[%3.3f] index[%d]", zIndex, ( *( inRenderableList->begin() + *iter ) ).GetPosition().z, *iter );
+    //__log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => z[%3.3f] vs iter->z[%3.3f] index[%d]", zIndex, ( *( inRenderableList->begin() + *iter ) ).GetPosition().z, *iter );
     if( zIndex < ( *( inRenderableList->begin() + *iter ) ).GetPosition().z )
     {
       inRenderableIndicies->insert( iter, index );
-      __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => inserted z %3.3f to index %d", zIndex, index );
+      //__log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => inserted z %3.3f to index %d", zIndex, index );
       added = true;
       break;
     }
   }
   if( !added ) {
     inRenderableIndicies->push_back( index );
-    __log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => %3.3f pushed to end index %d", zIndex, index );
+    //__log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => %3.3f pushed to end index %d", zIndex, index );
   }
   quad->SetIndexInRenderableList( index );
 

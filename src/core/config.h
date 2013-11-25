@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <pcre/pcre.h>
 
 class ConfigFile;
 extern ConfigFile* __config;
@@ -47,4 +48,5 @@ public:
 
 private:
   ConfigFileValue* _GetValue( const std::string &name, bool createIfNotExist = false );
+  pcre *regexp;
 };

@@ -1,6 +1,6 @@
 _UpgradeReport_Files/
 Backup/
-Debug/logs/
+Debug/
 Release/logs/
 Release/data/temp/
 */*/default.cfg
@@ -16,3 +16,4 @@ flatuniverse.suo
 flatuniverse.v11.suo
 flatuniverse.opensdf
 build/*.gz
+flatuniverse/flatuniverse.vcxproj.user

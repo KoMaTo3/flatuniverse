@@ -31,7 +31,7 @@ function GUIInit()
 end
 
 --[[ GUIRendererRender ]]
-function GUIRendererRender()
+function GUIRendererRender( timerId )
   for id, item in pairs( GUIRenderer.GUIElements ) do
     --Alert( item.rect.right )
     item:Render()

@@ -94,8 +94,8 @@ Lua::Lua()
 
 Lua::~Lua()
 {
-  this->Destroy();
   DEF_DELETE( __debugRender );
+  this->Destroy();
 }//destructor
 
 
@@ -1835,7 +1835,7 @@ int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
   }
 
   if( lua_istable( lua, stackIndex ) ) {  //{R,G,B,A}
-    //__log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by table" );
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by table" );
     lua_pushvalue( lua, -1 );
     lua_pushnil( lua );
     float f[ 4 ];
@@ -1858,7 +1858,7 @@ int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => by 4 float => not enough parameters" );
       return 0;
     }
-    //__log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by 4 float" );
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::GetColor => by 4 float" );
     color.Set(
       ( float ) lua_tonumber( lua, stackIndex ),
       ( float ) lua_tonumber( lua, stackIndex + 1 ),

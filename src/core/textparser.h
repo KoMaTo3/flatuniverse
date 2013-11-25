@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include "pcre/pcre.h"
 
 
 enum TextParserLexem {
@@ -57,6 +58,7 @@ private:
   std::string _buffer;
   int _length;
   int _currentPos;
+  pcre *regexp;
 };
 
 

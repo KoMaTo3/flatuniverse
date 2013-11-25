@@ -272,7 +272,7 @@ function PlayerEndLongJump( timerId )
 end -- PlayerEndLongJump
 
 --[[ UpdatePlayerAnimation ]]
-function UpdatePlayerAnimation()
+function UpdatePlayerAnimation( timerid )
   local curTime = GetTime()
   local timer = 0.2
   if curTime - playerState.onGroundTime < 0.1 then  -- on ground
@@ -460,7 +460,7 @@ function CollisionMushroom( mushroom, target, flags, vx, vy )
 end -- CollisionMushroom
 
 --[[ UpdateCamera ]]
-function UpdateCamera()
+function UpdateCamera( timerId )
   local camera = GetCamera( 'camera-mario-style' )
   local _, cy = ObjectGetPos( camera )
   local px, _ = ObjectGetPos( 'player' )

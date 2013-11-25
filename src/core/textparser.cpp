@@ -2,9 +2,6 @@
 #include "file.h"
 
 
-#include "../pcre/pcre.h"
-
-
 #ifndef min
 #define min( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
 #define max( a, b ) ( ( a ) > ( b ) ? ( a ) : ( b ) )
@@ -15,22 +12,9 @@ TextParser::TextParser( const char *textBuffer, int textLength )
 :_buffer( textBuffer ), _length( textLength ), _currentPos( 0 )
 {
   this->RemoveComments( this->_buffer );
-}
-
-
-TextParser::~TextParser() {
-}
-
-
-bool TextParser::GetNext( Result& result ) {
-  if( this->_currentPos >= this->_length ) {
-    result.Reset();
-    return false;
-  }
-
   const char *error;
   int errorOffset;
-  static pcre *re = pcre_compile(
+  this->regexp = pcre_compile(
     "\\s*?("
     "([a-zA-Z_][a-zA-Z_0-9]*)"      //3
     "|([+\\-]?([0-9]*\\.)?[0-9]+)"  //4,5
@@ -43,13 +27,24 @@ bool TextParser::GetNext( Result& result ) {
     &errorOffset,
     NULL
   );
-  if( !re ) {
+}
+
+
+TextParser::~TextParser() {
+  pcre_free( this->regexp );
+  this->regexp = NULL;
+}
+
+
+bool TextParser::GetNext( Result& result ) {
+  if( this->_currentPos >= this->_length ) {
+    result.Reset();
     return false;
   }
   int reRes[ ( 20 /* кол-во пар скобок */ + 1 ) * 3 ];
 
   //LOGD( "next..." );
-  int resultIndex = 0, pcreResult = pcre_exec( re, NULL, this->_buffer.c_str() + this->_currentPos, this->AllowedToRead(), 0, 0, reRes, sizeof( reRes ) / sizeof( int ) );
+  int resultIndex = 0, pcreResult = pcre_exec( this->regexp, NULL, this->_buffer.c_str() + this->_currentPos, this->AllowedToRead(), 0, 0, reRes, sizeof( reRes ) / sizeof( int ) );
   //LOGD( "pcreResult[%d] firstByte[%d][%c]\n", pcreResult, this->_buffer[ this->_currentPos ], this->_buffer[ this->_currentPos ] );
 
   if( pcreResult > 0 ) {

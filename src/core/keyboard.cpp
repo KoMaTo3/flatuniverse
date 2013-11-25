@@ -7,10 +7,10 @@ int Keyboard::KeyModifiers = 0;
 
 Keyboard::Keyboard()
 {
-  this->keys.alloc        ( 1024 );
-  this->keysOld.alloc     ( 1024 );
-  this->keysPressed.alloc ( 1024 );
-  this->keysReleased.alloc( 1024 );
+  this->keys.Alloc        ( 1024 );
+  this->keysOld.Alloc     ( 1024 );
+  this->keysPressed.Alloc ( 1024 );
+  this->keysReleased.Alloc( 1024 );
   this->ResetState();
 }//constructor
 
@@ -36,10 +36,10 @@ void Keyboard::_ReallocBuffers( Dword newKeysCount )
           tmpKeysOld( this->keysOld ),
           tmpKeysPressed( this->keysPressed ),
           tmpKeysReleased( this->keysReleased );
-  this->keys.realloc        ( newKeysCount );
-  this->keysOld.realloc     ( newKeysCount );
-  this->keysPressed.realloc ( newKeysCount );
-  this->keysReleased.realloc( newKeysCount );
+  this->keys.Realloc        ( newKeysCount );
+  this->keysOld.Realloc     ( newKeysCount );
+  this->keysPressed.Realloc ( newKeysCount );
+  this->keysReleased.Realloc( newKeysCount );
   memset( this->keys.getData(),         0, this->keys.getLength() );
   memset( this->keysOld.getData(),      0, this->keysOld.getLength() );
   memset( this->keysPressed.getData(),  0, this->keysPressed.getLength() );

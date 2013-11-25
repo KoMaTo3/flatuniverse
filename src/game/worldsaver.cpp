@@ -90,7 +90,7 @@ void WorldSaver::AllocFreeBlocks( Dword blocksCount )
   {
     Dword startIndex = this->worldData.getLength() / this->blockSize;
     memory tmp( this->worldData );
-    this->worldData.alloc( tmp.getLength() + blocksCount * this->blockSize );
+    this->worldData.Alloc( tmp.getLength() + blocksCount * this->blockSize );
     memcpy( this->worldData.getData(), tmp.getData(), tmp.getLength() );
     for( Dword q = 0; q < blocksCount; ++q )
     {
@@ -100,7 +100,7 @@ void WorldSaver::AllocFreeBlocks( Dword blocksCount )
   }
   else
   {
-    this->worldData.alloc( blocksCount * this->blockSize );
+    this->worldData.Alloc( blocksCount * this->blockSize );
     for( Dword q = 0; q < blocksCount; ++q )
     {
       this->freeBlocks.push_back( q );
@@ -120,7 +120,7 @@ void WorldSaver::AllocFreeBlocks( Dword blocksCount )
 bool WorldSaver::LoadGrid( Short x, Short y, FU_OUT memory& data, FU_OUT Dword &version )
 {
   //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::LoadGrid => [%d; %d]", x, y );
-  data.free();
+  data.Free();
   Grid *grid = this->GridExists( x, y );
   if( !grid ) {
     //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::LoadGrid => grid not found in worldData" );
@@ -129,7 +129,7 @@ bool WorldSaver::LoadGrid( Short x, Short y, FU_OUT memory& data, FU_OUT Dword &
 
   Dword blocksNum = grid->blocksNums.size();
   //__log.PrintInfo( Filelevel_DEBUG, ". blocks per grid %d, version x%X", blocksNum, grid->version );
-  data.realloc( blocksNum * this->blockSize );
+  data.Realloc( blocksNum * this->blockSize );
   char *bufferDest = data.getData();
   char *bufferSrc = this->worldData.getData();
   for( Dword q = 0; q < blocksNum; ++q )
@@ -269,7 +269,7 @@ Dword WorldSaver::LoadFromFile( const std::string& fileName )
     if( f.Open( fileName, File_mode_READ ) != aOK ) {
       return 0;
     }
-    data.alloc( f.GetLength() );
+    data.Alloc( f.GetLength() );
     f.Read( data.getData(), data.getLength(), 1 );
     f.Close();
   }
@@ -292,7 +292,7 @@ Dword WorldSaver::LoadFromFile( const std::string& fileName )
   headerReader.SeekFromStart( worldDataLength + sizeof( WOLDSAVER_FILE_VERSION ) );
   //__log.PrintInfo( Filelevel_DEBUG, ". worldDataLength[%d]", worldDataLength );
 
-  this->worldData.alloc( worldDataLength );
+  this->worldData.Alloc( worldDataLength );
   memcpy( this->worldData.getData(), data.getData() + sizeof( WOLDSAVER_FILE_VERSION ), worldDataLength );
 
   //свободные блоки

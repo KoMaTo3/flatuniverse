@@ -238,6 +238,9 @@ RenderableQuad* RenderableQuad::SetTexture( const std::string& textureFileName, 
 {
   const Vec4 v4( texCoordsLeftTop.x, texCoordsLeftTop.y, texCoordsRightBottom.x, texCoordsRightBottom.y );
   this->texCoords = __textureAtlas->GetTextureCoords( textureFileName, v4 );
+  if( !this->info ) {
+    __log.PrintInfo( Filelevel_ERROR, "RenderableQuad::SetTexture => info is NULL" );
+  }
   this->info->textureCoordsNew = this->info->textureCoordsPrev = v4;
   this->info->textureName = textureFileName;
   return this;
@@ -251,6 +254,9 @@ RenderableQuad* RenderableQuad::SetTexture( const std::string& textureFileName, 
 =============
 */
 RenderableQuad* RenderableQuad::SetTextureCoords( const Vec2& texCoordsLeftTop, const Vec2& texCoordsRightBottom ) {
+  if( !this->info ) {
+    __log.PrintInfo( Filelevel_ERROR, "RenderableQuad::SetTextureCoords => info is NULL" );
+  }
   if( !this->info->textureName.empty() ) {
     const Vec4 v4( texCoordsLeftTop.x, texCoordsLeftTop.y, texCoordsRightBottom.x, texCoordsRightBottom.y );
     this->texCoords = __textureAtlas->GetTextureCoords( this->info->textureName, v4 );
@@ -281,6 +287,9 @@ Vec2 RenderableQuad::GetMiddleTextureCoords()
 */
 void RenderableQuad::SaveToBuffer( MemoryWriter &writer )
 {
+  if( !this->info ) {
+    __log.PrintInfo( Filelevel_ERROR, "RenderableQuad::SaveToBuffer => info is NULL" );
+  }
   //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SaveToBuffer => texture['%s']", this->info->textureName.c_str() );
   writer << this->info->textureName;
   //__log.PrintInfo( Filelevel_DEBUG, ". pos: sizeof[%d]", sizeof( this->GetPosition() ) );
@@ -395,6 +404,10 @@ void RenderableQuad::CalculateRect( Vec2 &leftTop, Vec2 &rightBottom )
 =============
 */
 void RenderableQuad::CheckChanges() {
+  if( !this->info ) {
+    __log.PrintInfo( Filelevel_ERROR, "RenderableQuad::CheckChanges => info is NULL" );
+  }
+
   //size
   if( this->info->sizeNew != this->info->sizePrev ) {
     this->SetSize( this->info->sizeNew );
@@ -428,6 +441,9 @@ void RenderableQuad::CheckChanges() {
 =============
 */
 void RenderableQuad::SetEnabled( bool isEnabled ) {
+  if( !this->info ) {
+    __log.PrintInfo( Filelevel_ERROR, "RenderableQuad::SetEnabled => info is NULL" );
+  }
   //__log.PrintInfo( Filelevel_DEBUG, "RenderableQuad::SetEnabled => this[x%p] value[%d]", this, isEnabled );
   if( isEnabled ) {
     if( this->info->indexInRenderableList != RENDERABLE_INDEX_UNDEFINED ) {

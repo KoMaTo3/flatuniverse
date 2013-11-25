@@ -42,7 +42,7 @@ bool TextureAtlas::Init( const Size& maxTextureSize, Byte borderSize )
   this->borderPerItem = borderSize;
   this->size = maxTextureSize;
   this->atlas.Init( this->size );
-  this->textureData.alloc( this->size.width * this->size.height * 4 );
+  this->textureData.Alloc( this->size.width * this->size.height * 4 );
   memset( this->textureData.getData(), 0xFF, this->textureData.getLength() );
 
   Dword pixelsCount = this->size.width * this->size.height;
@@ -134,6 +134,10 @@ Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const V
   else
   {
     TextureAtlasItem *item = this->LoadTexture( textureFileName );
+    if( !item ) {
+      __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::GetTextureCoords => LoadTexture('%s') => failed", textureFileName.c_str() );
+      return Vec4( 0.0f, 0.0f, 1.0f, 1.0f );
+    }
     Vec3 tex0( textureCoords.x, textureCoords.y, 0 ), tex1( textureCoords.z, textureCoords.w, 0 );
     tex0 *= item->matTransform;
     tex1 *= item->matTransform;

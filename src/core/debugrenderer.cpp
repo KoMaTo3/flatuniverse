@@ -11,6 +11,7 @@ DebugRenderer::DebugRenderer() {
 
 
 DebugRenderer::~DebugRenderer() {
+  this->Clrscr();
 }//destructor
 
 
