@@ -61,6 +61,9 @@ private:
             ext;        //נאסרטנוםטו פאיכא
 
     FileManagerItem();
+    FileManagerItem( const FileManagerItem& );
+  private:
+    FileManagerItem& operator=( const FileManagerItem& );
   };
 
 private:

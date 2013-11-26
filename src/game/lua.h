@@ -155,6 +155,7 @@ public:
   bool  RunScript     ( const std::string &script );
   bool  CallFunction  ( const std::string &funcName );
   bool  CallTableTableFunction    ( const std::string &table, const std::string &key, const std::string &function );
+  int   GetStackParmsCount();
 
   void  ShowError     ( const std::string &comment, const std::string &errorName );
 

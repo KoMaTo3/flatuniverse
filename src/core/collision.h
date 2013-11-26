@@ -18,6 +18,9 @@ public:
   Collision *object;
   std::string funcName;
 
+  luaCollisionListenerStruct()
+  :object( nullptr ), funcName( "" )
+  { }
   luaCollisionListenerStruct( const luaCollisionListenerStruct& setFrom )
     :object( setFrom.object ), funcName( setFrom.funcName ) {
   }
@@ -31,9 +34,6 @@ public:
     this->object    = setFrom.object;
     return *this;
   }
-
-private:
-  luaCollisionListenerStruct(){}
 };
 typedef std::deque< luaCollisionListenerStruct > luaCollisionListenersList;
 

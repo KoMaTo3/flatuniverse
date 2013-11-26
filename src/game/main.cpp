@@ -459,7 +459,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     */
       //obj->SetPosition( Vec3( -20.0f, 50.0f + Math::Sin16( rot * 5.0f ) * 50.0f, 0.0f ) );
 
-    sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), __worldGridList->size() );
+    sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d] luaStack[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), __worldGridList->size(), game->lua->GetStackParmsCount() );
     game->core->SetWindowTitle( tempChar );
   }
   //MessageBox( NULL, "Ok", "Debug", MB_OK );
@@ -603,22 +603,21 @@ void Game::Update()
 */
 void Game::UpdateLuaTimers()
 {
-  Dword q, count = this->luaTimers.size();
-  GameLuaTimer *timer;
-  for( q = 0; q < count; ++q )
-  {
-    timer = &this->luaTimers[ q ];
-    if( timer->active )
-    {
-      timer->time -= ( this->core->GetState() == CORE_STATE_PAUSED && !timer->dontPause ? 0.0f : sTimer.GetDeltaF() );
-      if( timer->time <= 0.0f )
-      {
-        timer->active = false;
-        if( timer->funcName.length() )
-          LUACALLBACK_Timer( this->lua, q, timer->funcName );
+  std::vector< GameLuaTimer > timerProcs;
+  for( auto &timer: this->luaTimers ) {
+    if( timer.active ) {
+      timer.time -= ( this->core->GetState() == CORE_STATE_PAUSED && !timer.dontPause ? 0.0f : sTimer.GetDeltaF() );
+      if( timer.time <= 0.0f ) {
+        timer.active = false;
+        if( !timer.funcName.empty() ) {
+          timerProcs.push_back( GameLuaTimer( timer.id, timer.funcName ) );
+        }
       }
     }
-  }//for q
+  }
+  for( auto &timer: timerProcs ) {
+    LUACALLBACK_Timer( this->lua, timer.id, timer.funcName );
+  }
 }//UpdateLuaTimers
 
 
@@ -757,17 +756,17 @@ void Game::LUA_SetCollisionStatic( const std::string &name, bool isStatic )
 */
 Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPause )
 {
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s']", funcName.c_str() );
   Dword id, count = game->luaTimers.size();
   bool setted = false;
-  for( Dword q = 0; q < count; ++q )
-    if( !game->luaTimers[ q ].active )
-    {
+  for( Dword q = 0; q < count; ++q ) {
+    if( !game->luaTimers[ q ].active ) {
       id = q;
       setted = true;
       break;
     }
-  if( !setted )
-  {
+  }
+  if( !setted ) {
     game->luaTimers.push_back( GameLuaTimer() );
     id = game->luaTimers.size() - 1;
   }
@@ -775,6 +774,8 @@ Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPaus
   game->luaTimers[ id ].time      = time;
   game->luaTimers[ id ].funcName  = funcName;
   game->luaTimers[ id ].dontPause = dontPause;
+  game->luaTimers[ id ].id = id;
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s'] id[%d] done", funcName.c_str(), id );
   return id;
 }//LUA_SetTimer
 

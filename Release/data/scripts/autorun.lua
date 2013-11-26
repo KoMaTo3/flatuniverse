@@ -375,7 +375,7 @@ function PushCoin( object )
   ObjectSetAnimation( itemName, 'supermario/coin', 'do' )
   animation[ 'timer'..SetTimer( 1.0, 'DoAnimationCoin' ) ] = { step = 1, time = 0, object = itemName, tile = object }
   ObjectRemoveTag( object, 'has-coin' )
-  ObjectAttr( object, { renderable = false } )
+  ObjectAttr( object, { renderable = false, lightPoint = false } )
   ObjectSetAnimation( object, 'supermario/brick2', 'do' )
   animation[ 'timer'..SetTimer( 0.5, 'DoAnimationBrick' ) ] = { step = 1, time = 0, object = itemName, tile = object }
   -- ObjectAttr( object, { textureName = 'textures/tiles/bricks/brick2.png' } )

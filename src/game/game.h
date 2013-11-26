@@ -31,6 +31,23 @@ public:
     float time;
     std::string funcName;
     bool dontPause; //не паузится от Game::SetActive
+    Dword id;
+
+    GameLuaTimer(){}
+    GameLuaTimer( const GameLuaTimer& from )
+    :active( from.active ), time( from.time ), funcName( from.funcName ), dontPause( from.dontPause ), id( from.id )
+    { }
+    GameLuaTimer& operator=( const GameLuaTimer& from ) {
+      this->active = from.active;
+      this->dontPause = from.dontPause;
+      this->funcName = from.funcName;
+      this->id = from.id;
+      this->time = from.time;
+      return *this;
+    }
+    GameLuaTimer( int setId, const std::string& setFuncName )
+    :id( setId ), funcName( setFuncName )
+    { }
   };
   std::vector< GameLuaTimer > luaTimers;
 
@@ -50,6 +67,16 @@ public:
   {
     std::string   funcName;
     ObjectTrigger *trigger;
+
+    GameObjectTrigger(){}
+    GameObjectTrigger( GameObjectTrigger& from )
+    :funcName( from.funcName ), trigger( from.trigger )
+    { }
+    GameObjectTrigger& operator=( const GameObjectTrigger& from ) {
+      this->funcName = from.funcName;
+      this->trigger = from.trigger;
+      return *this;
+    }
   };
   typedef std::deque< GameObjectTrigger > GameObjectTriggerList;
   GameObjectTriggerList objectTriggers;

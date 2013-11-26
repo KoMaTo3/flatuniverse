@@ -13,7 +13,6 @@ public:
   Vec2 position;
   Vec2 size;
   void *object;
-
   struct Value {
     int index;
     float value;
@@ -30,8 +29,10 @@ public:
 
 public:
   LBufferCacheEntity();
+  LBufferCacheEntity( const LBufferCacheEntity& );
   LBufferCacheEntity( void* const setObject, const Vec2& setPosition, const Vec2& setSize );
   void Reset( const Vec2& setPosition, const Vec2& setSize );
+  LBufferCacheEntity& operator=( const LBufferCacheEntity& );
 };
 
 

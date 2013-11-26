@@ -13,6 +13,13 @@ FileManager::FileManagerItem::FileManagerItem()
 }
 
 
+FileManager::FileManagerItem::FileManagerItem( const FileManagerItem& from )
+:type( from.type ), timestamp( from.timestamp ), size( from.size ), sizePacked( from.sizePacked ), start( from.start )
+,name( from.name ), path( from.path ), fullPath( from.fullPath ), pack( from.pack ), ext( from.ext )
+{
+}
+
+
 FileManager::FileManager()
 {
 }//constructor

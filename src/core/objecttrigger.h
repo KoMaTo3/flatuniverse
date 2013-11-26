@@ -37,9 +37,9 @@ public:
     this->object    = setFrom.object;
     return *this;
   }
-
-private:
-  luaTriggerListenerStruct(){}
+  luaTriggerListenerStruct()
+  :object( nullptr ), funcName( "" )
+  { }
 };
 typedef std::deque< luaTriggerListenerStruct > luaTriggerListenersList;
 

@@ -16,6 +16,15 @@ LBufferCacheEntity::LBufferCacheEntity( void* const setObject, const Vec2& setPo
 }
 
 
+LBufferCacheEntity::LBufferCacheEntity( const LBufferCacheEntity& from ) {
+  this->lifeTime = from.lifeTime;
+  this->object = from.object;
+  this->position = from.position;
+  this->size = from.size;
+  this->values = from.values;
+}
+
+
 void LBufferCacheEntity::Reset( const Vec2& setPosition, const Vec2& setSize ) {
   this->position = setPosition;
   this->size = setSize;
@@ -54,6 +63,16 @@ LBufferCacheEntity* LBufferCache::FindElement( void *object ) {
   }
   return NULL;
 }//FindElement
+
+
+LBufferCacheEntity& LBufferCacheEntity::operator=( const LBufferCacheEntity& from ) {
+  this->lifeTime = from.lifeTime;
+  this->object = from.object;
+  this->position = from.position;
+  this->size = from.size;
+  this->values = from.values;
+  return *this;
+}
 
 
 bool LBufferCache::CheckCache( void *object, const Vec2& position, const Vec2& size, LBufferCacheEntity **outCacheElement ) {
