@@ -27,11 +27,9 @@ LightMgr::LightMgr()
 LightMgr::~LightMgr() {
   if( this->fboLight ) {
     delete this->fboLight;
-    this->fboLight = NULL;
   }
   if( this->shader ) {
     delete this->shader;
-    this->shader = NULL;
   }
   for( auto &vaoItem: this->vao ) {
     delete vaoItem;
@@ -58,8 +56,7 @@ void LightMgr::Init( const Vec2& setTextureSize, ShaderProgram *setShader, Light
   this->_shaderUniforms.textureColor = this->shader->GetUniformLocation( "texture0" );
   this->_shaderUniforms.textureBrightness = this->shader->GetUniformLocation( "texture1" );
 
-  this->vao.resize( 1 );
-  this->vao[ 0 ] = new VertexArray();
+  this->vao.push_back( new VertexArray() );
 }//Init
 
 

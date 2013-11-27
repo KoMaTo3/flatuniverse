@@ -38,12 +38,12 @@ LightEntity::LightEntity( const LightType &setType, const Vec2& setPosition, con
   ,lbuffer( lBufferSize, Math::TWO_PI ), lastCheckInRect( true ), maxRange( Math::Sqrt16( setSize.x * setSize.y ) ), _lastPosition( -setPosition ), _lastSize( -setSize )
   , _lastColor( Vec4Null ), penetration( 0.0f )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "+1 LightEntity %p", this );
+  //__log.PrintInfo( Filelevel_DEBUG, "+1 LightEntity %p", this );
 }
 
 
 LightEntity::~LightEntity() {
-  __log.PrintInfo( Filelevel_DEBUG, "~LightEntity %p", this );
+  //__log.PrintInfo( Filelevel_DEBUG, "~LightEntity %p", this );
 }
 
 

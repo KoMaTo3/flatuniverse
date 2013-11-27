@@ -75,6 +75,10 @@ void LBuffer::DrawPolarLine( const Vec2& lineBegin, const Vec2& lineEnd ) {
 
 
 void LBuffer::_PushValue( int position, float value, LBufferCacheEntity *cacheElement ) {
+  while( position < 0 ) {
+    position += this->size;
+  }
+  position %= this->size;
   if( value < 0.0f ) {
     value = 0.0f;
   }

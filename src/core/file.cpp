@@ -137,7 +137,7 @@ HRESULT File::Open(const char *file_name, BYTE file_mode, BYTE warnLevel/* = Fil
   break;
   }
   fopen_s(&this->_file, fileName.data(), m);
-  __log.PrintInfo(Filelevel_DEBUG, "File::Open('%s') open in directory %s", fileName.data(), tools::GetCurDirectory().data());
+  //__log.PrintInfo(Filelevel_DEBUG, "File::Open('%s') open in directory %s", fileName.data(), tools::GetCurDirectory().data());
   if(path.length())
     tools::SetCurDirectory(oldDir);
   if(this->_file == 0)

@@ -463,7 +463,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     game->core->SetWindowTitle( tempChar );
   }
   //MessageBox( NULL, "Ok", "Debug", MB_OK );
-  game->core->__Test();
+  //game->core->__Test();
 
   game->world->SaveToFile( "data/temp/testworld.fu" );
   DEF_DELETE( game );
@@ -616,6 +616,7 @@ void Game::UpdateLuaTimers()
     }
   }
   for( auto &timer: timerProcs ) {
+    //__log.PrintInfo( Filelevel_DEBUG, "Game::UpdateLuaTimers => id[%d] func['%s']", timer.id, timer.funcName.c_str() );
     LUACALLBACK_Timer( this->lua, timer.id, timer.funcName );
   }
 }//UpdateLuaTimers
@@ -756,7 +757,7 @@ void Game::LUA_SetCollisionStatic( const std::string &name, bool isStatic )
 */
 Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPause )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s']", funcName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s']", funcName.c_str() );
   Dword id, count = game->luaTimers.size();
   bool setted = false;
   for( Dword q = 0; q < count; ++q ) {
@@ -775,7 +776,7 @@ Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPaus
   game->luaTimers[ id ].funcName  = funcName;
   game->luaTimers[ id ].dontPause = dontPause;
   game->luaTimers[ id ].id = id;
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s'] id[%d] done", funcName.c_str(), id );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s'] id[%d] done", funcName.c_str(), id );
   return id;
 }//LUA_SetTimer
 

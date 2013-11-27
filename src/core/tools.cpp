@@ -238,20 +238,20 @@ Int64 GetFileWriteTime( const std::string& file )
   HANDLE hFile = ::CreateFile( file.data(), GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
   if( hFile == INVALID_HANDLE_VALUE )
   {
-    __log.PrintInfo( Filelevel_WARNING, "getFileWriteTime('%s') => CreateFile() => INVALID_HANDLE_VALUE", file.data() );
+    __log.PrintInfo( Filelevel_WARNING, "getFileWriteTime('%s') => CreateFile() => INVALID_HANDLE_VALUE", file.c_str() );
     return 0;
   }
   FILETIME    creationTime, accessTime, writeTime;
   SYSTEMTIME  systemTime;
   if( !::GetFileTime( hFile, &creationTime, &accessTime, &writeTime ) )
   {
-    __log.PrintInfo( Filelevel_WARNING, "getFileWriteTime('%s') => GetFileTime() => FALSE", file.data() );
+    __log.PrintInfo( Filelevel_WARNING, "getFileWriteTime('%s') => GetFileTime() => FALSE", file.c_str() );
     ::CloseHandle( hFile );
     return 0;
   }
   if( !FileTimeToSystemTime( &writeTime, &systemTime ) )
   {
-    __log.PrintInfo( Filelevel_WARNING, "getFileWriteTime('%s') => FileTimeToSystemTime() => FALSE", file.data() );
+    __log.PrintInfo( Filelevel_WARNING, "getFileWriteTime('%s') => FileTimeToSystemTime() => FALSE", file.c_str() );
     ::CloseHandle( hFile );
     return 0;
   }

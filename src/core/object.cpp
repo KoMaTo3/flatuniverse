@@ -584,7 +584,7 @@ bool Object::DestroyExternalRenderableInList( CoreRenderableList *inRenderableLi
     if( *iter == index ) {
       //__log.PrintInfo( Filelevel_DEBUG, "add free index %d in list x%p", *iter, inRenderableFreeIndicies );
       inRenderableIndicies->erase( iter );
-      __log.PrintInfo( Filelevel_DEBUG, "DestroyExternalRenderableInList => erased index %d", index );
+      //__log.PrintInfo( Filelevel_DEBUG, "DestroyExternalRenderableInList => erased index %d", index );
       break;
     }
   }
@@ -1879,9 +1879,7 @@ void Object::DisableLightBlockByCollision() {
     __log.PrintInfo( Filelevel_WARNING, "Object::DisableLightBlockByCollision => this->widget is NULL" );
     return;
   }
-  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableLightBlockByCollision => widget[%p] ...", this->widget );
   this->widget->DeleteWidget( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION );
-  __log.PrintInfo( Filelevel_DEBUG, "Object::DisableLightBlockByCollision => widget[%p] done", this->widget );
 }//DisableLightBlockByCollision
 
 

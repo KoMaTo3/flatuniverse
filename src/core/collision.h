@@ -62,7 +62,9 @@ private:
   CollisionRect _rect;//рассчитанный контур объекта (квадрат)
 
   CollisionElement *collisionElement;
-  CollisionHandlerList *handlers;
+  CollisionHandlerList
+      *handlers,
+      *newHandlers;
   static CollisionHandlerInit *InitCollisionHandler;
   static luaCollisionListenersList *collisionLintenersList;
   static CollisionHandler *defaultCollisionHandler;

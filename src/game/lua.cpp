@@ -587,7 +587,7 @@ int Lua::LUA_StopTimer( lua_State *lua )
 */
 void Lua::LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => funcName['%s']", funcName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => funcName['%s']", funcName.c_str() );
   LuaStateCheck state( lua->luaState );
   lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
   if( !lua_isfunction( lua->luaState, -1 ) )
@@ -650,7 +650,7 @@ void LUACALLBACK_ListenMouseMove( Lua *lua, const std::string &funcName, const V
 */
 void Lua::LUACALLBACK_ListenKeyboard( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_ListenKeyboard => funcName['%s']", funcName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_ListenKeyboard => funcName['%s']", funcName.c_str() );
   LuaStateCheck state( lua->luaState );
   lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
   if( !lua_isfunction( lua->luaState, -1 ) )
@@ -1926,7 +1926,7 @@ void LUACALLBACK_ListenTrigger( Lua *lua, const std::string &funcName, const std
 =============
 */
 void Lua::LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, Byte flags, const Vec3 &velocity ) {
-  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_ListenCollision => funcName['%s']", funcName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_ListenCollision => funcName['%s']", funcName.c_str() );
   LuaStateCheck state( lua->luaState );
   lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
   if( !lua_isfunction( lua->luaState, -1 ) ) {

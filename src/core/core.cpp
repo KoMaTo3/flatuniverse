@@ -2018,14 +2018,14 @@ LRESULT APIENTRY Core::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
     case WM_KEYDOWN:
     {
       if( !( lParam & 0x40000000 ) ) {  //prevent auto-repeating
-        __log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d[x%X] => %d mods[%d]", wParam, wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
+        //__log.PrintInfo( Filelevel_DEBUG, "WM_KEYDOWN: %d[x%X] => %d mods[%d]", wParam, wParam, Keyboard::KeyCodeToGlut( wParam ), KeyboardGetModifiers() );
         /*
         if( core->gui.show ) {
           Glui2::__KeyboardFunc( Keyboard::KeyCodeToGlut( wParam ), core->mouse.GetCursorPosition().x, core->mouse.GetCursorPosition().y );
         }
         if( !core->gui.show || !Glui2::__KeyboardInteracted ) {
         */
-          core->keyboard.DoPress( wParam );
+        core->keyboard.DoPress( wParam );
       }
       //}
       return 0;

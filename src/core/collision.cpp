@@ -17,10 +17,11 @@ Collision::CollisionHandler *Collision::defaultCollisionHandler = NULL;
 
 Collision::Collision( Vec3* objectPosition )
 :position( NULL ), velocity( 0.0f, 0.0f, 0.0f ), acceleration( 0.0f, 0.0f, 0.0f ), isStatic( true ), mass( 1.0f )
-, force( 0.0f, 0.0f, 0.0f ), collisionElement( NULL ), handlers( NULL ), offset( Vec3Null ), positionLast( 0.0f, 0.0f, 0.0f ), _rect()
+, force( 0.0f, 0.0f, 0.0f ), collisionElement( NULL ), handlers( NULL ), newHandlers( NULL ), offset( Vec3Null ), positionLast( 0.0f, 0.0f, 0.0f ), _rect()
 {
   this->position = objectPosition;
   this->positionResult = *this->position + this->offset;
+  if( this->position->Length() < 0.1f ) __log.PrintInfo( Filelevel_DEBUG, "+Collision: position is 0:0" );
 }//constructor
 
 
@@ -29,6 +30,7 @@ Collision::~Collision()
 {
   DEF_DELETE( collisionElement );
   DEF_DELETE( this->handlers );
+  DEF_DELETE( this->newHandlers );
 }//destructor
 
 
@@ -111,6 +113,7 @@ Collision* Collision::SetPosition( const Vec3& newPosition )
   }
   *this->position = newPosition;
   this->positionResult = *this->position + this->offset;
+  if( this->position->Length() < 0.1f ) __log.PrintInfo( Filelevel_DEBUG, "Collision::SetPosition position is 0:0" );
   return this;
 }//SetPosition
 
@@ -589,6 +592,12 @@ void Collision::ResolveCollision()
       ( *iter )( this, result->target, flags, oldVelocity );
     }
   }
+  if( this->newHandlers && !this->newHandlers->empty() ) {
+    for( auto &handler: *this->newHandlers ) {
+      this->handlers->push_back( handler );
+    }
+    this->newHandlers->clear();
+  }
 
   this->Update( 0.0f );
 }//ResolveCollision
@@ -786,9 +795,10 @@ void Collision::Render( float phase, const Vec3 &offset, bool isActive ) {
 void Collision::AddHandler( CollisionHandler *handler ) {
   if( !this->handlers ) {
     this->handlers = new CollisionHandlerList;
+    this->newHandlers = new CollisionHandlerList;
   }
 
-  this->handlers->push_back( handler );
+  this->newHandlers->push_back( handler );
   //__log.PrintInfo( Filelevel_DEBUG, "Collision::AddHandler => collision[x%p] handler[x%p]", this, handler );
 }//AddHandler
 

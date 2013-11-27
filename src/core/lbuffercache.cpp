@@ -21,7 +21,11 @@ LBufferCacheEntity::LBufferCacheEntity( const LBufferCacheEntity& from ) {
   this->object = from.object;
   this->position = from.position;
   this->size = from.size;
-  this->values = from.values;
+  //this->values = from.values;
+  this->values.clear();
+  for( auto &value: from.values ) {
+    this->values.push_back( value );
+  }
 }
 
 
@@ -103,12 +107,17 @@ void LBufferCache::ClearCache( void* object ) {
   auto
     iter = this->cache.begin(),
     iterEnd = this->cache.end();
+  bool deleted = false;
   while( iter != iterEnd ) {
     if( iter->object == object ) {
       this->cache.erase( iter );
+      deleted = true;
       break;
     }
     ++iter;
+  }
+  if( !deleted ) {
+    __log.PrintInfo( Filelevel_WARNING, "LBufferCache::ClearCache => object[%p] not found", object );
   }
 }//ClearCache
 

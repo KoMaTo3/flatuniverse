@@ -997,7 +997,6 @@ function ToggleRenderableSize()
   end
 end --ToggleRenderableSize
 ]]
-
 function RenderGUI( timerId )
   settings.timer = settings.timer + 0.01
   Render( 'clrscr' )
