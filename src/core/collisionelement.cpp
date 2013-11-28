@@ -9,7 +9,7 @@
 
 
 const float COLLISION_POLYGON_AXIS_E = 0.01f;
-const float CollisionElement::epsilon = 1.0f;
+const float CollisionElement::epsilon = 0.0f;
 
 /*
 //=============
@@ -619,7 +619,6 @@ void CollisionElementPolygon::GetPointList( PointList &points ) {
 void CollisionElementPolygon::Update() {
   PointList::iterator iter, iterEnd = this->pointsSource.end();
   int count = this->pointsSource.size();
-  //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => points[%d] pointsResult[%d]", count, this->pointsResult.size() );
   if( count > 2 ) {
     Vec2 min, max, radius;
     int num = 0;
@@ -640,7 +639,6 @@ void CollisionElementPolygon::Update() {
           max.y > point->y ? max.y : point->y
           );
       }
-      //__log.PrintInfo( Filelevel_DEBUG, ". point[%3.1f; %3.1f]", this->pointsResult[ num ].x, this->pointsResult[ num ].y );
     }
     this->pointsResult[ this->pointsResult.size() - 1 ] = this->pointsResult[ 0 ];
     this->_rect->leftTop.Set( min.x, min.y, 0.0f );
@@ -648,7 +646,6 @@ void CollisionElementPolygon::Update() {
     this->_lastPosition.Set( this->position->x, -this->position->y );
     this->_lastSize.Set( radius.x, radius.y );
     this->_lastHalfSize = this->_lastSize * 0.5f;
-    //__log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::Update => rect[%3.1f; %3.1f]-[%3.1f; %3.1f]", this->_rect->leftTop.x, this->_rect->leftTop.y, this->_rect->rightBottom.x, this->_rect->rightBottom.y );
   } else {
     __log.PrintInfo( Filelevel_ERROR, "CollisionElementPolygon::Update => not enough points" );
   }
@@ -959,8 +956,6 @@ void CollisionElementPolygon::_ProjectObjectToAxis( const Vec2 &axis, FU_OUT flo
       isInitialized = true;
     }
   }//foreach pointsResult
-
-  __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::_ProjectObjectToAxis" );
 }//_ProjectObjectToAxis
 
 
@@ -975,7 +970,6 @@ void CollisionElementPolygon::_Render( const Vec3 &offset ) {
   glBegin( GL_TRIANGLE_FAN );
   PointList::const_iterator iter, iterEnd = this->pointsResult.end();
   for( iter = this->pointsResult.begin(); iter != iterEnd; ++iter ) {
-    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementPolygon::_Render => point[%3.1f; %3.1f]", iter->x, iter->y );
     glVertex3f( iter->x - offset.x, iter->y - offset.y, 0.0f );
   }
   glEnd();
@@ -1028,7 +1022,7 @@ void CollisionElementPolygon::FillBuffer( const Vec2& lightPosition, const Vec2&
       vec0.NormalizeFast();
       vec1.NormalizeFast();
       vec.NormalizeFast();
-      vec *= ( 1.0f + this->epsilon );  //углубляем ребро на 1+epsilon
+      //vec *= ( 1.0f + this->epsilon );  //углубляем ребро на 1+epsilon
       vec0 *= ( 1.0f + this->epsilon ); //удлинняем ребро на 1+epsilon
       vec1 *= ( 1.0f + this->epsilon );
       Vec2 resVec0 = pointCurrent + vec0 + vec;

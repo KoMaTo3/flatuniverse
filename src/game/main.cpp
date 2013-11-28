@@ -461,9 +461,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
     sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d] luaStack[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), __worldGridList->size(), game->lua->GetStackParmsCount() );
     game->core->SetWindowTitle( tempChar );
+    game->core->__Test();
   }
   //MessageBox( NULL, "Ok", "Debug", MB_OK );
-  //game->core->__Test();
 
   game->world->SaveToFile( "data/temp/testworld.fu" );
   DEF_DELETE( game );

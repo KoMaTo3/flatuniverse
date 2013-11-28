@@ -38,12 +38,10 @@ LightEntity::LightEntity( const LightType &setType, const Vec2& setPosition, con
   ,lbuffer( lBufferSize, Math::TWO_PI ), lastCheckInRect( true ), maxRange( Math::Sqrt16( setSize.x * setSize.y ) ), _lastPosition( -setPosition ), _lastSize( -setSize )
   , _lastColor( Vec4Null ), penetration( 0.0f )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "+1 LightEntity %p", this );
 }
 
 
 LightEntity::~LightEntity() {
-  //__log.PrintInfo( Filelevel_DEBUG, "~LightEntity %p", this );
 }
 
 
@@ -140,7 +138,7 @@ void LightEntity::Update( LightBlocksList &blocks ) {
   this->AddVertice( LightVertex( this->position, this->color, 1.0f ) );
   float step = max( 0.01f, Math::TWO_PI / float( this->lbuffer.GetSize() ) );
   Vec2 pos, posNormalized;
-  float lastRange = this->maxRange, range;
+  float lastRange = this->maxRange, range, oneByMaxRange = 1.0f / this->maxRange;
   float rangeHistory[ 2 ] = { -1.0f, -1.0f };
   int
     skipsCount = 0, //число пропущенных вершин
@@ -187,13 +185,13 @@ void LightEntity::Update( LightBlocksList &blocks ) {
     if( !skipped ) {
       skipsCount = 0;
     }
-    this->AddVertice( LightVertex( pos, this->color, 1.0f - range / this->maxRange ) );
+    this->AddVertice( LightVertex( pos, this->color, 1.0f - range * oneByMaxRange ) );
     ++verticesCount;
     rangeHistory[ 1 ] = rangeHistory[ 0 ];
     rangeHistory[ 0 ] = lastRange;
     lastRange = range;
   }
-  this->AddVertice( LightVertex( this->position + Vec2( this->lbuffer.GetValueByIndex( 0 ), 0.0f ), this->color, 1.0f - range / this->maxRange ) );
+  this->AddVertice( LightVertex( this->position + Vec2( this->lbuffer.GetValueByIndex( 0 ), 0.0f ), this->color, 1.0f - range * oneByMaxRange ) );
   this->_lastPosition = this->position;
   this->_lastSize = this->size;
   this->_lastColor = this->color;

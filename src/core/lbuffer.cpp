@@ -180,12 +180,14 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
   Vec2 intersectPoint;
   xBegin += this->size - 2;
   xEnd += this->size + 2;
-  for( int x = xBegin; x <= xEnd; ++x ) {
+  int calculationStep = -1;
+  int x = xBegin;
+  while( calculationStep ) {
     int xValue = x % this->size;
     float a = this->SizeToFloat( xValue, 0.001f );
     if( Vec2::TestIntersect(
       Vec2Null,
-      Vec2( Math::Cos( a ) * this->lightRadius, -Math::Sin( a ) * this->lightRadius ),
+      Vec2( Math::Cos( a ) * this->lightRadius * 2.0f, -Math::Sin( a ) * this->lightRadius * 2.0f ),
       linearPointBegin,
       linearPointEnd,
       &intersectPoint,
@@ -193,7 +195,15 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
     ) ) {
       value = intersectPoint.LengthFast();
       this->_PushValue( xValue, value, cache );
+    } else {
+      if( calculationStep < 0 && x <= xBegin ) {
+        calculationStep = 1;
+        x = xBegin;
+      } else if( calculationStep > 0 && x >= xEnd ) {
+        break;
+      }
     }
+    x += calculationStep;
   }
 }//DrawLine
 
