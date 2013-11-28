@@ -2,11 +2,13 @@ template "lift/small" {
   animation "down" 3 {
     sprite "main" {
       collision_offset( 50, -24 )
+      /*
       position {
         0( -50, 0 )
         1.5 linear( -50, 100 )
         3 linear( -50, 0 )
       }
+      */
       renderable_texture( "data/textures/tiles/question0.png" )
       renderable_texture_coords( 0, 1 )
       renderable_size( 100, 24 )

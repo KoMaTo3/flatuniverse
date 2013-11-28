@@ -28,6 +28,7 @@ template "supermario/coin" {
         1.0( 0,0, 0.25,1 )
       }
       renderable_size( 16, 32 )
+      /*
       position {
         0.0( 0,0 )
         0.1 linear( 0,-50 )
@@ -40,6 +41,7 @@ template "supermario/coin" {
         0.8 linear( 0,-60 )
         1.0 linear( 0,-50 )
       }
+      */
     }
   }
 }
@@ -50,7 +52,7 @@ template "supermario/brick0" {
   animation "do" 1 {
     sprite "brick" {
       collision_square( 32, 32 )
-      position {
+      renderablePosition {
         0.0( 0,0 )
         0.15 linear( 0,-10 )
         0.3 linear( 0,0 )
@@ -68,7 +70,7 @@ template "supermario/brick2" {
   animation "do" 1 {
     sprite "brick" {
       collision_square( 32, 32 )
-      position {
+      renderablePosition {
         0.0( 0,0 )
         0.15 linear( 0,-10 )
         0.3 linear( 0,0 )

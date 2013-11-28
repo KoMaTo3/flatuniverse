@@ -212,7 +212,7 @@ function EditorInit()
   GUILabel:Create( 1, y, 0, 0, 'Z:', GUI.elements.windowObject )
   GUI.elements.objectZ = GUIEdit:Create( 20, y, 40, '', function( obj ) OnChangeZ( obj:GetText() ) end, GUI.elements.windowObject )
   y = y + 17
-  GUI.elements.isRenderable = GUICheckbox:Create( 5, y, 'Renderable', false, nil, GUI.elements.windowObject, false )
+  GUI.elements.isRenderable = GUICheckbox:Create( 5, y, 'Renderable', false, OnChangeIsRenderable, GUI.elements.windowObject, false )
   y = y + 15
   GUI.elements.isCollision  = GUICheckbox:Create( 5, y, 'Collision', false, OnChangeIsCollision, GUI.elements.windowObject, false )
   y = y + 15
@@ -1193,6 +1193,22 @@ function PopFromBuffer()
     settings.buffer[ #settings.buffer ] = nil
   end
 end -- PopFromBuffer
+
+--[[ OnChangeIsRenderable ]]
+function OnChangeIsRenderable( isRenderableGuiElement )
+  local object = GetSelectedObject()
+  local checked = isRenderableGuiElement:GetIsChecked()
+  local objectList = Explode( object, '//' )
+  for num,name in pairs( objectList ) do --(
+    ObjectAttr( name, { renderable = checked } )
+  end
+  if checked then
+    local tileSize = GetTileSize()
+    for num,name in pairs( objectList ) do --(
+      ObjectAttr( name, { textureName = 'data/textures/null.png', renderableSize = tileSize..' '..tileSize } )
+    end
+  end
+end -- OnChangeIsRenderable
 
 --[[ OnChangeIsCollision ]]
 function OnChangeIsCollision( isCollisionGuiElement )
