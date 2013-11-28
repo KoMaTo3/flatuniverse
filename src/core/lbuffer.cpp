@@ -7,7 +7,7 @@ const Vec2 LBuffer::vecAxis( 1.0f, 0.0f );
 
 
 LBuffer::LBuffer( int setSize, float setFloatSize )
-  :size( setSize ), buffer( new float[ setSize ] ), sizeToFloat( 1.0f / float( setSize ) ), fSize( float( setSize ) ), sizeFloat( setFloatSize ), invSizeFloat( 1.0f / setFloatSize ), lightRadius( 1000.0f )
+  :size( setSize ), buffer( new float[ setSize ] ), sizeToFloat( 1.0f / float( setSize ) ), fSize( float( setSize ) ), sizeFloat( setFloatSize ), invSizeFloat( 1.0f / setFloatSize ), lightRadius( 1000.0f ), __doDump( false )
 {
 }
 
@@ -127,6 +127,9 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
     __log.PrintInfo( Filelevel_WARNING, "LBuffer::DrawLine => no cache" );
     return;
   }
+  if( this->__doDump ) {
+    __log.PrintInfo( Filelevel_DEBUG, "LBuffer::DrawLine => point0[%3.3f; %3.3f] point1[%3.3f; %3.3f]", point0.x, point0.y, point1.x, point1.y );
+  }
   Vec2
     lineBegin( Vec2( this->GetDegreeOfPoint( point0 ), point0.LengthFast() ) ),
     lineEnd( Vec2( this->GetDegreeOfPoint( point1 ), point1.LengthFast() ) );
@@ -180,12 +183,15 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
   Vec2 intersectPoint;
   xBegin += this->size - 2;
   xEnd += this->size + 2;
+  if( this->__doDump ) {
+    __log.PrintAligned( ". xBegin[%d] xEnd[%d]\nIntersects:", xBegin, xEnd );
+  }
   for( int x = xBegin; x <= xEnd; ++x ) {
     int xValue = x % this->size;
     float a = this->SizeToFloat( xValue, 0.001f );
     if( Vec2::TestIntersect(
       Vec2Null,
-      Vec2( Math::Cos( a ) * this->lightRadius, -Math::Sin( a ) * this->lightRadius ),
+      Vec2( Math::Cos( a ) * this->lightRadius * 2.0f, -Math::Sin( a ) * this->lightRadius * 2.0f ),
       linearPointBegin,
       linearPointEnd,
       &intersectPoint,
@@ -193,7 +199,13 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
     ) ) {
       value = intersectPoint.LengthFast();
       this->_PushValue( xValue, value, cache );
+      if( this->__doDump ) {
+        __log.Print( "[%d:%3.3f]", xValue, value );
+      }
     }
+  }
+  if( this->__doDump ) {
+    __log.Print( "\n" );
   }
 }//DrawLine
 
@@ -236,3 +248,26 @@ float LBuffer::GetValueByIndex( int index ) {
   }
   return this->buffer[ index ];
 }//GetValueByIndex
+
+
+void LBuffer::__Dump() {
+  this->__doDump = false;
+  int maxValuesCount = 0;
+  int normalValuesCount = 0;
+  for( int q = this->size - 10; q < this->size; ++q ) {
+    if( this->buffer[ q ] > 399.0f ) {
+      ++maxValuesCount;
+    } else {
+      ++normalValuesCount;
+    }
+  }
+  float coeff = float( min( maxValuesCount, normalValuesCount ) ) / float( max( maxValuesCount, normalValuesCount ) );
+  if( coeff > 0.5f ) {
+    this->__doDump = true;
+    __log.Print( "LBuffer %p size[%d]\n", this, this->size );
+    for( int q = 0; q < this->size; ++q ) {
+      __log.Print( "%d:%3.3f\n", q, this->buffer[ q ] );
+    }
+    __log.Print( "=====================\n" );
+  }
+}//__Dump

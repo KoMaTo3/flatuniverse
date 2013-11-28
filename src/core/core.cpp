@@ -1943,8 +1943,8 @@ void Core::_GluiHoverFunc( int x, int y )
 
 
 void Core::__Test() {
-  for( auto &index: *__coreRenderableListIndicies ) {
-    __log.PrintInfo( Filelevel_DEBUG, "__coreRenderableListIndicies: %d", index );
+  for( auto &light: *this->lightList ) {
+    light->lbuffer.__Dump();
   }
 }//__Test
 

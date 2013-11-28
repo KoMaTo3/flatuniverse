@@ -52,11 +52,13 @@ template "supermario/brick0" {
   animation "do" 1 {
     sprite "brick" {
       collision_square( 32, 32 )
+      /*
       renderablePosition {
         0.0( 0,0 )
         0.15 linear( 0,-10 )
         0.3 linear( 0,0 )
       }
+      */
       renderable_texture( "data/textures/tiles/bricks/brick0.png" )
       renderable_texture_coords(0,0,1,1)
       renderable_size( 32, 32 )
@@ -70,11 +72,13 @@ template "supermario/brick2" {
   animation "do" 1 {
     sprite "brick" {
       collision_square( 32, 32 )
+      /*
       renderablePosition {
         0.0( 0,0 )
         0.15 linear( 0,-10 )
         0.3 linear( 0,0 )
       }
+      */
       renderable_texture( "data/textures/tiles/bricks/brick2.png" )
       renderable_texture_coords(0,0,1,1)
       renderable_size( 32, 32 )

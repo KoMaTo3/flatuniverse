@@ -9,7 +9,7 @@
 
 
 const float COLLISION_POLYGON_AXIS_E = 0.01f;
-const float CollisionElement::epsilon = 1.0f;
+const float CollisionElement::epsilon = 0.0f;
 
 /*
 //=============
@@ -255,6 +255,11 @@ void CollisionElementSquare::SaveToBuffer( MemoryWriter &writer ) {
 */
 void CollisionElementSquare::FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) {
   //outer light
+  if( buffer->__doDump ) {
+    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::FillBuffer => light[%3.3f; %3.3f] size[%3.3f; %3.3f] thisPos[%3.3f; %3.3f] thisSize[%3.3f; %3.3f]",
+      lightPosition.x, lightPosition.y, size.x, size.y, this->position->x, this->position->y, this->size.x, this->size.y
+      );
+  }
   if( lightPosition.x < this->_lastPosition.x - this->_lastHalfSize.x ) { //add right edge
     this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x - this->_lastHalfSize.x, this->_lastPosition.y - this->_lastHalfSize.y - this->epsilon ), Vec2( this->_lastPosition.x - this->_lastHalfSize.x, this->_lastPosition.y + this->_lastHalfSize.y + this->epsilon ), cache );
   }
@@ -1028,7 +1033,7 @@ void CollisionElementPolygon::FillBuffer( const Vec2& lightPosition, const Vec2&
       vec0.NormalizeFast();
       vec1.NormalizeFast();
       vec.NormalizeFast();
-      vec *= ( 1.0f + this->epsilon );  //углубляем ребро на 1+epsilon
+      //vec *= ( 1.0f + this->epsilon );  //углубляем ребро на 1+epsilon
       vec0 *= ( 1.0f + this->epsilon ); //удлинняем ребро на 1+epsilon
       vec1 *= ( 1.0f + this->epsilon );
       Vec2 resVec0 = pointCurrent + vec0 + vec;
