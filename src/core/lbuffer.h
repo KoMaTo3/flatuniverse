@@ -51,6 +51,8 @@ public:
   void WriteFromCache( LBufferCacheEntity *cacheEntity );
   void ClearCache();
   void ClearCache( ILBufferProjectedObject *object );
+  void __Dump();
+  bool __doDump;
 
 private:
   LBuffer();

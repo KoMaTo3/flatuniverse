@@ -7,7 +7,7 @@ const Vec2 LBuffer::vecAxis( 1.0f, 0.0f );
 
 
 LBuffer::LBuffer( int setSize, float setFloatSize )
-  :size( setSize ), buffer( new float[ setSize ] ), sizeToFloat( 1.0f / float( setSize ) ), fSize( float( setSize ) ), sizeFloat( setFloatSize ), invSizeFloat( 1.0f / setFloatSize ), lightRadius( 1000.0f )
+  :size( setSize ), buffer( new float[ setSize ] ), sizeToFloat( 1.0f / float( setSize ) ), fSize( float( setSize ) ), sizeFloat( setFloatSize ), invSizeFloat( 1.0f / setFloatSize ), lightRadius( 1000.0f ), __doDump( false )
 {
 }
 
@@ -127,6 +127,9 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
     __log.PrintInfo( Filelevel_WARNING, "LBuffer::DrawLine => no cache" );
     return;
   }
+  if( this->__doDump ) {
+    __log.PrintInfo( Filelevel_DEBUG, "LBuffer::DrawLine => point0[%3.3f; %3.3f] point1[%3.3f; %3.3f]", point0.x, point0.y, point1.x, point1.y );
+  }
   Vec2
     lineBegin( Vec2( this->GetDegreeOfPoint( point0 ), point0.LengthFast() ) ),
     lineEnd( Vec2( this->GetDegreeOfPoint( point1 ), point1.LengthFast() ) );
@@ -205,6 +208,9 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
     }
     x += calculationStep;
   }
+  if( this->__doDump ) {
+    __log.Print( "\n" );
+  }
 }//DrawLine
 
 
@@ -246,3 +252,26 @@ float LBuffer::GetValueByIndex( int index ) {
   }
   return this->buffer[ index ];
 }//GetValueByIndex
+
+
+void LBuffer::__Dump() {
+  this->__doDump = false;
+  int maxValuesCount = 0;
+  int normalValuesCount = 0;
+  for( int q = this->size - 10; q < this->size; ++q ) {
+    if( this->buffer[ q ] > 399.0f ) {
+      ++maxValuesCount;
+    } else {
+      ++normalValuesCount;
+    }
+  }
+  float coeff = float( min( maxValuesCount, normalValuesCount ) ) / float( max( maxValuesCount, normalValuesCount ) );
+  if( coeff > 0.5f ) {
+    this->__doDump = true;
+    __log.Print( "LBuffer %p size[%d]\n", this, this->size );
+    for( int q = 0; q < this->size; ++q ) {
+      __log.Print( "%d:%3.3f\n", q, this->buffer[ q ] );
+    }
+    __log.Print( "=====================\n" );
+  }
+}//__Dump

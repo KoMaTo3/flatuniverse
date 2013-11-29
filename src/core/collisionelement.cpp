@@ -255,6 +255,11 @@ void CollisionElementSquare::SaveToBuffer( MemoryWriter &writer ) {
 */
 void CollisionElementSquare::FillBuffer( const Vec2& lightPosition, const Vec2& size, LBuffer *buffer, LBufferCacheEntity *cache ) {
   //outer light
+  if( buffer->__doDump ) {
+    __log.PrintInfo( Filelevel_DEBUG, "CollisionElementSquare::FillBuffer => light[%3.3f; %3.3f] size[%3.3f; %3.3f] thisPos[%3.3f; %3.3f] thisSize[%3.3f; %3.3f]",
+      lightPosition.x, lightPosition.y, size.x, size.y, this->position->x, this->position->y, this->size.x, this->size.y
+      );
+  }
   if( lightPosition.x < this->_lastPosition.x - this->_lastHalfSize.x ) { //add right edge
     this->AddEdgeToBuffer( lightPosition, buffer, Vec2( this->_lastPosition.x - this->_lastHalfSize.x, this->_lastPosition.y - this->_lastHalfSize.y - this->epsilon ), Vec2( this->_lastPosition.x - this->_lastHalfSize.x, this->_lastPosition.y + this->_lastHalfSize.y + this->epsilon ), cache );
   }
