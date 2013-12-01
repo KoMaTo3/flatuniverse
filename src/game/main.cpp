@@ -529,6 +529,7 @@ Game::Game()
   LUAFUNC_ObjectSetAnimation= Game::LUA_ObjectSetAnimation;
   LUAFUNC_ObjectStopAnimation = Game::LUA_ObjectStopAnimation;
   LUAFUNC_SetPause          = Game::LUA_SetPause;
+  LUAFUNC_SetLightAmbient   = Game::LUA_SetLightAmbient;
 
   Collision::SetInitCollisionHandler( Game::LUA_ListenCollision );
   Collision::SetDefaultCollisionHandler( Game::CollisionProc );
@@ -2235,3 +2236,14 @@ void  Game::LUA_ObjectRemoveTag( const std::string &objectName, const std::strin
   }
   return object->RemoveTag( tag );
 }//LUA_ObjectRemoveTag
+
+
+/*
+=============
+  LUA_SetLightAmbient
+=============
+*/
+void Game::LUA_SetLightAmbient( const Vec4 &color )
+{
+  game->core->GetLightRenderer()->GetLightManager()->lightAmbient = color;
+}//LUA_SetLightAmbient

@@ -130,6 +130,7 @@ public:
   static void   LUA_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation );
   static void   LUA_ObjectStopAnimation ( const std::string &objectName );
   static void   LUA_SetPause          ( bool isPause );
+  static void   LUA_SetLightAmbient   ( const Vec4 &color );
 
   void Update();
   void UpdateLuaTimers();

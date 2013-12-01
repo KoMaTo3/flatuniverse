@@ -66,6 +66,7 @@ LUAFUNCPROC_ObjectRemoveTag   *LUAFUNC_ObjectRemoveTag      = NULL;
 LUAFUNCPROC_ObjectSetAnimation*LUAFUNC_ObjectSetAnimation   = NULL;
 LUAFUNCPROC_ObjectStopAnimation *LUAFUNC_ObjectStopAnimation= NULL;
 LUAFUNCPROC_SetPause          *LUAFUNC_SetPause             = NULL;
+LUAFUNCPROC_SetLightAmbient   *LUAFUNC_SetLightAmbient      = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -179,6 +180,7 @@ bool Lua::Init()
   lua_register( this->luaState, "ObjectSetAnimation", Lua::LUA_ObjectSetAnimation );
   lua_register( this->luaState, "ObjectStopAnimation",Lua::LUA_ObjectStopAnimation );
   lua_register( this->luaState, "SetPause",         Lua::LUA_SetPause );
+  lua_register( this->luaState, "SetLightAmbient",  Lua::LUA_SetLightAmbient );
   lua_atpanic( this->luaState, ErrorHandler );
 
   //__log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -1230,6 +1232,26 @@ int Lua::LUA_SetCamera( lua_State *lua )
   LUAFUNC_SetCamera( name );
   return 0;
 }//LUA_SetCamera
+
+
+
+/*
+=============
+  LUA_SetLightAmbient
+=============
+*/
+int Lua::LUA_SetLightAmbient( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 4 )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetLightAmbient => not enough parameters" );
+    return 0;
+  }
+  Vec4 color( lua_tonumber( lua, 1 ), lua_tonumber( lua, 2 ), lua_tonumber( lua, 3 ), lua_tonumber( lua, 4 ) );
+  LUAFUNC_SetLightAmbient( color );
+  return 0;
+}//LUA_SetLightAmbient
 
 
 

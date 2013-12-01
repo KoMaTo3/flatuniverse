@@ -71,6 +71,7 @@ typedef void  LUAFUNCPROC_ObjectRemoveTag   ( const std::string &name, const std
 typedef void  LUAFUNCPROC_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation );
 typedef void  LUAFUNCPROC_ObjectStopAnimation ( const std::string &objectName );
 typedef void  LUAFUNCPROC_SetPause          ( bool isPause );
+typedef void  LUAFUNCPROC_SetLightAmbient   ( const Vec4 &color );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -125,6 +126,7 @@ extern LUAFUNCPROC_ObjectRemoveTag  *LUAFUNC_ObjectRemoveTag;
 extern LUAFUNCPROC_ObjectSetAnimation       *LUAFUNC_ObjectSetAnimation;
 extern LUAFUNCPROC_ObjectStopAnimation      *LUAFUNC_ObjectStopAnimation;
 extern LUAFUNCPROC_SetPause         *LUAFUNC_SetPause;
+extern LUAFUNCPROC_SetLightAmbient  *LUAFUNC_SetLightAmbient;
 
 
 //callbacks
@@ -216,6 +218,7 @@ public:
   static int LUA_ObjectSetAnimation ( lua_State *lua );
   static int LUA_ObjectStopAnimation( lua_State *lua );
   static int LUA_SetPause         ( lua_State *lua );
+  static int LUA_SetLightAmbient  ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );
