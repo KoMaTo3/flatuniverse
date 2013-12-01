@@ -51,8 +51,8 @@ template "supermario/brick0" {
   }
   animation "do" 1 {
     sprite "brick" {
-      collision_square( 32, 32 )
       /*
+      collision_square( 32, 32 )
       renderablePosition {
         0.0( 0,0 )
         0.15 linear( 0,-10 )
@@ -71,8 +71,8 @@ template "supermario/brick2" {
   }
   animation "do" 1 {
     sprite "brick" {
-      collision_square( 32, 32 )
       /*
+      collision_square( 32, 32 )
       renderablePosition {
         0.0( 0,0 )
         0.15 linear( 0,-10 )

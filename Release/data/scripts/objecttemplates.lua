@@ -194,6 +194,15 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/grass/grass1-top.png',
       },
     },
+    -- ShadowGrass-0
+    {
+      name = 'Тёмная трава',
+      icon = 'data/textures/tiles/grass/blackgrass0.png',
+      attr = {
+        renderable = true,
+      },
+      animation = { 'grass/0', 'default' },
+    },
     -- Tube0
     {
       name = 'Труба: верхушка левая',

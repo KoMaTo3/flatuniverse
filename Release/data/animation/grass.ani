@@ -1,0 +1,11 @@
+template "grass/0" {
+  animation "default" 3 {
+    sprite "main" {
+      renderable_texture( "data/textures/tiles/grass/blackgrass0.png" )
+      renderable_texture_coords {
+        0( 0, 0, 1, 1 )
+      }
+      renderable_size( 24, 24 )
+    }
+  }
+}//lift/small
