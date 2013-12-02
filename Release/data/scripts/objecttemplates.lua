@@ -199,7 +199,8 @@ function GetObjectsTemplates()
       name = 'Тёмная трава',
       icon = 'data/textures/tiles/grass/blackgrass0.png',
       attr = {
-        renderable = true,
+        z = -1,
+        -- renderable = true, textureName = 'textures/tiles/grass/blackgrass0.png', renderableSize = '64 32',
       },
       animation = { 'grass/0', 'default' },
     },

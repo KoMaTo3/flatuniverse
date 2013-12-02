@@ -1265,6 +1265,7 @@ void Game::LUA_ObjectSetAnimation( const std::string &objectName, const std::str
     __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectSetAnimation => object '%s' not found", objectName.c_str() );
     return;
   }
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectSetAnimation => object['%s'] template['%s'] animation['%s']", objectName.c_str(), templateName.c_str(), animation.c_str() );
   Animation::AnimationPack *pack = object->ApplyAnimation( templateName, animation );
   if( pack ) {
     pack->SetEnabled( true );

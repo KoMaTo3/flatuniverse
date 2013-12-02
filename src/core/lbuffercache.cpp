@@ -117,7 +117,7 @@ void LBufferCache::ClearCache( void* object ) {
     ++iter;
   }
   if( !deleted ) {
-    __log.PrintInfo( Filelevel_WARNING, "LBufferCache::ClearCache => object[%p] not found", object );
+    //__log.PrintInfo( Filelevel_WARNING, "LBufferCache::ClearCache => object[%p] not found", object );
   }
 }//ClearCache
 

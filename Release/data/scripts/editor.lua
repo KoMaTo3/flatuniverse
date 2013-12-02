@@ -1110,7 +1110,9 @@ function EditorInsertItemByTemplate( px, py )
   local offsetX, offsetY = GetTileOffset()
   local attrs = GUI.templates.items[ GUI.templates.currentItem ].attr
   local tags = GUI.templates.items[ GUI.templates.currentItem ].tags
-  attrs.renderableSize = tileSize..' '..tileSize
+  if attrs.renderable ~= nil and attrs.renderable then
+    attrs.renderableSize = tileSize..' '..tileSize
+  end
   if attrs['collision'] ~= nil and attrs.collision then
     local size = tileSize
     if attrs['_collisionScale'] ~= nil then

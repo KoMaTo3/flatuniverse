@@ -706,7 +706,6 @@ void Lua::LUACALLBACK_ListenMouseKey( Lua *lua, const std::string &funcName, Dwo
 */
 void Lua::LUACALLBACK_ListenMouseMove( Lua *lua, const std::string &funcName, const Vec2 &pos )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_ListenMouseMove => funcName['%s']", funcName.c_str() );
   LuaStateCheck state( lua->luaState );
   lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
   if( !lua_isfunction( lua->luaState, -1 ) )
