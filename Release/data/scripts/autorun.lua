@@ -228,13 +228,18 @@ function PlayerControl( id, isPressed )
 
     if id == 0x46 then  -- F - fire
       if isPressed then
-        local x,y = ObjectAttr( 'player', { 'position' } )
+        local x,y = ObjectGetPos( 'player' )
         local object = 'player-bullet-.'..x..'.'..y..'.'..string.format( '%f', settings.timer )
-        ObjectCreate( object, x + 20, y, 0 )
+        local isRight = playerState.lastDirection > 0 and true or false
+        ObjectCreate( object, x + ( isRight and 30 or -30 ), y - 10, 0 )
         ObjectAttr( object, {
-          collision = true, collisionSize = '22 22', collisionAcceleration = '0 500', collisionVelocity = '150 -200', collisionStatic = false
+          renderable = true,
+          collision = true, collisionSize = '12 12', collisionAcceleration = '0 900', collisionVelocity = ( isRight and 150 or -150 )..' -400', collisionStatic = false,
+          lightBlockByCollision = true,
+          lightPoint = true, lightPointSize = ( math.random( 0, 1000 ) / 1000.0 ) * 300.0 + 30.0, lightPointColor = string.format( '%f %f %f 1', math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2 ), lightPointPenetration = 3
           } )
-        -- ObjectSetAnimation( object, 'bullet/test000', 'default' )
+        ObjectSetAnimation( object, 'bullet/test000', isRight and 'right' or 'left' )
+        ListenCollision( object, 'CollisionBullet' )
       end
     end
 
@@ -459,6 +464,26 @@ function CollisionMushroom( mushroom, target, flags, vx, vy )
   end
   ]]
 end -- CollisionMushroom
+
+--(
+function CollisionBullet( bullet, target, flags, vx, vy )
+  local isJumped = false
+  if bit32.band( flags, 4 ) == 4 then
+    vy = -vy * 0.9
+    local x, y = ObjectGetPos( bullet )
+    y = y - 1
+    ObjectSetPos( bullet, x, y )
+    isJumped = true
+  end
+  if bit32.band( flags, 2 ) == 2 or bit32.band( flags, 8 ) == 8 then
+    vx = -vx
+  end
+  if isJumped and math.abs( vy ) < 100 then
+    ObjectRemove( bullet )
+  else
+    ObjectAttr( bullet, { collisionVelocity = string.format( '%f %f', vx, vy ) } )
+  end
+end --)
 
 --[[ UpdateCamera ]]
 function UpdateCamera( timerId )

@@ -138,6 +138,7 @@ public:
   void ClearLuaTimers();
   void StringToObjectList( const std::string &str, ObjectList &list ) const;
   std::string ObjectListToString( const ObjectList &list ) const;
+  void OnRemoveObject( const std::string& objectName );
 
   static void   KeyboardProc          ( Dword keyId, bool isPressed );
   static void   MouseKeyProc          ( Dword keyId, bool isPressed );

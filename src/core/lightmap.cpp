@@ -135,7 +135,7 @@ void LightEntity::Update( LightBlocksList &blocks ) {
 
   this->vertices.clear();
   this->verticesSoftEdges.clear();
-  this->AddVertice( LightVertex( this->position, this->color, 1.0f ) );
+  this->AddVertice( LightVertex( this->position, this->color, this->color.w ) );
   float step = max( 0.01f, Math::TWO_PI / float( this->lbuffer.GetSize() ) );
   Vec2 pos, posNormalized;
   float lastRange = this->maxRange, range, oneByMaxRange = 1.0f / this->maxRange;
@@ -185,13 +185,13 @@ void LightEntity::Update( LightBlocksList &blocks ) {
     if( !skipped ) {
       skipsCount = 0;
     }
-    this->AddVertice( LightVertex( pos, this->color, 1.0f - range * oneByMaxRange ) );
+    this->AddVertice( LightVertex( pos, this->color, ( 1.0f - range * oneByMaxRange ) * this->color.w ) );
     ++verticesCount;
     rangeHistory[ 1 ] = rangeHistory[ 0 ];
     rangeHistory[ 0 ] = lastRange;
     lastRange = range;
   }
-  this->AddVertice( LightVertex( this->position + Vec2( this->lbuffer.GetValueByIndex( 0 ), 0.0f ), this->color, 1.0f - range * oneByMaxRange ) );
+  this->AddVertice( LightVertex( this->position + Vec2( this->lbuffer.GetValueByIndex( 0 ), 0.0f ), this->color, ( 1.0f - range * oneByMaxRange ) * this->color.w ) );
   this->_lastPosition = this->position;
   this->_lastSize = this->size;
   this->_lastColor = this->color;

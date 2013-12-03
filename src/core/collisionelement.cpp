@@ -1018,7 +1018,7 @@ void CollisionElementPolygon::FillBuffer( const Vec2& lightPosition, const Vec2&
     Vec2 pointPrev( iterPrev->x, -iterPrev->y );
     Vec2 vec( pointCurrent - pointPrev );
     vec.Rotate90CCW();
-    if( vec.Dot( lightPosition - pointCurrent ) <= 0.0f ) {
+    if( vec.Dot( lightPosition - pointCurrent ) < 0.0f ) {
       //this->AddEdgeToBuffer( lightPosition, buffer, pointCurrent, pointPrev, cache );
       Vec2
         vec0( pointCurrent - pointPrev ),

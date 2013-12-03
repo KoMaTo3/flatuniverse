@@ -782,6 +782,7 @@ void Object::DisableCollision()
     if( *iter == this->collision )
     {
       __collisionList->erase( iter );
+      //delete this->collision;
       this->collision = NULL;
       break;
     }

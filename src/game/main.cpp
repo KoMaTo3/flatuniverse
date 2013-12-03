@@ -459,7 +459,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     */
       //obj->SetPosition( Vec3( -20.0f, 50.0f + Math::Sin16( rot * 5.0f ) * 50.0f, 0.0f ) );
 
-    sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d] luaStack[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), __worldGridList->size(), game->lua->GetStackParmsCount() );
+      sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d] cListeners[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), __worldGridList->size(), game->luaCollisionListeners.size() );
     game->core->SetWindowTitle( tempChar );
     game->core->__Test();
   }
@@ -692,6 +692,44 @@ void Game::ObjectOnUnload( Object* obj ) {
 }//ObjectOnUnload
 
 
+
+void Game::OnRemoveObject( const std::string& objectName ) {
+  Object *object = this->core->GetObject( objectName );
+  if( !object ) {
+    return;
+  }
+
+  //collision
+  if( object->IsCollision() ) {
+    Collision *collision = object->GetCollision();
+    auto
+      iter = this->luaCollisionListeners.begin(),
+      iterEnd = this->luaCollisionListeners.end();
+    for( ;iter != iterEnd; ++iter ) {
+      if( iter->object == collision ) {
+        this->luaCollisionListeners.erase( iter );
+        break;
+      }
+    }
+  }
+
+  //trigger
+  if( object->IsTrigger() ) {
+    ObjectTrigger *trigger = object->GetTrigger();
+    auto
+      iter = this->luaTriggerListeners.begin(),
+      iterEnd = this->luaTriggerListeners.end();
+    for( ;iter != iterEnd; ++iter ) {
+      if( iter->object == trigger ) {
+        this->luaTriggerListeners.erase( iter );
+        break;
+      }
+    }
+  }
+}//OnRemoveObject
+
+
+
 /*
 =============
   LUA_GetObjectPos
@@ -805,8 +843,11 @@ bool Game::LUA_RemoveObject( const std::string &name )
 {
   auto nameList = tools::Explode( name, "//" );
   for( auto &oneName: nameList ) {
+    game->OnRemoveObject( oneName );
     game->core->RemoveObject( oneName, true );
   }
+  //game->luaCollisionListeners.push_back( listener );
+  //collision->AddHandler( Game::CollisionProc );
   return true;
 }//LUA_RemoveObject
 

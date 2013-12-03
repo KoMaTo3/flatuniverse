@@ -198,6 +198,14 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
     ) ) {
       value = intersectPoint.LengthFast();
       this->_PushValue( xValue, value, cache );
+      /*
+      if( calculationStep < 0 && x <= xBegin ) {
+        calculationStep = 1;
+        x = xBegin;
+      } else if( calculationStep > 0 && x >= xEnd ) {
+        break;
+      }
+      */
     } else {
       if( calculationStep < 0 && x <= xBegin ) {
         calculationStep = 1;
