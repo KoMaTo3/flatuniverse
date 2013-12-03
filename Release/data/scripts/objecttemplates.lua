@@ -199,10 +199,20 @@ function GetObjectsTemplates()
       name = 'Тёмная трава',
       icon = 'data/textures/tiles/grass/blackgrass0.png',
       attr = {
-        z = -1,
+        z = 1,
         -- renderable = true, textureName = 'textures/tiles/grass/blackgrass0.png', renderableSize = '64 32',
       },
       animation = { 'grass/0', 'default' },
+    },
+    -- ShadowGrass-1
+    {
+      name = 'Тёмная трава (сверху вниз)',
+      icon = 'data/textures/tiles/grass/blackgrass0.png',
+      attr = {
+        z = 1,
+        -- renderable = true, textureName = 'textures/tiles/grass/blackgrass0.png', renderableSize = '64 32',
+      },
+      animation = { 'grass/0', 'topdown' },
     },
     -- Tube0
     {

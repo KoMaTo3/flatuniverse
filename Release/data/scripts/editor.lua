@@ -49,6 +49,7 @@ settings = {
     gamePaused = false,
     cameraDirection = 0,  -- перемещение камеры
     multiSelectStartPoint = { x = 0, y = 0 }, -- стартовая точка мультиселекта
+    ambientLight = { R = 1.0, G = 1.0, B = 1.0, A = 0.2 },
 }
 mousePos = {    -- экранная позиция курсора
     x = 0,
@@ -169,6 +170,13 @@ function EditorInit()
 
   -- settings block
   GUI.elements.windowSettings = GUILabel:Create( settings.windowSize.x - 220, 0, 220, 200, 'Settings' )
+
+  -- Ambient Light
+  GUILabel:Create( 0, 60, 0, 0, 'Ambient light:', GUI.elements.windowSettings )
+  GUI.elements.ambientLightR = GUIEdit:Create( 110, 60, 25, string.format( '%.1f', settings.ambientLight.R ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  GUI.elements.ambientLightG = GUIEdit:Create( 110 + 27*1, 60, 25, string.format( '%.1f', settings.ambientLight.G ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  GUI.elements.ambientLightB = GUIEdit:Create( 110 + 27*2, 60, 25, string.format( '%.1f', settings.ambientLight.B ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  GUI.elements.ambientLightA = GUIEdit:Create( 110 + 27*3, 60, 25, string.format( '%.1f', settings.ambientLight.A ), UpdateAmbientByGUI, GUI.elements.windowSettings )
 
   --grid size
   GUILabel:Create( 0, 40, 0, 0, 'Grid:', GUI.elements.windowSettings )
@@ -1387,4 +1395,10 @@ function RemoveObjectsFromList( list, objects )
   end
   list = Implode( listTable, '//' )
   return list
+end --)
+
+--(
+function UpdateAmbientByGUI()
+  local R, G, B, A = GUI.elements.ambientLightR:GetText(), GUI.elements.ambientLightG:GetText(), GUI.elements.ambientLightB:GetText(), GUI.elements.ambientLightA:GetText()
+  SetLightAmbient( R, G, B, A )
 end --)

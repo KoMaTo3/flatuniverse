@@ -215,6 +215,10 @@ void LBuffer::DrawLine( LBufferCacheEntity *cache, const Vec2& point0, const Vec
       }
     }
     x += calculationStep;
+    if( x < 0 ) {
+      x = xBegin;
+      calculationStep = 1;
+    }
   }
   if( this->__doDump ) {
     __log.Print( "\n" );

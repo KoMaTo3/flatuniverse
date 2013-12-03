@@ -14,13 +14,24 @@ template "grass/0" {
         10 linear( -0.03 )
       }
       renderable_texture( "data/textures/tiles/grass/blackgrass0.png", 0, 0, 1, 1 )
-      position {
-        0( 0, 0 )
-        2.5 linear( 0, 0 )
-        5 linear( 0, 0 )
-        7.5 linear( 0, 0 )
-        10 linear( 0, 0 )
+    }
+  }
+
+  animation "topdown" 10 {
+    sprite "main" {
+      renderable_size {
+        0( 64, 16 )
+        2.5 linear( 68, 16 )
+        5 linear( 60, 16 )
+        7.5 linear( 66, 16 )
+        10 linear( 64, 16 )
       }
+      renderable_rotation {
+        0( -0.03 )
+        5 linear( 0.03 )
+        10 linear( -0.03 )
+      }
+      renderable_texture( "data/textures/tiles/grass/blackgrass0.png", 0, 1, 1, 0 )
     }
   }
 }//grass/0

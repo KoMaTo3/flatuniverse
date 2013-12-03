@@ -1848,13 +1848,46 @@ Object* Core::GetTriggerInPoint( const Vec2& pos, const std::string &afterObject
 */
 Object* Core::GetRenderableInPoint( const Vec2& pos, const std::string &afterObject )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Core::GetRenderableInPoint => pos[%3.3f; %3.3f]", pos.x, pos.y );
-  CoreRenderableListIndicies::iterator iter, iterEnd = __coreRenderableListIndicies->end();
+  __log.PrintInfo( Filelevel_DEBUG, "Core::GetRenderableInPoint => pos[%3.3f; %3.3f] after['%s']", pos.x, pos.y, afterObject.c_str() );
+
+  auto
+    iter = __coreRenderableListIndicies->rbegin(),
+    iterEnd = __coreRenderableListIndicies->rend();
+  bool returnFirst = afterObject.empty();
+
+  for( ; iter != iterEnd; ++iter ) {
+    __log.PrintInfo( Filelevel_DEBUG, ". index[%d]", *iter );
+    RenderableQuad *quad = &( *__coreRenderableList )[ *iter ];
+    Vec2 leftTop, rightBottom;
+    quad->CalculateRect( leftTop, rightBottom );
+    if( !(
+      rightBottom.x < pos.x ||
+      leftTop.x       > pos.x ||
+      rightBottom.y   < pos.y ||
+      leftTop.y       > pos.y
+      ) ) {
+      if( returnFirst ) {
+        __log.PrintInfo( Filelevel_DEBUG, ". return first" );
+        return this->GetObjectByRenderableIndex( *iter );
+      } else {
+        Object *object = this->GetObjectByRenderableIndex( *iter );
+        __log.PrintInfo( Filelevel_DEBUG, ". first object by index[%d] name['%s']", *iter, object->GetNameFull().c_str() );
+        if( object->GetNameFull() == afterObject ) {
+        __log.PrintInfo( Filelevel_DEBUG, ". is first and skip" );
+          returnFirst = true;
+        }
+      }
+    }
+  }
+
+  /*
+  CoreRenderableListIndicies::reverse_iterator iter, iterEnd = __coreRenderableListIndicies->rend();
   Vec2 leftTop, rightBottom;
   bool returnFirst = afterObject.empty();
+  __log.PrintInfo( Filelevel_DEBUG, ". returnFirst[%d]", returnFirst );
   Object *object;
 
-  for( iter = __coreRenderableListIndicies->begin(); iter != iterEnd; ++iter ) {
+  for( iter = __coreRenderableListIndicies->rbegin(); iter != iterEnd; ++iter ) {
     RenderableQuad *quad = &( *__coreRenderableList )[ *iter ];
     //__log.PrintInfo( Filelevel_DEBUG, ". index[%d] quad[x%p]", *iter, quad );
     quad->CalculateRect( leftTop, rightBottom );
@@ -1868,12 +1901,14 @@ Object* Core::GetRenderableInPoint( const Vec2& pos, const std::string &afterObj
       //__log.PrintInfo( Filelevel_DEBUG, ". . . test passed, this in" );
       object = this->GetObjectByRenderableIndex( *iter );
       if( returnFirst ) {
+        __log.PrintInfo( Filelevel_DEBUG, ". result['%s']", object->GetNameFull().c_str() );
         return object;
       } else if( object->GetNameFull() == afterObject ) {
         returnFirst = true;
       }
     }
   }//for iter
+  */
 
   return NULL;
 }//GetRenderableInPoint

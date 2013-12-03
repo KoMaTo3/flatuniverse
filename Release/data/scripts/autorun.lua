@@ -63,8 +63,9 @@ function Main()
   ObjectAddTag( 'player', 'player' )
   ObjectSetAnimation( 'player', 'player/mario', 'stay-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
   SetTimer( 1 / 10, 'UpdatePlayerAnimation', true )
+  SetTimer( 0, 'UpdateBackGround', true )
   ObjectAttr( 'player', { collisionAcceleration = '0 1500', lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1', lightPointPenetration = 3 } )
-  SetLightAmbient( 1, 1, 1, 0.2 )
+  SetLightAmbient( settings.ambientLight.R, settings.ambientLight.G, settings.ambientLight.B, settings.ambientLight.A )
   -- ObjectAttr( 'background', { z = 1 } )
   -- ListenTrigger( 'testFunc', 'wall.424.286.4.030000' )
   -- ObjectRemove( 'camera-mario-style' )
@@ -226,14 +227,13 @@ function PlayerControl( id, isPressed )
       end
     end
 
-    if id == 0x46 then  -- F - fire
+    if id == 0x58 then  -- X - fire
       if isPressed then
         local x,y = ObjectGetPos( 'player' )
         local object = 'player-bullet-.'..x..'.'..y..'.'..string.format( '%f', settings.timer )
         local isRight = playerState.lastDirection > 0 and true or false
         ObjectCreate( object, x + ( isRight and 30 or -30 ), y - 10, 0 )
         ObjectAttr( object, {
-          renderable = true,
           collision = true, collisionSize = '12 12', collisionAcceleration = '0 900', collisionVelocity = ( isRight and 150 or -150 )..' -400', collisionStatic = false,
           lightBlockByCollision = true,
           lightPoint = true, lightPointSize = ( math.random( 0, 1000 ) / 1000.0 ) * 300.0 + 30.0, lightPointColor = string.format( '%f %f %f 1', math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2 ), lightPointPenetration = 3
@@ -295,6 +295,13 @@ function UpdatePlayerAnimation( timerid )
   end
   SetTimer( timer, 'UpdatePlayerAnimation', true )
 end -- UpdatePlayerAnimation
+
+--(
+function UpdateBackGround( timerId )
+  local x, y = ObjectGetPos( 'player' )
+  ObjectSetPos( 'background', x, y * 0.5 + 50 )
+  SetTimer( 0, 'UpdateBackGround', true )
+end --)
 
 --[[ IsObjectUnderThis ]]
 function IsObjectUnderThis( object, target )
@@ -364,7 +371,7 @@ function PushMushroom( object )
   local itemName = object..'-mushroom-'..string.format( '%f', GetTime() )
   local brickX, brickY = ObjectGetPos( object )
   ObjectCreate( itemName, brickX, brickY, -0.1 )
-  ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '32 32' } )
+  ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '32 32', collision = true, collisionSize = '32 32', collisionStatic = true } )
   animation[ 'timer'..SetTimer( 0.1, 'DoAnimationMushroom' ) ] = { step = 1, time = 0, object = itemName, tile = object }
   ObjectRemoveTag( object, 'has-mushroom' )
   ObjectAttr( object, { renderable = false } )
@@ -408,7 +415,7 @@ function DoAnimationMushroom( timerId )
     else
       -- ObjectAddTag( anim.tile, 'has-mushroom' )
       animation[ keyByTimer ] = nil
-      ObjectAttr( anim.object, { collision = true, collisionSize = '32 32', collisionVelocity = '150 0', collisionAcceleration = '0 1200', collisionStatic = false, lightBlockByCollision } )
+      ObjectAttr( anim.object, { collisionVelocity = '150 0', collisionAcceleration = '0 1200', collisionStatic = false } )
       ObjectAddTag( anim.object, 'mushroom' )
       ObjectAddTag( anim.object, 'no-reset-player-velocity' )
       ListenCollision( anim.object, 'CollisionMushroom' )
@@ -475,8 +482,12 @@ function CollisionBullet( bullet, target, flags, vx, vy )
     ObjectSetPos( bullet, x, y )
     isJumped = true
   end
-  if bit32.band( flags, 2 ) == 2 or bit32.band( flags, 8 ) == 8 then
-    vx = -vx
+  if bit32.band( flags, 2 ) == 2 and vx > 0 then
+    vx = -math.abs( vx )
+    x = x - 1
+  elseif bit32.band( flags, 8 ) == 8 and vx < 0 then
+    vx = math.abs( vx )
+    x = x + 1
   end
   if isJumped and math.abs( vy ) < 100 then
     ObjectRemove( bullet )

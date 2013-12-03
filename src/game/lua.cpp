@@ -1247,7 +1247,7 @@ int Lua::LUA_SetLightAmbient( lua_State *lua )
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetLightAmbient => not enough parameters" );
     return 0;
   }
-  Vec4 color( lua_tonumber( lua, 1 ), lua_tonumber( lua, 2 ), lua_tonumber( lua, 3 ), lua_tonumber( lua, 4 ) );
+  Vec4 color( ( float ) lua_tonumber( lua, 1 ), ( float ) lua_tonumber( lua, 2 ), ( float ) lua_tonumber( lua, 3 ), ( float ) lua_tonumber( lua, 4 ) );
   LUAFUNC_SetLightAmbient( color );
   return 0;
 }//LUA_SetLightAmbient
