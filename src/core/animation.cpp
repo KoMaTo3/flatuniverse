@@ -1,13 +1,13 @@
 #include "animation.h"
 
 
-IAnimation::IAnimation( const std::string& setName )
+Animation::IAnimation::IAnimation( const std::string& setName )
 :_name( setName )
 {
 }
 
 
-IAnimation::~IAnimation() {
+Animation::IAnimation::~IAnimation() {
   /*
   while( this->_parameters.size() ) {
     delete this->_parameters.begin()->second;
@@ -17,7 +17,7 @@ IAnimation::~IAnimation() {
 }
 
 
-void IAnimation::Update( float animationTime ) {
+void Animation::IAnimation::Update( float animationTime ) {
 
   ParametersList::const_iterator
     iter = this->_parameters.begin(),
@@ -30,13 +30,13 @@ void IAnimation::Update( float animationTime ) {
 }//Update
 
 
-void IAnimation::__Dump( const std::string &prefix ) {
+void Animation::IAnimation::__Dump( const std::string &prefix ) {
   for( auto &parameter: this->_parameters ) {
     parameter.second->__Dump( prefix + "  " );
   }
 }//__Dump
 
 
-void IAnimation::SetEnable( bool isEnabled ) {
+void Animation::IAnimation::SetEnable( bool isEnabled ) {
   static_cast< AnimationParameterBool* >( &( *this->_parameters.find( ENABLED )->second ) )->SetValue( isEnabled );
 }//Disable

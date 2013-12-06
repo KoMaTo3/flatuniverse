@@ -11,13 +11,12 @@
 #include <string>
 #include <memory>
 
-class ISprite;
-enum AnimationSpriteParameterType;
-class IAnimationParameter;
-
 namespace Animation {
 
 
+class ISprite;
+enum AnimationSpriteParameterType;
+class IAnimationParameter;
 class AnimationPack;
 class Object;
 

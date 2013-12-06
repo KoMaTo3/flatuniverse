@@ -3,13 +3,13 @@
 #include "file.h"
 
 
-AnimationSet::AnimationSet( const std::string &setName, float setAnimationLength )
+Animation::AnimationSet::AnimationSet( const std::string &setName, float setAnimationLength )
 :_name( setName ), _time( 0.0f ), _animationLength( setAnimationLength ), _cycled( true )
 {
 }
 
 
-AnimationSet::~AnimationSet() {
+Animation::AnimationSet::~AnimationSet() {
   if( !this->_animationList.empty() ) {
     for( auto &animation: this->_animationList ) {
       delete animation;
@@ -19,7 +19,7 @@ AnimationSet::~AnimationSet() {
 }
 
 
-IAnimation* AnimationSet::AddAnimation( IAnimation* newAnimation ) {
+Animation::IAnimation* Animation::AnimationSet::AddAnimation( Animation::IAnimation* newAnimation ) {
   if( !newAnimation ) {
     __log.PrintInfo( Filelevel_ERROR, "AnimationSet::AddAnimation => is NULL" );
     return NULL;
@@ -31,7 +31,7 @@ IAnimation* AnimationSet::AddAnimation( IAnimation* newAnimation ) {
 }//AddAnimation
 
 
-void AnimationSet::Update( float dt ) {
+void Animation::AnimationSet::Update( float dt ) {
   if( this->_animationLength > 0.0f ) {
     this->_time += dt;
     if( this->_cycled ) {
@@ -49,7 +49,7 @@ void AnimationSet::Update( float dt ) {
 }//Update
 
 
-void AnimationSet::__Dump( const std::string &prefix ) {
+void Animation::AnimationSet::__Dump( const std::string &prefix ) {
   /*
   LOGD( "%s. AnimationSet[%p] name['%s'] length[%3.1f] time[%3.1f] cycled[%d] animationCount[%d]\n", prefix.c_str(), this, this->_name.c_str(), this->_animationLength, this->_time, this->_cycled, this->_animationList.size() );
   for( auto &animation: this->_animationList ) {
@@ -59,7 +59,7 @@ void AnimationSet::__Dump( const std::string &prefix ) {
 }//__Dump
 
 
-void AnimationSet::SetEnabled( bool isEnabled ) {
+void Animation::AnimationSet::SetEnabled( bool isEnabled ) {
   for( auto &animation: this->_animationList ) {
     animation->SetEnable( isEnabled );
   }

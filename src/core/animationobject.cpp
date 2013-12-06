@@ -3,13 +3,13 @@
 #include "file.h"
 
 
-IObject::IObject()
+Animation::IObject::IObject()
 :_animation( NULL ), _animationTemplate( NULL )
 {
 }
 
 
-IObject::~IObject() {
+Animation::IObject::~IObject() {
   if( this->_animation ) {
     delete this->_animation;
     this->_animation = NULL;
@@ -17,7 +17,7 @@ IObject::~IObject() {
 }
 
 
-Animation::AnimationPack* IObject::ApplyAnimation( const std::string& templateName, const std::string& animationName, float startTime ) {
+Animation::AnimationPack* Animation::IObject::ApplyAnimation( const std::string& templateName, const std::string& animationName, float startTime ) {
   Animation::AnimationPack *templatePack = Animation::GetPackTemplate( templateName );
   if( !templatePack ) {
     __log.PrintInfo( Filelevel_ERROR, "IObject::ApplyAnimation => animation '%s' not found", templateName.c_str() );
@@ -42,7 +42,7 @@ Animation::AnimationPack* IObject::ApplyAnimation( const std::string& templateNa
 }//ApplyAnimation
 
 
-Animation::AnimationPack* IObject::ApplySubAnimation( const std::string& animationName ) {
+Animation::AnimationPack* Animation::IObject::ApplySubAnimation( const std::string& animationName ) {
   if( !this->_animation ) {
     __log.PrintInfo( Filelevel_ERROR, "IObject::ApplySubAnimation => animation '%s' not found", animationName.c_str() );
     return NULL;
@@ -53,7 +53,7 @@ Animation::AnimationPack* IObject::ApplySubAnimation( const std::string& animati
 }//ApplySubAnimation
 
 
-void IObject::StopAnimation() {
+void Animation::IObject::StopAnimation() {
   if( !this->_animation ) {
     return;
   }
@@ -65,14 +65,14 @@ void IObject::StopAnimation() {
 }//StopAnimation
 
 
-AnimationObject::AnimationObject( IAnimationObject* object, const std::string& setName )
+Animation::AnimationObject::AnimationObject( IAnimationObject* object, const std::string& setName )
 :AnimationTemplate( setName ), _object( ( IObject* ) object )
 {
   static_cast< AnimationParameterBool* >( this->SetParameter( ENABLED ) )->Bind( static_cast< IObject* >( object )->GetEnabledPtr() );
 }
 
 
-AnimationObject::~AnimationObject() {
+Animation::AnimationObject::~AnimationObject() {
   //if( this->_object ) {
   //  delete this->_object;
   //}
@@ -84,8 +84,8 @@ AnimationObject::~AnimationObject() {
 * Делает один из параметров анимированным, возвращает его аниматор
 *
 */
-IAnimationParameter* AnimationObject::SetParameter( AnimationSpriteParameterType parameterType ) {
-  IAnimationParameter *parameter = NULL;
+Animation::IAnimationParameter* Animation::AnimationObject::SetParameter( Animation::AnimationSpriteParameterType parameterType ) {
+  Animation::IAnimationParameter *parameter = NULL;
  
   ParametersList::iterator iter = this->_parameters.find( parameterType );
   if( iter != this->_parameters.end() ) {
@@ -139,57 +139,57 @@ IAnimationParameter* AnimationObject::SetParameter( AnimationSpriteParameterType
     }
     */
   case ENABLED: {
-    AnimationParameterBool *value = new AnimationParameterBool();
+    AnimationParameterBool *value = new Animation::AnimationParameterBool();
     parameter = value;
     value->Bind( this->_object->GetEnabledPtr() );
     break;
     }
   case RENDERABLE_SIZE: {
-    AnimationParameterFloat2 *value = new AnimationParameterFloat2();
+    AnimationParameterFloat2 *value = new Animation::AnimationParameterFloat2();
     parameter = value;
     value->Bind( this->_object->GetRenderableSize() );
     break;
     }
   case RENDERABLE_TEXTURE_COORDINATES: {
-    AnimationParameterFloat4 *value = new AnimationParameterFloat4();
+    AnimationParameterFloat4 *value = new Animation::AnimationParameterFloat4();
     parameter = value;
     value->Bind( this->_object->GetTextureCoords() );
     break;
     }
   case RENDERABLE_TEXTURE_NAME: {
-    AnimationParameterString *value = new AnimationParameterString();
+    AnimationParameterString *value = new Animation::AnimationParameterString();
     parameter = value;
     value->Bind( &this->_object->GetTextureNamePtr(), &this->_object->GetTextureChangedFlag() );
     break;
     }
   case POSITION: {
-    AnimationParameterFloat2 *value = new AnimationParameterFloat2();
+    AnimationParameterFloat2 *value = new Animation::AnimationParameterFloat2();
     parameter = value;
     value->Bind( &this->_object->GetPositionPtr().x, &this->_object->GetPositionPtr().y );
     break;
     }
   case RENDERABLE_ROTATION: {
-    AnimationParameterFloat1 *value = new AnimationParameterFloat1();
+    AnimationParameterFloat1 *value = new Animation::AnimationParameterFloat1();
     parameter = value;
     value->Bind( this->_object->GetRenderableRotationPtr() );
     break;
     }
   case COLOR: {
-    AnimationParameterFloat4 *value = new AnimationParameterFloat4();
+    AnimationParameterFloat4 *value = new Animation::AnimationParameterFloat4();
     parameter = value;
     value->Bind( this->_object->GetColorPtr() );
     break;
     }
   case COLLISION_SQUARE: {
     //__log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => COLLISION_SQUARE" );
-    AnimationParameterFloat3 *value = new AnimationParameterFloat3();
+    AnimationParameterFloat3 *value = new Animation::AnimationParameterFloat3();
     parameter = value;
     value->Bind( this->_object->GetCollisionSquareSize() );
     break;
     }
   case COLLISION_OFFSET: {
     //__log.PrintInfo( Filelevel_DEBUG, "AnimationObject::SetParameter => COLLISION_OFFSET" );
-    AnimationParameterFloat3 *value = new AnimationParameterFloat3();
+    AnimationParameterFloat3 *value = new Animation::AnimationParameterFloat3();
     parameter = value;
     value->Bind( this->_object->GetCollisionOffsetPtr() );
     break;
@@ -206,18 +206,18 @@ IAnimationParameter* AnimationObject::SetParameter( AnimationSpriteParameterType
 }//SetParameter
 
 
-IAnimationParameter* AnimationObject::SetParameterOfExternAnimation( AnimationSpriteParameterType parameterType, void* AnimationObjectThis ) {
+Animation::IAnimationParameter* Animation::AnimationObject::SetParameterOfExternAnimation( Animation::AnimationSpriteParameterType parameterType, void* AnimationObjectThis ) {
   return ( static_cast< AnimationObject* >( AnimationObjectThis ) )->SetParameter( parameterType );
 }
 
 
-IAnimationObject* AnimationObject::MakeObjectInstance( const std::string& setName ) {
+Animation::IAnimationObject* Animation::AnimationObject::MakeObjectInstance( const std::string& setName ) {
   return this->_object->MakeInstance( setName );
 }//MakeObjectInstance
 
 
-void AnimationObject::MakeFromTemplate( const IAnimation &animation ) {
-  const AnimationObject *anim = static_cast< const AnimationObject* >( &animation );
+void Animation::AnimationObject::MakeFromTemplate( const Animation::IAnimation &animation ) {
+  const Animation::AnimationObject *anim = static_cast< const Animation::AnimationObject* >( &animation );
   for( auto &parameter: anim->_parameters ) {
     this->SetParameter( parameter.first )->MakeFromTemplate( *parameter.second );
   }

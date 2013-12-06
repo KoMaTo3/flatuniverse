@@ -9,7 +9,6 @@
 
 namespace Animation {
   class AnimationPack;
-};
 
 
 //Интерфейс для работы с объектом
@@ -63,6 +62,8 @@ private:
   AnimationObject();
   AnimationObject( const AnimationObject& );
   AnimationObject& operator=( const AnimationObject& );
+};
+
 };
 
 

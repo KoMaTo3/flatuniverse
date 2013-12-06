@@ -9,7 +9,6 @@
 
 namespace Animation {
   class AnimationPack;
-};
 
 
 //Интерфейс для работы со спрайтом
@@ -54,5 +53,6 @@ private:
   AnimationSprite& operator=( const AnimationSprite& );
 };
 
+};
 
 #endif

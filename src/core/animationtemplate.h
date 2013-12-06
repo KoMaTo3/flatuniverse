@@ -9,6 +9,9 @@
 #include "animation.h"
 
 
+namespace Animation {
+
+
 class AnimationTemplate: public IAnimation
 {
 public:
@@ -47,6 +50,9 @@ IAnimationParameter* AnimationTemplate::SetParameter( AnimationSpriteParameterTy
 
   return parameter;
 }//SetParameter
+
+
+};
 
 
 #endif

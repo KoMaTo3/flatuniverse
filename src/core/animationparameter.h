@@ -9,6 +9,9 @@
 #include "interpolation.h"
 
 
+namespace Animation {
+
+
 template< class T >
 class KeyFrame {
 public:
@@ -187,5 +190,7 @@ private:
   KeyFramesList _keyFrames;
 };
 
+
+}
 
 #endif

@@ -6,10 +6,7 @@
 #include "file.h"
 
 
-using namespace Animation;
-
-
-Manager::Manager() {
+Animation::Manager::Manager() {
   //this->_loadFunctionList.insert( std::make_pair( "scale", &Manager::_LoadAttributeScale ) );
   //this->_loadFunctionList.insert( std::make_pair( "rotation", &Manager::_LoadAttributeRotation ) );
   this->_loadFunctionList.insert( std::make_pair( "renderable_size", &Manager::_LoadAttributeRenderableSize ) );
@@ -25,11 +22,11 @@ Manager::Manager() {
 }
 
 
-Manager::~Manager() {
+Animation::Manager::~Manager() {
 }
 
 
-void Manager::LoadFile( const std::string& fileName ) {
+void Animation::Manager::LoadFile( const std::string& fileName ) {
   File f;
   if( f.Open( fileName, File_mode_READ ) ) {
     __log.PrintInfo( Filelevel_ERROR, "Animation::Manager::LoadFile => can't open file" );
@@ -54,7 +51,7 @@ void Manager::LoadFile( const std::string& fileName ) {
 }//LoadFile
 
 
-void Manager::_LoadPack( TextParser &parser ) {
+void Animation::Manager::_LoadPack( TextParser &parser ) {
   TextParser::Result value;
 
   //"name"
@@ -102,12 +99,12 @@ void Manager::_LoadPack( TextParser &parser ) {
 }//_LoadPack
 
 
-void Manager::_Error( TextParser &parser, TextParser::Result &result ) {
+void Animation::Manager::_Error( TextParser &parser, TextParser::Result &result ) {
   __log.PrintInfo( Filelevel_ERROR, "Animation::Manager => error at line %d column %d", parser.GetLineAtByte( result.lastPointer ), parser.GetColumnAtByte( result.lastPointer ) );
 }
 
 
-void Manager::_LoadSet( TextParser &parser, Animation::AnimationPack *pack ) {
+void Animation::Manager::_LoadSet( TextParser &parser, Animation::AnimationPack *pack ) {
   TextParser::Result value;
 
   //"name"
@@ -163,7 +160,7 @@ void Manager::_LoadSet( TextParser &parser, Animation::AnimationPack *pack ) {
 }//_LoadSet
 
 
-void Manager::_LoadAnimationSprite( TextParser &parser, AnimationSet *set ) {
+void Animation::Manager::_LoadAnimationSprite( TextParser &parser, Animation::AnimationSet *set ) {
   TextParser::Result value;
 
   //name
@@ -176,7 +173,7 @@ void Manager::_LoadAnimationSprite( TextParser &parser, AnimationSet *set ) {
     return;
   }
   const std::string name = value.value;
-  AnimationTemplate *tpl = new AnimationTemplate( name );
+  Animation::AnimationTemplate *tpl = new Animation::AnimationTemplate( name );
   set->AddAnimation( tpl );
 
   if( !this->_TextParserNextIsSymbol( parser, "{" ) ) {
@@ -285,7 +282,7 @@ void Manager::_LoadAnimationSprite( TextParser &parser, AnimationSet *set ) {
 }//_LoadAnimationSprite
 
 
-bool Manager::_TextParserNextIsSymbol( TextParser &parser, const std::string& symbol, bool showError ) {
+bool Animation::Manager::_TextParserNextIsSymbol( TextParser &parser, const std::string& symbol, bool showError ) {
   TextParser::Result value;
   if( !parser.GetNext( value ) ) {
     if( showError ) {
@@ -303,7 +300,7 @@ bool Manager::_TextParserNextIsSymbol( TextParser &parser, const std::string& sy
 }//_TextParserNextIsSymbol
 
 
-bool Manager::_TextParserNextIsNumber( TextParser &parser, TextParser::Result &value, bool showError ) {
+bool Animation::Manager::_TextParserNextIsNumber( TextParser &parser, TextParser::Result &value, bool showError ) {
   if( !parser.GetNext( value ) ) {
     if( showError ) {
       __log.PrintInfo( Filelevel_ERROR, "Animation::Manager::_TextParserNextIsNumber => end of file" );
@@ -320,7 +317,7 @@ bool Manager::_TextParserNextIsNumber( TextParser &parser, TextParser::Result &v
 }//_TextParserNextIsNumber
 
 
-void Manager::_LoadAttributeRenderableTexture( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Animation::Manager::_LoadAttributeRenderableTexture( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -400,7 +397,7 @@ void Manager::_LoadAttributeRenderableTexture( TextParser &parser, AnimationTemp
 }//_LoadAttributeRenderableTexture
 
 
-void Manager::_LoadAttributeEnabled( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Animation::Manager::_LoadAttributeEnabled( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -535,7 +532,7 @@ void Manager::_LoadAttributeScale( TextParser &parser, AnimationTemplate *tpl, f
 */
 
 
-void Manager::_LoadAttributeRenderableSize( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Animation::Manager::_LoadAttributeRenderableSize( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -587,7 +584,7 @@ void Manager::_LoadAttributeRenderableSize( TextParser &parser, AnimationTemplat
 }//_LoadAttributeRenderableSize
 
 
-void Manager::_LoadAttributeCollisionSquare( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Animation::Manager::_LoadAttributeCollisionSquare( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -639,7 +636,7 @@ void Manager::_LoadAttributeCollisionSquare( TextParser &parser, AnimationTempla
 }//_LoadAttributeCollisionSquare
 
 
-void Manager::_LoadAttributeCollisionOffset( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Animation::Manager::_LoadAttributeCollisionOffset( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -691,7 +688,7 @@ void Manager::_LoadAttributeCollisionOffset( TextParser &parser, AnimationTempla
 }//_LoadAttributeCollisionOffset
 
 
-void Manager::_LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Animation::Manager::_LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -743,7 +740,7 @@ void Manager::_LoadAttributePosition( TextParser &parser, AnimationTemplate *tpl
 }//_LoadAttributePosition
 
 
-void Manager::_LoadAttributeRenderableRotation( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Animation::Manager::_LoadAttributeRenderableRotation( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -779,7 +776,7 @@ void Manager::_LoadAttributeRenderableRotation( TextParser &parser, AnimationTem
 }//_LoadAttributeRenderableRotation
 
 
-void Manager::_LoadAttributeRenderableTextureCoords( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Animation::Manager::_LoadAttributeRenderableTextureCoords( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {
@@ -839,7 +836,7 @@ void Manager::_LoadAttributeRenderableTextureCoords( TextParser &parser, Animati
 }//_LoadAttributeRenderableTextureCoords
 
 
-void Manager::_LoadAttributeColor( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
+void Animation::Manager::_LoadAttributeColor( TextParser &parser, AnimationTemplate *tpl, float time, InterpolationType interpolation ) {
   TextParser::Result value;
 
   if( !this->_TextParserNextIsSymbol( parser, "(" ) ) {

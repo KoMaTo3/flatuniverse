@@ -7,8 +7,25 @@
 #include <string>
 
 
+namespace Animation {
+
+
 class IAnimation;
 class IAnimationObject;
+
+
+enum ANIMATION_SET_ACTION {
+  ANIMATION_SET_ACTION_STOP,
+  ANIMATION_SET_ACTION_DIE,
+  ANIMATION_SET_ACTION_REPEAR,
+  ANIMATION_SET_ACTION_SET_ANIMATION,
+};
+
+
+struct AnimationSetAction {
+  ANIMATION_SET_ACTION action;
+  std::string animation;
+};
 
 
 class AnimationSet
@@ -47,6 +64,7 @@ private:
     _time,
     _animationLength;
   bool _cycled;
+  AnimationSetAction _actionAfterAnimationDone;
 
   AnimationSet();
   AnimationSet( const AnimationSet& );
@@ -65,5 +83,7 @@ void AnimationSet::MakeFromTemplate( const AnimationSet& set, IAnimationObject *
     this->AddAnimation( anim )->MakeFromTemplate( *animation );
   }
 }//MakeFromTemplate
+
+};
 
 #endif

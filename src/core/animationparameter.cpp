@@ -2,28 +2,28 @@
 #include "file.h"
 
 
-IAnimationParameter::~IAnimationParameter() {
+Animation::IAnimationParameter::~IAnimationParameter() {
 }
 
 
-IAnimationParameter::IAnimationParameter() {
+Animation::IAnimationParameter::IAnimationParameter() {
 }
 
 
 /*
 * Float 1
 */
-AnimationParameterFloat1::AnimationParameterFloat1()
+Animation::AnimationParameterFloat1::AnimationParameterFloat1()
 :_value( NULL )
 {
 }
 
 
-AnimationParameterFloat1::~AnimationParameterFloat1() {
+Animation::AnimationParameterFloat1::~AnimationParameterFloat1() {
 }
 
 
-void AnimationParameterFloat1::Update( float animationTime ) {
+void Animation::AnimationParameterFloat1::Update( float animationTime ) {
   if( !this->_value ) {
     __log.PrintInfo( Filelevel_WARNING, "AnimationParameterFloat1::Update => value is NULL" );
     return;
@@ -75,23 +75,23 @@ void AnimationParameterFloat1::Update( float animationTime ) {
 }//Update
 
 
-void AnimationParameterFloat1::Bind( float *setValue ) {
+void Animation::AnimationParameterFloat1::Bind( float *setValue ) {
   this->_value = setValue;
 }//Bind
 
 
-AnimationParameterFloat1* AnimationParameterFloat1::AddKeyFrame( float time, float value, InterpolationType interpolation ) {
+Animation::AnimationParameterFloat1* Animation::AnimationParameterFloat1::AddKeyFrame( float time, float value, InterpolationType interpolation ) {
   this->_keyFrames.push_back( KeyFrameType( time, value, interpolation ) );
   return this;
 }//AddKeyFrame
 
 
-void AnimationParameterFloat1::__Dump( const std::string &prefix ) {
+void Animation::AnimationParameterFloat1::__Dump( const std::string &prefix ) {
   //LOGD( "%s. parameter[%p] keyFramesCount[%d] value[%3.3f]\n", prefix.c_str(), this, this->_keyFrames.size(), *this->_value );
 }//__Dump
 
 
-void AnimationParameterFloat1::MakeFromTemplate( const IAnimationParameter& parameter ) {
+void Animation::AnimationParameterFloat1::MakeFromTemplate( const IAnimationParameter& parameter ) {
   const AnimationParameterFloat1 *param = static_cast< const AnimationParameterFloat1* >( &parameter );
   for( auto &key: param->_keyFrames ) {
     this->AddKeyFrame( key.time, key.value, key.interpolation );
@@ -103,17 +103,17 @@ void AnimationParameterFloat1::MakeFromTemplate( const IAnimationParameter& para
 /*
 * Float 2
 */
-AnimationParameterFloat2::AnimationParameterFloat2() {
+Animation::AnimationParameterFloat2::AnimationParameterFloat2() {
   this->_value[ 0 ] = NULL;
   this->_value[ 1 ] = NULL;
 }
 
 
-AnimationParameterFloat2::~AnimationParameterFloat2() {
+Animation::AnimationParameterFloat2::~AnimationParameterFloat2() {
 }
 
 
-void AnimationParameterFloat2::Update( float animationTime ) {
+void Animation::AnimationParameterFloat2::Update( float animationTime ) {
   if( !this->_value ) {
     return;
   }
@@ -168,36 +168,36 @@ void AnimationParameterFloat2::Update( float animationTime ) {
 }//Update
 
 
-void AnimationParameterFloat2::Bind( float *setValue0, float *setValue1 ) {
+void Animation::AnimationParameterFloat2::Bind( float *setValue0, float *setValue1 ) {
   this->_value[ 0 ] = setValue0;
   this->_value[ 1 ] = setValue1;
 }//Bind
 
 
-void AnimationParameterFloat2::Bind( Vec2& setValue ) {
+void Animation::AnimationParameterFloat2::Bind( Vec2& setValue ) {
   this->_value[ 0 ] = &setValue.x;
   this->_value[ 1 ] = &setValue.y;
 }//Bind
 
 
-AnimationParameterFloat2* AnimationParameterFloat2::AddKeyFrame( float time, float value0, float value1, InterpolationType interpolation ) {
+Animation::AnimationParameterFloat2* Animation::AnimationParameterFloat2::AddKeyFrame( float time, float value0, float value1, InterpolationType interpolation ) {
   this->_keyFrames.push_back( KeyFrameType( time, Vec2( value0, value1 ), interpolation ) );
   return this;
 }//AddKeyFrame
 
 
-AnimationParameterFloat2* AnimationParameterFloat2::AddKeyFrame( float time, const Vec2& value, InterpolationType interpolation ) {
+Animation::AnimationParameterFloat2* Animation::AnimationParameterFloat2::AddKeyFrame( float time, const Vec2& value, InterpolationType interpolation ) {
   this->_keyFrames.push_back( KeyFrameType( time, value, interpolation ) );
   return this;
 }//AddKeyFrame
 
 
-void AnimationParameterFloat2::__Dump( const std::string &prefix ) {
+void Animation::AnimationParameterFloat2::__Dump( const std::string &prefix ) {
   //LOGD( "%s. parameter[%p] keyFramesCount[%d] value[%3.3f; %3.3f]\n", prefix.c_str(), this, this->_keyFrames.size(), *this->_value[ 0 ], *this->_value[ 1 ] );
 }//__Dump
 
 
-void AnimationParameterFloat2::MakeFromTemplate( const IAnimationParameter& parameter ) {
+void Animation::AnimationParameterFloat2::MakeFromTemplate( const IAnimationParameter& parameter ) {
   const AnimationParameterFloat2 *param = static_cast< const AnimationParameterFloat2* >( &parameter );
   for( auto &key: param->_keyFrames ) {
     this->AddKeyFrame( key.time, key.value, key.interpolation );
@@ -208,18 +208,18 @@ void AnimationParameterFloat2::MakeFromTemplate( const IAnimationParameter& para
 /*
 * Float 3
 */
-AnimationParameterFloat3::AnimationParameterFloat3() {
+Animation::AnimationParameterFloat3::AnimationParameterFloat3() {
   this->_value[ 0 ] = NULL;
   this->_value[ 1 ] = NULL;
   this->_value[ 2 ] = NULL;
 }
 
 
-AnimationParameterFloat3::~AnimationParameterFloat3() {
+Animation::AnimationParameterFloat3::~AnimationParameterFloat3() {
 }
 
 
-void AnimationParameterFloat3::Update( float animationTime ) {
+void Animation::AnimationParameterFloat3::Update( float animationTime ) {
   if( !this->_value ) {
     return;
   }
@@ -279,38 +279,38 @@ void AnimationParameterFloat3::Update( float animationTime ) {
 }//Update
 
 
-void AnimationParameterFloat3::Bind( float *setValue0, float *setValue1, float *setValue2 ) {
+void Animation::AnimationParameterFloat3::Bind( float *setValue0, float *setValue1, float *setValue2 ) {
   this->_value[ 0 ] = setValue0;
   this->_value[ 1 ] = setValue1;
   this->_value[ 2 ] = setValue2;
 }//Bind
 
 
-void AnimationParameterFloat3::Bind( Vec3& setValue ) {
+void Animation::AnimationParameterFloat3::Bind( Vec3& setValue ) {
   this->_value[ 0 ] = &setValue.x;
   this->_value[ 1 ] = &setValue.y;
   this->_value[ 2 ] = &setValue.z;
 }//Bind
 
 
-AnimationParameterFloat3* AnimationParameterFloat3::AddKeyFrame( float time, float value0, float value1, float value2, InterpolationType interpolation ) {
+Animation::AnimationParameterFloat3* Animation::AnimationParameterFloat3::AddKeyFrame( float time, float value0, float value1, float value2, InterpolationType interpolation ) {
   this->_keyFrames.push_back( KeyFrameType( time, Vec3( value0, value1, value2 ), interpolation ) );
   return this;
 }//AddKeyFrame
 
 
-AnimationParameterFloat3* AnimationParameterFloat3::AddKeyFrame( float time, const Vec3& value, InterpolationType interpolation ) {
+Animation::AnimationParameterFloat3* Animation::AnimationParameterFloat3::AddKeyFrame( float time, const Vec3& value, InterpolationType interpolation ) {
   this->_keyFrames.push_back( KeyFrameType( time, value, interpolation ) );
   return this;
 }//AddKeyFrame
 
 
-void AnimationParameterFloat3::__Dump( const std::string &prefix ) {
+void Animation::AnimationParameterFloat3::__Dump( const std::string &prefix ) {
   //LOGD( "%s. parameter[%p] keyFramesCount[%d] value[%3.3f; %3.3f; %3.3f]\n", prefix.c_str(), this, this->_keyFrames.size(), *this->_value[ 0 ], *this->_value[ 1 ], *this->_value[ 2 ] );
 }//__Dump
 
 
-void AnimationParameterFloat3::MakeFromTemplate( const IAnimationParameter& parameter ) {
+void Animation::AnimationParameterFloat3::MakeFromTemplate( const IAnimationParameter& parameter ) {
   const AnimationParameterFloat3 *param = static_cast< const AnimationParameterFloat3* >( &parameter );
   for( auto &key: param->_keyFrames ) {
     this->AddKeyFrame( key.time, key.value, key.interpolation );
@@ -321,7 +321,7 @@ void AnimationParameterFloat3::MakeFromTemplate( const IAnimationParameter& para
 /*
 * Float 4
 */
-AnimationParameterFloat4::AnimationParameterFloat4() {
+Animation::AnimationParameterFloat4::AnimationParameterFloat4() {
   this->_value[ 0 ] = NULL;
   this->_value[ 1 ] = NULL;
   this->_value[ 2 ] = NULL;
@@ -329,11 +329,11 @@ AnimationParameterFloat4::AnimationParameterFloat4() {
 }
 
 
-AnimationParameterFloat4::~AnimationParameterFloat4() {
+Animation::AnimationParameterFloat4::~AnimationParameterFloat4() {
 }
 
 
-void AnimationParameterFloat4::Update( float animationTime ) {
+void Animation::AnimationParameterFloat4::Update( float animationTime ) {
   if( !this->_value ) {
     return;
   }
@@ -397,7 +397,7 @@ void AnimationParameterFloat4::Update( float animationTime ) {
 }//Update
 
 
-void AnimationParameterFloat4::Bind( float *setValue0, float *setValue1, float *setValue2, float *setValue3 ) {
+void Animation::AnimationParameterFloat4::Bind( float *setValue0, float *setValue1, float *setValue2, float *setValue3 ) {
   this->_value[ 0 ] = setValue0;
   this->_value[ 1 ] = setValue1;
   this->_value[ 2 ] = setValue2;
@@ -405,7 +405,7 @@ void AnimationParameterFloat4::Bind( float *setValue0, float *setValue1, float *
 }//Bind
 
 
-void AnimationParameterFloat4::Bind( Vec4& setValue ) {
+void Animation::AnimationParameterFloat4::Bind( Vec4& setValue ) {
   this->_value[ 0 ] = &setValue.x;
   this->_value[ 1 ] = &setValue.y;
   this->_value[ 2 ] = &setValue.z;
@@ -413,24 +413,24 @@ void AnimationParameterFloat4::Bind( Vec4& setValue ) {
 }//Bind
 
 
-AnimationParameterFloat4* AnimationParameterFloat4::AddKeyFrame( float time, float value0, float value1, float value2, float value3, InterpolationType interpolation ) {
+Animation::AnimationParameterFloat4* Animation::AnimationParameterFloat4::AddKeyFrame( float time, float value0, float value1, float value2, float value3, InterpolationType interpolation ) {
   this->_keyFrames.push_back( KeyFrameType( time, Vec4( value0, value1, value2, value3 ), interpolation ) );
   return this;
 }//AddKeyFrame
 
 
-AnimationParameterFloat4* AnimationParameterFloat4::AddKeyFrame( float time, const Vec4& value, InterpolationType interpolation ) {
+Animation::AnimationParameterFloat4* Animation::AnimationParameterFloat4::AddKeyFrame( float time, const Vec4& value, InterpolationType interpolation ) {
   this->_keyFrames.push_back( KeyFrameType( time, value, interpolation ) );
   return this;
 }//AddKeyFrame
 
 
-void AnimationParameterFloat4::__Dump( const std::string &prefix ) {
+void Animation::AnimationParameterFloat4::__Dump( const std::string &prefix ) {
   //LOGD( "%s. parameter[%p] keyFramesCount[%d] value[%3.3f; %3.3f; %3.3f; %3.3f]\n", prefix.c_str(), this, this->_keyFrames.size(), *this->_value[ 0 ], *this->_value[ 1 ], *this->_value[ 2 ], *this->_value[ 3 ] );
 }//__Dump
 
 
-void AnimationParameterFloat4::MakeFromTemplate( const IAnimationParameter& parameter ) {
+void Animation::AnimationParameterFloat4::MakeFromTemplate( const IAnimationParameter& parameter ) {
   const AnimationParameterFloat4 *param = static_cast< const AnimationParameterFloat4* >( &parameter );
   for( auto &key: param->_keyFrames ) {
     this->AddKeyFrame( key.time, key.value, key.interpolation );
@@ -441,17 +441,17 @@ void AnimationParameterFloat4::MakeFromTemplate( const IAnimationParameter& para
 /*
 * String
 */
-AnimationParameterString::AnimationParameterString()
+Animation::AnimationParameterString::AnimationParameterString()
 :_value( NULL ), _valueChanged( NULL ), _valueHash( 0 )
 {
 }
 
 
-AnimationParameterString::~AnimationParameterString() {
+Animation::AnimationParameterString::~AnimationParameterString() {
 }
 
 
-void AnimationParameterString::Update( float animationTime ) {
+void Animation::AnimationParameterString::Update( float animationTime ) {
   if( !this->_value ) {
     __log.PrintInfo( Filelevel_WARNING, "AnimationParameterString::Update => value is NULL" );
     return;
@@ -502,25 +502,25 @@ void AnimationParameterString::Update( float animationTime ) {
 }//Update
 
 
-void AnimationParameterString::Bind( std::string *setValue, bool *onChangeFlag ) {
+void Animation::AnimationParameterString::Bind( std::string *setValue, bool *onChangeFlag ) {
   this->_value = setValue;
   this->_valueChanged = onChangeFlag;
   this->_valueHash = this->_valueHasher( *this->_value );
 }//Bind
 
 
-AnimationParameterString* AnimationParameterString::AddKeyFrame( float time, const std::string &value ) {
+Animation::AnimationParameterString* Animation::AnimationParameterString::AddKeyFrame( float time, const std::string &value ) {
   this->_keyFrames.push_back( KeyFrameType( time, value, FLAT ) );
   return this;
 }//AddKeyFrame
 
 
-void AnimationParameterString::__Dump( const std::string &prefix ) {
+void Animation::AnimationParameterString::__Dump( const std::string &prefix ) {
   //LOGD( "%s. parameter[%p] keyFramesCount[%d] value['%s']\n", prefix.c_str(), this, this->_keyFrames.size(), this->_value->c_str() );
 }//__Dump
 
 
-void AnimationParameterString::MakeFromTemplate( const IAnimationParameter& parameter ) {
+void Animation::AnimationParameterString::MakeFromTemplate( const IAnimationParameter& parameter ) {
   const AnimationParameterString *param = static_cast< const AnimationParameterString* >( &parameter );
   for( auto &key: param->_keyFrames ) {
     this->AddKeyFrame( key.time, key.value );
@@ -528,7 +528,7 @@ void AnimationParameterString::MakeFromTemplate( const IAnimationParameter& para
 }//MakeFromTemplate
 
 
-void AnimationParameterString::_SetValue( const std::string &newValue ) {
+void Animation::AnimationParameterString::_SetValue( const std::string &newValue ) {
   *this->_value = newValue;
   size_t newHash = this->_valueHasher( *this->_value );
   *this->_valueChanged = ( this->_valueHash != newHash );
@@ -539,17 +539,17 @@ void AnimationParameterString::_SetValue( const std::string &newValue ) {
 /*
 * Boolean
 */
-AnimationParameterBool::AnimationParameterBool()
+Animation::AnimationParameterBool::AnimationParameterBool()
 :_value( NULL )
 {
 }
 
 
-AnimationParameterBool::~AnimationParameterBool() {
+Animation::AnimationParameterBool::~AnimationParameterBool() {
 }
 
 
-void AnimationParameterBool::Update( float animationTime ) {
+void Animation::AnimationParameterBool::Update( float animationTime ) {
   if( !this->_value ) {
     __log.PrintInfo( Filelevel_WARNING, "AnimationParameterBool::Update => value is NULL" );
     return;
@@ -599,23 +599,23 @@ void AnimationParameterBool::Update( float animationTime ) {
 }//Update
 
 
-void AnimationParameterBool::Bind( bool *setValue ) {
+void Animation::AnimationParameterBool::Bind( bool *setValue ) {
   this->_value = setValue;
 }//Bind
 
 
-AnimationParameterBool* AnimationParameterBool::AddKeyFrame( float time, bool value ) {
+Animation::AnimationParameterBool* Animation::AnimationParameterBool::AddKeyFrame( float time, bool value ) {
   this->_keyFrames.push_back( KeyFrameType( time, value, FLAT ) );
   return this;
 }//AddKeyFrame
 
 
-void AnimationParameterBool::__Dump( const std::string &prefix ) {
+void Animation::AnimationParameterBool::__Dump( const std::string &prefix ) {
   //LOGD( "%s. parameter[%p] keyFramesCount[%d] value[%d]\n", prefix.c_str(), this, this->_keyFrames.size(), *this->_value );
 }//__Dump
 
 
-void AnimationParameterBool::MakeFromTemplate( const IAnimationParameter& parameter ) {
+void Animation::AnimationParameterBool::MakeFromTemplate( const IAnimationParameter& parameter ) {
   const AnimationParameterBool *param = static_cast< const AnimationParameterBool* >( &parameter );
   for( auto &key: param->_keyFrames ) {
     this->AddKeyFrame( key.time, key.value );
@@ -623,6 +623,6 @@ void AnimationParameterBool::MakeFromTemplate( const IAnimationParameter& parame
 }//MakeFromTemplate
 
 
-void AnimationParameterBool::SetValue( bool newValue ) {
+void Animation::AnimationParameterBool::SetValue( bool newValue ) {
   *this->_value = newValue;
 }//SetValue

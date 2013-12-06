@@ -3,7 +3,7 @@
 #include "file.h"
 
 
-ISprite::~ISprite() {
+Animation::ISprite::~ISprite() {
   if( this->_animation ) {
     delete this->_animation;
     this->_animation = NULL;
@@ -11,7 +11,7 @@ ISprite::~ISprite() {
 }
 
 
-Animation::AnimationPack* ISprite::ApplyAnimation( const std::string& templateName, const std::string& animationName ) {
+Animation::AnimationPack* Animation::ISprite::ApplyAnimation( const std::string& templateName, const std::string& animationName ) {
   __log.PrintInfo( Filelevel_DEBUG, "ISprite::ApplyAnimation" );
   Animation::AnimationPack *templatePack = Animation::GetPackTemplate( templateName );
   if( !templatePack ) {
@@ -36,7 +36,7 @@ Animation::AnimationPack* ISprite::ApplyAnimation( const std::string& templateNa
 }//ApplyAnimation
 
 
-Animation::AnimationPack* ISprite::ApplySubAnimation( const std::string& animationName ) {
+Animation::AnimationPack* Animation::ISprite::ApplySubAnimation( const std::string& animationName ) {
   if( !this->_animation ) {
     __log.PrintInfo( Filelevel_ERROR, "ISprite::ApplySubAnimation => animation '%s' not found", animationName.c_str() );
     return NULL;
@@ -47,14 +47,14 @@ Animation::AnimationPack* ISprite::ApplySubAnimation( const std::string& animati
 }//ApplySubAnimation
 
 
-AnimationSprite::AnimationSprite( IAnimationObject* sprite, const std::string& setName )
+Animation::AnimationSprite::AnimationSprite( Animation::IAnimationObject* sprite, const std::string& setName )
 :AnimationTemplate( setName ), _sprite( ( ISprite* ) sprite )
 {
   static_cast< AnimationParameterBool* >( this->SetParameter( ENABLED ) )->Bind( static_cast< ISprite* >( sprite )->GetEnabledPtr() );
 }
 
 
-AnimationSprite::~AnimationSprite() {
+Animation::AnimationSprite::~AnimationSprite() {
   if( this->_sprite ) {
     delete this->_sprite;
   }
@@ -66,8 +66,8 @@ AnimationSprite::~AnimationSprite() {
 * Делает один из параметров анимированным, возвращает его аниматор
 *
 */
-IAnimationParameter* AnimationSprite::SetParameter( AnimationSpriteParameterType parameterType ) {
-  IAnimationParameter *parameter = NULL;
+Animation::IAnimationParameter* Animation::AnimationSprite::SetParameter( Animation::AnimationSpriteParameterType parameterType ) {
+  Animation::IAnimationParameter *parameter = NULL;
  
   ParametersList::iterator iter = this->_parameters.find( parameterType );
   if( iter != this->_parameters.end() ) {
@@ -152,18 +152,18 @@ IAnimationParameter* AnimationSprite::SetParameter( AnimationSpriteParameterType
 }//SetParameter
 
 
-IAnimationParameter* AnimationSprite::SetParameterOfExternAnimation( AnimationSpriteParameterType parameterType, void* AnimationSpriteThis ) {
-  return ( static_cast< AnimationSprite* >( AnimationSpriteThis ) )->SetParameter( parameterType );
+Animation::IAnimationParameter* Animation::AnimationSprite::SetParameterOfExternAnimation( Animation::AnimationSpriteParameterType parameterType, void* AnimationSpriteThis ) {
+  return ( static_cast< Animation::AnimationSprite* >( AnimationSpriteThis ) )->SetParameter( parameterType );
 }
 
 
-IAnimationObject* AnimationSprite::MakeObjectInstance( const std::string& setName ) {
+Animation::IAnimationObject* Animation::AnimationSprite::MakeObjectInstance( const std::string& setName ) {
   return this->_sprite->MakeInstance( setName );
 }//MakeObjectInstance
 
 
-void AnimationSprite::MakeFromTemplate( const IAnimation &animation ) {
-  const AnimationSprite *anim = static_cast< const AnimationSprite* >( &animation );
+void Animation::AnimationSprite::MakeFromTemplate( const Animation::IAnimation &animation ) {
+  const Animation::AnimationSprite *anim = static_cast< const Animation::AnimationSprite* >( &animation );
   for( auto &parameter: anim->_parameters ) {
     this->SetParameter( parameter.first )->MakeFromTemplate( *parameter.second );
   }

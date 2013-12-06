@@ -16,6 +16,8 @@
 #include "animationparameter.h"
 
 
+namespace Animation {
+
 enum AnimationSpriteParameterType {
   ENABLED,
   /*
@@ -74,6 +76,9 @@ private:
   IAnimation();
   IAnimation( const IAnimation& );
   const IAnimation& operator=( const IAnimation& );
+};
+
+
 };
 
 

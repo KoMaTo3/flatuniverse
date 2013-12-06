@@ -1,16 +1,16 @@
 #include "animationtemplate.h"
 
 
-AnimationTemplate::AnimationTemplate( const std::string& setName )
-:IAnimation( setName )
+Animation::AnimationTemplate::AnimationTemplate( const std::string& setName )
+:Animation::IAnimation( setName )
 {
 }
 
 
-AnimationTemplate::~AnimationTemplate() {
+Animation::AnimationTemplate::~AnimationTemplate() {
 }
 
 
-IAnimationObject* AnimationTemplate::MakeObjectInstance() {
+Animation::IAnimationObject* Animation::AnimationTemplate::MakeObjectInstance() {
   return NULL;
 }//MakeObjectInstance

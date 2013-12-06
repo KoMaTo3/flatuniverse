@@ -96,7 +96,7 @@ enum ObjectGuiType {
 
 
 
-class Object: public IPointerOwner, public ITags, public IObject, public ObjectWidget::WidgetOwner
+class Object: public IPointerOwner, public ITags, public Animation::IObject, public ObjectWidget::WidgetOwner
 {
 public:
   struct ObjectForce  //вектор силы
@@ -293,7 +293,7 @@ public:
   virtual Vec3& GetCollisionOffsetPtr() {
     return ( this->IsCollision() ? this->GetCollision()->GetOffsetModifier() : this->EnableCollision()->InitSquare( Vec3( 1.0f, 1.0f, 0.0f ) )->GetOffsetModifier() );
   }
-  virtual IAnimationObject* MakeInstance( const std::string& setName );
+  virtual Animation::IAnimationObject* MakeInstance( const std::string& setName );
 
   /*
   g2Controller*       EnableGui           ( const GuiConstructor *info );

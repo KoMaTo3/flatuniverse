@@ -7,10 +7,10 @@
 #include "interpolation.h"
 
 
-class AnimationTemplate;
-
-
 namespace Animation {
+
+
+class AnimationTemplate;
 
 
 class Manager {
@@ -46,7 +46,7 @@ private:
 };
 
 
-}
+};
 
 
 #endif

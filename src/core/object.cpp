@@ -1833,7 +1833,7 @@ void Object::RemoveTag( const std::string& tag ) {
 }//RemoveTag
 
 
-IAnimationObject* Object::MakeInstance( const std::string& setName ) {
+Animation::IAnimationObject* Object::MakeInstance( const std::string& setName ) {
   Object *child = this->GetChild( setName );
   if( !child ) {
     child = new Object( setName, this, false );
