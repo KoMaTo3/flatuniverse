@@ -2,6 +2,7 @@
 
 #include "core/core.h"
 #include "core/object.h"
+#include "core/animationset.h"
 #include "worldgridmgr.h"
 #include "lua.h"
 #include <vector>
@@ -80,6 +81,8 @@ public:
   };
   typedef std::deque< GameObjectTrigger > GameObjectTriggerList;
   GameObjectTriggerList objectTriggers;
+  typedef std::hash_map< std::string, Animation::ANIMATION_SET_ACTION > AnimationSetActionByName;
+  AnimationSetActionByName animationSetActionByName;
 
 public:
   Game();
@@ -127,7 +130,7 @@ public:
   static bool   LUA_ObjectHasTag      ( const std::string &objectName, const std::string &tag );
   static void   LUA_ObjectAddTag      ( const std::string &objectName, const std::string &tag );
   static void   LUA_ObjectRemoveTag   ( const std::string &objectName, const std::string &tag );
-  static void   LUA_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation );
+  static void   LUA_ObjectSetAnimation( const std::string &actionAfterAnimationComplete, const std::string &animationAfterAnimationComplete, const std::string &objectName, const std::string &templateName, const std::string &animation );
   static void   LUA_ObjectStopAnimation ( const std::string &objectName );
   static void   LUA_SetPause          ( bool isPause );
   static void   LUA_SetLightAmbient   ( const Vec4 &color );

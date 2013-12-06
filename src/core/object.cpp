@@ -1464,11 +1464,23 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     if( isAnimation ) {
       std::string templateName = "", animationName = "";
       float startTime;
+      Animation::AnimationSetAction actionAfterComplete( Animation::ANIMATION_SET_ACTION_REPEAT );
+      Animation::ANIMATION_SET_STATUS status = Animation::ANIMATION_SET_STATUS_PLAYING;
       reader >> templateName;
       reader >> animationName;
       reader >> startTime;
-      __log.PrintInfo( Filelevel_DEBUG, "LoadFromBuffer => animationTemplate['%s'] name['%s'] time[%3.3f]", templateName.c_str(), animationName.c_str(), startTime );
-      this->ApplyAnimation( templateName, animationName, startTime )->SetEnabled( true );
+      if( version >= 0x0000000A ) {
+        reader >> actionAfterComplete.action;
+        reader >> actionAfterComplete.animation;
+
+        if( version >= 0x0000000B ) {
+          reader >> status;
+        }
+      }
+      __log.PrintInfo( Filelevel_DEBUG, "LoadFromBuffer => animationTemplate['%s'] name['%s'] time[%3.3f] status[%d]", templateName.c_str(), animationName.c_str(), startTime, status );
+      if( status != Animation::ANIMATION_SET_STATUS_STOPPED ) {
+        this->ApplyAnimation( actionAfterComplete, templateName, animationName, startTime )->SetEnabled( true );
+      }
     }
 
     if( version >= 0x00000007 ) {

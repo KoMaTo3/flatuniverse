@@ -17,14 +17,28 @@ class IAnimationObject;
 enum ANIMATION_SET_ACTION {
   ANIMATION_SET_ACTION_STOP,
   ANIMATION_SET_ACTION_DIE,
-  ANIMATION_SET_ACTION_REPEAR,
+  ANIMATION_SET_ACTION_REPEAT,
   ANIMATION_SET_ACTION_SET_ANIMATION,
 };
 
 
-struct AnimationSetAction {
+enum ANIMATION_SET_STATUS {
+  ANIMATION_SET_STATUS_STOPPED,
+  ANIMATION_SET_STATUS_PLAYING,
+  ANIMATION_SET_STATUS_PAUSED,
+  ANIMATION_SET_STATUS_CHANGING,
+};
+
+
+class AnimationSetAction {
+public:
   ANIMATION_SET_ACTION action;
   std::string animation;
+
+  AnimationSetAction();
+  AnimationSetAction( const AnimationSetAction& from );
+  AnimationSetAction( const ANIMATION_SET_ACTION setAction, const std::string &setAnimation = "" );
+  AnimationSetAction& operator=( const AnimationSetAction& from );
 };
 
 
@@ -41,11 +55,9 @@ public:
   __forceinline void SetAnimationLength( float length ) {
     this->_animationLength = ( length > 0.0f ? length : 0.0f );
   }
-  __forceinline void SetAnimationCycled( bool cycled ) {
-    this->_cycled = cycled;
-  }
   __forceinline void ResetAnimation( float setTime = 0.0f ) {
     this->_time = setTime;
+    this->_status = ANIMATION_SET_STATUS_PLAYING;
   }
   void SetEnabled( bool isEnabled );
   bool GetEnabled() const;
@@ -55,6 +67,9 @@ public:
   inline float GetTime() const {
     return this->_time;
   }
+  void SetActionAfterAnimationComplete( const AnimationSetAction& actionAfterComplete );
+  const AnimationSetAction& GetActionAfterAnimationComplete() { return this->_actionAfterAnimationDone; }
+  inline ANIMATION_SET_STATUS GetStatus() { return this->_status; }
 
 private:
   typedef std::vector< IAnimation* > AnimationList;
@@ -63,7 +78,7 @@ private:
   float
     _time,
     _animationLength;
-  bool _cycled;
+  ANIMATION_SET_STATUS _status;
   AnimationSetAction _actionAfterAnimationDone;
 
   AnimationSet();
@@ -77,7 +92,7 @@ void AnimationSet::MakeFromTemplate( const AnimationSet& set, IAnimationObject *
   this->_name   = set._name;
   this->_time   = set._time;
   this->_animationLength = set._animationLength;
-  this->_cycled = set._cycled;
+  this->_status = set._status;
   for( auto &animation: set._animationList ) {
     TAnimation *anim = new TAnimation( object->MakeInstance( animation->GetName() ), animation->GetName() );
     this->AddAnimation( anim )->MakeFromTemplate( *animation );

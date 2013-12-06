@@ -6,7 +6,7 @@ function GetObjectsTemplates()
       icon = 'data/textures/editor/respawn.png',
       attr = {
       },
-      animation = { 'editor/respawn', 'default' },
+      animation = { 'editor/respawn', 'default', 'repeat' },
       tags = {
         'respawn',
       },
@@ -202,7 +202,7 @@ function GetObjectsTemplates()
         z = 1,
         -- renderable = true, textureName = 'textures/tiles/grass/blackgrass0.png', renderableSize = '64 32',
       },
-      animation = { 'grass/0', 'default' },
+      animation = { 'grass/0', 'default', 'repeat' },
     },
     -- ShadowGrass-1
     {
@@ -212,7 +212,7 @@ function GetObjectsTemplates()
         z = 1,
         -- renderable = true, textureName = 'textures/tiles/grass/blackgrass0.png', renderableSize = '64 32',
       },
-      animation = { 'grass/0', 'topdown' },
+      animation = { 'grass/0', 'topdown', 'repeat' },
     },
     -- Tube0
     {
@@ -313,6 +313,16 @@ function GetObjectsTemplates()
       attr = {
         renderable = true, textureName = 'textures/tiles/coin0.png',
         trigger = true, _triggerScale = 1, _triggerFunc = 'CoinCollect',
+      },
+    },
+    -- Mushroom0
+    {
+      name = 'Гриб',
+      icon = 'data/textures/items/mushroom.png',
+      attr = {
+        renderable = true, textureName = 'textures/items/mushroom.png',
+        collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500',
+        lightBlockByCollision = true,
       },
     },
     --

@@ -1168,7 +1168,15 @@ function EditorInsertItemByTemplate( px, py )
     GUI.templates.items[ GUI.templates.currentItem ].creationScript( name )
   end
   if type( GUI.templates.items[ GUI.templates.currentItem ].animation ) == 'table' then
-    ObjectSetAnimation( name, GUI.templates.items[ GUI.templates.currentItem ].animation[ 1 ], GUI.templates.items[ GUI.templates.currentItem ].animation[ 2 ] )
+    local actionAfterComplete = 'repeat'
+    local animationAfterComplete = ''
+    if GUI.templates.items[ GUI.templates.currentItem ].animation[ 3 ] ~= nil then
+      actionAfterComplete = GUI.templates.items[ GUI.templates.currentItem ].animation[ 3 ]
+      if GUI.templates.items[ GUI.templates.currentItem ].animation[ 4 ] ~= nil then
+        animationAfterComplete = GUI.templates.items[ GUI.templates.currentItem ].animation[ 4 ]
+      end
+    end
+    ObjectSetAnimation( name, GUI.templates.items[ GUI.templates.currentItem ].animation[ 1 ], GUI.templates.items[ GUI.templates.currentItem ].animation[ 2 ], actionAfterComplete, animationAfterComplete )
   end
 
   if tags ~= nil then

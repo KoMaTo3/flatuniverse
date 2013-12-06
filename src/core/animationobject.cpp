@@ -17,7 +17,7 @@ Animation::IObject::~IObject() {
 }
 
 
-Animation::AnimationPack* Animation::IObject::ApplyAnimation( const std::string& templateName, const std::string& animationName, float startTime ) {
+Animation::AnimationPack* Animation::IObject::ApplyAnimation( const Animation::AnimationSetAction& actionAfterComplete, const std::string& templateName, const std::string& animationName, float startTime ) {
   Animation::AnimationPack *templatePack = Animation::GetPackTemplate( templateName );
   if( !templatePack ) {
     __log.PrintInfo( Filelevel_ERROR, "IObject::ApplyAnimation => animation '%s' not found", templateName.c_str() );
@@ -25,7 +25,7 @@ Animation::AnimationPack* Animation::IObject::ApplyAnimation( const std::string&
   }
 
   if( this->_animationTemplate == templatePack ) {
-    return this->ApplySubAnimation( animationName );
+    return this->ApplySubAnimation( actionAfterComplete, animationName );
   }
 
   if( this->_animation ) {
@@ -35,20 +35,20 @@ Animation::AnimationPack* Animation::IObject::ApplyAnimation( const std::string&
 
   this->_animation = new Animation::AnimationPack();
   ( this->_animation )->MakeFromTemplate< AnimationObject >( *templatePack, AnimationObject::SetParameterOfExternAnimation, this );
-  ( this->_animation )->SetCurrentAnimation( animationName, startTime );
+  ( this->_animation )->SetCurrentAnimation( actionAfterComplete, animationName, startTime );
   this->_animationTemplate = templatePack;
 
   return this->_animation;
 }//ApplyAnimation
 
 
-Animation::AnimationPack* Animation::IObject::ApplySubAnimation( const std::string& animationName ) {
+Animation::AnimationPack* Animation::IObject::ApplySubAnimation( const Animation::AnimationSetAction& actionAfterComplete, const std::string& animationName ) {
   if( !this->_animation ) {
     __log.PrintInfo( Filelevel_ERROR, "IObject::ApplySubAnimation => animation '%s' not found", animationName.c_str() );
     return NULL;
   }
 
-  ( this->_animation )->SetCurrentAnimation( animationName );
+  ( this->_animation )->SetCurrentAnimation( actionAfterComplete, animationName );
   return this->_animation;
 }//ApplySubAnimation
 

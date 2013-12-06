@@ -58,7 +58,7 @@ void AnimationPack::__Dump( const std::string &prefix ) {
 }
 
 
-bool AnimationPack::SetCurrentAnimation( const std::string &animationName, float startTime ) {
+bool AnimationPack::SetCurrentAnimation( const Animation::AnimationSetAction& actionAfterComplete, const std::string &animationName, float startTime ) {
   AnimationSetList::const_iterator animation = this->_animationSetList.find( animationName );
   if( animation == this->_animationSetList.end() ) {
     __log.PrintInfo( Filelevel_WARNING, "AnimationPack::SetCurrentAnimation => this[%p] animation['%s'] not found", this, animationName.c_str() );
@@ -74,6 +74,7 @@ bool AnimationPack::SetCurrentAnimation( const std::string &animationName, float
 
   this->_currentAnimation->SetEnabled( true );
   this->_currentAnimation->ResetAnimation( startTime );
+  this->_currentAnimation->SetActionAfterAnimationComplete( actionAfterComplete );
   return true;
 }//SetCurrentAnimation
 
@@ -81,6 +82,16 @@ bool AnimationPack::SetCurrentAnimation( const std::string &animationName, float
 void AnimationPack::Update( float dt ) {
   if( this->_currentAnimation ) {
     this->_currentAnimation->Update( dt );
+    switch( this->_currentAnimation->GetStatus() ) {
+      case Animation::ANIMATION_SET_STATUS_STOPPED: {
+        this->_currentAnimation->SetEnabled( false );
+      }
+      break;
+      case Animation::ANIMATION_SET_STATUS_CHANGING: {
+        this->SetCurrentAnimation( Animation::AnimationSetAction( Animation::ANIMATION_SET_ACTION_STOP ), this->_currentAnimation->GetActionAfterAnimationComplete().animation );
+      }
+      break;
+    }
   }
 }//Update
 
@@ -114,6 +125,9 @@ void AnimationPack::SaveToBuffer( MemoryWriter &writer ) {
   if( this->_currentAnimation ) {
     writer << this->_currentAnimation->GetName();
     writer << this->_currentAnimation->GetTime();
+    writer << this->_currentAnimation->GetActionAfterAnimationComplete().action;
+    writer << this->_currentAnimation->GetActionAfterAnimationComplete().animation;
+    writer << this->_currentAnimation->GetStatus();
   } else {
     __log.PrintInfo( Filelevel_ERROR, "AnimationPack::SaveToBuffer => no current animation" );
   }

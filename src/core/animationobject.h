@@ -9,7 +9,7 @@
 
 namespace Animation {
   class AnimationPack;
-
+  class AnimationSetAction;
 
 //Интерфейс для работы с объектом
 class IObject: public IAnimationObject {
@@ -28,8 +28,8 @@ public:
   virtual Vec3& GetCollisionOffsetPtr() = NULL;
   //virtual IAnimationObject* MakeInstance() = NULL;
 
-  Animation::AnimationPack *ApplyAnimation( const std::string& templateName, const std::string& animationName = "default", float startTime = 0.0f );
-  Animation::AnimationPack *ApplySubAnimation( const std::string& animationName );
+  Animation::AnimationPack *ApplyAnimation( const AnimationSetAction& actionAfterComplete, const std::string& templateName, const std::string& animationName = "default", float startTime = 0.0f );
+  Animation::AnimationPack *ApplySubAnimation( const AnimationSetAction& actionAfterComplete, const std::string& animationName );
   void StopAnimation();
   inline Animation::AnimationPack *GetAnimation() {
     return this->_animation;

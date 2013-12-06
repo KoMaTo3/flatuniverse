@@ -68,7 +68,7 @@ typedef void  LUAFUNCPROC_RemoveObjectForce ( const std::string &name, int force
 typedef bool  LUAFUNCPROC_ObjectHasTag      ( const std::string &name, const std::string &tag );
 typedef void  LUAFUNCPROC_ObjectAddTag      ( const std::string &name, const std::string &tag );
 typedef void  LUAFUNCPROC_ObjectRemoveTag   ( const std::string &name, const std::string &tag );
-typedef void  LUAFUNCPROC_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation );
+typedef void  LUAFUNCPROC_ObjectSetAnimation( const std::string &actionAfterAnimationComplete, const std::string &animationAfterAnimationComplete, const std::string &objectName, const std::string &templateName, const std::string &animation );
 typedef void  LUAFUNCPROC_ObjectStopAnimation ( const std::string &objectName );
 typedef void  LUAFUNCPROC_SetPause          ( bool isPause );
 typedef void  LUAFUNCPROC_SetLightAmbient   ( const Vec4 &color );

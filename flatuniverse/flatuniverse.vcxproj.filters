@@ -558,9 +558,6 @@
     <ClCompile Include="..\src\core\animationset.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\animationsprite.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\animationtemplate.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -879,9 +876,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\animationset.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\animationsprite.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\animationtemplate.h">

@@ -539,6 +539,11 @@ Game::Game()
   ObjectTrigger::SetTriggerListenerList( &this->luaTriggerListeners );
 
   __ObjectTriggerOnRemoveGlobalHandler = Game::OnRemoveTrigger;
+
+  this->animationSetActionByName.insert( std::make_pair( "stop", Animation::ANIMATION_SET_ACTION_STOP ) );
+  this->animationSetActionByName.insert( std::make_pair( "die", Animation::ANIMATION_SET_ACTION_DIE ) );
+  this->animationSetActionByName.insert( std::make_pair( "repeat", Animation::ANIMATION_SET_ACTION_REPEAT ) );
+  this->animationSetActionByName.insert( std::make_pair( "next", Animation::ANIMATION_SET_ACTION_SET_ANIMATION ) );
 }//constructor
 
 Game::~Game()
@@ -1298,7 +1303,7 @@ void Game::LUA_SetCamera( const std::string &name )
   LUA_ObjectSetAnimation
 =============
 */
-void Game::LUA_ObjectSetAnimation( const std::string &objectName, const std::string &templateName, const std::string &animation )
+void Game::LUA_ObjectSetAnimation( const std::string &actionAfterAnimationComplete, const std::string &animationAfterAnimationComplete, const std::string &objectName, const std::string &templateName, const std::string &animation )
 {
   Object *object = game->core->GetObject( objectName );
   if( !object )
@@ -1307,7 +1312,17 @@ void Game::LUA_ObjectSetAnimation( const std::string &objectName, const std::str
     return;
   }
   __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectSetAnimation => object['%s'] template['%s'] animation['%s']", objectName.c_str(), templateName.c_str(), animation.c_str() );
-  Animation::AnimationPack *pack = object->ApplyAnimation( templateName, animation );
+  Animation::AnimationSetAction actionAfterAnimation( Animation::ANIMATION_SET_ACTION_REPEAT, animationAfterAnimationComplete );
+  if( !actionAfterAnimationComplete.empty() ) {
+    auto &searchResult = game->animationSetActionByName.find( actionAfterAnimationComplete );
+    if( searchResult != game->animationSetActionByName.end() ) {
+      actionAfterAnimation.action = searchResult->second;
+    } else {
+      __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectSetAnimation => unknown action['%s']", actionAfterAnimationComplete.c_str() );
+    }
+  }
+
+  Animation::AnimationPack *pack = object->ApplyAnimation( actionAfterAnimation, templateName, animation );
   if( pack ) {
     pack->SetEnabled( true );
   }

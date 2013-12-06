@@ -98,7 +98,6 @@
     <ClCompile Include="..\src\core\animationpack.cpp" />
     <ClCompile Include="..\src\core\animationparameter.cpp" />
     <ClCompile Include="..\src\core\animationset.cpp" />
-    <ClCompile Include="..\src\core\animationsprite.cpp" />
     <ClCompile Include="..\src\core\animationtemplate.cpp" />
     <ClCompile Include="..\src\core\collision.cpp" />
     <ClCompile Include="..\src\core\collisionelement.cpp" />
@@ -295,7 +294,6 @@
     <ClInclude Include="..\src\core\animationpack.h" />
     <ClInclude Include="..\src\core\animationparameter.h" />
     <ClInclude Include="..\src\core\animationset.h" />
-    <ClInclude Include="..\src\core\animationsprite.h" />
     <ClInclude Include="..\src\core\animationtemplate.h" />
     <ClInclude Include="..\src\core\collision.h" />
     <ClInclude Include="..\src\core\collisionelement.h" />

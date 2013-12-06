@@ -125,7 +125,7 @@ function CollisionPlayer( player, target, flags, vx, vy )
       ObjectAddTag( target, 'push-bottom' )
       ObjectRemoveTag( target, 'brick-breakable' )
       ObjectStopAnimation( target )
-      ObjectSetAnimation( target, 'supermario/brick0', 'do' )
+      ObjectSetAnimation( target, 'supermario/brick0', 'do', 'stop' )
       ObjectAttr( target, { color = '0 0 0 0' } )
     end
     if ObjectHasTag( target, 'has-mushroom' ) then
@@ -515,7 +515,7 @@ function DoAnimationBrickDisplace( timerId )
   local anim = animation[ keyByTimer ]
 
   if anim.step == 1 then
-    ObjectStopAnimation( anim.object, 'supermario/brick2', 'default' )
+    ObjectStopAnimation( anim.object )
     ObjectRemoveTag( anim.object, 'push-bottom' )
     ObjectAddTag( anim.object, 'brick-breakable' )
     ObjectAttr( anim.object, { color = '1 1 1 1' } )

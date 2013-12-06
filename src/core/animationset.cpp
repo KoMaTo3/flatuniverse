@@ -3,10 +3,26 @@
 #include "file.h"
 
 
-Animation::AnimationSet::AnimationSet( const std::string &setName, float setAnimationLength )
-:_name( setName ), _time( 0.0f ), _animationLength( setAnimationLength ), _cycled( true )
-{
+Animation::AnimationSetAction::AnimationSetAction() {
 }
+
+
+Animation::AnimationSetAction::AnimationSetAction( const AnimationSetAction& from )
+:action( from.action ), animation( from.animation ) {
+}
+
+
+Animation::AnimationSetAction& Animation::AnimationSetAction::operator=( const Animation::AnimationSetAction& from ) {
+  this->action = from.action;
+  this->animation = from.animation;
+  return *this;
+}
+
+
+Animation::AnimationSetAction::AnimationSetAction( const Animation::ANIMATION_SET_ACTION setAction, const std::string &setAnimation )
+:action( setAction ), animation( setAnimation ) {
+}
+
 
 
 Animation::AnimationSet::~AnimationSet() {
@@ -16,6 +32,12 @@ Animation::AnimationSet::~AnimationSet() {
     }
     this->_animationList.clear();
   }
+}
+
+
+Animation::AnimationSet::AnimationSet( const std::string &setName, float setAnimationLength )
+:_name( setName ), _time( 0.0f ), _animationLength( setAnimationLength ), _status( Animation::ANIMATION_SET_STATUS_STOPPED ), _actionAfterAnimationDone(  )
+{
 }
 
 
@@ -32,19 +54,44 @@ Animation::IAnimation* Animation::AnimationSet::AddAnimation( Animation::IAnimat
 
 
 void Animation::AnimationSet::Update( float dt ) {
-  if( this->_animationLength > 0.0f ) {
-    this->_time += dt;
-    if( this->_cycled ) {
-      while( this->_time > this->_animationLength ) {
-        this->_time -= this->_animationLength;
+  __log.PrintInfo( Filelevel_DEBUG, "AnimationSet::Update => status[%d]", this->_status );
+  if( this->_status == Animation::ANIMATION_SET_STATUS_PLAYING ) {
+    if( this->_animationLength > 0.0f ) {
+      this->_time += dt;
+      if( this->_time > this->_animationLength ) {
+        __log.PrintInfo( Filelevel_DEBUG, "AnimationSet::Update => animation done, next action %d", this->_actionAfterAnimationDone.action );
+        switch( this->_actionAfterAnimationDone.action ) {
+          case Animation::ANIMATION_SET_ACTION_DIE: {
+            this->SetEnabled( false );
+            this->_status = Animation::ANIMATION_SET_STATUS_STOPPED;
+          }
+          break;
+          case Animation::ANIMATION_SET_ACTION_REPEAT: {
+            while( this->_time > this->_animationLength ) {
+              this->_time -= this->_animationLength;
+            }
+          }
+          break;
+          case Animation::ANIMATION_SET_ACTION_SET_ANIMATION: {
+            this->_status = Animation::ANIMATION_SET_STATUS_CHANGING;
+            this->_time -= this->_animationLength;
+          }
+          break;
+          case Animation::ANIMATION_SET_ACTION_STOP: {
+            this->_status = Animation::ANIMATION_SET_STATUS_PAUSED;
+            this->_time = 0.0f;
+          }
+          break;
+        }
       }
+    } else {
+      this->_time = 0.0f;
     }
-  } else {
-    this->_time = 0.0f;
-  }
-
-  for( auto &animation: this->_animationList ) {
-    animation->Update( this->_time );
+  }//playing
+  if( this->_status != Animation::ANIMATION_SET_STATUS_STOPPED ) {
+    for( auto &animation: this->_animationList ) {
+      animation->Update( this->_time );
+    }
   }
 }//Update
 
@@ -64,3 +111,8 @@ void Animation::AnimationSet::SetEnabled( bool isEnabled ) {
     animation->SetEnable( isEnabled );
   }
 }//DisableAnimation
+
+
+void Animation::AnimationSet::SetActionAfterAnimationComplete( const Animation::AnimationSetAction& actionAfterComplete ) {
+  this->_actionAfterAnimationDone = actionAfterComplete;
+}//SetActionAfterAnimationComplete

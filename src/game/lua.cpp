@@ -2214,7 +2214,9 @@ int Lua::LUA_ObjectSetAnimation( lua_State *lua )
   std::string objectName    = lua_tostring( lua, 1 );
   std::string templateName  = lua_tostring( lua, 2 );
   std::string animationName = lua_tostring( lua, 3 );
-  LUAFUNC_ObjectSetAnimation( objectName, templateName, animationName );
+  std::string actionAfterAnimationComplete( parmsCount > 3 ? lua_tostring( lua, 4 ) : "" );
+  std::string animationAfterAnimationComplete( parmsCount > 4 ? lua_tostring( lua, 5 ) : "" );
+  LUAFUNC_ObjectSetAnimation( actionAfterAnimationComplete, animationAfterAnimationComplete, objectName, templateName, animationName );
   return 0;
 }//LUA_ObjectSetAnimation
 
