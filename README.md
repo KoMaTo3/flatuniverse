@@ -3,7 +3,8 @@ flatuniverse
 
 OpenGL 2D engine
 
-Latest release 2013.12.06: https://dl.dropboxusercontent.com/u/71135358/flatuniverse-20131206.tar.gz
+Latest release 2013.12.07: https://dl.dropboxusercontent.com/u/71135358/flatuniverse-20131207.tar.gz
+
 Версия мира: 0x000B
 
 Последние изменения:
