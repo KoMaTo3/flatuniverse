@@ -54,12 +54,12 @@ Animation::IAnimation* Animation::AnimationSet::AddAnimation( Animation::IAnimat
 
 
 void Animation::AnimationSet::Update( float dt ) {
-  __log.PrintInfo( Filelevel_DEBUG, "AnimationSet::Update => status[%d]", this->_status );
+  //__log.PrintInfo( Filelevel_DEBUG, "AnimationSet::Update => status[%d]", this->_status );
   if( this->_status == Animation::ANIMATION_SET_STATUS_PLAYING ) {
     if( this->_animationLength > 0.0f ) {
       this->_time += dt;
       if( this->_time > this->_animationLength ) {
-        __log.PrintInfo( Filelevel_DEBUG, "AnimationSet::Update => animation done, next action %d", this->_actionAfterAnimationDone.action );
+        //__log.PrintInfo( Filelevel_DEBUG, "AnimationSet::Update => animation done, next action %d", this->_actionAfterAnimationDone.action );
         switch( this->_actionAfterAnimationDone.action ) {
           case Animation::ANIMATION_SET_ACTION_DIE: {
             this->SetEnabled( false );

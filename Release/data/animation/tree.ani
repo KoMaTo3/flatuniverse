@@ -1,0 +1,15 @@
+template "tree/0" {
+  animation "default" 10 {
+    sprite "main" {
+      renderable_size {
+        0( 128, 256 )
+        2.5 linear( 134, 256 )
+        5 linear( 122, 256 )
+        7.5 linear( 131, 256 )
+        10 linear( 128, 256 )
+      }
+      renderable_texture( "data/textures/ground/tree0.png" )
+      renderable_texture_coords ( 0, 0, 1, 1 )
+    }
+  }
+}//tree/0

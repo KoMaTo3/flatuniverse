@@ -35,3 +35,36 @@ template "grass/0" {
     }
   }
 }//grass/0
+
+template "grass/shadowed/0" {
+  animation "default" 5 {
+    sprite "main" {
+      renderable_size( 32, 32 )
+      renderable_texture( "data/textures/tiles/grass/shadowed/grass0.png", 0, 0, 1, 1 )
+    }
+
+    sprite "eye-left" {
+      renderable_size {
+        0 ( 2, 1 )
+        0.1 ( 2, 2 )
+        4.6 ( 2, 1 )
+        4.7 ( 2, 0 )
+      }
+      position( -3, 0.5 )
+      renderable_texture( "data/temp/blank.png", 0, 0, 1, 1 )
+      color( 1, 0, 0, 1 )
+    }
+
+    sprite "eye-right" {
+      renderable_size {
+        0 ( 2, 1 )
+        0.1 ( 2, 2 )
+        4.6 ( 2, 1 )
+        4.7 ( 2, 0 )
+      }
+      position( 3, 0.5 )
+      renderable_texture( "data/temp/blank.png", 0, 0, 1, 1 )
+      color( 1, 0, 0, 1 )
+    }
+  }
+}//grass/shadowed/0

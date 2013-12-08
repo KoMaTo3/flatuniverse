@@ -194,26 +194,6 @@ function GetObjectsTemplates()
         renderable = true, textureName = 'textures/tiles/grass/grass1-top.png',
       },
     },
-    -- ShadowGrass-0
-    {
-      name = 'Тёмная трава',
-      icon = 'data/textures/tiles/grass/blackgrass0.png',
-      attr = {
-        z = 1,
-        -- renderable = true, textureName = 'textures/tiles/grass/blackgrass0.png', renderableSize = '64 32',
-      },
-      animation = { 'grass/0', 'default', 'repeat' },
-    },
-    -- ShadowGrass-1
-    {
-      name = 'Тёмная трава (сверху вниз)',
-      icon = 'data/textures/tiles/grass/blackgrass0.png',
-      attr = {
-        z = 1,
-        -- renderable = true, textureName = 'textures/tiles/grass/blackgrass0.png', renderableSize = '64 32',
-      },
-      animation = { 'grass/0', 'topdown', 'repeat' },
-    },
     -- Tube0
     {
       name = 'Труба: верхушка левая',
@@ -324,6 +304,44 @@ function GetObjectsTemplates()
         collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500',
         lightBlockByCollision = true,
       },
+    },
+    -- ShadowGrass-0
+    {
+      name = 'Тёмная трава',
+      icon = 'data/textures/tiles/grass/blackgrass0.png',
+      attr = {
+        z = 1,
+        -- renderable = true, textureName = 'textures/tiles/grass/blackgrass0.png', renderableSize = '64 32',
+      },
+      animation = { 'grass/0', 'default', 'repeat' },
+    },
+    -- ShadowGrass-1
+    {
+      name = 'Тёмная трава (сверху вниз)',
+      icon = 'data/textures/tiles/grass/blackgrass0.png',
+      attr = {
+        z = 1,
+        -- renderable = true, textureName = 'textures/tiles/grass/blackgrass0.png', renderableSize = '64 32',
+      },
+      animation = { 'grass/0', 'topdown', 'repeat' },
+    },
+    -- ShadowGrass-2
+    {
+      name = 'Тёмная трава с глазами',
+      icon = 'data/textures/tiles/grass/shadowed/grass0.png',
+      attr = {
+        z = -1,
+      },
+      animation = { 'grass/shadowed/0', 'default', 'repeat' },
+    },
+    -- Tree-0
+    {
+      name = 'Тёмное дерево',
+      icon = 'data/textures/ground/tree0.png',
+      attr = {
+        z = 1,
+      },
+      animation = { 'tree/0', 'default', 'repeat' },
     },
     --
   }
