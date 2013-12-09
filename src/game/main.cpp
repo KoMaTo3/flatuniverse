@@ -67,7 +67,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->core->CreateObject( "camera", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->SetLockToDelete( true )->SetSaveable( false );
   game->core->CreateObject( "active-object", game->core->GetObject( "defaults" ) )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
-  game->world->AddActiveObject( game->core->GetObject( "defaults/camera" ) );
+  game->world->AddActiveObject( game->core->GetObject( "defaults/camera" ), true );
 
   /*
   obj = game->core->CreateObject( "test-bg-2" );
@@ -117,7 +117,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   render->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
   render->SetSize( Vec2( ( float ) game->core->GetWindowSize().width * 2.0f, ( float ) game->core->GetWindowSize().height ) );
 
-  game->world->AddActiveObject( game->core->GetObject( "player" ) );
+  game->world->AddActiveObject( game->core->GetObject( "player" ), true );
 
   __log.PrintInfo( Filelevel_DEBUG, "sizeof( RenderableQuad ) = %d", sizeof( RenderableQuad ) );
 

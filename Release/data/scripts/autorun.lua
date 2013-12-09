@@ -518,7 +518,7 @@ function DoAnimationBrickDisplace( timerId )
     ObjectStopAnimation( anim.object )
     ObjectRemoveTag( anim.object, 'push-bottom' )
     ObjectAddTag( anim.object, 'brick-breakable' )
-    ObjectAttr( anim.object, { color = '1 1 1 1' } )
+    ObjectAttr( anim.object, { color = '1 1 1 1', renderableRotation = 0 } )
     animation[ keyByTimer ] = nil
     --[[
     anim.time = anim.time + 1

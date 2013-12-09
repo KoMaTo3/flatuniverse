@@ -9,11 +9,12 @@ WorldGridList *__worldGridList = NULL;
 
 
 
+
 /*
   [in] rootObject: объект, в котором будет храниться грид
 */
 WorldGrid::WorldGrid( const WorldGrid::WorldGridPosition &newPosition )
-:position( newPosition ), version( 0 )
+:position( newPosition ), version( 0 ), isFullyLoaded( true )
 {
   WorldGridList::iterator iter, iterEnd = __worldGridList->end();
 
@@ -28,6 +29,9 @@ WorldGrid::WorldGrid( const WorldGrid::WorldGridPosition &newPosition )
     __log.PrintInfo( Filelevel_ERROR, "WorldGrid constructor: grid[%d; %d] already exists" );
   /* else
     __log.PrintInfo( Filelevel_DEBUG, "WorldGrid: new grid [%d; %d]", newPosition.x, newPosition.y );*/
+
+  this->loader.objectsCount = 0;
+  this->loader.rootObject = nullptr;
 }//constructor
 
 
@@ -62,7 +66,7 @@ WorldGrid::~WorldGrid()
 */
 void WorldGrid::AttachObject( Object *object )
 {
-  this->Update();
+  //this->Update();
   //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::AttachObject => object[x%X]", object );
   if( !object )
   {
@@ -177,6 +181,9 @@ bool WorldGrid::IsThisObject( Object *object )
 */
 bool WorldGrid::GetGridDump( FU_OUT memory& dump )
 {
+  if( !this->isFullyLoaded ) {
+    return false;
+  }
   this->Update();
   dump.Free();
   MemoryWriter writer( dump );
@@ -208,16 +215,29 @@ bool WorldGrid::GetGridDump( FU_OUT memory& dump )
   LoadFromDump
 =============
 */
-bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion )
+bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion, const bool forceLoad )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::LoadFromDump => dump length %d byte(s) rootObject[x%X]", dump.getLength(), rootObject );
-  MemoryReader reader( dump );
-  Dword q = 0, objectsNum;
+  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::LoadFromDump => dump length %d byte(s) rootObject[x%X] forceLoad[%d]", dump.getLength(), rootObject, forceLoad );
+  this->loader.dump = dump;
+  this->loader.rootObject = rootObject;
+  this->loader.reader.SetSource( this->loader.dump.getData(), this->loader.dump.getLength() );
+  Dword q = 0;
   this->version = fileVersion;
-  reader >> objectsNum;
-  //__log.PrintInfo( Filelevel_DEBUG, ". %d objects in dump", objectsNum );
+  this->loader.reader >> this->loader.objectsCount;
+  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::LoadFromDump => %d objects in dump, readerPos[%d]", this->loader.objectsCount, this->loader.reader.GetCurPos() );
 
-  this->Update();
+  //this->Update();
+  if( this->loader.objectsCount ) {
+    this->isFullyLoaded = false;
+    if( forceLoad ) {
+      while( this->loader.objectsCount ) {
+        this->Update();
+      }
+    }
+  } else {
+    this->isFullyLoaded = true;
+  }
+  /*
   Object *object;
   for( ; q < objectsNum; ++q )
   {
@@ -230,6 +250,7 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dwor
 
     this->AttachObject( object );
   }//for q
+  */
 
   return true;
 }//LoadFromDump
@@ -243,26 +264,45 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dwor
 */
 void WorldGrid::Update()
 {
-  WorldGridObjectList::iterator iter, iterEnd;
-  bool changed;
-  do
-  {
-    changed = false;
-    iterEnd = this->objects.end();
-    //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => pos[%d; %d] objects[%d]", this->position.x, this->position.y, this->objects.size() );
-    for( iter = this->objects.begin(); iter != iterEnd; ++iter )
+  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update" );
+  if( this->isFullyLoaded ) {
+    WorldGridObjectList::iterator iter, iterEnd;
+    bool changed;
+    do
     {
-      //__log.PrintInfo( Filelevel_DEBUG, ". pointer[x%X] object[x%X] valid[%d]", &( *iter ), iter->GetObject(), iter->GetValid() );
-      if( !( *iter )->GetIsValid() ) {
-        //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => object[x%X] is not valid, delete from grid", ( *iter )->GetObjectSrc() );
-        //this->DetachObject( iter->GetObjectSrc< Object >() );
-        delete ( *iter );
-        this->objects.erase( iter );
-        changed = true;
-        break;
+      changed = false;
+      iterEnd = this->objects.end();
+      //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => pos[%d; %d] objects[%d]", this->position.x, this->position.y, this->objects.size() );
+      for( iter = this->objects.begin(); iter != iterEnd; ++iter )
+      {
+        //__log.PrintInfo( Filelevel_DEBUG, ". pointer[x%X] object[x%X] valid[%d]", &( *iter ), iter->GetObject(), iter->GetValid() );
+        if( !( *iter )->GetIsValid() ) {
+          //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => object[x%X] is not valid, delete from grid", ( *iter )->GetObjectSrc() );
+          //this->DetachObject( iter->GetObjectSrc< Object >() );
+          delete ( *iter );
+          this->objects.erase( iter );
+          changed = true;
+          break;
+        }
       }
+    } while( changed );
+  } else {
+    //object = new Object( name, ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName.c_str() ) ) );
+    __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => objects[%d]", this->loader.objectsCount );
+    Object *object = new Object();
+    __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => readerPos[%d]", this->loader.reader.GetCurPos() );
+    object->LoadFromBuffer( this->loader.reader, this->loader.rootObject, this->version );
+    --this->loader.objectsCount;
+    if( !this->loader.objectsCount ) {
+      this->isFullyLoaded = true;
+      this->loader.dump.Free();
     }
-  } while( changed );
+
+    //this->objects.push_back( ObjectPointerType() );
+    //this->objects.rbegin()->Init( object );
+
+    this->AttachObject( object );
+  }
 }//Update
 
 

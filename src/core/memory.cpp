@@ -153,7 +153,9 @@ memory& memory::operator=(memory &src)
   if(this->length != src.length)
     this->Alloc(src.length);
 
-  memcpy(this->data, (char*) src, this->length);
+  if( this->length ) {
+    memcpy(this->data, (char*) src, this->length);
+  }
   return *this;
 }//operator = memory
 

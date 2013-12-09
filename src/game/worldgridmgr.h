@@ -16,7 +16,8 @@
 #include "worldsaver.h"
 
 
-#define WORLD_GRID_UPDATE_INTERVAL    ( 1.0f / 10.0f )    //период обновления состояния гридов
+#define WORLD_GRID_UPDATE_INTERVAL        ( 1.0f / 10.0f )    //период обновления состояния гридов
+#define WORLD_GRID_LOADER_UPDATE_INTERVAL ( 1.0f / 100.0f )   //интервал загрузки объектов грида из дампа
 
 
 
@@ -25,6 +26,7 @@ class WorldGridManager
 private:
   Object*             rootGridObject;     //корневой _для_всех_гридов_ объект
   float               currentTime;        //время, прошедшее с момента последнего обновления
+  float               currentTimeLoader;  //время подгрузки объектов из дампа
   WorldGridObjectList activeObjects;      //перечень активных объектов
   //Pos< Short>         blocksPerGrid;      //число блоков в одном гриде
   //float               blockSize;          //размер одного блока в гриде
@@ -38,11 +40,11 @@ public:
   virtual ~WorldGridManager();
 
   void        Update                  ( bool forceLoadGrids = false );
-  void        AddActiveObject         ( Object *obj );
+  void        AddActiveObject         ( Object *obj, const bool forceLoadGrid = false );
   void        AttachObjectToGrid      ( const WorldGrid::WorldGridPosition& gridPos, Object *obj );
   void        AttachObjectToGrid      ( Short gridX, Short gridY, Object *obj );
   WorldGrid*  IsGridLoaded            ( const WorldGrid::WorldGridPosition& gridPos );
-  WorldGrid*  LoadGrid                ( const WorldGrid::WorldGridPosition& gridPos );
+  WorldGrid*  LoadGrid                ( const WorldGrid::WorldGridPosition& gridPos, const bool forceLoad = false );
   bool        UnloadGrid              ( const WorldGrid::WorldGridPosition gridPos );
   WorldGrid::WorldGridPosition
               GetGridPositionByObject ( const Object& obj );

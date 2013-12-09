@@ -359,6 +359,8 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   //__objectByGui           = new ObjectByGuiList();
   //__guiList               = new GuiList();
   //
+  __coreRenderableList->reserve( 256 * 256 ); //индексный буфер short, поэтому 64k это максимум
+  __coreGUI->reserve( 256 * 256 );
 
   this->_window.windowToWorld.Set( 100.0f / float( screenWidth ), 100.0f / float( screenHeight ), 1.0f );
   this->_window.windowCenter.Set( screenWidth * 0.5f, screenHeight * 0.5f );

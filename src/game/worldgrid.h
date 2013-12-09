@@ -48,9 +48,16 @@ public:
   };
 
 private:
-  WorldGridPosition         position;   //координаты мира
-  WorldGridObjectList       objects;    //все объекты грида
-  Dword                     version;    //версия
+  WorldGridPosition         position;       //координаты мира
+  WorldGridObjectList       objects;        //все объекты грида
+  Dword                     version;        //версия
+  bool                      isFullyLoaded;  //флаг полной загруженности грида из дампа
+  struct {
+    memory                  dump;
+    MemoryReader            reader;
+    Dword                   objectsCount;
+    Object                  *rootObject;
+  } loader;
   //WorldGridObjectList activeObjects;    //список активных объектов, запрещающих гриду выгрузиться. грид должен сам следить за этим списком при добавлении/удалении объектов
 
 public:
@@ -64,9 +71,10 @@ public:
   const WorldGridPosition&
         GetPosition () { return this->position; }
   bool  GetGridDump ( FU_OUT memory& dump );
-  bool  LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion );
+  bool  LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion, const bool forceLoad = false );
   bool  GetFirstMovableObject( WorldGridObjectList::iterator &iter );
   bool  GetNextMovableObject( WorldGridObjectList::iterator &iter );
+  inline bool IsFullyLoaded() { return this->isFullyLoaded; }
 
   void  Update();
 };
