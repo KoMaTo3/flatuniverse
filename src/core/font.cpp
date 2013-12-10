@@ -57,7 +57,7 @@ Font* Font::SetFont( const std::string& fontFileName, const std::string &filePro
   this->font.fontName = fontFileName;
   this->font.letterSpacing = setLetterSpacing;
 
-  this->font.isProportional = ( fileProportions.length() > 0 );
+  this->font.isProportional = !fileProportions.empty();
   if( this->font.isProportional )
   {
     memory data;
@@ -68,8 +68,8 @@ Font* Font::SetFont( const std::string& fontFileName, const std::string &filePro
       Byte *dataByte = ( Byte* ) data.getData();
       for( Dword num = 0; num < 256; ++num )
       {
-        this->font.proportions[ num ].offset = dataByte[ num << 1 ];
-        this->font.proportions[ num ].width  = dataByte[ ( num << 1 ) + 1 ];
+        this->font.proportions[ num ].offset = ( float ) dataByte[ num << 1 ];
+        this->font.proportions[ num ].width  = ( float ) dataByte[ ( num << 1 ) + 1 ];
       }//for num
     }
     else {
@@ -244,7 +244,7 @@ float Font::GetTextWidth( const std::string &text ) {
   float width = 0.0f;
   Dword length = text.size();
   for( Dword q = 0; q < length; ++q ) {
-    width += this->font.proportions[ text[ q ] ].width;
+    width += this->font.proportions[ ( Byte ) text[ q ] ].width;
   }
   return width;
 }//GetTextWidth
