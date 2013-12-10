@@ -12,6 +12,9 @@ DebugRenderer::DebugRenderer() {
 
 DebugRenderer::~DebugRenderer() {
   this->Clrscr();
+  for( auto &font: this->fonts ) {
+    delete font.second;
+  }
 }//destructor
 
 
