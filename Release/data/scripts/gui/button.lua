@@ -25,10 +25,20 @@ function GUIButton:SetEnabled( setIsEnabled )
 end -- GUIButton:SetEnabled
 
 
+function GUIButton:GetOffset()
+  local dx, dy = 0, 0
+  if self.parent ~= nil then
+    dx, dy = self.parent:GetOffset()
+  end
+  return self.rect.left + dx, self.rect.top + dy
+end
+
+
 --[[ GUIButton:Create ]]
 function GUIButton:Create( x0, y0, width, height, setText, setOnClickHandler, parent, setIsEnabled )
   local obj = {
     childs = {},
+    parent = parent,
     rect = {
       left = x0,
       top = y0,

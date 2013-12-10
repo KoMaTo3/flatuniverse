@@ -37,16 +37,27 @@ function GUILabel:CropByTextWidth()
 end -- GUILabel:CropByTextWidth
 
 
+function GUILabel:GetOffset()
+  local dx, dy = 0, 0
+  if self.parent ~= nil then
+    dx, dy = self.parent:GetOffset()
+  end
+  return self.rect.left + dx, self.rect.top + dy
+end
+
+
 --[[ GUILabel:Create ]]
-function GUILabel:Create( x0, y0, width, height, setText, parent, setOnMouseMove )
+function GUILabel:Create( x0, y0, width, height, setText, parent, setOnMouseMove, zIndex )
   local obj = {
     childs = {},
+    parent = parent,
     rect = {
       left = x0,
       top = y0,
       right = x0 + width,
       bottom = y0 + height,
     },
+    z = ( zIndex == nil and 0 or zIndex ),
     isHover = false,
     hoverPos = { x = 0, y = 0 },
     text = setText,
@@ -75,9 +86,9 @@ function GUILabel:Render( dx, dy )
   local y0 = self.rect.top + dy
   local x1 = self.rect.right + dx
   local y1 = self.rect.bottom + dy
-  Render( 'sprite', x0, y0, 0, x1, y1, 0, 'data/temp/blank.png', self.colors.inner )
-  Render( 'rect', x0, y0, 0, x1, y1, 0, self.colors.border )
-  Render( 'text', x0 + 4,y0, 0, self.text, '000000ff' )
+  Render( 'sprite', x0, y0, self.z, x1, y1, self.z, 'data/temp/blank.png', self.colors.inner )
+  Render( 'rect', x0, y0, self.z, x1, y1, self.z, self.colors.border )
+  Render( 'text', x0 + 4,y0, self.z, self.text, '000000ff' )
   -- childs
   for key, item in pairs( self.childs ) do
     item:Render( dx + self.rect.left, dy + self.rect.top )

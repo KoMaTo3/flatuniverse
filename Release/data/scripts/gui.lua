@@ -25,6 +25,7 @@ function GUIInit()
   LoadScript( 'data/scripts/gui/label.lua' )
   LoadScript( 'data/scripts/gui/select.lua' )
   LoadScript( 'data/scripts/gui/edit.lua' )
+  LoadScript( 'data/scripts/gui/slider-vertical.lua' )
   ListenKeyboard( 'GUIKeyboard' )
   ListenMouseKey( 'GUIMouseKey' )
   ListenMouseMove( 'GUIMouseMove' )
@@ -48,7 +49,7 @@ function GUIMouseKey( id, isPressed )
   else --) (
     local inRect = false
     GUIRenderer.activeItem = nil
-    for id, item in pairs( GUIRenderer.GUIElements ) do --(
+    for elementId, item in pairs( GUIRenderer.GUIElements ) do --(
       if item:TestInRect( mousePos.x, mousePos.y ) then --(
         inRect = true
         if GUIRenderer.activeItem ~= nil then
@@ -61,7 +62,7 @@ function GUIMouseKey( id, isPressed )
         end
         do break end
       end --) if
-    end --) for id,item
+    end --) for elementId,item
     if not inRect and GUIRenderer.OnClickDefault ~= nil then
       GUIRenderer.OnClickDefault( id, isPressed )
     end

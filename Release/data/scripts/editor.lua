@@ -165,7 +165,7 @@ function EditorInit()
   GUIRenderer.OnKeyboardDefault = OnEditorKey
 
   -- GUI
-  GUI.tooltip = GUILabel:Create( 0, settings.windowSize.y, 200, 13, '', nil, function( self ) self.SetPosition( self, 0, settings.windowSize.y ) end )
+  GUI.tooltip = GUILabel:Create( 0, settings.windowSize.y, 200, 13, '', nil, function( self ) self.SetPosition( self, 0, settings.windowSize.y ) end, -9 )
   GUI.elements.labelDebug = GUILabel:Create( 0, 0, settings.windowSize.x, 20, 'debug' )
 
   -- settings block
@@ -173,10 +173,14 @@ function EditorInit()
 
   -- Ambient Light
   GUILabel:Create( 0, 60, 0, 0, 'Ambient light:', GUI.elements.windowSettings )
-  GUI.elements.ambientLightR = GUIEdit:Create( 110, 60, 25, string.format( '%.1f', settings.ambientLight.R ), UpdateAmbientByGUI, GUI.elements.windowSettings )
-  GUI.elements.ambientLightG = GUIEdit:Create( 110 + 27*1, 60, 25, string.format( '%.1f', settings.ambientLight.G ), UpdateAmbientByGUI, GUI.elements.windowSettings )
-  GUI.elements.ambientLightB = GUIEdit:Create( 110 + 27*2, 60, 25, string.format( '%.1f', settings.ambientLight.B ), UpdateAmbientByGUI, GUI.elements.windowSettings )
-  GUI.elements.ambientLightA = GUIEdit:Create( 110 + 27*3, 60, 25, string.format( '%.1f', settings.ambientLight.A ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  -- GUI.elements.ambientLightR = GUIEdit:Create( 110, 60, 25, string.format( '%.1f', settings.ambientLight.R ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  -- GUI.elements.ambientLightG = GUIEdit:Create( 110 + 27*1, 60, 25, string.format( '%.1f', settings.ambientLight.G ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  -- GUI.elements.ambientLightB = GUIEdit:Create( 110 + 27*2, 60, 25, string.format( '%.1f', settings.ambientLight.B ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  -- GUI.elements.ambientLightA = GUIEdit:Create( 110 + 27*3, 60, 25, string.format( '%.1f', settings.ambientLight.A ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  GUI.elements.ambientLightR = GUISliderVertical:Create( 110, 67, 40, -1, 1, settings.ambientLight.R, 'R', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
+  GUI.elements.ambientLightG = GUISliderVertical:Create( 110 + 20*1, 67, 40, -1, 1, settings.ambientLight.G, 'G', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
+  GUI.elements.ambientLightB = GUISliderVertical:Create( 110 + 20*2, 67, 40, -1, 1, settings.ambientLight.B, 'B', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
+  GUI.elements.ambientLightA = GUISliderVertical:Create( 110 + 20*3, 67, 40, -1, 1, settings.ambientLight.A, 'A', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
 
   --grid size
   GUILabel:Create( 0, 40, 0, 0, 'Grid:', GUI.elements.windowSettings )

@@ -35,11 +35,21 @@ function GUISelect:SetEnabled( setIsEnabled )
 end -- GUISelect:SetEnabled
 
 
+function GUISelect:GetOffset()
+  local dx, dy = 0, 0
+  if self.parent ~= nil then
+    dx, dy = self.parent:GetOffset()
+  end
+  return self.rect.left + dx, self.rect.top + dy
+end
+
+
 --[[ GUISelect:Create ]]
 function GUISelect:Create( x0, y0, width, setValue, setValuesList, setOnChangeHandler, parent, setIsEnabled )
   local defaultHeight = 16
   local obj = {
     childs = {},
+    parent = parent,
     rect = {
       left = x0,
       top = y0,
