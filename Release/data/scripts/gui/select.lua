@@ -117,9 +117,9 @@ function GUISelect:Render( dx, dy )
     local y = y1 + 1, color
     for value,name in pairs( self.values ) do
       color = ( self.valueHover == value ) and self.colors.focus or ( ( self.value == value ) and self.colors.current or self.colors.default )
-      Render( 'sprite', x0, y - 1, 0, x1, y + self.rect.height - 1, 0, 'data/temp/blank.png', color.bg )
-      Render( 'line', x0, y + self.rect.height - 1, 0, x1, y + self.rect.height - 1, 0, self.colors.dark )
-      Render( 'text', x0 + 5, y, 0, name, color.text )
+      Render( 'sprite', x0, y - 1, -1, x1, y + self.rect.height - 1, -1, 'data/temp/blank.png', color.bg )
+      Render( 'line', x0, y + self.rect.height - 1, -1, x1, y + self.rect.height - 1, -1, self.colors.dark )
+      Render( 'text', x0 + 5, y, -1, name, color.text )
       y = y + self.rect.height
     end
   end

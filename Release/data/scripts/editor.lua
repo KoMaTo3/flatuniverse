@@ -171,16 +171,14 @@ function EditorInit()
   -- settings block
   GUI.elements.windowSettings = GUILabel:Create( settings.windowSize.x - 220, 0, 220, 200, 'Settings' )
 
-  -- Ambient Light
-  GUILabel:Create( 0, 60, 0, 0, 'Ambient light:', GUI.elements.windowSettings )
-  -- GUI.elements.ambientLightR = GUIEdit:Create( 110, 60, 25, string.format( '%.1f', settings.ambientLight.R ), UpdateAmbientByGUI, GUI.elements.windowSettings )
-  -- GUI.elements.ambientLightG = GUIEdit:Create( 110 + 27*1, 60, 25, string.format( '%.1f', settings.ambientLight.G ), UpdateAmbientByGUI, GUI.elements.windowSettings )
-  -- GUI.elements.ambientLightB = GUIEdit:Create( 110 + 27*2, 60, 25, string.format( '%.1f', settings.ambientLight.B ), UpdateAmbientByGUI, GUI.elements.windowSettings )
-  -- GUI.elements.ambientLightA = GUIEdit:Create( 110 + 27*3, 60, 25, string.format( '%.1f', settings.ambientLight.A ), UpdateAmbientByGUI, GUI.elements.windowSettings )
-  GUI.elements.ambientLightR = GUISliderVertical:Create( 110, 67, 40, -1, 1, settings.ambientLight.R, 'R', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
-  GUI.elements.ambientLightG = GUISliderVertical:Create( 110 + 20*1, 67, 40, -1, 1, settings.ambientLight.G, 'G', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
-  GUI.elements.ambientLightB = GUISliderVertical:Create( 110 + 20*2, 67, 40, -1, 1, settings.ambientLight.B, 'B', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
-  GUI.elements.ambientLightA = GUISliderVertical:Create( 110 + 20*3, 67, 40, -1, 1, settings.ambientLight.A, 'A', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
+  -- layer
+  GUILabel:Create( 0, 20, 0, 0, 'Layer:', GUI.elements.windowSettings )
+  local list = {}
+  table.insert( list, 'default' )
+  table.insert( list, 'renderable' )
+  table.insert( list, 'collision' )
+  table.insert( list, 'trigger' )
+  GUI.elements.layer = GUISelect:Create( 55, 20, 90, 1, list, OnChangeLayer, GUI.elements.windowSettings )
 
   --grid size
   GUILabel:Create( 0, 40, 0, 0, 'Grid:', GUI.elements.windowSettings )
@@ -192,28 +190,41 @@ function EditorInit()
   table.insert( list, '32' )
   table.insert( list, '48' )
   table.insert( list, '64' )
+  table.insert( list, '80' )
+  table.insert( list, '96' )
+  table.insert( list, '112' )
   table.insert( list, '128' )
+  table.insert( list, '144' )
+  table.insert( list, '160' )
+  table.insert( list, '176' )
+  table.insert( list, '192' )
+  table.insert( list, '208' )
+  table.insert( list, '224' )
+  table.insert( list, '240' )
   table.insert( list, '256' )
   table.insert( list, '512' )
+  table.insert( list, '1024' )
   GUI.elements.gridSize = GUISelect:Create( 55, 40, 40, 3, list, OnChangeTileSize, GUI.elements.windowSettings )
 
   --grid offset
   GUILabel:Create( 95, 40, 0, 0, 'offset', GUI.elements.windowSettings )
   local list = {}
-  for q = 0,32,4 do
+  for q = 0,32,2 do
     table.insert( list, q )
   end
   GUI.elements.gridOffsetX = GUISelect:Create( 150, 40, 30, 1, list, nil, GUI.elements.windowSettings )
   GUI.elements.gridOffsetY = GUISelect:Create( 180, 40, 30, 1, list, nil, GUI.elements.windowSettings )
 
-  -- layer
-  GUILabel:Create( 0, 20, 0, 0, 'Layer:', GUI.elements.windowSettings )
-  local list = {}
-  table.insert( list, 'default' )
-  table.insert( list, 'renderable' )
-  table.insert( list, 'collision' )
-  table.insert( list, 'trigger' )
-  GUI.elements.layer = GUISelect:Create( 55, 20, 90, 1, list, OnChangeLayer, GUI.elements.windowSettings )
+  -- Ambient Light
+  GUILabel:Create( 0, 60, 0, 0, 'Ambient light:', GUI.elements.windowSettings )
+  -- GUI.elements.ambientLightR = GUIEdit:Create( 110, 60, 25, string.format( '%.1f', settings.ambientLight.R ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  -- GUI.elements.ambientLightG = GUIEdit:Create( 110 + 27*1, 60, 25, string.format( '%.1f', settings.ambientLight.G ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  -- GUI.elements.ambientLightB = GUIEdit:Create( 110 + 27*2, 60, 25, string.format( '%.1f', settings.ambientLight.B ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  -- GUI.elements.ambientLightA = GUIEdit:Create( 110 + 27*3, 60, 25, string.format( '%.1f', settings.ambientLight.A ), UpdateAmbientByGUI, GUI.elements.windowSettings )
+  GUI.elements.ambientLightR = GUISliderVertical:Create( 110, 67, 40, -1, 1, settings.ambientLight.R, 'R', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
+  GUI.elements.ambientLightG = GUISliderVertical:Create( 110 + 20*1, 67, 40, -1, 1, settings.ambientLight.G, 'G', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
+  GUI.elements.ambientLightB = GUISliderVertical:Create( 110 + 20*2, 67, 40, -1, 1, settings.ambientLight.B, 'B', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
+  GUI.elements.ambientLightA = GUISliderVertical:Create( 110 + 20*3, 67, 40, -1, 1, settings.ambientLight.A, 'A', UpdateAmbientByGUI, GUI.elements.windowSettings, true, '%1.2f' )
 
   -- object block
   GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 130, 'Object' )
@@ -223,6 +234,7 @@ function EditorInit()
   y = y + 20
   GUILabel:Create( 1, y, 0, 0, 'Z:', GUI.elements.windowObject )
   GUI.elements.objectZ = GUIEdit:Create( 20, y, 40, '', function( obj ) OnChangeZ( obj:GetText() ) end, GUI.elements.windowObject )
+  GUI.elements.objectZslider = GUISliderVertical:Create( 62, y + 8, 150, -100, 10, 0, 'Z', function( obj ) OnChangeZ( obj:GetText() ) end, GUI.elements.windowObject, false, '%.1f' )
   y = y + 17
   GUI.elements.isRenderable = GUICheckbox:Create( 5, y, 'Renderable', false, OnChangeIsRenderable, GUI.elements.windowObject, false )
   y = y + 15
@@ -944,6 +956,8 @@ function UpdateGuiBySelectedObject()
       GUI.elements.objectName:SetText( object )
       GUI.elements.objectZ:SetEnabled( true )
       GUI.elements.objectZ:SetText( string.format( '%.3f', objectZ ) )
+      GUI.elements.objectZslider:SetEnabled( true )
+      GUI.elements.objectZslider:SetText( string.format( '%.3f', objectZ ) )
       GUI.elements.isRenderable:SetEnabled( true )
       GUI.elements.isRenderable:SetIsChecked( isRenderable )
       GUI.elements.isCollision:SetEnabled( true )
@@ -969,6 +983,8 @@ function UpdateGuiBySelectedObject()
     GUI.elements.objectName:SetText( '' )
     GUI.elements.objectZ:SetEnabled( true )
     GUI.elements.objectZ:SetText( string.format( '%.3f', objectZ ) )
+    GUI.elements.objectZslider:SetEnabled( true )
+    GUI.elements.objectZslider:SetText( string.format( '%.3f', objectZ ) )
     GUI.elements.isRenderable:SetEnabled( true )
     GUI.elements.isRenderable:SetIsChecked( isRenderable )
     GUI.elements.isCollision:SetEnabled( true )
@@ -985,6 +1001,8 @@ function UpdateGuiBySelectedObject()
     GUI.elements.objectName:SetText( '' )
     GUI.elements.objectZ:SetEnabled( false )
     GUI.elements.objectZ:SetText( '' )
+    GUI.elements.objectZslider:SetEnabled( false )
+    GUI.elements.objectZslider:SetText( '' )
     GUI.elements.isRenderable:SetEnabled( false )
     GUI.elements.isRenderable:SetIsChecked( false )
     GUI.elements.isCollision:SetEnabled( false )
@@ -1291,6 +1309,8 @@ end -- OnChangeIsLightPoint
 
 --[[ OnChangeZ ]]
 function OnChangeZ( setZ )
+  GUI.elements.objectZ:SetText( setZ )
+  GUI.elements.objectZslider:SetText( setZ )
   local object = GetSelectedObject()
   local objectList = Explode( object, '//' )
   for num,name in pairs( objectList ) do --(

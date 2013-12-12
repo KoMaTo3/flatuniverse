@@ -9,6 +9,12 @@ end -- GUISliderVertical:GetType
 
 --[[ GUISliderVertical:SetText ]]
 function GUISliderVertical:SetText( setText )
+  if type( setText ) ~= 'number' then
+    setText = tonumber( setText )
+  end
+  if setText == nil then
+    setText = 0
+  end
   if setText < self.values.min then
     setText = self.values.min
   elseif setText > self.values.max then
@@ -20,7 +26,7 @@ end -- GUISliderVertical:SetText
 
 --[[ GUISliderVertical:GetText ]]
 function GUISliderVertical:GetText()
-  return self.value
+  return string.format( self.textFormat, self.value )
 end -- GUISliderVertical:GetText
 
 --[[ GUISliderVertical:GetValue ]]
@@ -94,6 +100,7 @@ function GUISliderVertical:Render( dx, dy )
   local x1 = self.rect.right + dx
   local y1 = self.rect.bottom + dy
   local resRulerOffset = 0
+  local rulerZ = 0
 
   if self.state == 1 then
     local halfHeight = math.floor( self.height / 2 )
@@ -104,6 +111,7 @@ function GUISliderVertical:Render( dx, dy )
     local lastRulerOffset = self.rulerOffset
     self.rulerOffset = self.GetRulerOffset( self, dx, dy )
     resRulerOffset = self.scale.offset
+    rulerZ = -1
     if self.rulerOffset ~= lastRulerOffset then
       local coeff = 1.0 - ( self.rulerOffset + halfHeight ) / self.height
       self.value = self.values.min + coeff * ( self.values.max - self.values.min )
@@ -114,16 +122,16 @@ function GUISliderVertical:Render( dx, dy )
       GUI.tooltip:SetText( string.format( self.textFormat, self.value ) )
       GUI.tooltip:CropByTextWidth()
     end
-    Render( 'sprite', x0 + 3, bgTop - 2, -5, x1 - 7, bgBottom + 2, -5, 'data/temp/blank.png', 'ffffffff' )
-    Render( 'rect', x0 + 3, bgTop - 3, -5, x1 - 6, bgBottom + 2, -5, '444444ff' )
-    Render( 'sprite', x0 + 5, bgTop, -5, x1 - 9, bgBottom, -5, 'data/temp/blank.png', '888888aa' )
+    Render( 'sprite', x0 + 4, bgTop - 2, -1, x1 - 6, bgBottom + 2, -1, 'data/temp/blank.png', 'ffffffff' )
+    Render( 'rect', x0 + 4, bgTop - 3, -1, x1 - 5, bgBottom + 2, -1, '444444ff' )
+    Render( 'sprite', x0 + 6, bgTop, -1, x1 - 8, bgBottom, -1, 'data/temp/blank.png', '888888aa' )
   else
     self.rulerOffset = 0
   end
-  Render( 'sprite', x0, y0 + self.rulerOffset + resRulerOffset - 4, -5, x1, y1 + self.rulerOffset + resRulerOffset + 4, -5, 'data/textures/gui/slider-vertical.tga', self.isHover and 'aa4444ff' or 'ffffffff' )
+  Render( 'sprite', x0, y0 + self.rulerOffset + resRulerOffset - 4, rulerZ, x1, y1 + self.rulerOffset + resRulerOffset + 4, rulerZ, 'data/textures/gui/slider-vertical.tga', self.isHover and 'aa4444ff' or ( self.isEnabled and 'ffffffff' or 'ffffff55' ) )
   if self.isHover then
-    local halfWidth = math.floor( Render( 'getTextWidth', self.title ) / 2 )
-    Render( 'text', x0 + 8 - halfWidth, y0 + 15, -1, self.title, '000000ff' )
+    local text = self.title..': '..string.format( self.textFormat, self.value )
+    Render( 'text', x0 + 8 - math.floor( Render( 'getTextWidth', text ) / 2 ), y0 + 15, -0.9, text, '000000ff' )
   end
 
   -- childs
@@ -133,6 +141,9 @@ function GUISliderVertical:Render( dx, dy )
 end -- GUISliderVertical:Render
 
 function GUISliderVertical:TestInRect( x, y, dx, dy )
+  if not self.isEnabled then
+    return false
+  end
   if dx == nil then
     dx = 0
     dy = 0
