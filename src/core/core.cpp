@@ -131,6 +131,7 @@ public:
 
 Core::Core()
 :_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL ), animationMgr( NULL )
+,objectUnloaderTimer( 0.0f )
 {
   this->_window.isActive  = true;
   this->_window.dc        = NULL;
@@ -1257,7 +1258,7 @@ bool Core::Redraw()
               glVertex3f( pos.x - size.x, pos.y + size.y, 0.0f );
             }
           }
-          if( this->debug.selectedObjects.size() ) {
+          if( !this->debug.selectedObjects.empty() ) {
             glColor4f( 1.0f, 0.0f, 0.0f, alpha );
             for( auto &obj: this->debug.selectedObjects ) {
               if( obj->IsRenderable() ) {
@@ -1459,6 +1460,7 @@ bool Core::Update()
   this->keyboard.Update();
   this->mouse.Update();
   float delta = ( this->_state == CORE_STATE_PAUSED ? 0.0f : sTimer.GetDeltaF() );
+  this->objectUnloaderTimer += sTimer.GetDeltaF();
 
   MSG msg;
   while( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
@@ -1498,6 +1500,28 @@ bool Core::Update()
       */
   }
   this->lightRenderer->Update();
+
+  while( this->objectUnloaderTimer > CORE_UNLOAD_OBJECT_INTERVAL ) {
+    this->objectUnloaderTimer -= CORE_UNLOAD_OBJECT_INTERVAL;
+    if( !__objectsToRemove.empty() ) {
+      auto iter = __objectsToRemove.begin();
+      __log.PrintInfo( Filelevel_DEBUG, "Core => unload object '%s'[%p] timer[%3.3f]", ( *iter )->GetNameFull().c_str(), *iter, this->objectUnloaderTimer );
+      delete *iter;
+      if( !this->debug.selectedObjects.empty() ) {
+        auto
+          selectedIter = this->debug.selectedObjects.begin(),
+          selectedIterEnd = this->debug.selectedObjects.end();
+        while( selectedIter != selectedIterEnd ) {
+          if( *selectedIter == *iter ) {
+            this->debug.selectedObjects.erase( selectedIter );
+            break;
+          }
+          ++selectedIter;
+        }
+      }
+      __objectsToRemove.pop_front();
+    }
+  }
 
   //__log.PrintInfo( Filelevel_DEBUG, "============" );
   return true;

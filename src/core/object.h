@@ -24,6 +24,8 @@ class LightRenderer;
 //class g2Controller;
 //typedef std::deque< g2Controller* > GuiList;
 typedef std::deque< std::string > stdDequeString;
+typedef std::deque< Object* > ObjectsToRemoveList;
+extern ObjectsToRemoveList __objectsToRemove;
 
 
 //object by collision
@@ -258,6 +260,7 @@ public:
   inline
   const std::string&  GetLuaScript        () { return this->luaScript; }
   void                RecalculateRenderableZ( const float z );
+  void                SetNeedToUnload     ( const bool unload );
 
   static
     RenderableQuad*   CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );

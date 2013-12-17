@@ -470,7 +470,7 @@ function DoPause( setPause )
     DebugRender( 0 )
     settings.editorType = 0
     GUI.elements.layer:SetText( 'default' )
-    OnChangeLayer( GUI.elements.layer )
+    -- OnChangeLayer( GUI.elements.layer )
   end
 end --)
 
@@ -1321,6 +1321,8 @@ end -- OnChangeZ
 --[[ OnChangeLayer ]]
 function OnChangeLayer( obj )
   local val = obj:GetValue()
+  SetEditorMode( val - 1 )
+  --[[
   if val > 1 then
     DebugRender( math.pow( 2, val - 2 ) )
     settings.editorType = val - 1
@@ -1328,6 +1330,7 @@ function OnChangeLayer( obj )
     DebugRender( 0 )
     settings.editorType = 0
   end
+  ]]
 end -- OnChangeLayer
 
 --[[ OnChangeTileSize ]]
@@ -1379,7 +1382,7 @@ end --)
 --( Переключение режима редактора на default, renderable, collision, trigger
 function SetEditorMode( setMode )
   DoPause( true )
-  DebugRender( setMode == 0 and 0 or math.pow( 2, setMode - 1 ) )
+  -- DebugRender( setMode == 0 and 0 or math.pow( 2, setMode - 1 ) )
   settings.editorType = setMode
   local modeToText = {
     [0] = 'default',
@@ -1388,7 +1391,14 @@ function SetEditorMode( setMode )
     [3] = 'trigger',
   }
   GUI.elements.layer:SetText( modeToText[ setMode ] )
-  OnChangeLayer( GUI.elements.layer )
+  if setMode > 0 then
+    DebugRender( math.pow( 2, setMode - 1 ) )
+    settings.editorType = setMode
+  else
+    DebugRender( 0 )
+    settings.editorType = 0
+  end
+  -- OnChangeLayer( GUI.elements.layer )
   -- settings.editorMode = 0
   -- SelectObject( '' )
   UpdateGuiBySelectedObject()

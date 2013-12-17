@@ -16,15 +16,22 @@
 #include "core/object.h"
 #include "core/objectpointer.h"
 #include <list>
+#include <vector>
 
 
 class WorldGrid;
 typedef Pointer ObjectPointerType;
-typedef std::deque< WorldGrid* > WorldGridList;
-typedef std::deque< ObjectPointerType* > WorldGridObjectList;
+typedef std::vector< WorldGrid* > WorldGridList;
+typedef std::vector< ObjectPointerType* > WorldGridObjectList;
 extern WorldGridList *__worldGridList;
 
 //#define WORLD_GRID_BLOCK_SIZE ( 16 )
+enum WORLDGRID_STATE {
+  WORLDGRID_STATE_UNKNOWN,
+  WORLDGRID_STATE_LOADING,
+  WORLDGRID_STATE_DONE,
+  WORLDGRID_STATE_UNLOADING,
+};
 
 
 class WorldGrid
@@ -51,7 +58,8 @@ private:
   WorldGridPosition         position;       //координаты мира
   WorldGridObjectList       objects;        //все объекты грида
   Dword                     version;        //версия
-  bool                      isFullyLoaded;  //флаг полной загруженности грида из дампа
+  //bool                      isFullyLoaded;  //флаг полной загруженности грида из дампа
+  WORLDGRID_STATE           state;
   struct {
     memory                  dump;
     MemoryReader            reader;
@@ -74,7 +82,8 @@ public:
   bool  LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion, const bool forceLoad = false );
   bool  GetFirstMovableObject( WorldGridObjectList::iterator &iter );
   bool  GetNextMovableObject( WorldGridObjectList::iterator &iter );
-  inline bool IsFullyLoaded() { return this->isFullyLoaded; }
+  inline bool IsFullyLoaded() { return this->state == WORLDGRID_STATE_DONE || this->state == WORLDGRID_STATE_UNLOADING; }
+  inline WORLDGRID_STATE GetState() { return this->state; }
 
   void  Update();
 };

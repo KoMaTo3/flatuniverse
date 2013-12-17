@@ -46,14 +46,14 @@ void WorldGridManager::Update( bool forceLoadGrids )
 
   while( this->currentTime > WORLD_GRID_UPDATE_INTERVAL || forceUpdate )
   {
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => __worldGridList[%d]", __worldGridList->size() );
+    //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => __worldGridList[%d]", __worldGridList->size() );
 
     //Update grids
     WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
     for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid ) {
       ( *iterGrid )->Update();
     }
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => __worldGridList updated" );
+    //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => __worldGridList updated" );
 
     WorldGridObjectList::iterator iter, iterEnd;
     Short x, y;
@@ -138,9 +138,9 @@ void WorldGridManager::Update( bool forceLoadGrids )
           if( grid ) {
             grid->AttachObject( object );
           } else {
-            __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => load grid[%d; %d]...", pos.x, pos.y );
+            //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => load grid[%d; %d]...", pos.x, pos.y );
             this->LoadGrid( pos )->AttachObject( object );
-            __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => load grid[%d; %d] done", pos.x, pos.y );
+            //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => load grid[%d; %d] done", pos.x, pos.y );
           }
           keepChecking = false;
           break;
@@ -173,7 +173,7 @@ void WorldGridManager::Update( bool forceLoadGrids )
     if( forceUpdate ) {
       break;
     }
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update done" );
+    //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update done" );
   }//while time
 }//Update
 
@@ -344,7 +344,7 @@ WorldGrid* WorldGridManager::LoadGrid( const WorldGrid::WorldGridPosition& gridP
   UnloadGrid
 =============
 */
-bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition gridPos )
+bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition gridPos, const bool forceUnload )
 {
   WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
   for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
@@ -352,6 +352,9 @@ bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition gridPos )
     if( ( *iterGrid )->GetPosition() == gridPos )
     {
       //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::UnloadGrid => grid[%d; %d] unloading...", gridPos.x, gridPos.y );
+      if( ( *iterGrid )->GetState() != WORLDGRID_STATE_DONE && !forceUnload ) {
+        break;
+      }
       memory gridDump;
       while( !( *iterGrid )->GetGridDump( gridDump ) ) {
         ( *iterGrid )->Update();
@@ -366,7 +369,7 @@ bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition gridPos )
       //__log.PrintInfo( Filelevel_DEBUG, ". save grid dump..." );
       this->worldSaver.SaveGrid( gridPos.x, gridPos.y, gridDump );
 
-      //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::UnloadGrid => grid[%d; %d] unloaded", gridPos.x, gridPos.y );
+      __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::UnloadGrid => grid[%d; %d] unloaded", gridPos.x, gridPos.y );
       return true;
     }
   }
@@ -384,7 +387,7 @@ bool WorldGridManager::UnloadGrid( const WorldGrid::WorldGridPosition gridPos )
 void WorldGridManager::SaveToFile( const std::string& fileName )
 {
   while( !__worldGridList->empty() )
-    this->UnloadGrid( (  *__worldGridList->begin() )->GetPosition() );
+    this->UnloadGrid( (  *__worldGridList->begin() )->GetPosition(), true );
   this->worldSaver.SaveToFile( fileName );
 }//SaveToFile
 
