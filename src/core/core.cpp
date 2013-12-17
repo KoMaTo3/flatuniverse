@@ -15,6 +15,7 @@
 #include "debugrenderer.h"
 #include "animationmanager.h"
 #include "objectwidget.h"
+#include "thread.h"
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -32,6 +33,7 @@ CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободны
 //
 
 ConfigFile* __config = NULL;
+Thread::Pipeline *__workPipeline = nullptr;
 
 extern DebugRenderer* __debugRender;
 LightRenderer *__lightLenderer = NULL;
@@ -210,6 +212,7 @@ bool Core::Destroy()
   this->_window.glRC = NULL;
   ReleaseDC( this->_window.hwnd, this->_window.dc );
   this->_window.dc = NULL;
+  DEF_DELETE( __workPipeline );
   //DEF_DELETE( __objectByGui );
   //DEF_DELETE( __guiList );
 
@@ -357,6 +360,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   __objectByTrigger       = new ObjectByTriggerList();
   this->animationMgr      = new Animation::Manager(  );
   this->lightList         = new LightList;
+  __workPipeline          = new Thread::Pipeline();
   //__objectByGui           = new ObjectByGuiList();
   //__guiList               = new GuiList();
   //
@@ -1522,6 +1526,8 @@ bool Core::Update()
       __objectsToRemove.pop_front();
     }
   }
+
+  __workPipeline->Update();
 
   //__log.PrintInfo( Filelevel_DEBUG, "============" );
   return true;
