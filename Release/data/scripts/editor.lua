@@ -529,7 +529,7 @@ function OnEditorMouseKey( id, isPressed )
     end,
     [2] = function()
       if isPressed then
-        if settings.keys.isCtrl or settings.keys.isAlt then --(
+        if settings.keys.isCtrl --[[ or settings.keys.isAlt ]] then --(
           settings.editorMode = 22
           local cx, cy = GetCameraPos()
           settings.multiSelectStartPoint.x = mousePos.x + cx
@@ -741,6 +741,9 @@ function OnEditorMouseMove( x, y )
         local offsetX, offsetY = GetTileOffset()
         objectList = Explode( object, '//' )
         local dx, dy = math.floor( ( mousePos.x - settings.move.mouseStart.x ) / tileSize ) * tileSize, math.floor( ( mousePos.y - settings.move.mouseStart.y ) / tileSize ) * tileSize
+        if settings.keys.isAlt then
+          dx, dy = mousePos.x - settings.move.mouseStart.x, mousePos.y - settings.move.mouseStart.y
+        end
         local moveByX, moveByY = -settings.move.lastOffset.x + dx, -settings.move.lastOffset.y + dy
         settings.move.lastOffset.x = settings.move.lastOffset.x + moveByX
         settings.move.lastOffset.y = settings.move.lastOffset.y + moveByY
