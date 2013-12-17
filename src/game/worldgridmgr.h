@@ -17,7 +17,7 @@
 
 
 #define WORLD_GRID_UPDATE_INTERVAL        ( 1.0f / 10.0f )    //период обновления состояния гридов
-#define WORLD_GRID_LOADER_UPDATE_INTERVAL ( 1.0f / 10.0f )   //интервал загрузки объектов грида из дампа
+#define WORLD_GRID_LOADER_UPDATE_INTERVAL ( 1.0f / 50.0f )   //интервал загрузки объектов грида из дампа
 
 
 
