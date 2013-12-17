@@ -21,6 +21,7 @@ private:
   //„тобы туда-сюда не гон€ть текстуру - храним еЄ и в RAM (скорость не тестировалась, а надо бы)
   memory      textureData;
   SquareAtlas atlas;
+  bool        needWriteToGPU;
 
   struct TextureAtlasItem
   {
@@ -32,6 +33,13 @@ private:
   typedef std::vector< TextureAtlasItem* > TextureAtlasItemsList;
   TextureAtlasItemsList textures;
 
+  struct ThreadDataLoadTexture {
+    memory  *data;
+    Size    size;
+    TextureAtlas *atlas;
+    TextureAtlasItem *item;
+  };
+
 public:
   TextureAtlas();
   virtual ~TextureAtlas();
@@ -39,13 +47,17 @@ public:
   bool                Init                  ( const Size& maxTextureSize, Byte borderSize = 0 );
   void                Bind                  ();
   void                Unbind                ();
-  TextureAtlasItem*   LoadTexture           ( const std::string& textureFileName, const bool forceLoad = true );
+  TextureAtlasItem*   LoadTexture           ( const std::string& textureFileName, const bool forceLoad = false );
   Vec4                GetTextureCoords      ( const std::string& textureFileName, const Vec4& textureCoords );
   Vec2                GetTextureSize        ( const std::string& textureFileName );
   Vec4                GetInvTextureCoords   ( const std::string& textureFileName, const Vec4& textureCoords );
   const std::string&  GetTextureNameByCoords( Vec2 texCoords );
   TextureAtlasItem*   IsTextureLoaded       ( const std::string& textureFileName );
   bool                CheckGLError          ( int line, const std::string& fileName );
+  inline const Size   GetAtlasSize          () { return this->size; }
+  inline void         FlushToGPU            () { this->needWriteToGPU = true; }
+
+  static unsigned int __stdcall ThreadLoadTexture( void* data );
 
   //debug
   void              __Dump( const std::string& fileName );
