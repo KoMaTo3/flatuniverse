@@ -78,7 +78,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetSize( Vec2( 100.0f, 100.0f ) );
   */
 
-
   obj = game->core->CreateObject( "player" );
   obj->SetLockToDelete( true );
   col = obj->EnableCollision();

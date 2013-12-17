@@ -285,23 +285,27 @@ Vec2 TextureAtlas::GetTextureSize( const std::string& textureFileName )
   LoadTexture
 =============
 */
-TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& textureFileName )
+TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& textureFileName, const bool forceLoad )
 {
   ImageLoader image;
-  if( !image.LoadFromFile( textureFileName ) )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => file not found '%s'", textureFileName.c_str() );
-    return NULL;
+  Size size( 0, 0 );
+  memory deferredLoadingData;
+
+  if( forceLoad ) {
+    if( !image.LoadFromFile( textureFileName ) ) {
+      __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => file not found '%s'", textureFileName.c_str() );
+      return NULL;
+    }
+    size = image.GetImageSize();
+  } else {
+    __fileManager->GetFile( textureFileName, deferredLoadingData );
+    size = ImageLoader::GetImageSizeFromBuffer( ( Byte* ) deferredLoadingData.getData(), deferredLoadingData.getLength() );
   }
 
-  Size size = *image.GetImageSize();
-  if( !this->atlas.HasPlace( size ) )
-  {
+  if( !this->atlas.HasPlace( size ) ) {
     __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => atlas can't find needed place [ %d; %d ]", size.width, size.height );
     return NULL;
   }
-
-  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::LoadTexture => load new texture from file '%s'", textureFileName.c_str() );
 
   TextureAtlasItem *item = new TextureAtlasItem();
   Rect< Dword > fullRect;
@@ -336,13 +340,20 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
   item->matInvTransform = matInvScale * matInvTranslate;
 
   //размещение картинки в текстуре
-  this->Bind();
-  Dword *dst = ( Dword* ) this->textureData.getData(),
-    *src = ( Dword* ) image.GetImageData();
-  for( Dword y = 0; y < image.GetImageSize()->height; ++y )
-    memcpy( dst + ( item->rect.top + y ) * this->size.width + item->rect.left, src + y * image.GetImageSize()->width, image.GetImageSize()->width * 4 );
-  glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
-  this->Unbind();
+  if( forceLoad ) {
+    this->Bind();
+    Dword
+      *dst = ( Dword* ) this->textureData.getData(),
+      *src = ( Dword* ) image.GetImageData();
+    for( Dword y = 0; y < image.GetImageSize().height; ++y ) {
+      memcpy( dst + ( item->rect.top + y ) * this->size.width + item->rect.left, src + y * image.GetImageSize().width, image.GetImageSize().width * 4 );
+    }
+    glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
+    this->Unbind();
+  } else {
+    // TODO: здесь отложенная загрузка
+    // класть в стек deferredLoadingData, указатель на атлас и TextureAtlasItem item
+  }
 
   this->textures.push_back( item );
   return item;

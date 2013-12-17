@@ -60,17 +60,10 @@ Bool ImageLoader::LoadFromFile( const string &fileName )
 }//LoadFromFile
 
 
-/*
-----------
-  LoadFromBuffer
-----------
-*/
-Bool ImageLoader::LoadFromBuffer( Byte *buffer, Dword length )
-{
-  if( !buffer || !length )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "ImageLoader::LoadFromBuffer => buffer[x%X] length[x%X]", buffer, length );
-    return false;
+
+IMAGELOADER_IMAGE_TYPE ImageLoader::GetImageFormat( Byte *buffer, Dword length ) {
+  if( !buffer || !length ) {
+    return IMAGELOADER_IMAGE_TYPE_UNKNOWN;
   }
 
   if(length >= 2) //BMP
@@ -79,17 +72,16 @@ Bool ImageLoader::LoadFromBuffer( Byte *buffer, Dword length )
       buffer[0] == 'B' &&
       buffer[1] == 'M'
       )
-      return this->_LoadFromBufferBMP( buffer, length );
+      return IMAGELOADER_IMAGE_TYPE_BMP;
   }
-  if(length >= 10)  //JPG
+  if(length >= 3)  //TGA
   {
     if(
-      buffer[6] == 'J' &&
-      buffer[7] == 'F' &&
-      buffer[8] == 'I' &&
-      buffer[9] == 'F'
+      buffer[0] == 0 &&
+      buffer[1] == 0 &&
+      (buffer[2] == 0x02 || buffer[2] == 0x0A)
       )
-      return this->_LoadFromBufferJPG( buffer, length );
+      return IMAGELOADER_IMAGE_TYPE_TGA;
   }
   if(length >= 4)  //PNG
   {
@@ -99,18 +91,43 @@ Bool ImageLoader::LoadFromBuffer( Byte *buffer, Dword length )
       buffer[2] == 'N' &&
       buffer[3] == 'G'
       )
-      return this->_LoadFromBufferPNG( buffer, length );
+      return IMAGELOADER_IMAGE_TYPE_PNG;
   }
-  if(length >= 3)  //TGA
+  if(length >= 10)  //JPG
   {
     if(
-      buffer[0] == 0 &&
-      buffer[1] == 0 &&
-      (buffer[2] == 0x02 || buffer[2] == 0x0A)
+      buffer[6] == 'J' &&
+      buffer[7] == 'F' &&
+      buffer[8] == 'I' &&
+      buffer[9] == 'F'
       )
-      return this->_LoadFromBufferTGA( buffer, length );
+      return IMAGELOADER_IMAGE_TYPE_JPG;
   }
 
+  return IMAGELOADER_IMAGE_TYPE_UNKNOWN;
+}//GetImageFormat
+
+
+/*
+----------
+  LoadFromBuffer
+----------
+*/
+Bool ImageLoader::LoadFromBuffer( Byte *buffer, Dword length )
+{
+  IMAGELOADER_IMAGE_TYPE format = ImageLoader::GetImageFormat( buffer, length );
+
+  switch( format ) {
+  case IMAGELOADER_IMAGE_TYPE_BMP: 
+    return this->_LoadFromBufferBMP( buffer, length );
+  case IMAGELOADER_IMAGE_TYPE_JPG: 
+    return this->_LoadFromBufferJPG( buffer, length );
+  case IMAGELOADER_IMAGE_TYPE_PNG: 
+    return this->_LoadFromBufferPNG( buffer, length );
+  case IMAGELOADER_IMAGE_TYPE_TGA: 
+    return this->_LoadFromBufferTGA( buffer, length );
+  }
+  __log.PrintInfo( Filelevel_ERROR, "ImageLoader::LoadFromBuffer => unknown format" );
   return false;
 }//LoadFromBuffer
 
@@ -313,10 +330,132 @@ Bool ImageLoader::_LoadFromBufferTGA( Byte *buffer, Dword length )
   GetImageSize
 ----------
 */
-const Size* ImageLoader::GetImageSize()
+const Size ImageLoader::GetImageSize()
 {
-  return &this->_size;
+  return this->_size;
 }//GetImageSize
+
+
+
+const Size ImageLoader::GetImageSizeFromBuffer( Byte *buffer, Dword length ) {
+  IMAGELOADER_IMAGE_TYPE format = ImageLoader::GetImageFormat( buffer, length );
+  switch( format ) {
+  case IMAGELOADER_IMAGE_TYPE_BMP:
+    return ImageLoader::GetImageSizeBMP( buffer, length );
+  case IMAGELOADER_IMAGE_TYPE_JPG:
+    return ImageLoader::GetImageSizeJPG( buffer, length );
+  case IMAGELOADER_IMAGE_TYPE_PNG:
+    return ImageLoader::GetImageSizePNG( buffer, length );
+  case IMAGELOADER_IMAGE_TYPE_TGA:
+    return ImageLoader::GetImageSizeTGA( buffer, length );
+  }
+  __log.PrintInfo( Filelevel_ERROR, "ImageLoader::GetImageSize => unknown format" );
+  tools::Dump( buffer, length, "ImageLoader::GetImageSize => unknown format" );
+  return Size( 0, 0 );
+}//GetImageSize
+
+
+
+const Size ImageLoader::GetImageSizeBMP( Byte *buffer, Dword length ) {
+  if( length < sizeof( BITMAPFILEHEADER ) + sizeof( BITMAPINFOHEADER ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "ImageLoader::GetImageSizeBMP => buffer too short" );
+    return Size( 0, 0 );
+  }
+
+  BITMAPINFOHEADER *infoHeader = (BITMAPINFOHEADER*) ( buffer + sizeof( BITMAPFILEHEADER ) );
+
+  return Size( infoHeader->biWidth, infoHeader->biHeight );
+}//GetImageSizeBMP
+
+
+
+const Size ImageLoader::GetImageSizeTGA( Byte *buffer, Dword length ) {
+  if( !buffer || length < 15 ) {
+    __log.PrintInfo( Filelevel_ERROR, "ImageLoader::GetImageSizeTGA => buffer too short" );
+    return Size( 0, 0 );
+  }
+
+  if( buffer[ 1 ] ) {
+    __log.PrintInfo( Filelevel_ERROR, "ImageLoader::GetImageSizeTGA => is not TGA" );
+    return Size( 0, 0 );
+  }
+
+  Byte compressed = buffer[ 2 ]; //RLE-compression
+  if( !( compressed == 2 || compressed == 0x0A ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "ImageLoader::GetImageSizeTGA => unknown compression method" );
+    return Size( 0, 0 );
+  }
+  return Size( *( Word* ) ( buffer + 12 ), *( Word* ) ( buffer + 14 ) );
+}
+
+
+
+const Size ImageLoader::GetImageSizeJPG( Byte *buffer, Dword length ) {
+  jpeg_decompress_struct	    cinfo;
+  ImgJpg::_gImporterJPEGError	jerr;
+
+  MemoryReader file;
+  file.SetSource( buffer, length );
+
+  cinfo.err = jpeg_std_error( &jerr.pub );		  // устанавливаем дефолтный менеджер обработки ошибок
+  jerr.pub.error_exit = ImgJpg::JPEGErrorExit;	// присваиваем дефолтную функцию для обработки ошибки
+
+  if( setjmp(jerr.setjmp_buffer) )
+  {
+	  jpeg_destroy_decompress( &cinfo );
+	  file.Free();
+    __log.PrintInfo( Filelevel_ERROR, "ImageLoader::GetImageSizeJPG => failed" );
+    return Size( 0, 0 );
+  }
+  jpeg_create_decompress( &cinfo );
+  ImgJpg::JPEGStdioSrcgMemoryReader( &cinfo, &file );
+  jpeg_read_header( &cinfo, TRUE );
+	jpeg_destroy_decompress( &cinfo );
+
+  return Size( cinfo.image_width, cinfo.image_height );
+}
+
+
+
+const Size ImageLoader::GetImageSizePNG( Byte *buffer, Dword length ) {
+
+  png_structp   png_ptr;
+  png_infop     info_ptr;
+  png_uint_32   img_width = 0, img_height = 0;
+  int           bit_depth = 0, color_type = 0, interlace_type = 0;
+
+  MemoryReader memReader;
+  memReader.SetSource( buffer, length );
+  Dword sig = *( ( Dword* ) buffer );
+  if( !png_check_sig( ( BYTE* ) &sig ,4 ) )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "ImageLoader::GetImageSizePNG => png_check_sig failed" );
+    return Size( 0, 0 );
+  }
+  png_ptr = png_create_read_struct( PNG_LIBPNG_VER_STRING, 0, 0, 0 );
+  if( png_ptr == NULL )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "ImageLoader::GetImageSizePNG => png_create_read_struct failed" );
+    return Size( 0, 0 );
+  }
+  info_ptr = png_create_info_struct( png_ptr );
+  if( info_ptr == NULL )
+  {
+    __log.PrintInfo( Filelevel_ERROR, "ImageLoader::GetImageSizePNG => png_create_info_struct failed" );
+    return Size( 0, 0 );
+  }
+  memReader.SeekFromStart( 4 );
+  png_set_read_fn( png_ptr, ( void* ) &memReader, ImgPng::PNGReadFunctiongMemoryReader );
+
+  png_set_sig_bytes( png_ptr, 4 );
+
+  png_read_info( png_ptr, info_ptr );
+  png_get_IHDR( png_ptr, info_ptr, &img_width, &img_height, &bit_depth, &color_type, &interlace_type, 0, 0 );
+  png_destroy_read_struct( &png_ptr, 0, 0 );
+
+  return Size( img_width, img_height );
+}
+
 
 
 /*

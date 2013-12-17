@@ -26,6 +26,13 @@ extern "C" {
 
 
 using namespace std;
+enum IMAGELOADER_IMAGE_TYPE {
+  IMAGELOADER_IMAGE_TYPE_UNKNOWN,
+  IMAGELOADER_IMAGE_TYPE_TGA,
+  IMAGELOADER_IMAGE_TYPE_BMP,
+  IMAGELOADER_IMAGE_TYPE_PNG,
+  IMAGELOADER_IMAGE_TYPE_JPG,
+};
 
 
 class ImageLoader
@@ -46,9 +53,16 @@ public:
 
   Bool        LoadFromFile  ( const string &fileName );
   Bool        LoadFromBuffer( Byte *buffer, Dword length );
-  const Size  *GetImageSize ();
+  const Size  GetImageSize  ();
   inline
   Byte*       GetImageData  () { return (Byte*) this->_data.getData(); }
+
+  static IMAGELOADER_IMAGE_TYPE GetImageFormat( Byte *buffer, Dword length );
+  static const Size GetImageSizeFromBuffer( Byte *buffer, Dword length );
+  static const Size GetImageSizeBMP ( Byte *buffer, Dword length );
+  static const Size GetImageSizeTGA ( Byte *buffer, Dword length );
+  static const Size GetImageSizeJPG ( Byte *buffer, Dword length );
+  static const Size GetImageSizePNG ( Byte *buffer, Dword length );
 };
 
 

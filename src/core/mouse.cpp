@@ -57,7 +57,7 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object, bool se
   ImageLoader image;
   image.LoadFromFile( imageFileName );
 
-  this->cursor.size.Set( float( image.GetImageSize()->width ) , float( image.GetImageSize()->height ) );
+  this->cursor.size.Set( float( image.GetImageSize().width ) , float( image.GetImageSize().height ) );
   this->cursor.spriteOffset.Set( this->cursor.size.x * 0.5f * this->cursor.pixelsToTexels.x, this->cursor.size.y * 0.5f * this->cursor.pixelsToTexels.y, 0.0f );
 
   if( this->cursor.sprite->GetIsValid() )
@@ -71,14 +71,14 @@ void Mouse::SetCursor( const std::string& imageFileName, Object* object, bool se
         //и сделать пиксели с прозрачностью < minAlpha полностью прозрачными
         Dword *pos = ( Dword* ) image.GetImageData();
         Byte *block, minAlpha = 255;
-        Size imageSize = *image.GetImageSize();
+        Size imageSize = image.GetImageSize();
         for( Dword y = 0; y < imageSize.height; ++y )
         for( Dword x = 0; x < imageSize.width; ++x ) {
           block = ( Byte* ) pos;
           *(pos++) = ( block[ 3 ] < minAlpha ? ARGB( 0, 0, 0, 0 ) : ARGB( 255, block[ 0 ], block[ 1 ], block[ 2 ] ) );
         }
 
-        this->cursor.hCursor = this->_CreateCursorFromMemory( image.GetImageData(), image.GetImageSize(), RGB( 0, 0, 0), 0, 0 );
+        this->cursor.hCursor = this->_CreateCursorFromMemory( image.GetImageData(), &image.GetImageSize(), RGB( 0, 0, 0), 0, 0 );
 
         this->cursor.isHardware = true;
         ::ShowCursor( TRUE );
