@@ -597,6 +597,9 @@
     <ClCompile Include="..\src\core\objectwidget.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\thread.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\collision.h">
@@ -915,6 +918,9 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\objectwidget.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\thread.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

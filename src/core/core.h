@@ -51,6 +51,8 @@ enum CoreStates
 #define CORE_SIGNAL_UPDATEPALETTE         ( 0x00000003 )
 
 
+const float CORE_UNLOAD_OBJECT_INTERVAL = 1.0f / 50.0f;
+
 namespace Animation {
   class Manager;
 };
@@ -82,6 +84,7 @@ private:
   //std::list< Object* >        _objects;
   Object                      *_rootObject; //корневой объект сцены
   //Object                      *_rootGUIObject;  //корневой объект GUI
+  float objectUnloaderTimer;
 
   //gui
   /*

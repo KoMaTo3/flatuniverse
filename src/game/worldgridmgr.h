@@ -17,7 +17,7 @@
 
 
 #define WORLD_GRID_UPDATE_INTERVAL        ( 1.0f / 10.0f )    //период обновления состояния гридов
-#define WORLD_GRID_LOADER_UPDATE_INTERVAL ( 1.0f / 100.0f )   //интервал загрузки объектов грида из дампа
+#define WORLD_GRID_LOADER_UPDATE_INTERVAL ( 1.0f / 10.0f )   //интервал загрузки объектов грида из дампа
 
 
 
@@ -45,7 +45,7 @@ public:
   void        AttachObjectToGrid      ( Short gridX, Short gridY, Object *obj );
   WorldGrid*  IsGridLoaded            ( const WorldGrid::WorldGridPosition& gridPos );
   WorldGrid*  LoadGrid                ( const WorldGrid::WorldGridPosition& gridPos, const bool forceLoad = false );
-  bool        UnloadGrid              ( const WorldGrid::WorldGridPosition gridPos );
+  bool        UnloadGrid              ( const WorldGrid::WorldGridPosition gridPos, const bool forceUnload = false );
   WorldGrid::WorldGridPosition
               GetGridPositionByObject ( const Object& obj );
   WorldGrid::WorldGridPosition

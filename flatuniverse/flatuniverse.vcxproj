@@ -137,6 +137,7 @@
     <ClCompile Include="..\src\core\tags.cpp" />
     <ClCompile Include="..\src\core\textparser.cpp" />
     <ClCompile Include="..\src\core\textureatlas.cpp" />
+    <ClCompile Include="..\src\core\thread.cpp" />
     <ClCompile Include="..\src\core\timer.cpp" />
     <ClCompile Include="..\src\core\tools.cpp" />
     <ClCompile Include="..\src\core\variable.cpp" />
@@ -334,6 +335,7 @@
     <ClInclude Include="..\src\core\tags.h" />
     <ClInclude Include="..\src\core\textparser.h" />
     <ClInclude Include="..\src\core\textureatlas.h" />
+    <ClInclude Include="..\src\core\thread.h" />
     <ClInclude Include="..\src\core\timer.h" />
     <ClInclude Include="..\src\core\tools.h" />
     <ClInclude Include="..\src\core\variable.h" />

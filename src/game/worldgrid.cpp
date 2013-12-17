@@ -14,7 +14,7 @@ WorldGridList *__worldGridList = NULL;
   [in] rootObject: объект, в котором будет храниться грид
 */
 WorldGrid::WorldGrid( const WorldGrid::WorldGridPosition &newPosition )
-:position( newPosition ), version( 0 ), isFullyLoaded( true )
+:position( newPosition ), version( 0 ), state( WORLDGRID_STATE_DONE )
 {
   WorldGridList::iterator iter, iterEnd = __worldGridList->end();
 
@@ -43,14 +43,17 @@ WorldGrid::~WorldGrid()
     if( ( *iter )->GetIsValid() )
     {
       //__log.PrintInfo( Filelevel_DEBUG, "~WorldGrid => deleting object x%X['%s']", ( *iter )->GetObject< Object >(), ( *iter )->GetObject< Object >()->GetNameFull().c_str() );
-      delete ( *iter )->GetObject< Object >();
+      ( *iter )->GetObject< Object >()->SetNeedToUnload( true );
+      //this->DetachObject( ( *iter )->GetObject< Object >() );
+      //delete ( *iter )->GetObject< Object >();
     }
   //__log.PrintInfo( Filelevel_DEBUG, "~WorldGrid => clear pointers list" );
+  this->DetachAll();
 
   while( !this->objects.empty() )
   {
-    delete *this->objects.begin();
-    this->objects.pop_front();
+    delete *this->objects.rbegin();
+    this->objects.pop_back();
   }
   //this->objects.clear();
 
@@ -140,8 +143,8 @@ void WorldGrid::DetachAll()
 {
   while( !this->objects.empty() )
   {
-    delete *this->objects.begin();
-    this->objects.pop_front();
+    delete *this->objects.rbegin();
+    this->objects.pop_back();
   }
   //this->objects.clear();
 }//DetachAll
@@ -181,7 +184,7 @@ bool WorldGrid::IsThisObject( Object *object )
 */
 bool WorldGrid::GetGridDump( FU_OUT memory& dump )
 {
-  if( !this->isFullyLoaded ) {
+  if( !( this->state == WORLDGRID_STATE_DONE || this->state == WORLDGRID_STATE_UNLOADING ) ) {
     return false;
   }
   this->Update();
@@ -228,14 +231,16 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dwor
 
   //this->Update();
   if( this->loader.objectsCount ) {
-    this->isFullyLoaded = false;
+    //this->isFullyLoaded = false;
+    this->state = WORLDGRID_STATE_LOADING;
     if( forceLoad ) {
       while( this->loader.objectsCount ) {
         this->Update();
       }
     }
   } else {
-    this->isFullyLoaded = true;
+    //this->isFullyLoaded = true;
+    this->state = WORLDGRID_STATE_DONE;
   }
   /*
   Object *object;
@@ -264,8 +269,8 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dwor
 */
 void WorldGrid::Update()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update" );
-  if( this->isFullyLoaded ) {
+  //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update" );
+  if( this->state == WORLDGRID_STATE_DONE ) {
     WorldGridObjectList::iterator iter, iterEnd;
     bool changed;
     do
@@ -294,7 +299,7 @@ void WorldGrid::Update()
     object->LoadFromBuffer( this->loader.reader, this->loader.rootObject, this->version );
     --this->loader.objectsCount;
     if( !this->loader.objectsCount ) {
-      this->isFullyLoaded = true;
+      this->state = WORLDGRID_STATE_DONE;
       this->loader.dump.Free();
     }
 

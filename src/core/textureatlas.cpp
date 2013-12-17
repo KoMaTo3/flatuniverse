@@ -4,6 +4,7 @@
 #include "tools.h"
 #include "imageloader.h"
 #include "gl/gl.h"
+#include "thread.h"
 
 
 TextureAtlas *__textureAtlas = NULL;
@@ -11,7 +12,7 @@ TextureAtlas *__textureAtlas = NULL;
 
 
 TextureAtlas::TextureAtlas()
-:textureId( NULL ), size( 0, 0 ), borderPerItem( 0 )
+:textureId( NULL ), size( 0, 0 ), borderPerItem( 0 ), needWriteToGPU( false )
 {
 }//constructor
 
@@ -97,6 +98,10 @@ bool TextureAtlas::CheckGLError( int line, const std::string& fileName )
 void TextureAtlas::Bind()
 {
   glBindTexture( GL_TEXTURE_2D, this->textureId );
+  if( this->needWriteToGPU ) {
+    this->needWriteToGPU = false;
+    glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
+  }
 }//Bind
 
 
@@ -285,23 +290,28 @@ Vec2 TextureAtlas::GetTextureSize( const std::string& textureFileName )
   LoadTexture
 =============
 */
-TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& textureFileName )
+TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& textureFileName, const bool forceLoad )
 {
   ImageLoader image;
-  if( !image.LoadFromFile( textureFileName ) )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => file not found '%s'", textureFileName.c_str() );
-    return NULL;
+  Size size( 0, 0 );
+  memory *deferredLoadingData;
+
+  if( forceLoad ) {
+    if( !image.LoadFromFile( textureFileName ) ) {
+      __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => file not found '%s'", textureFileName.c_str() );
+      return NULL;
+    }
+    size = image.GetImageSize();
+  } else {
+    deferredLoadingData = new memory();
+    __fileManager->GetFile( textureFileName, *deferredLoadingData );
+    size = ImageLoader::GetImageSizeFromBuffer( ( Byte* ) deferredLoadingData->getData(), deferredLoadingData->getLength() );
   }
 
-  Size size = *image.GetImageSize();
-  if( !this->atlas.HasPlace( size ) )
-  {
+  if( !this->atlas.HasPlace( size ) ) {
     __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => atlas can't find needed place [ %d; %d ]", size.width, size.height );
     return NULL;
   }
-
-  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::LoadTexture => load new texture from file '%s'", textureFileName.c_str() );
 
   TextureAtlasItem *item = new TextureAtlasItem();
   Rect< Dword > fullRect;
@@ -336,14 +346,58 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
   item->matInvTransform = matInvScale * matInvTranslate;
 
   //размещение картинки в текстуре
-  this->Bind();
-  Dword *dst = ( Dword* ) this->textureData.getData(),
-    *src = ( Dword* ) image.GetImageData();
-  for( Dword y = 0; y < image.GetImageSize()->height; ++y )
-    memcpy( dst + ( item->rect.top + y ) * this->size.width + item->rect.left, src + y * image.GetImageSize()->width, image.GetImageSize()->width * 4 );
-  glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
-  this->Unbind();
+  if( forceLoad ) {
+    //this->Bind();
+    Dword
+      *dst = ( Dword* ) this->textureData.getData(),
+      *src = ( Dword* ) image.GetImageData();
+    for( Dword y = 0; y < image.GetImageSize().height; ++y ) {
+      memcpy( dst + ( item->rect.top + y ) * this->size.width + item->rect.left, src + y * image.GetImageSize().width, image.GetImageSize().width * 4 );
+    }
+    //glTexImage2D( GL_TEXTURE_2D, 0, 4, this->size.width, this->size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->textureData.getData() );
+    //this->Unbind();
+    this->FlushToGPU();
+  } else {
+    // TODO: здесь отложенная загрузка
+    // класть в стек deferredLoadingData, указатель на атлас и TextureAtlasItem item
+    ThreadDataLoadTexture *loader = new ThreadDataLoadTexture();
+    loader->data = deferredLoadingData;
+    loader->size = size;
+    loader->atlas = this;
+    loader->item = item;
+    extern Thread::Pipeline *__workPipeline;
+    __workPipeline->Add( loader, TextureAtlas::ThreadLoadTexture );
+  }
 
   this->textures.push_back( item );
   return item;
 }//LoadTexture
+
+
+unsigned int __stdcall TextureAtlas::ThreadLoadTexture( void* data ) {
+  Thread::Work *work = ( Thread::Work* ) data;
+  ThreadDataLoadTexture *loader = ( ThreadDataLoadTexture* ) work->data;
+  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::ThreadLoadTexture => begin: data[%d] size[%d; %d]", loader->data->getLength(), loader->size.width, loader->size.height );
+  //
+
+  ImageLoader image;
+  if( !image.LoadFromBuffer( ( Byte* ) loader->data->getData(), loader->data->getLength() ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::ThreadLoadTexture => image.LoadFromBuffer failed" );
+    work->status = Thread::THREAD_WORK_STATUS_ERROR;
+    return 1;
+  }
+  Dword
+    *dst = ( Dword* ) loader->atlas->textureData.getData(),
+    *src = ( Dword* ) image.GetImageData();
+  for( Dword y = 0; y < image.GetImageSize().height; ++y ) {
+    memcpy( dst + ( loader->item->rect.top + y ) * loader->atlas->size.width + loader->item->rect.left, src + y * image.GetImageSize().width, image.GetImageSize().width * 4 );
+  }
+  loader->atlas->FlushToGPU();
+
+  //done
+  delete loader->data;
+  delete loader;
+  work->status = Thread::THREAD_WORK_STATUS_DONE;
+  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::ThreadLoadTexture => done" );
+  return 0;
+}//ThreadLoadTexture

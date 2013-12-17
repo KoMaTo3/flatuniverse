@@ -21,6 +21,7 @@ ObjectByTriggerList   *__objectByTrigger    = NULL;
 
 Object::ObjectEvent *Object::OnLoad = NULL;
 Object::ObjectEvent *Object::OnUnload = NULL;
+ObjectsToRemoveList __objectsToRemove;
 
 
 /*
@@ -1958,3 +1959,29 @@ void Object::__Test() {
   this->widget->AddWidget( new ObjectWidget::WidgetLightBlockByCollision( this, __lightLenderer, elem ) );
   //this->widget->AddWidget( new ObjectWidget::WidgetLightPoint( this, &__lightLenderer->GetLightManager()->lightList, &this->position, Vec4( 1.0f, 1.0f, 1.0f, 0.4f ), Vec2( 300.0f, 300.0f ), 1.0f ) );
 }
+
+
+void Object::SetNeedToUnload( const bool unload ) {
+  bool finded = false;
+  auto
+    iter = __objectsToRemove.begin(),
+    iterEnd = __objectsToRemove.end();
+  while( iter != iterEnd ) {
+    if( *iter == this ) {
+      finded = true;
+      break;
+    }
+    ++iter;
+  }
+  if( unload ) {
+    if( !finded ) {
+      __objectsToRemove.push_back( this );
+      this->name = "";
+      this->nameFull = "";
+    }
+  } else {
+    if( finded ) {
+      __objectsToRemove.erase( iter );
+    }
+  }
+}//SetNeedToUnload
