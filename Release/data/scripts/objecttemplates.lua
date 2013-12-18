@@ -5,6 +5,7 @@ function GetObjectsTemplates()
       name = 'Точка спавна игрока',
       icon = 'data/textures/editor/respawn.png',
       attr = {
+        lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1',
       },
       animation = { 'editor/respawn', 'default', 'repeat' },
       tags = {
