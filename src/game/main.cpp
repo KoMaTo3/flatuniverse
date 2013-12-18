@@ -40,7 +40,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     //gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( ( __config->GetNumber( "gl_screen_width" ) + float( WORLD_GRID_BLOCK_SIZE ) ) / ( float( WORLD_GRID_BLOCK_SIZE ) * float( max( blocksPerGrid.x, blocksPerGrid.y ) ) ) ) );
   //__log.PrintInfo( Filelevel_DEBUG, "gridsAroundObject: %d", gridsAroundObject );
   //__log.PrintInfo( Filelevel_DEBUG, "sizeof( RenderableQuad ) = %d", sizeof( RenderableQuad ) );
-  game->world = new WorldGridManager( game->core->GetRootObject(), gridsAroundObject );
+  game->world = new World::GridManager( game->core->GetRootObject(), gridsAroundObject );
 
   bool isDebug = __config->GetBoolean( "is_debug" );
   Object *obj;
@@ -458,7 +458,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     */
       //obj->SetPosition( Vec3( -20.0f, 50.0f + Math::Sin16( rot * 5.0f ) * 50.0f, 0.0f ) );
 
-      sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d] cListeners[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), __worldGridList->size(), game->luaCollisionListeners.size() );
+      sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d] cListeners[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), World::__worldGridList->size(), game->luaCollisionListeners.size() );
     game->core->SetWindowTitle( tempChar );
     game->core->__Test();
   }
@@ -887,7 +887,7 @@ void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos, int notIn
     obj->SetPosition( pos );
     obj->Update( 0.0f );
     if( !notInGrid ) {
-      WorldGrid::WorldGridPosition gridPos = game->world->GetGridPositionByObject( *obj );
+      World::Grid::Position gridPos = game->world->GetGridPositionByObject( *obj );
       //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => gridPos[%d; %d]", gridPos.x, gridPos.y );
       game->world->AttachObjectToGrid( gridPos, obj );
     }
@@ -1382,7 +1382,7 @@ void Game::LUA_ClearScene()
 {
   /*
     1. Чистим потомков core->root
-    2. Чистим ссылки на объекты в мирах __worldGridList (ObjectPointer)
+    2. Чистим ссылки на объекты в мирах World::__worldGridList (ObjectPointer)
       
   */
   __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene core" );

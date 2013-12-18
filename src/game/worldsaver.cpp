@@ -1,4 +1,5 @@
 #include "worldsaver.h"
+#include "worldgrid.h"
 #include "core/file.h"
 #include "core/filemanager.h"
 #include "core/memorywriter.h"
@@ -7,7 +8,7 @@
 
 
 
-WorldSaver::WorldSaver()
+World::Saver::Saver()
   :blockSize( 1024 ), fileName( "" )
 {
 }//constructor
@@ -20,15 +21,15 @@ WorldSaver::WorldSaver()
   SaveGrid
 =============
 */
-void WorldSaver::SaveGrid( Short x, Short y, memory& data )
+void World::Saver::SaveGrid( Short x, Short y, memory& data )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::SaveGrid => pos[%d; %d] dataLength[%d]", x, y, data.getLength() );
+  //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::SaveGrid => pos[%d; %d] dataLength[%d]", x, y, data.getLength() );
   if( this->GridExists( x, y ) ) {
     this->FreeGrid( x, y );
   }
 
   if( !data.getLength() ) {
-    //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::SaveGrid => grid clear" );
+    //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::SaveGrid => grid clear" );
     return;
   }
 
@@ -58,10 +59,10 @@ void WorldSaver::SaveGrid( Short x, Short y, memory& data )
   Dword blockNum;
   Dword bufferPos = 0;
   char *bufferSrc = data.getData();
-  Grid *grid = new Grid();
+  GridInfo *grid = new GridInfo();
   grid->x = x;
   grid->y = y;
-  grid->version = WOLDSAVER_FILE_VERSION;
+  grid->version = World::VERSION;
   this->grids.push_back( grid );
   for( Dword q = 0; q < needBlocksCount; ++q )
   {
@@ -73,7 +74,7 @@ void WorldSaver::SaveGrid( Short x, Short y, memory& data )
     bufferSrc += this->blockSize;
   }
 
-  //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::SaveGrid => done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::SaveGrid => done" );
 }//SaveGrid
 
 
@@ -84,7 +85,7 @@ void WorldSaver::SaveGrid( Short x, Short y, memory& data )
   AllocFreeBlocks
 =============
 */
-void WorldSaver::AllocFreeBlocks( Dword blocksCount )
+void World::Saver::AllocFreeBlocks( Dword blocksCount )
 {
   if( this->worldData.getLength() )
   {
@@ -95,7 +96,7 @@ void WorldSaver::AllocFreeBlocks( Dword blocksCount )
     for( Dword q = 0; q < blocksCount; ++q )
     {
       this->freeBlocks.push_back( startIndex + q );
-      //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::AllocFreeBlocks => index[%d]", startIndex + q );
+      //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::AllocFreeBlocks => index[%d]", startIndex + q );
     }
   }
   else
@@ -104,7 +105,7 @@ void WorldSaver::AllocFreeBlocks( Dword blocksCount )
     for( Dword q = 0; q < blocksCount; ++q )
     {
       this->freeBlocks.push_back( q );
-      //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::AllocFreeBlocks => index[%d]", q );
+      //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::AllocFreeBlocks => index[%d]", q );
     }
   }
 }//AllocFreeBlocks
@@ -117,13 +118,13 @@ void WorldSaver::AllocFreeBlocks( Dword blocksCount )
   LoadGrid
 =============
 */
-bool WorldSaver::LoadGrid( Short x, Short y, FU_OUT memory& data, FU_OUT Dword &version )
+bool World::Saver::LoadGrid( Short x, Short y, FU_OUT memory& data, FU_OUT Dword &version )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::LoadGrid => [%d; %d]", x, y );
+  //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::LoadGrid => [%d; %d]", x, y );
   data.Free();
-  Grid *grid = this->GridExists( x, y );
+  GridInfo *grid = this->GridExists( x, y );
   if( !grid ) {
-    //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::LoadGrid => grid not found in worldData" );
+    //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::LoadGrid => grid not found in worldData" );
     return false;
   }
 
@@ -155,7 +156,7 @@ bool WorldSaver::LoadGrid( Short x, Short y, FU_OUT memory& data, FU_OUT Dword &
   GridExists
 =============
 */
-WorldSaver::Grid* WorldSaver::GridExists( Short x, Short y )
+World::Saver::GridInfo* World::Saver::GridExists( Short x, Short y )
 {
   GridsList::iterator iter, iterEnd = this->grids.end();
   for( iter = this->grids.begin(); iter != iterEnd; ++iter ) {
@@ -174,10 +175,10 @@ WorldSaver::Grid* WorldSaver::GridExists( Short x, Short y )
   FreeGrid
 =============
 */
-void WorldSaver::FreeGrid( Short x, Short y )
+void World::Saver::FreeGrid( Short x, Short y )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::FreeGrid => [%d; %d]", x, y );
-  Grid *grid = NULL;
+  //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::FreeGrid => [%d; %d]", x, y );
+  GridInfo *grid = NULL;
   GridsList::iterator gridIter, gridIterEnd = this->grids.end();
   for( gridIter = this->grids.begin(); gridIter != gridIterEnd; ++gridIter )
     if( ( *gridIter )->x == x && ( *gridIter )->y == y )
@@ -191,7 +192,7 @@ void WorldSaver::FreeGrid( Short x, Short y )
   GridNumList::iterator iter, iterEnd = grid->blocksNums.end();
   for( iter = grid->blocksNums.begin(); iter != iterEnd; ++iter )
   {
-    //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::FreeGrid => added free grid %d", *iter );
+    //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::FreeGrid => added free grid %d", *iter );
     this->freeBlocks.push_back( *iter );
   }
 
@@ -207,7 +208,7 @@ void WorldSaver::FreeGrid( Short x, Short y )
   SaveToFile
 =============
 */
-void WorldSaver::SaveToFile( const std::string& fileName )
+void World::Saver::SaveToFile( const std::string& fileName )
 {
   std::string resultFileName = ( fileName.empty() ? this->fileName : fileName );
   File f;
@@ -215,7 +216,7 @@ void WorldSaver::SaveToFile( const std::string& fileName )
     return;
   }
 
-  f.Write( &WOLDSAVER_FILE_VERSION, sizeof( WOLDSAVER_FILE_VERSION ) );
+  f.Write( &World::VERSION, sizeof( World::VERSION ) );
   f.Write( this->worldData.getData(), this->worldData.getLength() );
 
   memory header;
@@ -235,7 +236,7 @@ void WorldSaver::SaveToFile( const std::string& fileName )
   GridsList::iterator iter, iterEnd = this->grids.end();
   for( iter = this->grids.begin(); iter != iterEnd; ++iter )
   {
-    //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::SaveToFile => grid[%d; %d] version[x%X]", ( *iter )->x, ( *iter )->y, ( *iter )->version );
+    //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::SaveToFile => grid[%d; %d] version[x%X]", ( *iter )->x, ( *iter )->y, ( *iter )->version );
     headerWriter << ( *iter )->version;
     headerWriter << ( *iter )->x;
     headerWriter << ( *iter )->y;
@@ -261,7 +262,7 @@ void WorldSaver::SaveToFile( const std::string& fileName )
   LoadFromFile
 =============
 */
-Dword WorldSaver::LoadFromFile( const std::string& fileName )
+Dword World::Saver::LoadFromFile( const std::string& fileName )
 {
   memory data;
   if( !__fileManager->GetFile( fileName, data ) ) {
@@ -273,27 +274,27 @@ Dword WorldSaver::LoadFromFile( const std::string& fileName )
     f.Read( data.getData(), data.getLength(), 1 );
     f.Close();
   }
-  //__log.PrintInfo( Filelevel_DEBUG, "WorldSaver::LoadFromFile => '%s'", fileName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::LoadFromFile => '%s'", fileName.c_str() );
 
   Dword headerLength, worldDataLength;
   MemoryReader headerReader( data );
   Dword version;
   headerReader >> version;
   //__log.PrintInfo( Filelevel_DEBUG, ". version[x%X]", version );
-  if( version != WOLDSAVER_FILE_VERSION ) {
-    //__log.PrintInfo( Filelevel_WARNING, "WorldSaver::LoadFromFile => file '%s' has bad version of data (x%X), needed version x%X", fileName.c_str(), version, WOLDSAVER_FILE_VERSION );
+  if( version != World::VERSION ) {
+    //__log.PrintInfo( Filelevel_WARNING, "World::Saver::LoadFromFile => file '%s' has bad version of data (x%X), needed version x%X", fileName.c_str(), version, World::VERSION );
     //return 0;
   }
 
   headerReader.SeekFromStart( data.getLength() - sizeof( headerLength ) );
   headerReader >> headerLength;
   //__log.PrintInfo( Filelevel_DEBUG, ". headerLength[%d]", headerLength );
-  worldDataLength = data.getLength() - sizeof( headerLength ) - headerLength - sizeof( WOLDSAVER_FILE_VERSION );
-  headerReader.SeekFromStart( worldDataLength + sizeof( WOLDSAVER_FILE_VERSION ) );
+  worldDataLength = data.getLength() - sizeof( headerLength ) - headerLength - sizeof( World::VERSION );
+  headerReader.SeekFromStart( worldDataLength + sizeof( World::VERSION ) );
   //__log.PrintInfo( Filelevel_DEBUG, ". worldDataLength[%d]", worldDataLength );
 
   this->worldData.Alloc( worldDataLength );
-  memcpy( this->worldData.getData(), data.getData() + sizeof( WOLDSAVER_FILE_VERSION ), worldDataLength );
+  memcpy( this->worldData.getData(), data.getData() + sizeof( World::VERSION ), worldDataLength );
 
   //свободные блоки
   this->freeBlocks.clear();
@@ -314,7 +315,7 @@ Dword WorldSaver::LoadFromFile( const std::string& fileName )
   //__log.PrintInfo( Filelevel_DEBUG, ". gridsCount[%d]", gridsCount );
   for( Dword q = 0; q < gridsCount; ++q )
   {
-    Grid *grid = new Grid();
+    GridInfo *grid = new GridInfo();
     if( version >= 0x00000004 ) {
       headerReader >> grid->version;
     } else {

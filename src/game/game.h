@@ -20,10 +20,10 @@ public:
     Object *obj[ 40 ];
   } gridTooltipUnderMouse;
 
-  Core              *core;
-  WorldGridManager  *world;
-  Lua               *lua;
-  bool              isActive; //true - playing, false - editing
+  Core                *core;
+  World::GridManager  *world;
+  Lua                 *lua;
+  bool                isActive; //true - playing, false - editing
 
   //lua-таймеры
   struct GameLuaTimer

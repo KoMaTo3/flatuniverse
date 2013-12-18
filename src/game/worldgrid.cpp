@@ -5,18 +5,15 @@
 #include "core/memoryreader.h"
 
 
-WorldGridList *__worldGridList = NULL;
+World::GridList *World::__worldGridList = NULL;
 
 
 
 
-/*
-  [in] rootObject: объект, в котором будет храниться грид
-*/
-WorldGrid::WorldGrid( const WorldGrid::WorldGridPosition &newPosition )
+World::Grid::Grid( const World::Grid::Position &newPosition )
 :position( newPosition ), version( 0 ), state( WORLDGRID_STATE_DONE )
 {
-  WorldGridList::iterator iter, iterEnd = __worldGridList->end();
+  World::GridList::iterator iter, iterEnd = __worldGridList->end();
 
   bool finded = false;
   for( iter = __worldGridList->begin(); iter != iterEnd; ++iter )
@@ -26,9 +23,9 @@ WorldGrid::WorldGrid( const WorldGrid::WorldGridPosition &newPosition )
       break;
     }
   if( finded )
-    __log.PrintInfo( Filelevel_ERROR, "WorldGrid constructor: grid[%d; %d] already exists" );
+    __log.PrintInfo( Filelevel_ERROR, "World::Grid constructor: grid[%d; %d] already exists" );
   /* else
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGrid: new grid [%d; %d]", newPosition.x, newPosition.y );*/
+    __log.PrintInfo( Filelevel_DEBUG, "World::Grid: new grid [%d; %d]", newPosition.x, newPosition.y );*/
 
   this->loader.objectsCount = 0;
   this->loader.rootObject = nullptr;
@@ -36,9 +33,9 @@ WorldGrid::WorldGrid( const WorldGrid::WorldGridPosition &newPosition )
 
 
 
-WorldGrid::~WorldGrid()
+World::Grid::~Grid()
 {
-  WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
+  World::GridObjectList::iterator iter, iterEnd = this->objects.end();
   for( iter = this->objects.begin(); iter != iterEnd; ++iter )
     if( ( *iter )->GetIsValid() )
     {
@@ -67,13 +64,13 @@ WorldGrid::~WorldGrid()
   AttachObject
 =============
 */
-void WorldGrid::AttachObject( Object *object )
+void World::Grid::AttachObject( Object *object )
 {
   //this->Update();
   //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::AttachObject => object[x%X]", object );
   if( !object )
   {
-    __log.PrintInfo( Filelevel_WARNING, "WorldGrid::AttachObject => object is NULL" );
+    __log.PrintInfo( Filelevel_WARNING, "World::Grid::AttachObject => object is NULL" );
     return;
   }
 
@@ -111,17 +108,17 @@ void WorldGrid::AttachObject( Object *object )
   DetachObject
 =============
 */
-void WorldGrid::DetachObject( Object *object )
+void World::Grid::DetachObject( Object *object )
 {
   if( !object )
   {
-    __log.PrintInfo( Filelevel_WARNING, "WorldGrid::DetachObject => object is NULL" );
+    __log.PrintInfo( Filelevel_WARNING, "World::Grid::DetachObject => object is NULL" );
     return;
   }
 
   this->Update();
-  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::DetachObject => object[x%X]", object );
-  WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
+  __log.PrintInfo( Filelevel_DEBUG, "World::Grid::DetachObject => object[x%X]", object );
+  World::GridObjectList::iterator iter, iterEnd = this->objects.end();
   for( iter = this->objects.begin(); iter != iterEnd; ++iter ) {
     if( ( *iter )->GetObject< Object >() == object ) {
       delete ( *iter );
@@ -129,7 +126,7 @@ void WorldGrid::DetachObject( Object *object )
       break;
     }
   }
-  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::DetachObject ok" );
+  __log.PrintInfo( Filelevel_DEBUG, "World::Grid::DetachObject ok" );
 }//DetachObject
 
 
@@ -139,7 +136,7 @@ void WorldGrid::DetachObject( Object *object )
   DetachAll
 =============
 */
-void WorldGrid::DetachAll()
+void World::Grid::DetachAll()
 {
   while( !this->objects.empty() )
   {
@@ -157,15 +154,15 @@ void WorldGrid::DetachAll()
   IsThisObject
 =============
 */
-bool WorldGrid::IsThisObject( Object *object )
+bool World::Grid::IsThisObject( Object *object )
 {
   if( !object )
   {
-    __log.PrintInfo( Filelevel_WARNING, "WorldGrid::AttachObject => object is NULL" );
+    __log.PrintInfo( Filelevel_WARNING, "World::Grid::AttachObject => object is NULL" );
     return false;
   }
 
-  WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
+  World::GridObjectList::iterator iter, iterEnd = this->objects.end();
   for( iter = this->objects.begin(); iter != iterEnd; ++iter ) {
     if( ( *iter )->GetObject< Object >() == object ) {
       return true;
@@ -182,7 +179,7 @@ bool WorldGrid::IsThisObject( Object *object )
   GetGridDump
 =============
 */
-bool WorldGrid::GetGridDump( FU_OUT memory& dump )
+bool World::Grid::GetGridDump( FU_OUT memory& dump )
 {
   if( !( this->state == WORLDGRID_STATE_DONE || this->state == WORLDGRID_STATE_UNLOADING ) ) {
     return false;
@@ -197,7 +194,7 @@ bool WorldGrid::GetGridDump( FU_OUT memory& dump )
   //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::GetGridDump => objects %d", objectsCount );
 
   //объекты
-  WorldGridObjectList::iterator iter, iterEnd = this->objects.end();
+  World::GridObjectList::iterator iter, iterEnd = this->objects.end();
   //Object *obj;
   ////RenderableQuad *quad;
   //Collision *collision;
@@ -218,16 +215,16 @@ bool WorldGrid::GetGridDump( FU_OUT memory& dump )
   LoadFromDump
 =============
 */
-bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion, const bool forceLoad )
+bool World::Grid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dword fileVersion, const bool forceLoad )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::LoadFromDump => dump length %d byte(s) rootObject[x%X] forceLoad[%d]", dump.getLength(), rootObject, forceLoad );
+  __log.PrintInfo( Filelevel_DEBUG, "World::Grid::LoadFromDump => dump length %d byte(s) rootObject[x%X] forceLoad[%d]", dump.getLength(), rootObject, forceLoad );
   this->loader.dump = dump;
   this->loader.rootObject = rootObject;
   this->loader.reader.SetSource( this->loader.dump.getData(), this->loader.dump.getLength() );
   Dword q = 0;
   this->version = fileVersion;
   this->loader.reader >> this->loader.objectsCount;
-  __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::LoadFromDump => %d objects in dump, readerPos[%d]", this->loader.objectsCount, this->loader.reader.GetCurPos() );
+  __log.PrintInfo( Filelevel_DEBUG, "World::Grid::LoadFromDump => %d objects in dump, readerPos[%d]", this->loader.objectsCount, this->loader.reader.GetCurPos() );
 
   //this->Update();
   if( this->loader.objectsCount ) {
@@ -267,11 +264,11 @@ bool WorldGrid::LoadFromDump( FU_IN memory& dump, Object *rootObject, const Dwor
   Update
 =============
 */
-void WorldGrid::Update()
+void World::Grid::Update()
 {
   //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update" );
   if( this->state == WORLDGRID_STATE_DONE ) {
-    WorldGridObjectList::iterator iter, iterEnd;
+    World::GridObjectList::iterator iter, iterEnd;
     bool changed;
     do
     {
@@ -293,9 +290,9 @@ void WorldGrid::Update()
     } while( changed );
   } else {
     //object = new Object( name, ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName.c_str() ) ) );
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => objects[%d]", this->loader.objectsCount );
+    __log.PrintInfo( Filelevel_DEBUG, "World::Grid::Update => objects[%d]", this->loader.objectsCount );
     Object *object = new Object();
-    __log.PrintInfo( Filelevel_DEBUG, "WorldGrid::Update => readerPos[%d]", this->loader.reader.GetCurPos() );
+    __log.PrintInfo( Filelevel_DEBUG, "World::Grid::Update => readerPos[%d]", this->loader.reader.GetCurPos() );
     object->LoadFromBuffer( this->loader.reader, this->loader.rootObject, this->version );
     --this->loader.objectsCount;
     if( !this->loader.objectsCount ) {
@@ -317,8 +314,8 @@ void WorldGrid::Update()
   GetFirstMovableObject
 =============
 */
-bool WorldGrid::GetFirstMovableObject( WorldGridObjectList::iterator &iter ) {
-  WorldGridObjectList::iterator iterEnd = this->objects.end();
+bool World::Grid::GetFirstMovableObject( World::GridObjectList::iterator &iter ) {
+  World::GridObjectList::iterator iterEnd = this->objects.end();
   Object *object;
   for( iter = this->objects.begin(); iter != iterEnd; ++iter ) {
     if( ( *iter )->GetIsValid() ) {
@@ -338,8 +335,8 @@ bool WorldGrid::GetFirstMovableObject( WorldGridObjectList::iterator &iter ) {
   GetNextMovableObject
 =============
 */
-bool WorldGrid::GetNextMovableObject( WorldGridObjectList::iterator &iter ) {
-  WorldGridObjectList::iterator iterEnd = this->objects.end();
+bool World::Grid::GetNextMovableObject( World::GridObjectList::iterator &iter ) {
+  World::GridObjectList::iterator iterEnd = this->objects.end();
   Object *object;
   for( ++iter; iter != iterEnd; ++iter ) {
     if( ( *iter )->GetIsValid() ) {
