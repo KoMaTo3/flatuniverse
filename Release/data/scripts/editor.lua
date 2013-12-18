@@ -476,9 +476,9 @@ end --)
 
 --( Îáğàáîòêà êíîïîê ìûøè
 function OnEditorMouseKey( id, isPressed )
-  if not settings.gamePaused then
-    return false
-  end
+  -- if not settings.gamePaused then
+  --   return false
+  -- end
   local mode = {
     [0] = function() --(
       if isPressed then --(
@@ -488,6 +488,8 @@ function OnEditorMouseKey( id, isPressed )
             settings.editorMode = 20
             settings.move.mouseStart.x = mousePos.x
             settings.move.mouseStart.y = mousePos.y
+            SelectObject( '' )
+            UpdateGuiBySelectedObject()
           else --)(
             doMultiSelect = true
           end --)
@@ -597,11 +599,12 @@ function OnEditorMouseKey( id, isPressed )
         else
           local num = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) ) + 1
           if num > 0 and num <= #GUI.templates.items then
+            DoPause( true )
             GUI.templates.currentItem = num
-            DebugRender( 0 )
+            -- DebugRender( 0 )
             settings.editorType = 0
-            SelectObject( '' )
-            UpdateGuiBySelectedObject()
+            -- SelectObject( '' )
+            -- UpdateGuiBySelectedObject()
           end
         end
       else
@@ -624,6 +627,8 @@ function OnEditorMouseKey( id, isPressed )
     [20] = function()
       settings.editorMode = 0
       local name = EditorInsertItemByTemplate( mousePos.x, mousePos.y )
+      SelectObject( name )
+      UpdateGuiBySelectedObject()
       PushToBuffer( function()
         end, function()
           ObjectRemove( name )
@@ -653,6 +658,8 @@ function OnEditorMouseKey( id, isPressed )
           names[ #names + 1 ] = EditorInsertItemByTemplate( x, y )
         end
         end
+        SelectObject( Implode( names, '//' ) )
+        UpdateGuiBySelectedObject()
         PushToBuffer( function()
           end, function()
             for q = 1,#names do
@@ -1235,6 +1242,8 @@ function PopFromBuffer()
     settings.buffer[ #settings.buffer ].CancelAction()
     settings.buffer[ #settings.buffer ] = nil
   end
+  SelectObject( '' )
+  UpdateGuiBySelectedObject()
 end -- PopFromBuffer
 
 --[[ OnChangeIsRenderable ]]
@@ -1404,7 +1413,7 @@ function SetEditorMode( setMode )
   -- OnChangeLayer( GUI.elements.layer )
   -- settings.editorMode = 0
   -- SelectObject( '' )
-  UpdateGuiBySelectedObject()
+  -- UpdateGuiBySelectedObject()
 end --)
 
 --( Äîáàâëåíèå îáúåêòîâ â ñïèñîê (äëÿ ìóëüòè-ñåëåêòà)
