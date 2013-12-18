@@ -7,18 +7,18 @@
 #include "thread.h"
 
 
-TextureAtlas *__textureAtlas = NULL;
+Texture::Atlas *__textureAtlas = NULL;
 
 
 
-TextureAtlas::TextureAtlas()
+Texture::Atlas::Atlas()
 :textureId( NULL ), size( 0, 0 ), borderPerItem( 0 ), needWriteToGPU( false )
 {
 }//constructor
 
 
 
-TextureAtlas::~TextureAtlas()
+Texture::Atlas::~Atlas()
 {
   if( this->textureId ) {
     glDeleteTextures( 1, &this->textureId );
@@ -32,11 +32,11 @@ TextureAtlas::~TextureAtlas()
   Init
 =============
 */
-bool TextureAtlas::Init( const Size& maxTextureSize, Byte borderSize )
+bool Texture::Atlas::Init( const Size& maxTextureSize, Byte borderSize )
 {
   if( !maxTextureSize.width || !maxTextureSize.height )
   {
-    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::Init => bad size" );
+    __log.PrintInfo( Filelevel_ERROR, "Texture::Atlas::Init => bad size" );
     return false;
   }
 
@@ -77,7 +77,7 @@ bool TextureAtlas::Init( const Size& maxTextureSize, Byte borderSize )
   CheckGLError
 =============
 */
-bool TextureAtlas::CheckGLError( int line, const std::string& fileName )
+bool Texture::Atlas::CheckGLError( int line, const std::string& fileName )
 {
   GLenum error = glGetError();
   if( error )
@@ -95,7 +95,7 @@ bool TextureAtlas::CheckGLError( int line, const std::string& fileName )
   Bind
 =============
 */
-void TextureAtlas::Bind()
+void Texture::Atlas::Bind()
 {
   glBindTexture( GL_TEXTURE_2D, this->textureId );
   if( this->needWriteToGPU ) {
@@ -111,7 +111,7 @@ void TextureAtlas::Bind()
   Unbind
 =============
 */
-void TextureAtlas::Unbind()
+void Texture::Atlas::Unbind()
 {
   glBindTexture ( GL_TEXTURE_2D, NULL );
 }//Unbind
@@ -124,29 +124,29 @@ void TextureAtlas::Unbind()
   Загрузка текстуры, размещение в атласе, выдача реальных текстурных координат
 =============
 */
-Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const Vec4& textureCoords )
+Vec4 Texture::Atlas::GetTextureCoords( const std::string& textureFileName, const Vec4& textureCoords )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => textureFileName['%s'] textureCoords[%3.3f; %3.3f]-[%3.3f; %3.3f]", textureFileName.c_str(), textureCoords.x, textureCoords.y, textureCoords.z, textureCoords.w );
-  TextureAtlasItem *item = this->IsTextureLoaded( textureFileName );
+  //__log.PrintInfo( Filelevel_DEBUG, "Texture::Atlas::GetTextureCoords => textureFileName['%s'] textureCoords[%3.3f; %3.3f]-[%3.3f; %3.3f]", textureFileName.c_str(), textureCoords.x, textureCoords.y, textureCoords.z, textureCoords.w );
+  Texture::Atlas::Item *item = this->IsTextureLoaded( textureFileName );
   if( item )
   {
     Vec3 leftTop, rightBottom;
     leftTop = Vec3( textureCoords.x, textureCoords.y, 0.0f ) * item->matTransform;
     rightBottom = Vec3( textureCoords.z, textureCoords.w, 0.0f ) * item->matTransform;
-    //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => existing texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
+    //__log.PrintInfo( Filelevel_DEBUG, "Texture::Atlas::GetTextureCoords => existing texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
     return Vec4( leftTop.x, leftTop.y, rightBottom.x, rightBottom.y );
   }
   else
   {
-    TextureAtlasItem *item = this->LoadTexture( textureFileName );
+    Texture::Atlas::Item *item = this->LoadTexture( textureFileName );
     if( !item ) {
-      __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::GetTextureCoords => LoadTexture('%s') => failed", textureFileName.c_str() );
+      __log.PrintInfo( Filelevel_ERROR, "Texture::Atlas::GetTextureCoords => LoadTexture('%s') => failed", textureFileName.c_str() );
       return Vec4( 0.0f, 0.0f, 1.0f, 1.0f );
     }
     Vec3 tex0( textureCoords.x, textureCoords.y, 0 ), tex1( textureCoords.z, textureCoords.w, 0 );
     tex0 *= item->matTransform;
     tex1 *= item->matTransform;
-    //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureCoords => loaded texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), tex0.x, tex0.y, tex1.x, tex1.y );
+    //__log.PrintInfo( Filelevel_DEBUG, "Texture::Atlas::GetTextureCoords => loaded texture['%s'] t0[%3.5f; %3.5f] t1[%3.5f; %3.5f]", textureFileName.c_str(), tex0.x, tex0.y, tex1.x, tex1.y );
     return Vec4( tex0.x, tex0.y, tex1.x, tex1.y );
   }
 }//GetTextureCoords
@@ -159,9 +159,9 @@ Vec4 TextureAtlas::GetTextureCoords( const std::string& textureFileName, const V
   GetInvTextureCoords
 =============
 */
-Vec4 TextureAtlas::GetInvTextureCoords( const std::string& textureFileName, const Vec4& textureCoords )
+Vec4 Texture::Atlas::GetInvTextureCoords( const std::string& textureFileName, const Vec4& textureCoords )
 {
-  TextureAtlasItem *item = this->IsTextureLoaded( textureFileName );
+  Texture::Atlas::Item *item = this->IsTextureLoaded( textureFileName );
   if( item )
   {
     Vec3 leftTop, rightBottom;
@@ -171,7 +171,7 @@ Vec4 TextureAtlas::GetInvTextureCoords( const std::string& textureFileName, cons
   }
   else
   {
-    __log.PrintInfo( Filelevel_WARNING, "TextureAtlas::GetInvTextureCoords => texture '%s' not loaded", textureFileName.c_str() );
+    __log.PrintInfo( Filelevel_WARNING, "Texture::Atlas::GetInvTextureCoords => texture '%s' not loaded", textureFileName.c_str() );
     return Vec4( 0.0f, 0.0f, 1.0f, 1.0f );
   }
 }//GetInvTextureCoords
@@ -184,14 +184,14 @@ Vec4 TextureAtlas::GetInvTextureCoords( const std::string& textureFileName, cons
   GetTextureNameByCoords
 =============
 */
-const std::string& TextureAtlas::GetTextureNameByCoords( Vec2 texCoords )
+const std::string& Texture::Atlas::GetTextureNameByCoords( Vec2 texCoords )
 {
   //Pos< Dword > = 
-  TextureAtlasItemsList::iterator iter, iterEnd = this->textures.end();
+  Texture::Atlas::ItemsList::iterator iter, iterEnd = this->textures.end();
   Vec4 atlasPos( texCoords.x * float( this->size.width ), texCoords.y * float( this->size.height ), 0.0f, 0.0f );
   for( iter = this->textures.begin(); iter != iterEnd; ++iter )
   {
-    TextureAtlasItem *item = *iter;
+    Texture::Atlas::Item *item = *iter;
     if(  atlasPos.x >= item->rect.right
       || atlasPos.x < item->rect.left
       || atlasPos.y >= item->rect.bottom
@@ -212,9 +212,9 @@ const std::string& TextureAtlas::GetTextureNameByCoords( Vec2 texCoords )
   IsTextureLoaded
 =============
 */
-TextureAtlas::TextureAtlasItem* TextureAtlas::IsTextureLoaded( const std::string& textureFileName )
+Texture::Atlas::Item* Texture::Atlas::IsTextureLoaded( const std::string& textureFileName )
 {
-  TextureAtlasItemsList::iterator iter, iterEnd = this->textures.end();
+  Texture::Atlas::ItemsList::iterator iter, iterEnd = this->textures.end();
   for( iter = this->textures.begin(); iter != iterEnd; ++iter )
     if( ( *iter )->textureFileName == textureFileName )
       return *iter;
@@ -231,7 +231,7 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::IsTextureLoaded( const std::string
   Дамп текстуры в файл
 =============
 */
-void TextureAtlas::__Dump( const std::string& fileName )
+void Texture::Atlas::__Dump( const std::string& fileName )
 {
   File f;
   if( !f.Open( fileName, File_mode_WRITE ) )
@@ -270,16 +270,16 @@ void TextureAtlas::__Dump( const std::string& fileName )
   GetTextureSize
 =============
 */
-Vec2 TextureAtlas::GetTextureSize( const std::string& textureFileName )
+Vec2 Texture::Atlas::GetTextureSize( const std::string& textureFileName )
 {
-  TextureAtlasItem *texture = this->IsTextureLoaded( textureFileName );
+  Texture::Atlas::Item *texture = this->IsTextureLoaded( textureFileName );
   if( !texture )
   {
-    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::GetTextureSize => texture '%s' not found", textureFileName.c_str() );
+    __log.PrintInfo( Filelevel_ERROR, "Texture::Atlas::GetTextureSize => texture '%s' not found", textureFileName.c_str() );
     return Vec2( 0.0f, 0.0f );
   }
 
-  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::GetTextureSize => texture['%s'] size[%d; %d]", textureFileName.c_str(), texture->rect.right - texture->rect.left + 1, texture->rect.bottom - texture->rect.top + 1 );
+  //__log.PrintInfo( Filelevel_DEBUG, "Texture::Atlas::GetTextureSize => texture['%s'] size[%d; %d]", textureFileName.c_str(), texture->rect.right - texture->rect.left + 1, texture->rect.bottom - texture->rect.top + 1 );
   return Vec2( texture->rect.right - texture->rect.left + 1.0f, texture->rect.bottom - texture->rect.top + 1.0f );
 }//GetTextureSize
 
@@ -290,7 +290,7 @@ Vec2 TextureAtlas::GetTextureSize( const std::string& textureFileName )
   LoadTexture
 =============
 */
-TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& textureFileName, const bool forceLoad )
+Texture::Atlas::Item* Texture::Atlas::LoadTexture( const std::string& textureFileName, const bool forceLoad )
 {
   ImageLoader image;
   Size size( 0, 0 );
@@ -298,7 +298,7 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
 
   if( forceLoad ) {
     if( !image.LoadFromFile( textureFileName ) ) {
-      __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => file not found '%s'", textureFileName.c_str() );
+      __log.PrintInfo( Filelevel_ERROR, "Texture::Atlas::LoadTexture => file not found '%s'", textureFileName.c_str() );
       return NULL;
     }
     size = image.GetImageSize();
@@ -309,11 +309,11 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
   }
 
   if( !this->atlas.HasPlace( size ) ) {
-    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::LoadTexture => atlas can't find needed place [ %d; %d ]", size.width, size.height );
+    __log.PrintInfo( Filelevel_ERROR, "Texture::Atlas::LoadTexture => atlas can't find needed place [ %d; %d ]", size.width, size.height );
     return NULL;
   }
 
-  TextureAtlasItem *item = new TextureAtlasItem();
+  Texture::Atlas::Item *item = new Texture::Atlas::Item();
   Rect< Dword > fullRect;
   this->atlas.Cut( size + Size( this->borderPerItem * 2, this->borderPerItem * 2 ), &fullRect );
   item->rect = Rect< Dword >( fullRect.left + 1, fullRect.top + 1, fullRect.right - 1, fullRect.bottom - 1 );
@@ -359,14 +359,14 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
     this->FlushToGPU();
   } else {
     // TODO: здесь отложенная загрузка
-    // класть в стек deferredLoadingData, указатель на атлас и TextureAtlasItem item
+    // класть в стек deferredLoadingData, указатель на атлас и Texture::Atlas::Item item
     ThreadDataLoadTexture *loader = new ThreadDataLoadTexture();
     loader->data = deferredLoadingData;
     loader->size = size;
     loader->atlas = this;
     loader->item = item;
     extern Thread::Pipeline *__workPipeline;
-    __workPipeline->Add( loader, TextureAtlas::ThreadLoadTexture );
+    __workPipeline->Add( loader, Texture::Atlas::ThreadLoadTexture );
   }
 
   this->textures.push_back( item );
@@ -374,15 +374,15 @@ TextureAtlas::TextureAtlasItem* TextureAtlas::LoadTexture( const std::string& te
 }//LoadTexture
 
 
-unsigned int __stdcall TextureAtlas::ThreadLoadTexture( void* data ) {
+unsigned int __stdcall Texture::Atlas::ThreadLoadTexture( void* data ) {
   Thread::Work *work = ( Thread::Work* ) data;
   ThreadDataLoadTexture *loader = ( ThreadDataLoadTexture* ) work->data;
-  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::ThreadLoadTexture => begin: data[%d] size[%d; %d]", loader->data->getLength(), loader->size.width, loader->size.height );
+  //__log.PrintInfo( Filelevel_DEBUG, "Texture::Atlas::ThreadLoadTexture => begin: data[%d] size[%d; %d]", loader->data->getLength(), loader->size.width, loader->size.height );
   //
 
   ImageLoader image;
   if( !image.LoadFromBuffer( ( Byte* ) loader->data->getData(), loader->data->getLength() ) ) {
-    __log.PrintInfo( Filelevel_ERROR, "TextureAtlas::ThreadLoadTexture => image.LoadFromBuffer failed" );
+    __log.PrintInfo( Filelevel_ERROR, "Texture::Atlas::ThreadLoadTexture => image.LoadFromBuffer failed" );
     work->status = Thread::THREAD_WORK_STATUS_ERROR;
     return 1;
   }
@@ -398,6 +398,6 @@ unsigned int __stdcall TextureAtlas::ThreadLoadTexture( void* data ) {
   delete loader->data;
   delete loader;
   work->status = Thread::THREAD_WORK_STATUS_DONE;
-  //__log.PrintInfo( Filelevel_DEBUG, "TextureAtlas::ThreadLoadTexture => done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "Texture::Atlas::ThreadLoadTexture => done" );
   return 0;
 }//ThreadLoadTexture

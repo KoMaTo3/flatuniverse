@@ -352,7 +352,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   __coreGUI               = new CoreRenderableList();
   __coreGUIIndicies       = new CoreRenderableListIndicies();
   __coreGUIFreeIndicies   = new CoreRenderableListIndicies();
-  __textureAtlas          = new TextureAtlas();
+  __textureAtlas          = new Texture::Atlas();
   __triggerList           = new ObjectTriggerList();
   this->collisionManager  = new CollisionManager();
   this->triggerManager    = new ObjectTriggerManager();

@@ -5,13 +5,21 @@
 #include "squareatlas.h"
 #include "gl/gl3.h"
 #include <vector>
+#include <string>
 
 
-class TextureAtlas;
-extern TextureAtlas *__textureAtlas;
+namespace Texture {
+class Atlas;
+};
 
 
-class TextureAtlas
+extern Texture::Atlas *__textureAtlas;
+
+
+namespace Texture {
+
+
+class Atlas
 {
 private:
   GLuint      textureId;      //opengl-handle
@@ -23,36 +31,36 @@ private:
   SquareAtlas atlas;
   bool        needWriteToGPU;
 
-  struct TextureAtlasItem
+  struct Item
   {
-    std::string   textureFileName;  //файл текстуры
+    std::string textureFileName;  //файл текстуры
     Mat4          matTransform;     //матрица преобразования текстурных координат в координаты в атласе
     Mat4          matInvTransform;  //матрица преобразования координат в атласе в текстурные координаты
     Rect< Dword>  rect;             //координаты блока в атласе
   };
-  typedef std::vector< TextureAtlasItem* > TextureAtlasItemsList;
-  TextureAtlasItemsList textures;
+  typedef std::vector< Item* > ItemsList;
+  ItemsList textures;
 
   struct ThreadDataLoadTexture {
     memory  *data;
     Size    size;
-    TextureAtlas *atlas;
-    TextureAtlasItem *item;
+    Atlas *atlas;
+    Item *item;
   };
 
 public:
-  TextureAtlas();
-  virtual ~TextureAtlas();
+  Atlas();
+  virtual ~Atlas();
 
   bool                Init                  ( const Size& maxTextureSize, Byte borderSize = 0 );
   void                Bind                  ();
   void                Unbind                ();
-  TextureAtlasItem*   LoadTexture           ( const std::string& textureFileName, const bool forceLoad = false );
+  Item*               LoadTexture           ( const std::string& textureFileName, const bool forceLoad = false );
   Vec4                GetTextureCoords      ( const std::string& textureFileName, const Vec4& textureCoords );
   Vec2                GetTextureSize        ( const std::string& textureFileName );
   Vec4                GetInvTextureCoords   ( const std::string& textureFileName, const Vec4& textureCoords );
   const std::string&  GetTextureNameByCoords( Vec2 texCoords );
-  TextureAtlasItem*   IsTextureLoaded       ( const std::string& textureFileName );
+  Item*               IsTextureLoaded       ( const std::string& textureFileName );
   bool                CheckGLError          ( int line, const std::string& fileName );
   inline const Size   GetAtlasSize          () { return this->size; }
   inline void         FlushToGPU            () { this->needWriteToGPU = true; }
@@ -61,4 +69,6 @@ public:
 
   //debug
   void              __Dump( const std::string& fileName );
+};
+
 };
