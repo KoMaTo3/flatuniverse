@@ -282,6 +282,8 @@ ConfigFile::ConfigFileValue* ConfigFile::_GetValue( const std::string &name, boo
       this->values.insert( make_pair( name, newValue ) );
       iter = this->values.find( name );
       return iter->second;
+    } else {
+      __log.PrintInfo( Filelevel_WARNING, "ConfigFile::_GetValue => '%s' not found", name.c_str() );
     }
     return NULL;
   }
@@ -380,9 +382,9 @@ void ConfigFile::Dump()
   GetNumber
 =============
 */
-float ConfigFile::GetNumber( const std::string &name, float defaultValue )
+float ConfigFile::GetNumber( const std::string &name, float defaultValue, bool createIfNotExists )
 {
-  ConfigFileValue *val = this->_GetValue( name );
+  ConfigFileValue *val = this->_GetValue( name, createIfNotExists );
   return ( val ? val->f : defaultValue );
 }//GetNumber
 
@@ -393,9 +395,9 @@ float ConfigFile::GetNumber( const std::string &name, float defaultValue )
   GetBoolean
 =============
 */
-bool ConfigFile::GetBoolean( const std::string &name, bool defaultValue )
+bool ConfigFile::GetBoolean( const std::string &name, bool defaultValue, bool createIfNotExists )
 {
-  ConfigFileValue *val = this->_GetValue( name );
+  ConfigFileValue *val = this->_GetValue( name, createIfNotExists );
   return ( val ? val->b : defaultValue );
 }//GetBoolean
 
@@ -406,8 +408,8 @@ bool ConfigFile::GetBoolean( const std::string &name, bool defaultValue )
   GetString
 =============
 */
-const std::string& ConfigFile::GetString( const std::string &name, const std::string &defaultValue )
+const std::string& ConfigFile::GetString( const std::string &name, const std::string &defaultValue, bool createIfNotExists )
 {
-  ConfigFileValue *val = this->_GetValue( name );
+  ConfigFileValue *val = this->_GetValue( name, createIfNotExists );
   return ( val ? val->s : defaultValue );
 }//GetString

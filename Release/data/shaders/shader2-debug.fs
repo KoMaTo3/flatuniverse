@@ -26,4 +26,8 @@ void main()
     + texture( texture1, vec2( texCoords.x, texCoords.y + offset.y ) )
     + texture( texture1, vec2( texCoords.x + offset.x, texCoords.y + offset.y ) ) * 0.7
   ) / ( 5 + 4 * 0.7 );
+
+  //lightness
+  float lightness = 0.8;
+  fragData0 = fragData0 * ( 1.0 - lightness ) + vec4( 1.0, 1.0, 1.0, 1.0 ) * lightness;
 }

@@ -33,7 +33,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->core->mouse.AddListener( Game::MouseKeyProc );
   game->core->mouse.AddMoveListener( Game::MouseMoveProc );
   game->core->CheckGLError( __LINE__, __FILE__ );
-  Short gridsAroundObject = ( Short )  __config->GetNumber( "grids_preload_range", 0.0f );
+  Short gridsAroundObject = ( Short )  __config->GetNumber( "grids_preload_range", 0.0f, true );
   if( !gridsAroundObject ) {
     gridsAroundObject = ( Short ) Math::Ceil( 0.5f * ( max( __config->GetNumber( "gl_screen_width" ), __config->GetNumber( "gl_screen_height" ) ) / gridSize ) );
   }
@@ -42,7 +42,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //__log.PrintInfo( Filelevel_DEBUG, "sizeof( RenderableQuad ) = %d", sizeof( RenderableQuad ) );
   game->world = new WorldGridManager( game->core->GetRootObject(), gridsAroundObject );
 
-  bool isDebug = __config->GetBoolean( "dbg_low_alpha" );
+  bool isDebug = __config->GetBoolean( "is_debug" );
   Object *obj;
   Collision *col;
   float worldAlpha = ( isDebug ? 0.1f : 1.0f );

@@ -379,10 +379,10 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   __log.PrintInfo( Filelevel_DEBUG, "new LightRenderer..." );
   this->lightRenderer     = new LightRenderer(
     Vec2( float( this->_window.windowSize.width ), float( this->_window.windowSize.height ) ),
-    "data/shaders/shader0.vs",
-    "data/shaders/shader0.fs",
-    "data/shaders/shader2.vs",
-    "data/shaders/shader2.fs",
+    __config->GetString( "gl_shader_shine_vertex" ),
+    __config->GetString( "gl_shader_shine_fragment" ),
+    __config->GetString( "gl_shader_shading_vertex" ),
+    __config->GetString( "gl_shader_shading_fragment" ),
     this->lightList
     );
   this->lightRenderer->GetLightManager()->lightAmbient.Set( 1.0f, 1.0f, 1.0f, 0.3f );

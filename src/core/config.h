@@ -39,9 +39,9 @@ public:
   void  SetNumber     ( const std::string &name, float value );
   void  SetBoolean    ( const std::string &name, const std::string &value );
   void  SetString     ( const std::string &name, const std::string &value );
-  float GetNumber     ( const std::string &name, float defaultValue = 0.0f );
-  bool  GetBoolean    ( const std::string &name, bool defaultValue = false );
-  const std::string& GetString( const std::string &name, const std::string &defaultValue = "" );
+  float GetNumber     ( const std::string &name, float defaultValue = 0.0f, bool createIfNotExists = false );
+  bool  GetBoolean    ( const std::string &name, bool defaultValue = false, bool createIfNotExists = false );
+  const std::string& GetString( const std::string &name, const std::string &defaultValue = "", bool createIfNotExists = false );
 
   void  RemoveComments( std::string &str );
   void  Dump          ();
