@@ -3,11 +3,12 @@ flatuniverse
 
 OpenGL 2D engine
 
-Latest release 2013.12.17: https://dl.dropboxusercontent.com/u/71135358/flatuniverse-20131217.tar.gz
+Latest release 2013.12.19: https://dl.dropboxusercontent.com/u/71135358/flatuniverse-20131219.tar.gz
 
 Версия мира: 0x000B
 
 Последние изменения:
+- !!!изменен файл конфигурации
 - зарелизена система освещения, марио стал в стиле "нуар", ура;
 - тестовая стрельба светящимися монетками, кнопка X;
 - в старых сохранениях необходимо вручную пометить блоки как "LightBlockByCollision", тобишь, отбрасывающие тень на основе формы коллизии;
