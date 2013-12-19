@@ -13,6 +13,9 @@ settings.editorMode:
 -- 20: промежуточный режим вставки тайла: нажал мышь и ждём отпускания или движения
 -- 21: вставка блока тайлов: рисование прямоугольной области
 -- 22: мульти-селект (рисование рамки)
+-- 30: mouseover на GUI.tabbedTemplates
+-- 11: перемещение GUI.tabbedTemplates
+-- 12: скролл GUI.tabbedTemplates
 ]]
 settings = {
     guiVisibility     = false,  -- отображение GUI
@@ -113,6 +116,224 @@ GUI = {
       Render( 'sprite', GUI.templates.x + 5, y, GUI.templates.zIndex, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, GUI.templates.zIndex, item.icon, 'ffffffff' )
     end,
   }, -- templates
+
+  tabbedTemplates = {
+    tabsList = {
+      {
+        id = 'blocks',
+        title = 'Блоки',
+        items = {},
+      },
+      {
+        id = 'grass',
+        title = 'Трава',
+        items = {},
+      },
+      {
+        id = 'sky',
+        title = 'Небо',
+        items = {},
+      },
+      {
+        id = 'light',
+        title = 'Свет',
+        items = {},
+      },
+      {
+        id = 'go',
+        title = 'Объекты',
+        items = {},
+      },
+      {
+        id = 'npc',
+        title = 'NPC',
+        items = {},
+      },
+      {
+        id = 'other',
+        title = 'Разное',
+        items = {},
+      },
+    },
+    position = {
+      x = 0,
+      y = 20,
+      height = 250,
+      width = nil,
+    },
+    tileSize = 24,
+    tilesPerRow = 13,
+    zIndex = 8.5,
+    currentTab = 1,
+    currentItem = 0,
+    isHovered = false,
+    isTitleHovered = false,
+    isMinimized = false,
+    Init = function()
+      GUI.tabbedTemplates.position.width = GUI.tabbedTemplates.tilesPerRow * GUI.tabbedTemplates.tileSize + 4 + 10
+      local offset = 0
+      for num,tab in pairs( GUI.tabbedTemplates.tabsList ) do --(
+        local width = Render( 'getTextWidth', tab.title ) + 4
+        tab.offset = offset
+        tab.width = width
+        offset = offset + width
+      end --)
+      local tableData = GetObjectsTabbedTemplates()
+      for num,tab in pairs( GUI.tabbedTemplates.tabsList ) do --(
+        for tdId ,tdTab in pairs( tableData ) do --(
+          if tdId == tab.id then  --(
+            tab.items = tdTab
+          end --)
+        end --)
+      end --)
+    end,
+    Draw = function() --(
+      local x, y, z, width, height
+        = GUI.tabbedTemplates.position.x
+        , GUI.tabbedTemplates.position.y
+        , GUI.tabbedTemplates.zIndex
+        , GUI.tabbedTemplates.position.width + 2
+        , GUI.tabbedTemplates.isMinimized and 11 or GUI.tabbedTemplates.position.height
+      -- background
+      Render( 'sprite', x, y, z, x + width, y + height, z, 'data/temp/blank.png', 'EDEDEDFF' )
+      Render( 'rect', x, y, z, x + width, y + height, z, 'A9A9A9FF' )
+      -- title
+      Render( 'sprite', x + 1, y + 2, z, x + width - 2, y + 10, z, 'data/temp/blank.png', GUI.tabbedTemplates.isTitleHovered and 'ffaaaaff' or 'ffaaaa77' )
+      if not GUI.tabbedTemplates.isMinimized then
+        -- tabs
+        for num,tab in pairs( GUI.tabbedTemplates.tabsList ) do --(
+          GUI.tabbedTemplates.DrawTab( num, tab, GUI.tabbedTemplates.position.x, GUI.tabbedTemplates.position.y + 10 )
+        end --)
+        -- items
+        x = x + 2
+        y = y + 29
+        for num,item in pairs( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items ) do --(
+          local tx, ty, tz
+            = x + ( ( num - 1 ) % GUI.tabbedTemplates.tilesPerRow ) * GUI.tabbedTemplates.tileSize
+            , y + math.floor( ( num - 1 ) / GUI.tabbedTemplates.tilesPerRow ) * GUI.tabbedTemplates.tileSize
+            , ( ( item.isHovered or num == GUI.tabbedTemplates.currentItem ) and GUI.tabbedTemplates.zIndex - 0.1 or GUI.tabbedTemplates.zIndex )
+          local borderColor = ( num == GUI.tabbedTemplates.currentItem and 'ff0000ff' or ( item.isHovered and 'ff6666ff' or 'ffffffff' ) )
+          Render( 'sprite', tx, ty, tz, tx + GUI.tabbedTemplates.tileSize - 1, ty + GUI.tabbedTemplates.tileSize, tz, 'data/temp/blank.png', '000000ff' )
+          Render( 'sprite', tx, ty, tz, tx + GUI.tabbedTemplates.tileSize, ty + GUI.tabbedTemplates.tileSize, tz, item.icon, 'ffffffff' )
+          Render( 'rect', tx, ty, tz, tx + GUI.tabbedTemplates.tileSize, ty + GUI.tabbedTemplates.tileSize, tz, borderColor )
+        end
+      end
+    end,  --) Draw
+    DrawTab = function( id, tab, dx, dy ) --(
+      local x, y, z = dx + tab.offset + 2, dy + 2, GUI.tabbedTemplates.zIndex
+      local isCurrent = GUI.tabbedTemplates.currentTab == id
+      local
+        colorBG, colorBGbottom, colorBorder =
+        ( isCurrent and 'ffaaaaff' or ( tab.isHovered and 'ffeeffff' or 'ffffffff' ) ), ( isCurrent and 'ff8888ff' or ( tab.isHovered and 'ffccccff' or 'ffffffff' ) ), 'A9A9A9FF'
+      Render( 'sprite', x, y, z, x + tab.width, y + 8, z, 'data/temp/blank.png', colorBG )
+      Render( 'sprite', x, y + 8, z, x + tab.width, y + 15, z, 'data/temp/blank.png', colorBGbottom )
+      Render( 'rect', x, y, z, x + tab.width, y + 15, z, colorBorder )
+      Render( 'text', x + 2, y + 2, z, tab.title, '000000ff' )
+    end,  --) DrawTab
+    OnMouseMove = function( x, y )  --(
+      if settings.editorMode == 31 then
+        GUI.tabbedTemplates.position.x = GUI.tabbedTemplates.moving.position.x + x - GUI.tabbedTemplates.moving.mousePos.x
+        GUI.tabbedTemplates.position.y = GUI.tabbedTemplates.moving.position.y + y - GUI.tabbedTemplates.moving.mousePos.y
+      end
+      GUI.tabbedTemplates.isHovered =
+        x >= GUI.tabbedTemplates.position.x
+        and x <= GUI.tabbedTemplates.position.x + GUI.tabbedTemplates.position.width
+        and y >= GUI.tabbedTemplates.position.y
+        and y <= GUI.tabbedTemplates.position.y + ( GUI.tabbedTemplates.isMinimized and 11 or GUI.tabbedTemplates.position.height )
+      GUI.tabbedTemplates.isTitleHovered = 
+        mousePos.x >= GUI.tabbedTemplates.position.x and
+        mousePos.x <= GUI.tabbedTemplates.position.x + GUI.tabbedTemplates.position.width and
+        mousePos.y >= GUI.tabbedTemplates.position.y and
+        mousePos.y <= GUI.tabbedTemplates.position.y + 10
+      if GUI.tabbedTemplates.isHovered then
+        local dx, dy, dz, width, height = GUI.tabbedTemplates.position.x, GUI.tabbedTemplates.position.y, GUI.tabbedTemplates.zIndex, GUI.tabbedTemplates.position.width + 2, GUI.tabbedTemplates.position.height + 30
+        dx = dx + 2
+        dy = dy + 29
+        local hovered = 0
+        for num,item in pairs( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items ) do --(
+          local tx, ty = dx + ( ( num - 1 ) % GUI.tabbedTemplates.tilesPerRow ) * GUI.tabbedTemplates.tileSize, dy + math.floor( ( num - 1 ) / GUI.tabbedTemplates.tilesPerRow ) * GUI.tabbedTemplates.tileSize
+          item.isHovered = x >= tx and x <= tx + GUI.tabbedTemplates.tileSize and y >= ty and y <= ty + GUI.tabbedTemplates.tileSize
+          if item.isHovered then
+            hovered = num
+          end
+        end
+        if hovered > 0 then
+          GUI.tooltip:SetPosition( x + 1, y - 25 )
+          GUI.tooltip:SetText( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ hovered ].name )
+          GUI.tooltip:CropByTextWidth()
+        else
+          GUI.tooltip:SetPosition( 0, settings.windowSize.y )
+        end
+      end
+      if GUI.tabbedTemplates.isHovered then
+        if settings.editorMode == 0 then
+          settings.editorMode = 30
+        end
+      else
+        if settings.editorMode == 30 then
+          settings.editorMode = 0
+        end
+      end
+      for num,tab in pairs( GUI.tabbedTemplates.tabsList ) do --(
+        tab.isHovered = 
+          x >= GUI.tabbedTemplates.position.x + tab.offset
+          and x <= GUI.tabbedTemplates.position.x + tab.offset + tab.width
+          and y >= GUI.tabbedTemplates.position.y + 10
+          and y <= GUI.tabbedTemplates.position.y + 28
+      end --)
+    end,  --) OnMouseMove
+    OnMouseClick = function( id, isPressed ) --(
+      if isPressed then
+        if GUI.tabbedTemplates.isTitleHovered then
+          -- move gui
+          settings.editorMode = 31
+          GUI.tabbedTemplates.moving = {
+            mousePos = {
+              x = mousePos.x,
+              y = mousePos.y,
+            },
+            position = {
+              x = GUI.tabbedTemplates.position.x,
+              y = GUI.tabbedTemplates.position.y,
+            }
+          }
+        elseif mousePos.x >= GUI.tabbedTemplates.position.x + GUI.tabbedTemplates.position.width - 10 and
+          mousePos.x <= GUI.tabbedTemplates.position.x + GUI.tabbedTemplates.position.width and
+          mousePos.y >= GUI.tabbedTemplates.position.y + 10 and
+          mousePos.y <= GUI.tabbedTemplates.position.y + GUI.tabbedTemplates.position.height then
+            -- scroll
+            settings.editorMode = 32
+        else
+          -- select
+          for num,tab in pairs( GUI.tabbedTemplates.tabsList ) do --(
+            if tab.isHovered then
+              GUI.tabbedTemplates.currentTab = num
+              GUI.tabbedTemplates.currentItem = 0
+              break
+            end
+          end --)
+          for num,item in pairs( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items ) do --(
+            if item.isHovered then
+              GUI.tabbedTemplates.currentItem = num
+              DoPause( true )
+              settings.editorType = 0
+              break
+            end
+          end --)
+        end
+      else
+        if settings.editorMode == 31 then
+          if GUI.tabbedTemplates.moving.mousePos.x == mousePos.x and GUI.tabbedTemplates.moving.mousePos.y == mousePos.y then
+            GUI.tabbedTemplates.isMinimized = not GUI.tabbedTemplates.isMinimized
+          end
+          settings.editorMode = 30
+        else
+          settings.editorMode = 30
+        end
+      end
+    end,  --) OnMouseClick
+  },  -- tabbedTemplates
+
   grid = {
     zIndex = 8.5,
     Render = function()
@@ -152,9 +373,10 @@ function EditorInit()
   settings.windowSize.y = y
 
   -- Настраиваем блок с шаблонами
-  GUI.templates.height = settings.windowSize.y - 10
-  GUI.templates.items = GetObjectsTemplates()
-  GUI.templates.width = GUI.templates.itemSize + 25
+  -- GUI.templates.height = settings.windowSize.y - 10
+  -- GUI.templates.items = GetObjectsTemplates()
+  -- GUI.templates.width = GUI.templates.itemSize + 25
+  GUI.tabbedTemplates.Init()
 
   -- Ставим обработчики на всё: клаву, кнопки и движение мыши
   -- ListenKeyboard( 'OnEditorKey' )
@@ -417,8 +639,10 @@ function OnEditorKey( id, isPressed )
         if settings.editorMode == 2 then
           settings.editorMode = 0
         end
-        GUI.templates.currentItem = 0
+        -- GUI.templates.currentItem = 0
+        GUI.tabbedTemplates.currentItem = 0
       end
+      --[[
       if id == 0x51 then    -- Q: Prev template
         if GUI.templates.currentItem > 1 then
           GUI.templates.currentItem = GUI.templates.currentItem - 1
@@ -429,6 +653,7 @@ function OnEditorKey( id, isPressed )
           GUI.templates.currentItem = GUI.templates.currentItem + 1
         end
       end
+      ]]
       if id == 0x47 then    -- G: toggle showing grid
         ToggleGrid()
       end
@@ -484,7 +709,8 @@ function OnEditorMouseKey( id, isPressed )
       if isPressed then --(
         local doMultiSelect = false
         if settings.editorType == 0 then --(
-          if GUI.templates.currentItem > 0 then --(
+          -- if GUI.templates.currentItem > 0 then --(
+          if GUI.tabbedTemplates.currentItem > 0 then --(
             settings.editorMode = 20
             settings.move.mouseStart.x = mousePos.x
             settings.move.mouseStart.y = mousePos.y
@@ -650,7 +876,7 @@ function OnEditorMouseKey( id, isPressed )
         local bottom = y < newY and newY or y
         left, top = GetTilePosByPixel( left, top )
         right, bottom = GetTilePosByPixel( right, bottom )
-        local texture = GUI.templates.items[ GUI.templates.currentItem ].icon
+        -- local texture = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].icon
         local names = {}
         for tx = left, right do
         for ty = top, bottom do
@@ -706,12 +932,22 @@ function OnEditorMouseKey( id, isPressed )
         UpdateGuiBySelectedObject()
       end --)
     end, --) 22
+    [30] = function() --(
+      GUI.tabbedTemplates.OnMouseClick( id, isPressed )
+    end,  --) 30
+    [31] = function() --(
+      GUI.tabbedTemplates.OnMouseClick( id, isPressed )
+    end,  --) 31
+    [32] = function() --(
+      GUI.tabbedTemplates.OnMouseClick( id, isPressed )
+    end,  --) 32
   }
   mode[ settings.editorMode ]()
 end --) OnEditorMouseKey
 
 -- Обработка движения мыши
-function OnEditorMouseMove( x, y )
+function OnEditorMouseMove( x, y )  --(
+  --[[
   if TestMouseOnGUI( x, y ) then
     local num = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) ) + 1
     if num > 0 and num <= #GUI.templates.items then
@@ -721,6 +957,8 @@ function OnEditorMouseMove( x, y )
     else
       GUI.tooltip:SetPosition( 0, settings.windowSize.y )
     end
+  else ]]
+  if GUI.tabbedTemplates.isHovered then
   else
     GUI.tooltip:SetPosition( 0, settings.windowSize.y )
     local mode = {
@@ -788,9 +1026,10 @@ function OnEditorMouseMove( x, y )
     }
     mode[ settings.editorMode ]()
   end
+  GUI.tabbedTemplates.OnMouseMove( x, y )
   mousePos.x = x
   mousePos.y = y
-end --OnEditorMouseMove
+end --) OnEditorMouseMove
 
 
 -- Возвращает объект под курсором
@@ -1059,7 +1298,7 @@ function RenderGUI( timerId )
     local offsetX, offsetY = GetTileOffset()
     left, top = GetTilePosByPixel( left, top )
     right, bottom = GetTilePosByPixel( right, bottom )
-    local texture = GUI.templates.items[ GUI.templates.currentItem ].icon
+    local texture = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].icon
     for tx = left, right do
     for ty = top, bottom do
       x, y = GetPixelByTile( tx, ty )
@@ -1068,7 +1307,7 @@ function RenderGUI( timerId )
     end
   end --)
   --( рамка тайла под курсором
-  if settings.editorMode == 0 and settings.gamePaused and GUI.templates.currentItem > 0 then
+  if settings.editorMode == 0 and settings.gamePaused and GUI.tabbedTemplates.currentItem > 0 then
     x, y = GetTilePosByPixel( mousePos.x, mousePos.y )
     left, top = GetPixelByTile( x, y )
     right, bottom = GetPixelByTile( x + 1, y + 1 )
@@ -1092,7 +1331,8 @@ function RenderGUI( timerId )
   end --)
 
   if settings.guiVisibility then
-    GUI.templates.Draw()
+    -- GUI.templates.Draw()
+    GUI.tabbedTemplates.Draw()
     GUIRendererRender( 0 ) -- additional GUI from gui.lua
   end
   SetTimer( 1/30, 'RenderGUI', true )
@@ -1116,12 +1356,13 @@ function TestMouseOnGUI( x, y )
     GUI.templates.y = GUI.templates.y + dy
     return true
   end
-  if x >= GUI.templates.x and
-     x <= GUI.templates.x + GUI.templates.width and
-     y >= GUI.templates.y and
-     y <= GUI.templates.y + GUI.templates.height
-     then
-    settings.editorMode = 10
+    if ( settings.editorMode == 0 or settings.editorMode == 10 ) and
+      x >= GUI.templates.x and
+      x <= GUI.templates.x + GUI.templates.width and
+      y >= GUI.templates.y and
+      y <= GUI.templates.y + GUI.templates.height
+    then
+      settings.editorMode = 10
     return true
   else
     if settings.editorMode == 10 then
@@ -1141,15 +1382,15 @@ end --tableLength
 
 --[[ EditorInsertItemByTemplate ]]
 function EditorInsertItemByTemplate( px, py )
-  if GUI.templates.currentItem <= 0 or GUI.templates.currentItem > #GUI.templates.items then
+  if GUI.tabbedTemplates.currentItem == 0 then
     return ''
   end
 
   local cameraX, cameraY = GetCameraPos()
   local tileSize = GetTileSize()
   local offsetX, offsetY = GetTileOffset()
-  local attrs = GUI.templates.items[ GUI.templates.currentItem ].attr
-  local tags = GUI.templates.items[ GUI.templates.currentItem ].tags
+  local attrs = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].attr
+  local tags = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].tags
   if attrs.renderable ~= nil and attrs.renderable then
     attrs.renderableSize = tileSize..' '..tileSize
   end
@@ -1196,19 +1437,20 @@ function EditorInsertItemByTemplate( px, py )
     ListenTrigger( name, attrs['_triggerFunc'] )
     -- attrs['_triggerFunc'] = nil
   end
-  if GUI.templates.items[ GUI.templates.currentItem ].creationScript ~= nil then
-    GUI.templates.items[ GUI.templates.currentItem ].creationScript( name )
+  local currentItem = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ]
+  if currentItem.creationScript ~= nil then
+    currentItem.creationScript( name )
   end
-  if type( GUI.templates.items[ GUI.templates.currentItem ].animation ) == 'table' then
+  if type( currentItem.animation ) == 'table' then
     local actionAfterComplete = 'repeat'
     local animationAfterComplete = ''
-    if GUI.templates.items[ GUI.templates.currentItem ].animation[ 3 ] ~= nil then
-      actionAfterComplete = GUI.templates.items[ GUI.templates.currentItem ].animation[ 3 ]
-      if GUI.templates.items[ GUI.templates.currentItem ].animation[ 4 ] ~= nil then
-        animationAfterComplete = GUI.templates.items[ GUI.templates.currentItem ].animation[ 4 ]
+    if currentItem.animation[ 3 ] ~= nil then
+      actionAfterComplete = currentItem.animation[ 3 ]
+      if currentItem.animation[ 4 ] ~= nil then
+        animationAfterComplete = currentItem.animation[ 4 ]
       end
     end
-    ObjectSetAnimation( name, GUI.templates.items[ GUI.templates.currentItem ].animation[ 1 ], GUI.templates.items[ GUI.templates.currentItem ].animation[ 2 ], actionAfterComplete, animationAfterComplete )
+    ObjectSetAnimation( name, currentItem.animation[ 1 ], currentItem.animation[ 2 ], actionAfterComplete, animationAfterComplete )
   end
 
   if tags ~= nil then
