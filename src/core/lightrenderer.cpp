@@ -5,6 +5,9 @@
 #include "vertexarray.h"
 
 
+using namespace LightMap;
+
+
 LightRenderer::LightRenderer(
   const Vec2& setTextureSize,
   const std::string& vertexShaderLightFileName,

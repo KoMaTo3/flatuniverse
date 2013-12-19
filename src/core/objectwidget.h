@@ -12,7 +12,10 @@
 
 
 class CollisionElement;
-class LightRenderer;
+
+namespace LightMap {
+  class LightRenderer;
+};
 
 
 namespace ObjectWidget {
@@ -124,7 +127,7 @@ private:
 
 class WidgetLightBlockByCollision: public Widget {
 public:
-  WidgetLightBlockByCollision( WidgetOwner *setOwner, LightRenderer *setLightRenderer, CollisionElement *setCollision );
+  WidgetLightBlockByCollision( WidgetOwner *setOwner, LightMap::LightRenderer *setLightRenderer, CollisionElement *setCollision );
   virtual ~WidgetLightBlockByCollision();
   virtual void OnEvent( const ObjectWidgetEvent &event );
   virtual void SaveToBuffer( MemoryWriter &writer );
@@ -136,13 +139,13 @@ private:
   WidgetLightBlockByCollision& operator=( const WidgetLightBlockByCollision& );
 
   CollisionElement *_collisionElement;
-  LightRenderer *_lightRenderer;
+  LightMap::LightRenderer *_lightRenderer;
 };
 
 
 class WidgetLightPoint: public Widget {
 public:
-  WidgetLightPoint( WidgetOwner *setOwner, LightsListPtr *setLightList, const Vec3 *setPosition, const Vec4 &setColor, const Vec2 &setSize, const float setBrightness, const int bufferSize = 1024 );
+  WidgetLightPoint( WidgetOwner *setOwner, LightMap::LightsListPtr *setLightList, const Vec3 *setPosition, const Vec4 &setColor, const Vec2 &setSize, const float setBrightness, const int bufferSize = 1024 );
   virtual ~WidgetLightPoint();
   virtual void OnEvent( const ObjectWidgetEvent &event );
   virtual void SaveToBuffer( MemoryWriter &writer );
@@ -157,7 +160,7 @@ private:
   WidgetLightPoint& operator=( const WidgetLightPoint& );
 
   LightMap::LightEntity *_lightEntity;
-  LightsListPtr *_lightList;
+  LightMap::LightsListPtr *_lightList;
   const Vec3 *_position;
 };
 

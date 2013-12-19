@@ -4,6 +4,9 @@
 #include "vertexarray.h"
 
 
+using namespace LightMap;
+
+
 Vec3 LightMgr::_ambientLightVertices[ 4 ] = {
   Vec3( 1.0f, -1.0f, 1.0f ),
   Vec3( -1.0f, 1.0f, 1.0f ),
@@ -12,7 +15,7 @@ Vec3 LightMgr::_ambientLightVertices[ 4 ] = {
 };
 
 
-LightMgr::TExtureSize::TExtureSize()
+LightMap::LightMgr::TextureSize::TextureSize()
 :width( 0 ), height( 0 )
 {
 }

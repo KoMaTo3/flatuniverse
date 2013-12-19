@@ -16,6 +16,7 @@
 #include "animationmanager.h"
 #include "objectwidget.h"
 #include "thread.h"
+#include "lightrenderer.h"
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -35,8 +36,8 @@ CoreRenderableListIndicies  *__coreGUIFreeIndicies = NULL;            //свободны
 ConfigFile* __config = NULL;
 Thread::Pipeline *__workPipeline = nullptr;
 
-extern DebugRenderer* __debugRender;
-LightRenderer *__lightLenderer = NULL;
+extern DebugRenderer    *__debugRender;
+LightMap::LightRenderer *__lightLenderer = NULL;
 
 
 class LightBlock: public LightMap::ILightBlock {
@@ -359,7 +360,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   __objectByCollision     = new ObjectByCollisionList();
   __objectByTrigger       = new ObjectByTriggerList();
   this->animationMgr      = new Animation::Manager(  );
-  this->lightList         = new LightList;
+  this->lightList         = new LightMap::LightList();
   __workPipeline          = new Thread::Pipeline();
   //__objectByGui           = new ObjectByGuiList();
   //__guiList               = new GuiList();
@@ -377,7 +378,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
   }
 
   __log.PrintInfo( Filelevel_DEBUG, "new LightRenderer..." );
-  this->lightRenderer     = new LightRenderer(
+  this->lightRenderer     = new LightMap::LightRenderer(
     Vec2( float( this->_window.windowSize.width ), float( this->_window.windowSize.height ) ),
     __config->GetString( "gl_shader_shine_vertex" ),
     __config->GetString( "gl_shader_shine_fragment" ),

@@ -117,12 +117,12 @@ private:
     GLuint  iboGUI;
   } _buffers;
 
-  CollisionManager      *collisionManager;
-  ObjectTriggerManager  *triggerManager;
-  Pointer               *camera;  //текущая камера
-  Animation::Manager    *animationMgr;
-  LightRenderer         *lightRenderer;
-  LightList             *lightList;
+  CollisionManager        *collisionManager;
+  ObjectTriggerManager    *triggerManager;
+  Pointer                 *camera;  //текущая камера
+  Animation::Manager      *animationMgr;
+  LightMap::LightRenderer *lightRenderer;
+  LightMap::LightList     *lightList;
 
 public:
   Keyboard  keyboard;
@@ -180,7 +180,7 @@ public:
   void    ClearScene          ();
   inline HWND GetWindowHandle() const { return this->_window.hwnd; }
   inline CoreStates GetState() { return this->_state; }
-  inline LightRenderer* GetLightRenderer() { return this->lightRenderer; }
+  inline LightMap::LightRenderer* GetLightRenderer() { return this->lightRenderer; }
   /*
   inline
   void    SetGuiVisibility    ( bool setShow ) { this->gui.show = setShow; }

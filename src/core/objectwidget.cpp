@@ -186,7 +186,7 @@ void WidgetLightBlock::LoadFromBuffer( MemoryReader &reader ) {
 
 
 
-WidgetLightBlockByCollision::WidgetLightBlockByCollision( WidgetOwner *setOwner, LightRenderer *setLightRenderer, CollisionElement *setCollision )
+WidgetLightBlockByCollision::WidgetLightBlockByCollision( WidgetOwner *setOwner, LightMap::LightRenderer *setLightRenderer, CollisionElement *setCollision )
 :Widget( ObjectWidgetGUID::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION, setOwner ), _collisionElement( setCollision ), _lightRenderer( setLightRenderer ) {
   if( !setCollision ) {
     __log.PrintInfo( Filelevel_ERROR, "WidgetLightBlockByCollision => collision is NULL" );
@@ -233,7 +233,7 @@ void WidgetLightBlockByCollision::LoadFromBuffer( MemoryReader &reader ) {
 
 
 
-WidgetLightPoint::WidgetLightPoint( WidgetOwner *setOwner, LightsListPtr *setLightList, const Vec3 *setPosition, const Vec4 &setColor, const Vec2 &setSize, const float setBrightness, const int bufferSize )
+WidgetLightPoint::WidgetLightPoint( WidgetOwner *setOwner, LightMap::LightsListPtr *setLightList, const Vec3 *setPosition, const Vec4 &setColor, const Vec2 &setSize, const float setBrightness, const int bufferSize )
 :Widget( ObjectWidgetGUID::OBJECT_WIDGET_LIGHTPOINT, setOwner ), _lightList( setLightList ), _position( setPosition ) {
   this->_lightEntity = new LightMap::LightEntity( LightMap::LT_POINT, Vec2( setPosition->x, setPosition->y ), setColor, setSize, setBrightness, bufferSize );
   ( *setLightList )->push_back( this->_lightEntity );

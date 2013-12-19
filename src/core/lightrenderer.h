@@ -10,6 +10,9 @@ class VertexArray;
 #include "lightmgr.h"
 
 
+namespace LightMap {
+
+
 class LightRenderer
 {
 public:
@@ -54,5 +57,7 @@ private:
   LightRenderer();
 };
 
+
+};
 
 #endif

@@ -8,11 +8,14 @@
 #include "shaderprogram.h"
 
 
+class VertexArray;
+
+
+namespace LightMap {
+
+
 typedef std::deque< LightMap::LightEntity* > LightList;
 typedef LightList* LightsListPtr;
-
-
-class VertexArray;
 
 
 class LightMgr
@@ -47,12 +50,12 @@ private:
       leftTop,
       rightBottom;
   } window;
-  struct TExtureSize {
+  struct TextureSize {
     int
       width,
       height;
 
-    TExtureSize();
+    TextureSize();
   } textureSize;
 
   LightMgr( const LightMgr& );
@@ -66,6 +69,8 @@ private:
 
   static Vec3 _ambientLightVertices[ 4 ];
   std::vector< VertexArray* > vao;
+};
+
 };
 
 #endif

@@ -11,7 +11,7 @@ extern CoreRenderableListIndicies *__coreRenderableListFreeIndicies;
 extern CoreRenderableList *__coreGUI;
 extern CoreRenderableListIndicies *__coreGUIIndicies;
 extern CoreRenderableListIndicies *__coreGUIFreeIndicies;
-extern LightRenderer *__lightLenderer;
+extern LightMap::LightRenderer *__lightLenderer;
 //extern GuiList *__guiList;
 //extern Glui2 *__coreGlui;
 
