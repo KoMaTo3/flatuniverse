@@ -245,44 +245,43 @@ GUI = {
         mousePos.x <= GUI.tabbedTemplates.position.x + GUI.tabbedTemplates.position.width and
         mousePos.y >= GUI.tabbedTemplates.position.y and
         mousePos.y <= GUI.tabbedTemplates.position.y + 10
-      if GUI.tabbedTemplates.isMinimized then
-        return false
-      end
-      if GUI.tabbedTemplates.isHovered then --(
-        local dx, dy, dz, width, height = GUI.tabbedTemplates.position.x, GUI.tabbedTemplates.position.y, GUI.tabbedTemplates.zIndex, GUI.tabbedTemplates.position.width + 2, GUI.tabbedTemplates.position.height + 30
-        dx = dx + 2
-        dy = dy + 29
-        local hovered = 0
-        for num,item in pairs( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items ) do --(
-          local tx, ty = dx + ( ( num - 1 ) % GUI.tabbedTemplates.tilesPerRow ) * GUI.tabbedTemplates.tileSize, dy + math.floor( ( num - 1 ) / GUI.tabbedTemplates.tilesPerRow ) * GUI.tabbedTemplates.tileSize
-          item.isHovered = x >= tx and x <= tx + GUI.tabbedTemplates.tileSize and y >= ty and y <= ty + GUI.tabbedTemplates.tileSize
-          if item.isHovered then
-            hovered = num
+      if not GUI.tabbedTemplates.isMinimized then --(
+        if GUI.tabbedTemplates.isHovered then --(
+          if settings.editorMode == 0 then
+            settings.editorMode = 30
+          end
+        else  --)(
+          if settings.editorMode == 30 then
+            settings.editorMode = 0
           end
         end --)
-        if hovered > 0 then
-          GUI.tooltip:SetPosition( x + 1, y - 25 )
-          GUI.tooltip:SetText( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ hovered ].name )
-          GUI.tooltip:CropByTextWidth()
-        else
-          GUI.tooltip:SetPosition( 0, settings.windowSize.y )
-        end
-      end --)
-      if GUI.tabbedTemplates.isHovered then
-        if settings.editorMode == 0 then
-          settings.editorMode = 30
-        end
-      else
-        if settings.editorMode == 30 then
-          settings.editorMode = 0
-        end
-      end
-      for num,tab in pairs( GUI.tabbedTemplates.tabsList ) do --(
-        tab.isHovered = 
-          x >= GUI.tabbedTemplates.position.x + tab.offset
-          and x <= GUI.tabbedTemplates.position.x + tab.offset + tab.width
-          and y >= GUI.tabbedTemplates.position.y + 10
-          and y <= GUI.tabbedTemplates.position.y + 28
+        if GUI.tabbedTemplates.isHovered then --(
+          local dx, dy, dz, width, height = GUI.tabbedTemplates.position.x, GUI.tabbedTemplates.position.y, GUI.tabbedTemplates.zIndex, GUI.tabbedTemplates.position.width + 2, GUI.tabbedTemplates.position.height + 30
+          dx = dx + 2
+          dy = dy + 29
+          local hovered = 0
+          for num,item in pairs( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items ) do --(
+            local tx, ty = dx + ( ( num - 1 ) % GUI.tabbedTemplates.tilesPerRow ) * GUI.tabbedTemplates.tileSize, dy + math.floor( ( num - 1 ) / GUI.tabbedTemplates.tilesPerRow ) * GUI.tabbedTemplates.tileSize
+            item.isHovered = x >= tx and x <= tx + GUI.tabbedTemplates.tileSize and y >= ty and y <= ty + GUI.tabbedTemplates.tileSize
+            if item.isHovered then
+              hovered = num
+            end
+          end --)
+          if hovered > 0 then
+            GUI.tooltip:SetPosition( x + 1, y - 25 )
+            GUI.tooltip:SetText( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ hovered ].name )
+            GUI.tooltip:CropByTextWidth()
+          else
+            GUI.tooltip:SetPosition( 0, settings.windowSize.y )
+          end
+        end --)
+        for num,tab in pairs( GUI.tabbedTemplates.tabsList ) do --(
+          tab.isHovered = 
+            x >= GUI.tabbedTemplates.position.x + tab.offset
+            and x <= GUI.tabbedTemplates.position.x + tab.offset + tab.width
+            and y >= GUI.tabbedTemplates.position.y + 10
+            and y <= GUI.tabbedTemplates.position.y + 28
+        end --)
       end --)
     end,  --) OnMouseMove
     OnMouseClick = function( id, isPressed ) --(
@@ -325,14 +324,10 @@ GUI = {
           end --)
         end
       else
-        if settings.editorMode == 31 then
-          if GUI.tabbedTemplates.moving.mousePos.x == mousePos.x and GUI.tabbedTemplates.moving.mousePos.y == mousePos.y then
-            GUI.tabbedTemplates.isMinimized = not GUI.tabbedTemplates.isMinimized
-          end
-          settings.editorMode = 30
-        else
-          settings.editorMode = 30
+        if settings.editorMode == 31 and GUI.tabbedTemplates.moving.mousePos.x == mousePos.x and GUI.tabbedTemplates.moving.mousePos.y == mousePos.y then
+          GUI.tabbedTemplates.isMinimized = not GUI.tabbedTemplates.isMinimized
         end
+        settings.editorMode = 30
       end
     end,  --) OnMouseClick
   },  -- tabbedTemplates
@@ -945,7 +940,9 @@ function OnEditorMouseKey( id, isPressed )
       GUI.tabbedTemplates.OnMouseClick( id, isPressed )
     end,  --) 32
   }
-  mode[ settings.editorMode ]()
+  if mode[ settings.editorMode ] ~= nil then
+    mode[ settings.editorMode ]()
+  end
 end --) OnEditorMouseKey
 
 -- Обработка движения мыши
@@ -962,7 +959,7 @@ function OnEditorMouseMove( x, y )  --(
     end
   else ]]
   if GUI.tabbedTemplates.isHovered then
-  else
+  else  --(
     GUI.tooltip:SetPosition( 0, settings.windowSize.y )
     local mode = {
       [0] = function()
@@ -1022,13 +1019,11 @@ function OnEditorMouseMove( x, y )  --(
         settings.move.mouseStart.x = mousePos.x - settings.windowSize.x * 0.5 + cx
         settings.move.mouseStart.y = mousePos.y - settings.windowSize.y * 0.5 + cy
       end,
-      [21] = function()
-      end,
-      [22] = function()
-      end,
     }
-    mode[ settings.editorMode ]()
-  end
+    if mode[ settings.editorMode ] ~= nil then
+      mode[ settings.editorMode ]()
+    end
+  end --)
   GUI.tabbedTemplates.OnMouseMove( x, y )
   mousePos.x = x
   mousePos.y = y
@@ -1172,7 +1167,7 @@ function EditorUpdateDebug( timerId )
     x = cx + mx - width * 0.5,
     y = cy + my - height * 0.5
   }
-  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] pixel[%d; %d] mode[%d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), math.floor( pos.x ), math.floor( pos.y ), settings.editorMode ) )
+  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] pixel[%d; %d] mode[%d] test[%d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), math.floor( pos.x ), math.floor( pos.y ), settings.editorMode, ( GUI.tabbedTemplates.isHovered and '1' or '0' ) ) )
   -- GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
   SetTimer( 0.01, 'EditorUpdateDebug', true )
 end -- EditorUpdateDebug
