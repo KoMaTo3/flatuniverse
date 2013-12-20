@@ -245,7 +245,10 @@ GUI = {
         mousePos.x <= GUI.tabbedTemplates.position.x + GUI.tabbedTemplates.position.width and
         mousePos.y >= GUI.tabbedTemplates.position.y and
         mousePos.y <= GUI.tabbedTemplates.position.y + 10
-      if GUI.tabbedTemplates.isHovered then
+      if GUI.tabbedTemplates.isMinimized then
+        return false
+      end
+      if GUI.tabbedTemplates.isHovered then --(
         local dx, dy, dz, width, height = GUI.tabbedTemplates.position.x, GUI.tabbedTemplates.position.y, GUI.tabbedTemplates.zIndex, GUI.tabbedTemplates.position.width + 2, GUI.tabbedTemplates.position.height + 30
         dx = dx + 2
         dy = dy + 29
@@ -256,7 +259,7 @@ GUI = {
           if item.isHovered then
             hovered = num
           end
-        end
+        end --)
         if hovered > 0 then
           GUI.tooltip:SetPosition( x + 1, y - 25 )
           GUI.tooltip:SetText( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ hovered ].name )
@@ -264,7 +267,7 @@ GUI = {
         else
           GUI.tooltip:SetPosition( 0, settings.windowSize.y )
         end
-      end
+      end --)
       if GUI.tabbedTemplates.isHovered then
         if settings.editorMode == 0 then
           settings.editorMode = 30
