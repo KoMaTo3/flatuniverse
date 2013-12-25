@@ -106,6 +106,7 @@
     <ClCompile Include="..\src\core\core.cpp" />
     <ClCompile Include="..\src\core\debugrenderer.cpp" />
     <ClCompile Include="..\src\core\debugrendererobjects.cpp" />
+    <ClCompile Include="..\src\core\entity.cpp" />
     <ClCompile Include="..\src\core\fbo.cpp" />
     <ClCompile Include="..\src\core\file.cpp" />
     <ClCompile Include="..\src\core\filemanager.cpp" />
@@ -127,6 +128,7 @@
     <ClCompile Include="..\src\core\objecttrigger.cpp" />
     <ClCompile Include="..\src\core\objecttriggermgr.cpp" />
     <ClCompile Include="..\src\core\objectwidget.cpp" />
+    <ClCompile Include="..\src\core\objectwidgetmgr.cpp" />
     <ClCompile Include="..\src\core\renderable.cpp" />
     <ClCompile Include="..\src\core\shaderprogram.cpp" />
     <ClCompile Include="..\src\core\singleton.cpp" />
@@ -147,6 +149,12 @@
     <ClCompile Include="..\src\core\kmatrix.cpp" />
     <ClCompile Include="..\src\core\kvector.cpp" />
     <ClCompile Include="..\src\core\vertexarray.cpp" />
+    <ClCompile Include="..\src\core\widgets\lightblock.cpp" />
+    <ClCompile Include="..\src\core\widgets\lightblockbycollision.cpp" />
+    <ClCompile Include="..\src\core\widgets\lightpoint.cpp" />
+    <ClCompile Include="..\src\core\widgets\renderable.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)\objectwidgetrenderable.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\src\game\lua.cpp" />
     <ClCompile Include="..\src\game\luastatecheck.cpp" />
     <ClCompile Include="..\src\game\main.cpp" />
@@ -303,6 +311,7 @@
     <ClInclude Include="..\src\core\core.h" />
     <ClInclude Include="..\src\core\debugrenderer.h" />
     <ClInclude Include="..\src\core\debugrendererobjects.h" />
+    <ClInclude Include="..\src\core\entity.h" />
     <ClInclude Include="..\src\core\fbo.h" />
     <ClInclude Include="..\src\core\file.h" />
     <ClInclude Include="..\src\core\filemanager.h" />
@@ -325,6 +334,8 @@
     <ClInclude Include="..\src\core\objecttrigger.h" />
     <ClInclude Include="..\src\core\objecttriggermgr.h" />
     <ClInclude Include="..\src\core\objectwidget.h" />
+    <ClInclude Include="..\src\core\objectwidgetmgr.h" />
+    <ClInclude Include="..\src\core\objectwidgetowner.h" />
     <ClInclude Include="..\src\core\renderable.h" />
     <ClInclude Include="..\src\core\shaderprogram.h" />
     <ClInclude Include="..\src\core\singleton.h" />
@@ -346,6 +357,10 @@
     <ClInclude Include="..\src\core\ktypes.h" />
     <ClInclude Include="..\src\core\kvector.h" />
     <ClInclude Include="..\src\core\vertexarray.h" />
+    <ClInclude Include="..\src\core\widgets\lightblock.h" />
+    <ClInclude Include="..\src\core\widgets\lightblockbycollision.h" />
+    <ClInclude Include="..\src\core\widgets\lightpoint.h" />
+    <ClInclude Include="..\src\core\widgets\renderable.h" />
     <ClInclude Include="..\src\game\game.h" />
     <ClInclude Include="..\src\game\lua.h" />
     <ClInclude Include="..\src\game\luastatecheck.h" />

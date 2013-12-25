@@ -28,6 +28,9 @@
     <Filter Include="lua">
       <UniqueIdentifier>{076747c6-07e4-449a-9043-ecbc28f4f541}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\widgets">
+      <UniqueIdentifier>{cbaa2d77-d5c4-4da1-ac8a-03edae0fb66d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\collision.cpp">
@@ -600,6 +603,24 @@
     <ClCompile Include="..\src\core\thread.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\widgets\lightblock.cpp">
+      <Filter>core\widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\widgets\lightblockbycollision.cpp">
+      <Filter>core\widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\widgets\lightpoint.cpp">
+      <Filter>core\widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\objectwidgetmgr.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\widgets\renderable.cpp">
+      <Filter>core\widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\entity.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\collision.h">
@@ -921,6 +942,27 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\thread.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\widgets\lightblock.h">
+      <Filter>core\widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\widgets\lightblockbycollision.h">
+      <Filter>core\widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\widgets\lightpoint.h">
+      <Filter>core\widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\objectwidgetmgr.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\objectwidgetowner.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\widgets\renderable.h">
+      <Filter>core\widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\entity.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

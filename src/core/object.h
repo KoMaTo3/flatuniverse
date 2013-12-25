@@ -4,6 +4,7 @@
 #include <deque>
 #include <string>
 #include "klib.h"
+#include "entity.h"
 #include "renderable.h"
 #include "collisionmgr.h"
 #include "textureatlas.h"
@@ -13,7 +14,10 @@
 #include "objecttriggermgr.h"
 #include "tags.h"
 #include "animationobject.h"
-#include "objectwidget.h"
+#include "objectwidgetmgr.h"
+#include "objectwidgetowner.h"
+#include "widgets/lightblockbycollision.h"
+#include "widgets/lightpoint.h"
 //#include "glui2/g2Theme.h"
 //#include "glui2/g2Spinner.h"
 
@@ -98,7 +102,7 @@ enum ObjectGuiType {
 
 
 
-class Object: public IPointerOwner, public ITags, public Animation::IObject, public ObjectWidget::WidgetOwner
+class Object: public Entity, public IPointerOwner, public ITags, public Animation::IObject, public ObjectWidget::WidgetOwner
 {
 public:
   struct ObjectForce  //вектор силы
@@ -154,8 +158,6 @@ public:
   };
   */
 
-protected:
-  Vec3            position;     //рассчитанна€ позици€ объекта в сцене. звук это, скрипт, частица или меш, главна€ координата - эта. еЄ может модифицировать физдвижок, напр€мую
 private:
   bool            isEnabled,    //вкл/выкл. при выключении удал€ютс€ все рендерейблы/коллизии/триггеры. при включении ничего не восстанавливаетс€
                   isEnabledPrev;//предыдущее значение isEnabled

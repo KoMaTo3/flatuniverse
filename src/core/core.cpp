@@ -975,7 +975,7 @@ void Core::_InitPixelFormat()
     if( ::SetPixelFormat( this->_window.dc, pixelFormat, &pfd ) == TRUE )
     {
       pixelFormatOk = true;
-      //__log.PrintInfo( Filelevel_INFO , "SetPixelFormat => cDepthBits[ %d ]", depths[ num ] );
+      __log.PrintInfo( Filelevel_INFO , "SetPixelFormat => cDepthBits[ %d ]", depths[ num ] );
       break;
     }
     else
@@ -1102,6 +1102,13 @@ bool Core::Redraw()
     //Основной мир
     if( !__coreRenderableList->empty() )
     {
+      static RenderableQuad* firstAddress = &*__coreRenderableList->begin();
+      RenderableQuad* lastAddress = &*__coreRenderableList->begin();
+      if( firstAddress != lastAddress ) {
+        __log.PrintInfo( Filelevel_ERROR, "Core::Redraw => __coreRenderableList has changed address[%p]", lastAddress );
+        firstAddress = lastAddress;
+      }
+
       glLoadIdentity();
       //glScalef( this->_window.windowToWorld.x, this->_window.windowToWorld.y, this->_window.windowToWorld.z );
       if( this->camera && this->camera->GetIsValid() )

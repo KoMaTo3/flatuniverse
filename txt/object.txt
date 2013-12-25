@@ -1,0 +1,53 @@
+Entity {
+  Vec3 position;  //вли€ет на положение всех виджетов
+  Vec3 scale;     //вли€ет на масштабы всех виджетов
+  float rotation; //вли€ет на ориентацию всех виджетов
+}
+
+
+Object:Entity {
+  Vec3 positionRes;
+  this->positionRes = this->position + ( this->isCollision() ? this->GetCollision()->GetPosition() : Vec3null )
+  inline Vec3 GetPosition(){ return this->positionRes; }
+  
+  //SetPosition, SetScale, SetRotation генерируют OBJECT_WIDGET_OBJECT_CHANGED
+}
+
+
+
+Collision {
+  Entity *source;
+  Vec3 position;
+  Vec3 scale;
+
+  void Update() {
+    this->positionRes = this->source->position + this->position.rotate( source->alpha )
+  }
+  //collision solver перемещает коллизию - мен€ет глобальную координату positionRes, при этом this->position не мен€етс€
+  //затем this->source->position высчитываетс€ из полученных данных
+
+  //изменение коллизии генерирует OBJECT_WIDGET_COLLISION_CHANGED
+  //слушает: OBJECT_WIDGET_OBJECT_CHANGED
+}
+
+
+
+Renderable {
+  Entity *source;
+  Vec3 position;  //положение относительно Entity->position
+  Vec3 scale;     //масштаб относительно Entity->scale
+
+  this->positionRes = this->source->position + this->position
+  
+  //изменение рендерейбла генерирует OBJECT_WIDGET_RENDERABLE_CHANGED
+  //слушает: OBJECT_WIDGET_OBJECT_CHANGED
+}
+
+Controller {
+  //слушает:
+  //  OBJECT_WIDGET_COLLISION_CHANGED: мен€ет положение объекта
+}
+
+
+кажда€ сущность должна иметь как мировые координаты, так и относительные
+все расчеты коллизий - на глобальных координатах

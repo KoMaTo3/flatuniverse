@@ -170,9 +170,9 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 =============
 */
 Object::Object()
-:IPointerOwner(), ITags(), IObject(), WidgetOwner()
+:Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner()
 , name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
-,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
+, positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 ,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( true )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
@@ -182,9 +182,9 @@ Object::Object()
 
 
 Object::Object( const std::string &objectName, Object* parentObject, bool setIsSaveable )
-:IPointerOwner(), ITags(), IObject(), WidgetOwner()
+:Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner()
 ,name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
-,position( 0.0f, 0.0f, 0.0f ), positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
+,positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 ,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( setIsSaveable )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
