@@ -72,6 +72,8 @@ typedef void  LUAFUNCPROC_ObjectSetAnimation( const std::string &actionAfterAnim
 typedef void  LUAFUNCPROC_ObjectStopAnimation ( const std::string &objectName );
 typedef void  LUAFUNCPROC_SetPause          ( bool isPause );
 typedef void  LUAFUNCPROC_SetLightAmbient   ( const Vec4 &color );
+typedef void  LUAFUNCPROC_WorldSave         ( const std::string& fileName );
+typedef void  LUAFUNCPROC_WorldLoad         ( const std::string& fileName );
 
 extern LUAFUNCPROC_RemoveObject     *LUAFUNC_RemoveObject;
 extern LUAFUNCPROC_GetObjectPos     *LUAFUNC_GetObjectPos;
@@ -127,6 +129,8 @@ extern LUAFUNCPROC_ObjectSetAnimation       *LUAFUNC_ObjectSetAnimation;
 extern LUAFUNCPROC_ObjectStopAnimation      *LUAFUNC_ObjectStopAnimation;
 extern LUAFUNCPROC_SetPause         *LUAFUNC_SetPause;
 extern LUAFUNCPROC_SetLightAmbient  *LUAFUNC_SetLightAmbient;
+extern LUAFUNCPROC_WorldSave        *LUAFUNC_WorldSave;
+extern LUAFUNCPROC_WorldLoad        *LUAFUNC_WorldLoad;
 
 
 //callbacks
@@ -219,6 +223,8 @@ public:
   static int LUA_ObjectStopAnimation( lua_State *lua );
   static int LUA_SetPause         ( lua_State *lua );
   static int LUA_SetLightAmbient  ( lua_State *lua );
+  static int LUA_WorldSave        ( lua_State *lua );
+  static int LUA_WorldLoad        ( lua_State *lua );
 
   //callbacks
   static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );

@@ -67,6 +67,8 @@ LUAFUNCPROC_ObjectSetAnimation*LUAFUNC_ObjectSetAnimation   = NULL;
 LUAFUNCPROC_ObjectStopAnimation *LUAFUNC_ObjectStopAnimation= NULL;
 LUAFUNCPROC_SetPause          *LUAFUNC_SetPause             = NULL;
 LUAFUNCPROC_SetLightAmbient   *LUAFUNC_SetLightAmbient      = NULL;
+LUAFUNCPROC_WorldSave         *LUAFUNC_WorldSave            = NULL;
+LUAFUNCPROC_WorldLoad         *LUAFUNC_WorldLoad            = NULL;
 
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
@@ -181,6 +183,8 @@ bool Lua::Init()
   lua_register( this->luaState, "ObjectStopAnimation",Lua::LUA_ObjectStopAnimation );
   lua_register( this->luaState, "SetPause",         Lua::LUA_SetPause );
   lua_register( this->luaState, "SetLightAmbient",  Lua::LUA_SetLightAmbient );
+  lua_register( this->luaState, "WorldSave",        Lua::LUA_WorldSave );
+  lua_register( this->luaState, "WorldLoad",        Lua::LUA_WorldLoad );
   lua_atpanic( this->luaState, ErrorHandler );
 
   //__log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
@@ -2259,3 +2263,39 @@ int Lua::LUA_SetPause( lua_State *lua )
   LUAFUNC_SetPause( isEnabled ? true : false );
   return 0;
 }//LUA_SetPause
+
+
+
+/*
+=============
+  LUA_WorldSave
+=============
+*/
+int Lua::LUA_WorldSave( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_WorldSave => not enough parameters" );
+    return 0;
+  }
+  LUAFUNC_WorldSave( lua_tostring( lua, 1 ) );
+  return 0;
+}//LUA_WorldSave
+
+
+
+/*
+=============
+  LUA_WorldLoad
+=============
+*/
+int Lua::LUA_WorldLoad( lua_State *lua )
+{
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_WorldLoad => not enough parameters" );
+    return 0;
+  }
+  LUAFUNC_WorldLoad( lua_tostring( lua, 1 ) );
+  return 0;
+}//LUA_WorldLoad

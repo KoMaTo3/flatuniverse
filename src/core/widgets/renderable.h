@@ -3,6 +3,7 @@
 
 
 #include "../objectwidget.h"
+#include "../renderable.h"
 
 
 class Entity;

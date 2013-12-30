@@ -2303,3 +2303,39 @@ void Game::LUA_SetLightAmbient( const Vec4 &color )
 {
   game->core->GetLightRenderer()->GetLightManager()->lightAmbient = color;
 }//LUA_SetLightAmbient
+
+
+/*
+=============
+  LUA_WorldSave
+=============
+*/
+void Game::LUA_WorldSave( const std::string& fileName )
+{
+  game->world->SaveToFile( fileName );
+  sTimer.Update();
+  //game->core->Update();
+}//LUA_WorldSave
+
+
+/*
+=============
+  LUA_WorldLoad
+=============
+*/
+void Game::LUA_WorldLoad( const std::string& fileName )
+{
+  game->world->ClearWorld();
+  game->core->ClearScene();
+  game->ClearLuaTimers();
+  game->core->Update();
+  game->core->SetCamera( game->core->GetObject( "player" ) ); //!!!
+  game->world->LoadFromFile( fileName );
+  game->core->GetObject( "player" )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->GetCollision()->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );  //!!!
+  //game->SetActive( false );
+
+  sTimer.Update();
+  game->core->Update();
+  game->core->keyboard.ResetState();
+  game->core->mouse.ResetState();
+}//LUA_WorldLoad
