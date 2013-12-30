@@ -231,6 +231,10 @@ GUI = {
       Render( 'text', x + 2, y + 2, z, tab.title, '000000ff' )
     end,  --) DrawTab
     OnMouseMove = function( x, y )  --(
+      if not settings.guiVisibility then
+        GUI.tabbedTemplates.isHovered = false
+        return
+      end
       if settings.editorMode == 31 then
         GUI.tabbedTemplates.position.x = GUI.tabbedTemplates.moving.position.x + x - GUI.tabbedTemplates.moving.mousePos.x
         GUI.tabbedTemplates.position.y = GUI.tabbedTemplates.moving.position.y + y - GUI.tabbedTemplates.moving.mousePos.y
@@ -555,6 +559,9 @@ function OnEditorKey( id, isPressed )
           PopFromBuffer()
         else
           settings.guiVisibility = not settings.guiVisibility
+          if not settings.guiVisibility then
+            settings.editorMode = 0
+          end
           --SetGuiVisibility( settings.guiVisibility )
         end
       end
@@ -707,7 +714,7 @@ function OnEditorMouseKey( id, isPressed )
       if isPressed then --(
         local doMultiSelect = false
         if settings.editorType == 0 then --(
-          -- if GUI.templates.currentItem > 0 then --(
+          -- if GUI.templates.currentItem > 0 then --
           if GUI.tabbedTemplates.currentItem > 0 then --(
             settings.editorMode = 20
             settings.move.mouseStart.x = mousePos.x
@@ -1337,6 +1344,9 @@ function RenderGUI( timerId )
 end --RenderGUI
 
 function TestMouseOnGUI( x, y )
+  if not settings.guiVisibility then
+    return false
+  end
   if settings.editorMode == 12 then
     GUI.templates.scroll = ( y - GUI.templates.y - 8 - 15 ) / ( GUI.templates.height - 32 )
     if GUI.templates.scroll < 0 then

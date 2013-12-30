@@ -41,36 +41,48 @@ function GUIRendererRender( timerId )
 end -- GUIRendererRender
 
 --[[ GUIMouseKey ]]
-function GUIMouseKey( id, isPressed )
-  if GUIRenderer.focusedItem ~= nil then --(
-    if GUIRenderer.focusedItem.OnClick ~= nil then
-      GUIRenderer.focusedItem:OnClick( id, isPressed )
-    end
-  else --) (
-    local inRect = false
-    GUIRenderer.activeItem = nil
-    for elementId, item in pairs( GUIRenderer.GUIElements ) do --(
-      if item:TestInRect( mousePos.x, mousePos.y ) then --(
-        inRect = true
-        if GUIRenderer.activeItem ~= nil then
-          -- Alert( GUIRenderer.activeItem:GetType() )
-          --labelDebug:SetText( GUIRenderer.activeItem:GetType() )
-          if GUIRenderer.activeItem.OnClick ~= nil then
-            GUIRenderer.activeItem:OnClick( id, isPressed )
+function GUIMouseKey( id, isPressed ) --(
+  local doDefaultHandler = false
+  if not settings.guiVisibility then  --(
+    doDefaultHandler = true
+  else  --)(
+    if GUIRenderer.focusedItem ~= nil then --(
+      if GUIRenderer.focusedItem.OnClick ~= nil then
+        GUIRenderer.focusedItem:OnClick( id, isPressed )
+      end
+    else --) (
+      local inRect = false
+      GUIRenderer.activeItem = nil
+      for elementId, item in pairs( GUIRenderer.GUIElements ) do --(
+        if item:TestInRect( mousePos.x, mousePos.y ) then --(
+          inRect = true
+          if GUIRenderer.activeItem ~= nil then
+            -- Alert( GUIRenderer.activeItem:GetType() )
+            --labelDebug:SetText( GUIRenderer.activeItem:GetType() )
+            if GUIRenderer.activeItem.OnClick ~= nil then
+              GUIRenderer.activeItem:OnClick( id, isPressed )
+            end
+            -- Alert( GUIRenderer.activeItem.rect.left )
           end
-          -- Alert( GUIRenderer.activeItem.rect.left )
-        end
-        do break end
-      end --) if
-    end --) for elementId,item
-    if not inRect and GUIRenderer.OnClickDefault ~= nil then
-      GUIRenderer.OnClickDefault( id, isPressed )
-    end
-  end --) ~GUIRenderer.focusedItem
-end -- GUIMouseKey
+          do break end
+        end --) if
+      end --) for elementId,item
+      if not inRect then
+        doDefaultHandler = true
+      end
+    end --) ~GUIRenderer.focusedItem
+  end --)
+  if doDefaultHandler and GUIRenderer.OnClickDefault ~= nil then
+    GUIRenderer.OnClickDefault( id, isPressed )
+  end
+end --) GUIMouseKey
 
 --[[ GUIMouseMove ]]
 function GUIMouseMove( x, y )
+local doDefaultHandler = false
+  if not settings.guiVisibility then
+    doDefaultHandler = true
+  end
   mousePos.x = x
   mousePos.y = y
   GUIRenderer.activeItem = nil
@@ -81,7 +93,10 @@ function GUIMouseMove( x, y )
       do break end
     end --) if
   end --) for id,item
-  if not inRect and GUIRenderer.OnMouseMoveDefault ~= nil then
+  if not inRect then
+    doDefaultHandler = true
+  end
+  if doDefaultHandler and GUIRenderer.OnMouseMoveDefault ~= nil then
     GUIRenderer.OnMouseMoveDefault( x, y )
   end
 
