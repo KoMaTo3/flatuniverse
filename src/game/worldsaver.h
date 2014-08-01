@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "core/klib.h"
 #include "core/memory.h"
@@ -8,7 +8,7 @@
 namespace World {
 
 
-//Версия файла сохранений
+//Р’РµСЂСЃРёСЏ С„Р°Р№Р»Р° СЃРѕС…СЂР°РЅРµРЅРёР№
 const Dword VERSION = 0x0000000B;
 
 
@@ -16,20 +16,20 @@ class Saver
 {
 public:
   typedef std::deque< Dword > GridNumList;
-  struct GridInfo   //информация о гридах
+  struct GridInfo   //РёРЅС„РѕСЂРјР°С†РёСЏ Рѕ РіСЂРёРґР°С…
   {
     Short x, y;
-    //Dword blocksCount;    //число блоков, занимаемых гридом
-    GridNumList blocksNums; //номера блоков
-    Dword version;          //версия грида
+    //Dword blocksCount;    //С‡РёСЃР»Рѕ Р±Р»РѕРєРѕРІ, Р·Р°РЅРёРјР°РµРјС‹С… РіСЂРёРґРѕРј
+    GridNumList blocksNums; //РЅРѕРјРµСЂР° Р±Р»РѕРєРѕРІ
+    Dword version;          //РІРµСЂСЃРёСЏ РіСЂРёРґР°
   };
   typedef std::deque< GridInfo* > GridsList;
-  GridNumList freeBlocks;    //номера свободных блоков
+  GridNumList freeBlocks;    //РЅРѕРјРµСЂР° СЃРІРѕР±РѕРґРЅС‹С… Р±Р»РѕРєРѕРІ
 private:
   GridsList grids;
   const Dword blockSize;
-  memory worldData;     //данные о мире
-  std::string fileName; //файл, в который сохраняется мир
+  memory worldData;     //РґР°РЅРЅС‹Рµ Рѕ РјРёСЂРµ
+  std::string fileName; //С„Р°Р№Р», РІ РєРѕС‚РѕСЂС‹Р№ СЃРѕС…СЂР°РЅСЏРµС‚СЃСЏ РјРёСЂ
 
 public:
   Saver();

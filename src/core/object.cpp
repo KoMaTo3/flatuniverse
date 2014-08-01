@@ -3,6 +3,7 @@
 #include "tools.h"
 #include "animationpack.h"
 #include "lightrenderer.h"
+#include "game/luaobject.h"
 //#include "glui2/glui2.h"
 
 extern CoreRenderableList *__coreRenderableList;
@@ -173,7 +174,7 @@ Object::Object()
 :Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner()
 , name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 , positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
-,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( true )
+,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( true ), luaObjectId( 0 )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
@@ -181,11 +182,11 @@ Object::Object()
 }//constructor
 
 
-Object::Object( const std::string &objectName, Object* parentObject, bool setIsSaveable )
+Object::Object( const std::string &objectName, Object* parentObject, bool setIsSaveable, bool setLuaUserdata )
 :Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner()
 ,name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
-,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( setIsSaveable )
+,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( setIsSaveable ), luaObjectId( 0 )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
@@ -197,6 +198,9 @@ Object::Object( const std::string &objectName, Object* parentObject, bool setIsS
   else
     this->nameFull = "/" + this->name;
   //__log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%p] parent[x%p] nameFull['%s']", this, this->_parent, this->nameFull.c_str() );
+  if( setLuaUserdata ) {
+    this->luaObjectId = Engine::LuaObject::InitUserData( this, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+  }
 }//constructor
 
 
@@ -219,6 +223,10 @@ Object::~Object()
 
   DEF_DELETE( this->tags );
 
+  if( this->luaObjectId ) {
+    Engine::LuaObject::RemoveFromLuaTable( this->luaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+    this->luaObjectId = 0;
+  }
   //__log.PrintInfo( Filelevel_DEBUG, "Object x%p deleted", this );
 }//destructor
 

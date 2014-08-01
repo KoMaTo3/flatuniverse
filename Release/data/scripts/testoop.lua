@@ -10,7 +10,7 @@ function TestClass:new( val )
 end
 
 function TestClass:alert()
-  Alert( self.value )
+  Debug.Alert( self.value )
 end
 
 
@@ -35,7 +35,7 @@ end -- InheritsFrom
 TestClassNew = InheritsFrom( TestClass )
 
 function TestClassNew:alert()
-  Alert( 'class 2: '..( self.value ) )
+  Debug.Alert( 'class 2: '..( self.value ) )
 end
 
 obj1 = TestClass:new( 8 )

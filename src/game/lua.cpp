@@ -1,4 +1,4 @@
-#include "lua.h"
+п»ї#include "lua.h"
 #include "core/filemanager.h"
 #include "windows.h"
 #include "luastatecheck.h"
@@ -6,6 +6,15 @@
 #include "core/tools.h"
 #include "core/debugrenderer.h"
 #include "core/tools.h"
+#include "luaobjects/object.h"
+#include "luaobjects/debug.h"
+#include "luaobjects/core.h"
+#include "luaobjects/keyboard.h"
+#include "luaobjects/mouse.h"
+#include "luaobjects/camera.h"
+#include "luaobjects/config.h"
+#include "luaobjects/scene.h"
+#include "luaobjects/tools.h"
 
 
 File Lua::log;
@@ -73,7 +82,7 @@ LUAFUNCPROC_WorldLoad         *LUAFUNC_WorldLoad            = NULL;
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
 
-//очерёдность применения атрибутов при вызове ObjectAttr({...})
+//РѕС‡РµСЂС‘РґРЅРѕСЃС‚СЊ РїСЂРёРјРµРЅРµРЅРёСЏ Р°С‚СЂРёР±СѓС‚РѕРІ РїСЂРё РІС‹Р·РѕРІРµ ObjectAttr({...})
 enum {
   LUA_OBJECT_ATTRS_PRIORITET_RENDERABLE = 0,
   LUA_OBJECT_ATTRS_PRIORITET_COLLISION,
@@ -111,7 +120,7 @@ Lua::~Lua()
   Init
 =============
 */
-bool Lua::Init()
+bool Lua::Init( Game *game )
 {
   if( this->luaState )
   {
@@ -185,10 +194,96 @@ bool Lua::Init()
   lua_register( this->luaState, "SetLightAmbient",  Lua::LUA_SetLightAmbient );
   lua_register( this->luaState, "WorldSave",        Lua::LUA_WorldSave );
   lua_register( this->luaState, "WorldLoad",        Lua::LUA_WorldLoad );
-  lua_atpanic( this->luaState, ErrorHandler );
+
+  //external libraries
+  static const luaL_Reg none_functions[] = {
+    { NULL, NULL }
+  };
+  //Object
+  static const luaL_Reg object_functions[] = {
+    { "Destroy", &Engine::LuaObject_Destroy },
+    { "SetAnimation", &Engine::LuaObject_SetAnimation },
+    { "GetName", &Engine::LuaObject_GetName },
+    { "GetNameFull", &Engine::LuaObject_GetNameFull },
+    { "GetParentNameFull", &Engine::LuaObject_GetParentNameFull },
+    { NULL, NULL }
+  };
+
+  static const luaL_Reg object_library_functions[] = {
+    { "New", &Engine::LuaObject_New },
+    { "Get", &Engine::LuaObject_Get },
+    { NULL, NULL }
+  };
+  Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, this->luaState, "Object", "", object_functions, object_library_functions /*, Sprite_gc */ );
+
+  //Debug
+  static const luaL_Reg debug_library_functions[] = {
+    { "Alert", &Engine::LuaDebug_Alert },
+    { "Log", &Engine::LuaDebug_Log },
+    { "RenderState", &Engine::LuaDebug_RenderState },
+    { "Render", &Engine::LuaDebug_Render },
+    { NULL, NULL }
+  };
+  Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_DEBUG, this->luaState, "Debug", "", none_functions, debug_library_functions );
+
+  //Core
+  static const luaL_Reg core_library_functions[] = {
+    { "SetTimer", &Engine::LuaCore_SetTimer },
+    { NULL, NULL }
+  };
+  Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE, this->luaState, "Core", "", none_functions, core_library_functions );
+
+  //Keyboard
+  static const luaL_Reg keyboard_library_functions[] = {
+    { "Listen", &Engine::LuaKeyboard_Listen },
+    { NULL, NULL }
+  };
+  Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_KEYBOARD, this->luaState, "Keyboard", "", none_functions, keyboard_library_functions );
+
+  //Mouse
+  static const luaL_Reg mouse_library_functions[] = {
+    { "ListenKey", &Engine::LuaMouse_ListenKey },
+    { NULL, NULL }
+  };
+  Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_MOUSE, this->luaState, "Mouse", "", none_functions, mouse_library_functions );
+
+  //Camera
+  static const luaL_Reg camera_functions[] = {
+    //{ "SetAnimation", &Engine::LuaObject_SetAnimation },
+    { NULL, NULL }
+  };
+
+  static const luaL_Reg camera_library_functions[] = {
+    { "Get", &Engine::LuaCamera_Get },
+    { NULL, NULL }
+  };
+  Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CAMERA, this->luaState, "Camera", "", camera_functions, camera_library_functions );
+  
+  //Config
+  static const luaL_Reg config_library_functions[] = {
+    { "GetGridSize", &Engine::LuaConfig_GetGridSize },
+    { NULL, NULL }
+  };
+  Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CONFIG, this->luaState, "Config", "", none_functions, config_library_functions );
+  
+  //Scene
+  static const luaL_Reg scene_library_functions[] = {
+    { "Clear", &Engine::LuaScene_Clear },
+    { NULL, NULL }
+  };
+  Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SCENE, this->luaState, "Scene", "", none_functions, scene_library_functions );
+  
+  //Tools
+  static const luaL_Reg tools_library_functions[] = {
+    { "GetRandomSeed", &Engine::LuaTools_GetRandomSeed },
+    { "GetTime", &Engine::LuaTools_GetTime },
+    { NULL, NULL }
+  };
+  Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_TOOLS, this->luaState, "Tools", "", none_functions, tools_library_functions );
 
   //__log.PrintInfo( Filelevel_DEBUG, "Lua::Init => initialized [x%X]", this->luaState );
 
+  lua_atpanic( this->luaState, ErrorHandler );
   __LuaCurrentContext = this;
 
   this->log.Open( "logs/lua.txt", File_mode_WRITE );
@@ -235,6 +330,17 @@ void Lua::LoadLibs() {
     lua_pop( this->luaState, 1 );
   }
 }//LoadLibs
+
+
+
+/*
+=============
+  Unref
+=============
+*/
+void Lua::Unref( const int referenceId ) {
+  luaL_unref( this->luaState, LUA_REGISTRYINDEX, referenceId );
+}//Unref
 
 
 
@@ -349,7 +455,7 @@ bool Lua::CallFunction( const std::string &funcName )
 /*
 =============
   CallTableTableFunction
-  Вызывает lua-функцию из таблицы, находящейся в таблице:
+  Р’С‹Р·С‹РІР°РµС‚ lua-С„СѓРЅРєС†РёСЋ РёР· С‚Р°Р±Р»РёС†С‹, РЅР°С…РѕРґСЏС‰РµР№СЃСЏ РІ С‚Р°Р±Р»РёС†Рµ:
   table[ key ].function()
 =============
 */
@@ -424,7 +530,7 @@ int Lua::GetStackParmsCount() {
 
 
 /////////////////////
-// Функционал
+// Р¤СѓРЅРєС†РёРѕРЅР°Р»
 /////////////////////
 int Lua::LUA_Alert( lua_State *lua )
 {
@@ -459,7 +565,7 @@ int Lua::LUA_ObjectRemove( lua_State *lua )
 */
 int Lua::LUA_GetObjectPos( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GetObjectPos => not enough parameters" );
     return 0;
@@ -542,21 +648,32 @@ int Lua::LUA_LogWrite( lua_State *lua )
 */
 int Lua::LUA_SetTimer( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetTimer => not enough parameters" );
     return 0;
   }
 
   float period          = ( float ) lua_tonumber( lua, 1 );
-  std::string funcName  = lua_tostring( lua, 2 );
+  std::string funcName  = "";
+  int luaFunctionId     = 0;
+  if( lua_isfunction( lua, 2 ) ) {
+    lua_pushvalue( lua, 2 );
+    luaFunctionId = luaL_ref( lua, LUA_REGISTRYINDEX );
+    //lua_pop( lua, 1 );
+  } else if( lua_isstring( lua, 2 ) ) {
+    funcName = lua_tostring( lua, 2 );
+  } else {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetTimer => bad 2nd parameter: must be function or string" );
+    return 0;
+  }
   int dontPause         = false;
 
   if( parmsCount >= 3 ) {
     dontPause = lua_toboolean( lua, 3 );
   }
 
-  int id = LUAFUNC_SetTimer( period, funcName, dontPause ? true : false );
+  int id = LUAFUNC_SetTimer( period, funcName, dontPause ? true : false, luaFunctionId );
   lua_pushinteger( lua, id );
 
   return 1;
@@ -571,7 +688,7 @@ int Lua::LUA_SetTimer( lua_State *lua )
 */
 int Lua::LUA_StopTimer( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_StopTimer => not enough parameters" );
     return 0;
@@ -591,21 +708,28 @@ int Lua::LUA_StopTimer( lua_State *lua )
   LUACALLBACK_Timer
 =============
 */
-void Lua::LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
+void Lua::LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName, const int luaFunctionId )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => funcName['%s']", funcName.c_str() );
+  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => funcName['%s'] luaFunctionId[%d]", funcName.c_str(), luaFunctionId );
   LuaStateCheck state( lua->luaState );
-  lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
-  if( !lua_isfunction( lua->luaState, -1 ) )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => '%s' is not a function", funcName.c_str() );
-    lua_pop( lua->luaState, 1 );  //stack:
+
+  if( luaFunctionId ) {
+    lua_rawgeti( lua->luaState, LUA_REGISTRYINDEX, luaFunctionId );
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => luaFunctionId[%d]", luaFunctionId );
+  } else {
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => function['%s']", funcName.c_str() );
+    lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
+    if( !lua_isfunction( lua->luaState, -1 ) )
+    {
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => '%s' is not a function", funcName.c_str() );
+      lua_pop( lua->luaState, 1 );  //stack:
+    }
   }
 
   lua_pushinteger( lua->luaState, id ); //stack: funcName id
   if( lua_pcall( lua->luaState, 1, 0, 0 ) )
   {
-    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => error by calling function '%s'", funcName.c_str() );
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => error by calling function '%s' or %d: %s", funcName.c_str(), luaFunctionId, lua_tostring( lua->luaState, -1 ) );
     lua_pop( lua->luaState, 1 );
     return;
   }
@@ -736,9 +860,9 @@ void Lua::LUACALLBACK_ListenMouseMove( Lua *lua, const std::string &funcName, co
   LUACALLBACK_Timer
 =============
 */
-void LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
+void LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName, const int luaFunctionId )
 {
-  Lua::LUACALLBACK_Timer( lua, id, funcName );
+  Lua::LUACALLBACK_Timer( lua, id, funcName, luaFunctionId );
 }//LUACALLBACK_Timer
 
 
@@ -750,7 +874,7 @@ void LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName )
 */
 int Lua::LUA_CreateObject( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 4 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_CreateObject => not enough parameters" );
@@ -781,7 +905,7 @@ int Lua::LUA_CreateObject( lua_State *lua )
 */
 int Lua::LUA_ObjectRenderable( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectRenderable => not enough parameters" );
@@ -825,7 +949,7 @@ int Lua::LUA_ObjectRenderable( lua_State *lua )
 */
 int Lua::LUA_ObjectCollision( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectCollision => not enough parameters" );
@@ -886,7 +1010,7 @@ int Lua::LUA_ObjectCollision( lua_State *lua )
 */
 int Lua::LUA_ObjectTrigger( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectTrigger => not enough parameters" );
@@ -929,7 +1053,7 @@ int Lua::LUA_ObjectTrigger( lua_State *lua )
 */
 int Lua::LUA_ObjectLightBlockByCollision( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectLightBlockByCollision => not enough parameters" );
@@ -956,7 +1080,7 @@ int Lua::LUA_ObjectLightBlockByCollision( lua_State *lua )
 */
 int Lua::LUA_ListenKeyboard( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenKeyboard => not enough parameters" );
@@ -976,7 +1100,7 @@ int Lua::LUA_ListenKeyboard( lua_State *lua )
 */
 int Lua::LUA_ListenMouseKey( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenMouseKey => not enough parameters" );
@@ -996,7 +1120,7 @@ int Lua::LUA_ListenMouseKey( lua_State *lua )
 */
 int Lua::LUA_ListenMouseMove( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenMouseMove => not enough parameters" );
@@ -1092,7 +1216,7 @@ int Lua::LUA_GetWindowSize( lua_State *lua )
 */
 int Lua::LUA_ObjectAddTrigger( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAddTrigger => not enough parameters" );
@@ -1114,7 +1238,7 @@ int Lua::LUA_ObjectAddTrigger( lua_State *lua )
 /*
 int Lua::LUA_GuiAddTrigger( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GuiAddTrigger => not enough parameters" );
@@ -1225,7 +1349,7 @@ void LUACALLBACK_GuiTrigger( Lua *lua, const std::string &funcName, const std::s
 */
 int Lua::LUA_SetCamera( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetCamera => not enough parameters" );
@@ -1245,7 +1369,7 @@ int Lua::LUA_SetCamera( lua_State *lua )
 */
 int Lua::LUA_SetLightAmbient( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 4 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetLightAmbient => not enough parameters" );
@@ -1266,7 +1390,7 @@ int Lua::LUA_SetLightAmbient( lua_State *lua )
 /*
 int Lua::LUA_SetGuiVisibility( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetGuiVisibility => not enough parameters" );
@@ -1328,7 +1452,7 @@ int Lua::LUA_GetRandomSeed( lua_State *lua )
 */
 int Lua::LUA_LoadScript( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_LoadScript => not enough parameters" );
@@ -1349,7 +1473,7 @@ int Lua::LUA_LoadScript( lua_State *lua )
 /*
 int Lua::LUA_GuiGetText( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GuiGetText => not enough parameters" );
@@ -1373,7 +1497,7 @@ int Lua::LUA_GuiGetText( lua_State *lua )
 /*
 int Lua::LUA_GuiSetText( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GuiSetText => not enough parameters" );
@@ -1397,7 +1521,7 @@ int Lua::LUA_GuiSetText( lua_State *lua )
 /*
 int Lua::LUA_GuiAttr( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GuiAttr => not enough parameters" );
@@ -1461,7 +1585,7 @@ int Lua::LUA_GuiAttr( lua_State *lua )
 */
 int Lua::LUA_ObjectAttr( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount != 2 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAttr => not enough parameters" );
@@ -1640,7 +1764,7 @@ int Lua::LUA_ObjectAttr( lua_State *lua )
 /*
 int Lua::LUA_GuiGetChecked( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GuiGetChecked => not enough parameters" );
@@ -1664,7 +1788,7 @@ int Lua::LUA_GuiGetChecked( lua_State *lua )
 */
 int Lua::LUA_DebugRender( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_DebugRender => not enough parameters" );
@@ -1684,7 +1808,7 @@ int Lua::LUA_DebugRender( lua_State *lua )
 */
 int Lua::LUA_GetObjectByPoint( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 3 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GetObjectByPoint => not enough parameters" );
@@ -1712,7 +1836,7 @@ int Lua::LUA_GetObjectByPoint( lua_State *lua )
 */
 int Lua::LUA_GetObjectByRect( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 5 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_GetObjectByRect => not enough parameters" );
@@ -1738,7 +1862,7 @@ int Lua::LUA_GetObjectByRect( lua_State *lua )
 */
 int Lua::LUA_SelectObject( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SelectObject => not enough parameters" );
@@ -1771,7 +1895,7 @@ int Lua::LUA_GetSelectedObject( lua_State *lua )
 =============
 */
 int Lua::LUA_Render( lua_State *lua ) {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_Render => not enough parameters" );
@@ -1872,7 +1996,7 @@ int Lua::LUA_Render( lua_State *lua ) {
 =============
 */
 int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < stackIndex ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => not enough parameters" );
     return 0;
@@ -2003,7 +2127,7 @@ void Lua::LUACALLBACK_ListenTrigger( Lua *lua, const std::string &funcName, cons
 =============
 */
 int Lua::LUA_ListenCollision( lua_State *lua ) {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenCollision => not enough parameters" );
     return 0;
@@ -2022,7 +2146,7 @@ int Lua::LUA_ListenCollision( lua_State *lua ) {
 =============
 */
 int Lua::LUA_ListenTrigger( lua_State *lua ) {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ListenTrigger => not enough parameters" );
     return 0;
@@ -2055,7 +2179,7 @@ int Lua::LUA_GetTime( lua_State *lua )
 */
 int Lua::LUA_SetObjectForce( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 3 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetObjectForce => not enough parameters" );
     return 0;
@@ -2076,7 +2200,7 @@ int Lua::LUA_SetObjectForce( lua_State *lua )
 */
 int Lua::LUA_RemoveObjectForce( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_RemoveObjectForce => not enough parameters" );
     return 0;
@@ -2096,7 +2220,7 @@ int Lua::LUA_RemoveObjectForce( lua_State *lua )
 */
 int Lua::LUA_ObjectHasTag( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectHasTag => not enough parameters" );
     return 0;
@@ -2117,7 +2241,7 @@ int Lua::LUA_ObjectHasTag( lua_State *lua )
 */
 int Lua::LUA_ObjectAddTag( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectAddTag => not enough parameters" );
     return 0;
@@ -2137,7 +2261,7 @@ int Lua::LUA_ObjectAddTag( lua_State *lua )
 */
 int Lua::LUA_ObjectRemoveTag( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectRemoveTag => not enough parameters" );
     return 0;
@@ -2156,7 +2280,7 @@ int Lua::LUA_ObjectRemoveTag( lua_State *lua )
 =============
 */
 int Lua::LUA_SetClipboard( lua_State *lua ) {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetClipboard => not enough parameters" );
     return 0;
@@ -2209,7 +2333,7 @@ int Lua::LUA_GetClipboard( lua_State *lua ) {
 */
 int Lua::LUA_ObjectSetAnimation( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 3 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectSetAnimation => not enough parameters" );
@@ -2233,7 +2357,7 @@ int Lua::LUA_ObjectSetAnimation( lua_State *lua )
 */
 int Lua::LUA_ObjectStopAnimation( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_ObjectStopAnimation => not enough parameters" );
@@ -2253,7 +2377,7 @@ int Lua::LUA_ObjectStopAnimation( lua_State *lua )
 */
 int Lua::LUA_SetPause( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 )
   {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_SetPause => not enough parameters" );
@@ -2273,7 +2397,7 @@ int Lua::LUA_SetPause( lua_State *lua )
 */
 int Lua::LUA_WorldSave( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_WorldSave => not enough parameters" );
     return 0;
@@ -2291,7 +2415,7 @@ int Lua::LUA_WorldSave( lua_State *lua )
 */
 int Lua::LUA_WorldLoad( lua_State *lua )
 {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUA_WorldLoad => not enough parameters" );
     return 0;

@@ -1,4 +1,4 @@
-#include "worldgrid.h"
+ï»¿#include "worldgrid.h"
 #include "core/tools.h"
 #include "core/file.h"
 #include "core/memorywriter.h"
@@ -81,7 +81,7 @@ void World::Grid::AttachObject( Object *object )
     return;
   }
 
-  //äåòà÷èì îò äðóãèõ ãðèäîâ
+  //Ð´ÐµÑ‚Ð°Ñ‡Ð¸Ð¼ Ð¾Ñ‚ Ð´Ñ€ÑƒÐ³Ð¸Ñ… Ð³Ñ€Ð¸Ð´Ð¾Ð²
   WorldGridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
   for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
   {
@@ -188,12 +188,12 @@ bool World::Grid::GetGridDump( FU_OUT memory& dump )
   dump.Free();
   MemoryWriter writer( dump );
 
-  //êîë-âî îáúåêòîâ
+  //ÐºÐ¾Ð»-Ð²Ð¾ Ð¾Ð±ÑŠÐµÐºÑ‚Ð¾Ð²
   Dword objectsCount = this->objects.size();
   writer << objectsCount;
   //__log.PrintInfo( Filelevel_DEBUG, "WorldGrid::GetGridDump => objects %d", objectsCount );
 
-  //îáúåêòû
+  //Ð¾Ð±ÑŠÐµÐºÑ‚Ñ‹
   World::GridObjectList::iterator iter, iterEnd = this->objects.end();
   //Object *obj;
   ////RenderableQuad *quad;

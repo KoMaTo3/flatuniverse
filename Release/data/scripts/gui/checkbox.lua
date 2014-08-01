@@ -81,7 +81,7 @@ function GUICheckbox:Render( dx, dy )
     dx = 0
     dy = 0
   end
-  Render(
+  Debug.Render(
     'sprite',
     self.rect.left + dx, self.rect.top + dy, 0,
     self.rect.right + dx, self.rect.bottom + dy, 0,
@@ -89,10 +89,10 @@ function GUICheckbox:Render( dx, dy )
     self.isEnabled and 'ffffffff' or 'ffffff44'
     )
   if self.state == 1 and self.isHover then
-    Render( 'rect', self.rect.left + dx, self.rect.top + dy + 1, 0, self.rect.right + dx - 1, self.rect.bottom + dy, 0, '444466ff' )
+    Debug.Render( 'rect', self.rect.left + dx, self.rect.top + dy + 1, 0, self.rect.right + dx - 1, self.rect.bottom + dy, 0, '444466ff' )
   end
   local textColor = self.isEnabled and '000000ff' or '00000044'
-  Render( 'text', self.rect.right + dx + 2, self.rect.top + dy, 0, self.text, textColor )
+  Debug.Render( 'text', self.rect.right + dx + 2, self.rect.top + dy, 0, self.text, textColor )
 end -- GUICheckbox:Render
 
 function GUICheckbox:TestInRect( x, y, dx, dy )

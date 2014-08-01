@@ -1,4 +1,4 @@
-#include "luastatecheck.h"
+﻿#include "luastatecheck.h"
 #include "core/file.h"
 #include "lua.h"
 

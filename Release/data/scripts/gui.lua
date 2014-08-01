@@ -9,7 +9,7 @@ GUIRenderer = {
   OnKeyboardDefault = nil,
 
   RenderEnable = function()
-    SetTimer( 0.1, 'GUIRendererRender' )
+    Core.SetTimer( 0.1, 'GUIRendererRender' )
   end,
 }
 
@@ -26,18 +26,18 @@ function GUIInit()
   LoadScript( 'data/scripts/gui/select.lua' )
   LoadScript( 'data/scripts/gui/edit.lua' )
   LoadScript( 'data/scripts/gui/slider-vertical.lua' )
-  ListenKeyboard( 'GUIKeyboard' )
-  ListenMouseKey( 'GUIMouseKey' )
+  Keyboard.Listen( 'GUIKeyboard' )
+  Mouse.ListenKey( 'GUIMouseKey' )
   ListenMouseMove( 'GUIMouseMove' )
 end
 
 --[[ GUIRendererRender ]]
 function GUIRendererRender( timerId )
   for id, item in pairs( GUIRenderer.GUIElements ) do
-    --Alert( item.rect.right )
+    --Debug.Alert( item.rect.right )
     item:Render()
   end
-  --SetTimer( 0.1, 'GUIRendererRender' )
+  --Core.SetTimer( 0.1, 'GUIRendererRender' )
 end -- GUIRendererRender
 
 --[[ GUIMouseKey ]]
@@ -57,12 +57,12 @@ function GUIMouseKey( id, isPressed ) --(
         if item:TestInRect( mousePos.x, mousePos.y ) then --(
           inRect = true
           if GUIRenderer.activeItem ~= nil then
-            -- Alert( GUIRenderer.activeItem:GetType() )
+            -- Debug.Alert( GUIRenderer.activeItem:GetType() )
             --labelDebug:SetText( GUIRenderer.activeItem:GetType() )
             if GUIRenderer.activeItem.OnClick ~= nil then
               GUIRenderer.activeItem:OnClick( id, isPressed )
             end
-            -- Alert( GUIRenderer.activeItem.rect.left )
+            -- Debug.Alert( GUIRenderer.activeItem.rect.left )
           end
           do break end
         end --) if

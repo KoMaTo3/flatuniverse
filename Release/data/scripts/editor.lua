@@ -48,7 +48,7 @@ settings = {
       isAlt   = false,
     },
     buffer = {},  -- буфер действий для отмены
-    gridSize = GetGridSize(),
+    gridSize = Config.GetGridSize(),
     gamePaused = false,
     cameraDirection = 0,  -- перемещение камеры
     multiSelectStartPoint = { x = 0, y = 0 }, -- стартовая точка мультиселекта
@@ -90,30 +90,30 @@ GUI = {
       local y
       local i
       -- bg
-      Render( 'sprite', GUI.templates.x, GUI.templates.y, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, GUI.templates.zIndex, 'data/temp/blank.png', '333333FF' )
+      Debug.Render( 'sprite', GUI.templates.x, GUI.templates.y, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, GUI.templates.zIndex, 'data/temp/blank.png', '333333FF' )
       -- scroll bg
-      Render( 'sprite', GUI.templates.x + GUI.templates.width - 15, GUI.templates.y, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, GUI.templates.zIndex, 'data/temp/blank.png', '555555FF' )
+      Debug.Render( 'sprite', GUI.templates.x + GUI.templates.width - 15, GUI.templates.y, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width, GUI.templates.y + GUI.templates.height, GUI.templates.zIndex, 'data/temp/blank.png', '555555FF' )
       -- scroll bar
       y = GUI.templates.y + 15 + GUI.templates.scroll*(GUI.templates.height-29)
-      Render( 'sprite', GUI.templates.x + GUI.templates.width - 14, y + 1, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width - 1, y + 13, GUI.templates.zIndex, 'data/temp/blank.png', '888888FF' )
+      Debug.Render( 'sprite', GUI.templates.x + GUI.templates.width - 14, y + 1, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width - 1, y + 13, GUI.templates.zIndex, 'data/temp/blank.png', '888888FF' )
       -- header
-      Render( 'sprite', GUI.templates.x, GUI.templates.y, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width, GUI.templates.y + 15, GUI.templates.zIndex, 'data/temp/blank.png', '999999FF' )
+      Debug.Render( 'sprite', GUI.templates.x, GUI.templates.y, GUI.templates.zIndex, GUI.templates.x + GUI.templates.width, GUI.templates.y + 15, GUI.templates.zIndex, 'data/temp/blank.png', '999999FF' )
       -- items
-      -- Render( 'scissorEnable', GUI.templates.x, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 0 ), GUI.templates.x + GUI.templates.width - 15, settings.windowSize.y - 16 )
-      Render( 'scissorEnable', GUI.templates.x + 1, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 1 ), GUI.templates.x + GUI.templates.width - 17, settings.windowSize.y - ( GUI.templates.y + 17 ) )
+      -- Debug.Render( 'scissorEnable', GUI.templates.x, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 0 ), GUI.templates.x + GUI.templates.width - 15, settings.windowSize.y - 16 )
+      Debug.Render( 'scissorEnable', GUI.templates.x + 1, settings.windowSize.y - ( GUI.templates.y + GUI.templates.height - 1 ), GUI.templates.x + GUI.templates.width - 17, settings.windowSize.y - ( GUI.templates.y + 17 ) )
       i = 0
       for key, item in pairs( GUI.templates.items ) do
         GUI.templates.DrawItem( key, item )
       end
       if GUI.templates.currentItem > 0 and GUI.templates.currentItem <= #GUI.templates.items then
         y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + ( GUI.templates.currentItem - 1 ) * ( GUI.templates.itemSize + 5 ) + 20
-        Render( 'rect', GUI.templates.x + 5, y, GUI.templates.zIndex, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, GUI.templates.zIndex, '00ff00ff' )
+        Debug.Render( 'rect', GUI.templates.x + 5, y, GUI.templates.zIndex, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, GUI.templates.zIndex, '00ff00ff' )
       end
-      Render( 'scissorDisable' )
+      Debug.Render( 'scissorDisable' )
     end,
     DrawItem = function( i, item )
       y = GUI.templates.y - GUI.templates.scroll * GUI.templates.maxScroll + ( i - 1 ) * ( GUI.templates.itemSize + 5 ) + 20
-      Render( 'sprite', GUI.templates.x + 5, y, GUI.templates.zIndex, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, GUI.templates.zIndex, item.icon, 'ffffffff' )
+      Debug.Render( 'sprite', GUI.templates.x + 5, y, GUI.templates.zIndex, GUI.templates.x + 5 + GUI.templates.itemSize, y + GUI.templates.itemSize, GUI.templates.zIndex, item.icon, 'ffffffff' )
     end,
   }, -- templates
 
@@ -173,7 +173,7 @@ GUI = {
       GUI.tabbedTemplates.position.width = GUI.tabbedTemplates.tilesPerRow * GUI.tabbedTemplates.tileSize + 4 + 10
       local offset = 0
       for num,tab in pairs( GUI.tabbedTemplates.tabsList ) do --(
-        local width = Render( 'getTextWidth', tab.title ) + 4
+        local width = Debug.Render( 'getTextWidth', tab.title ) + 4
         tab.offset = offset
         tab.width = width
         offset = offset + width
@@ -195,10 +195,10 @@ GUI = {
         , GUI.tabbedTemplates.position.width + 2
         , GUI.tabbedTemplates.isMinimized and 11 or GUI.tabbedTemplates.position.height
       -- background
-      Render( 'sprite', x, y, z, x + width, y + height, z, 'data/temp/blank.png', 'EDEDEDFF' )
-      Render( 'rect', x, y, z, x + width, y + height, z, 'A9A9A9FF' )
+      Debug.Render( 'sprite', x, y, z, x + width, y + height, z, 'data/temp/blank.png', 'EDEDEDFF' )
+      Debug.Render( 'rect', x, y, z, x + width, y + height, z, 'A9A9A9FF' )
       -- title
-      Render( 'sprite', x + 1, y + 2, z, x + width - 2, y + 10, z, 'data/temp/blank.png', GUI.tabbedTemplates.isTitleHovered and 'ffaaaaff' or 'ffaaaa77' )
+      Debug.Render( 'sprite', x + 1, y + 2, z, x + width - 2, y + 10, z, 'data/temp/blank.png', GUI.tabbedTemplates.isTitleHovered and 'ffaaaaff' or 'ffaaaa77' )
       if not GUI.tabbedTemplates.isMinimized then
         -- tabs
         for num,tab in pairs( GUI.tabbedTemplates.tabsList ) do --(
@@ -213,9 +213,9 @@ GUI = {
             , y + math.floor( ( num - 1 ) / GUI.tabbedTemplates.tilesPerRow ) * GUI.tabbedTemplates.tileSize
             , ( ( item.isHovered or num == GUI.tabbedTemplates.currentItem ) and GUI.tabbedTemplates.zIndex - 0.1 or GUI.tabbedTemplates.zIndex )
           local borderColor = ( num == GUI.tabbedTemplates.currentItem and 'ff0000ff' or ( item.isHovered and 'ff6666ff' or 'ffffffff' ) )
-          Render( 'sprite', tx, ty, tz, tx + GUI.tabbedTemplates.tileSize - 1, ty + GUI.tabbedTemplates.tileSize, tz, 'data/temp/blank.png', '000000ff' )
-          Render( 'sprite', tx, ty, tz, tx + GUI.tabbedTemplates.tileSize, ty + GUI.tabbedTemplates.tileSize, tz, item.icon, 'ffffffff' )
-          Render( 'rect', tx, ty, tz, tx + GUI.tabbedTemplates.tileSize, ty + GUI.tabbedTemplates.tileSize, tz, borderColor )
+          Debug.Render( 'sprite', tx, ty, tz, tx + GUI.tabbedTemplates.tileSize - 1, ty + GUI.tabbedTemplates.tileSize, tz, 'data/temp/blank.png', '000000ff' )
+          Debug.Render( 'sprite', tx, ty, tz, tx + GUI.tabbedTemplates.tileSize, ty + GUI.tabbedTemplates.tileSize, tz, item.icon, 'ffffffff' )
+          Debug.Render( 'rect', tx, ty, tz, tx + GUI.tabbedTemplates.tileSize, ty + GUI.tabbedTemplates.tileSize, tz, borderColor )
         end
       end
     end,  --) Draw
@@ -225,10 +225,10 @@ GUI = {
       local
         colorBG, colorBGbottom, colorBorder =
         ( isCurrent and 'ffaaaaff' or ( tab.isHovered and 'ffeeffff' or 'ffffffff' ) ), ( isCurrent and 'ff8888ff' or ( tab.isHovered and 'ffccccff' or 'ffffffff' ) ), 'A9A9A9FF'
-      Render( 'sprite', x, y, z, x + tab.width, y + 8, z, 'data/temp/blank.png', colorBG )
-      Render( 'sprite', x, y + 8, z, x + tab.width, y + 15, z, 'data/temp/blank.png', colorBGbottom )
-      Render( 'rect', x, y, z, x + tab.width, y + 15, z, colorBorder )
-      Render( 'text', x + 2, y + 2, z, tab.title, '000000ff' )
+      Debug.Render( 'sprite', x, y, z, x + tab.width, y + 8, z, 'data/temp/blank.png', colorBG )
+      Debug.Render( 'sprite', x, y + 8, z, x + tab.width, y + 15, z, 'data/temp/blank.png', colorBGbottom )
+      Debug.Render( 'rect', x, y, z, x + tab.width, y + 15, z, colorBorder )
+      Debug.Render( 'text', x + 2, y + 2, z, tab.title, '000000ff' )
     end,  --) DrawTab
     OnMouseMove = function( x, y )  --(
       if not settings.guiVisibility then
@@ -347,18 +347,18 @@ GUI = {
       sy = ( math.floor( settings.windowSize.y * 0.5 - cameraY ) ) % tileSize + tileSize * 0.5 + offsetY
       local halfTileSize = tileSize * 0.5
       for x = 0, settings.windowSize.x, tileSize do
-        Render( 'line', sx + x, 0, GUI.grid.zIndex, sx + x, settings.windowSize.y, GUI.grid.zIndex, '00FF0044' )
+        Debug.Render( 'line', sx + x, 0, GUI.grid.zIndex, sx + x, settings.windowSize.y, GUI.grid.zIndex, '00FF0044' )
       end
       for y = 0, settings.windowSize.y, tileSize do
-        Render( 'line', 0, sy + y, GUI.grid.zIndex, settings.windowSize.x, sy + y, GUI.grid.zIndex, '00FF0044' )
+        Debug.Render( 'line', 0, sy + y, GUI.grid.zIndex, settings.windowSize.x, sy + y, GUI.grid.zIndex, '00FF0044' )
       end
       for gx = 0,1 do
         local x = ( math.floor( cameraX / settings.gridSize ) + gx ) * settings.gridSize - cameraX + settings.windowSize.x * 0.5
-        Render( 'line', x, 0, GUI.grid.zIndex, x, settings.windowSize.y, GUI.grid.zIndex, 'FF0000FF' )
+        Debug.Render( 'line', x, 0, GUI.grid.zIndex, x, settings.windowSize.y, GUI.grid.zIndex, 'FF0000FF' )
       end
       for gy = 0,1 do
         local y = ( math.floor( cameraY / settings.gridSize ) + gy ) * settings.gridSize - cameraY + settings.windowSize.y * 0.5
-        Render( 'line', 0, y, GUI.grid.zIndex, settings.windowSize.x, y, GUI.grid.zIndex, 'FF0000FF' )
+        Debug.Render( 'line', 0, y, GUI.grid.zIndex, settings.windowSize.x, y, GUI.grid.zIndex, 'FF0000FF' )
       end
     end,
   }, -- grid
@@ -381,8 +381,8 @@ function EditorInit()
   GUI.tabbedTemplates.Init()
 
   -- Ставим обработчики на всё: клаву, кнопки и движение мыши
-  -- ListenKeyboard( 'OnEditorKey' )
-  -- ListenMouseKey( 'OnEditorMouseKey' )
+  -- Keyboard.Listen( 'OnEditorKey' )
+  -- Mouse.ListenKey( 'OnEditorMouseKey' )
   -- ListenMouseMove( 'OnEditorMouseMove' )
   GUIRenderer.OnClickDefault = OnEditorMouseKey
   GUIRenderer.OnMouseMoveDefault = OnEditorMouseMove
@@ -454,7 +454,7 @@ function EditorInit()
   GUI.elements.windowObject = GUILabel:Create( settings.windowSize.x - 220, 205, 220, 130, 'Object' )
   local y = 18
   GUILabel:Create( 1, y, 0, 0, 'Name:', GUI.elements.windowObject )
-  GUI.elements.objectName   = GUIEdit:Create( 50, y, 165, '', function( obj ) Alert( obj:GetText() ) end, GUI.elements.windowObject )
+  GUI.elements.objectName   = GUIEdit:Create( 50, y, 165, '', function( obj ) Debug.Alert( obj:GetText() ) end, GUI.elements.windowObject )
   y = y + 20
   GUILabel:Create( 1, y, 0, 0, 'Z:', GUI.elements.windowObject )
   GUI.elements.objectZ = GUIEdit:Create( 20, y, 40, '', function( obj ) OnChangeZ( obj:GetText() ) end, GUI.elements.windowObject )
@@ -470,7 +470,7 @@ function EditorInit()
   y = y + 15
   GUI.elements.isLightPoint = GUICheckbox:Create( 5, y, 'Light point', false, OnChangeIsLightPoint, GUI.elements.windowObject, false )
 
-  -- GUIEdit:Create( 200, 50, 100, 'test123', function() Alert(2) end )
+  -- GUIEdit:Create( 200, 50, 100, 'test123', function() Debug.Alert(2) end )
 
   -- Ставим обработчики чекбоксов и кнопок редактора
   --[[
@@ -515,7 +515,7 @@ function UpdateEditorCamera( timerId )
     x = x + 10
   end
   ObjectAttr( 'defaults/camera', { position = x..' '..y  } )
-  SetTimer( 0.01, 'UpdateEditorCamera', true )
+  Core.SetTimer( 0.01, UpdateEditorCamera, true )
 end -- UpdateEditorCamera
 
 --( Обработка кнопок клавы
@@ -697,7 +697,7 @@ function DoPause( setPause )
     SetCamera( 'defaults/camera' )
   else
     SetCamera( 'player' )
-    DebugRender( 0 )
+    Debug.RenderState( 0 )
     settings.editorType = 0
     GUI.elements.layer:SetText( 'default' )
     -- OnChangeLayer( GUI.elements.layer )
@@ -744,7 +744,7 @@ function OnEditorMouseKey( id, isPressed )
           local cx, cy = GetCameraPos()
           settings.multiSelectStartPoint.x = mousePos.x + cx
           settings.multiSelectStartPoint.y = mousePos.y + cy
-          LogWrite( 'start multiselect' )
+          Debug.Log( 'start multiselect' )
         end
       else --)( released
       end --)
@@ -800,7 +800,7 @@ function OnEditorMouseKey( id, isPressed )
           ]]
         else
           local object = GetObjectUnderCursorByMode()
-          LogWrite( 'GetObjectUnderCursorByMode => '..object )
+          Debug.Log( 'GetObjectUnderCursorByMode => '..object )
           SelectObject( object )
           UpdateGuiBySelectedObject()
           if #object > 0 then
@@ -832,7 +832,7 @@ function OnEditorMouseKey( id, isPressed )
           if num > 0 and num <= #GUI.templates.items then
             DoPause( true )
             GUI.templates.currentItem = num
-            -- DebugRender( 0 )
+            -- Debug.RenderState( 0 )
             settings.editorType = 0
             -- SelectObject( '' )
             -- UpdateGuiBySelectedObject()
@@ -999,7 +999,7 @@ function OnEditorMouseMove( x, y )  --(
         local moveByX, moveByY = -settings.move.lastOffset.x + dx, -settings.move.lastOffset.y + dy
         settings.move.lastOffset.x = settings.move.lastOffset.x + moveByX
         settings.move.lastOffset.y = settings.move.lastOffset.y + moveByY
-        LogWrite( settings.move.lastOffset.x..':'..settings.move.lastOffset.y..' => '..moveByX..':'..moveByY )
+        Debug.Log( settings.move.lastOffset.x..':'..settings.move.lastOffset.y..' => '..moveByX..':'..moveByY )
         for num,name in pairs( objectList ) do
           local x, y = ObjectGetPos( name )
           ObjectSetPos( name, x + moveByX, y + moveByY )
@@ -1051,7 +1051,7 @@ function GetObjectUnderCursorByMode()
     local name = GetSelectedObject()
     if settings.editorType == 1 then
       name = GetObjectByPoint( 1, pos.x, pos.y, name )
-      LogWrite( string.format( 'GetObjectByPoint => [1][%3.1f][%3.1f]["%s"]', pos.x, pos.y, name ) )
+      Debug.Log( string.format( 'GetObjectByPoint => [1][%3.1f][%3.1f]["%s"]', pos.x, pos.y, name ) )
     end
     if settings.editorType == 2 then
       name = GetObjectByPoint( 2, pos.x, pos.y, name )
@@ -1160,7 +1160,7 @@ function ToggleLayer( guiName )
   if settings.editorType == 3 then
     flags = 4
   end
-  DebugRender( flags )
+  Debug.RenderState( flags )
 end --ToggleLayer
 
 --
@@ -1176,7 +1176,7 @@ function EditorUpdateDebug( timerId )
   }
   GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] pixel[%d; %d] mode[%d] test[%d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), math.floor( pos.x ), math.floor( pos.y ), settings.editorMode, ( GUI.tabbedTemplates.isHovered and '1' or '0' ) ) )
   -- GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
-  SetTimer( 0.01, 'EditorUpdateDebug', true )
+  Core.SetTimer( 0.01, EditorUpdateDebug, true )
 end -- EditorUpdateDebug
 
 function UpdateGuiBySelectedObject()
@@ -1283,7 +1283,7 @@ end --ToggleRenderableSize
 ]]
 function RenderGUI( timerId )
   settings.timer = settings.timer + 0.01
-  Render( 'clrscr' )
+  Debug.Render( 'clrscr' )
   if settings.showGrid then
     GUI.grid.Render()
   end
@@ -1294,7 +1294,7 @@ function RenderGUI( timerId )
     local y = settings.move.mouseStart.y - cy + settings.windowSize.y * 0.5
     local newX = mousePos.x
     local newY = mousePos.y
-    Render( 'rect', x, y, 8.0, newX, newY, 8.0, '00ff00ff' )
+    Debug.Render( 'rect', x, y, 8.0, newX, newY, 8.0, '00ff00ff' )
     local left   = x < newX and x or newX
     local right  = x < newX and newX or x
     local top    = y < newY and y or newY
@@ -1307,7 +1307,7 @@ function RenderGUI( timerId )
     for tx = left, right do
     for ty = top, bottom do
       x, y = GetPixelByTile( tx, ty )
-      Render( 'sprite', x, y, 8.0, x + tileSize, y + tileSize, 8.0, texture, 'ffffff44' )
+      Debug.Render( 'sprite', x, y, 8.0, x + tileSize, y + tileSize, 8.0, texture, 'ffffff44' )
     end
     end
   end --)
@@ -1316,7 +1316,7 @@ function RenderGUI( timerId )
     x, y = GetTilePosByPixel( mousePos.x, mousePos.y )
     left, top = GetPixelByTile( x, y )
     right, bottom = GetPixelByTile( x + 1, y + 1 )
-    Render( 'rect', left, top, 8.0, right, bottom, 8.0, 'ff0000ff' )
+    Debug.Render( 'rect', left, top, 8.0, right, bottom, 8.0, 'ff0000ff' )
   end --)
 
   --( рамка мультиселекта
@@ -1332,7 +1332,7 @@ function RenderGUI( timerId )
     if top > bottom then
       top, bottom = bottom, top
     end
-    Render( 'rect', left, top, 8.0, right, bottom, 8.0, 'ff0000ff' )
+    Debug.Render( 'rect', left, top, 8.0, right, bottom, 8.0, 'ff0000ff' )
   end --)
 
   if settings.guiVisibility then
@@ -1340,7 +1340,7 @@ function RenderGUI( timerId )
     GUI.tabbedTemplates.Draw()
     GUIRendererRender( 0 ) -- additional GUI from gui.lua
   end
-  SetTimer( 1/30, 'RenderGUI', true )
+  Core.SetTimer( 1/30, RenderGUI, true )
 end --RenderGUI
 
 function TestMouseOnGUI( x, y )
@@ -1586,10 +1586,10 @@ function OnChangeLayer( obj )
   SetEditorMode( val - 1 )
   --[[
   if val > 1 then
-    DebugRender( math.pow( 2, val - 2 ) )
+    Debug.RenderState( math.pow( 2, val - 2 ) )
     settings.editorType = val - 1
   else
-    DebugRender( 0 )
+    Debug.RenderState( 0 )
     settings.editorType = 0
   end
   ]]
@@ -1637,14 +1637,14 @@ function SelectObjectsInRectangle( left, top, right, bottom, editorType )
     end
   end
   SelectObject( objects )
-  -- LogWrite( left..':'..top..' => '..right..':'..bottom )
+  -- Debug.Log( left..':'..top..' => '..right..':'..bottom )
   return objects
 end --)
 
 --( Переключение режима редактора на default, renderable, collision, trigger
 function SetEditorMode( setMode )
   DoPause( true )
-  -- DebugRender( setMode == 0 and 0 or math.pow( 2, setMode - 1 ) )
+  -- Debug.RenderState( setMode == 0 and 0 or math.pow( 2, setMode - 1 ) )
   settings.editorType = setMode
   local modeToText = {
     [0] = 'default',
@@ -1654,10 +1654,10 @@ function SetEditorMode( setMode )
   }
   GUI.elements.layer:SetText( modeToText[ setMode ] )
   if setMode > 0 then
-    DebugRender( math.pow( 2, setMode - 1 ) )
+    Debug.RenderState( math.pow( 2, setMode - 1 ) )
     settings.editorType = setMode
   else
-    DebugRender( 0 )
+    Debug.RenderState( 0 )
     settings.editorType = 0
   end
   -- OnChangeLayer( GUI.elements.layer )

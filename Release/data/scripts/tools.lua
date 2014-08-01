@@ -35,7 +35,7 @@ end -- GetPixelByTile
 
 --[[ GetGridByCoords ]]
 function GetGridByCoords( x, y )
-  local size = GetGridSize()
+  local size = Config.GetGridSize()
 end -- GetGridByCoords
 
 --( разбивка строки на компоненты

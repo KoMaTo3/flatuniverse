@@ -1,4 +1,4 @@
-//#define _CRTDBG_MAP_ALLOC
+Ôªø//#define _CRTDBG_MAP_ALLOC
 //#include <stdlib.h>
 //#include <crtdbg.h>
 
@@ -12,6 +12,7 @@
 #include "core/textparser.h"
 #include "core/interngl.h"
 #include "lua.h"
+#include "game/luaobject.h"
 
 Game *game = NULL;
 
@@ -49,7 +50,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   //CollisionElementPolygon::PointList polyPoints;
 
   game->core->CheckGLError( __LINE__, __FILE__ );
-  game->lua->Init();
+  game->lua->Init( game );
 
   game->core->CreateObject( "gui" )->SetLockToDelete( true )->SetSaveable( false );
 
@@ -78,7 +79,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetSize( Vec2( 100.0f, 100.0f ) );
   */
 
-  obj = game->core->CreateObject( "player" );
+  obj = game->core->CreateObject( "player", NULL, true );
   obj->SetLockToDelete( true );
   col = obj->EnableCollision();
   col->InitSquare( Vec3( 14.0f, 20.0f, 0.0f ) );
@@ -95,6 +96,17 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
   col->SetIsStatic( false );
   col->SetMass( 1000.0f );
+
+  memory scriptPlayer;
+  if( __fileManager->GetFile( "data/scripts/objects/player.lua", scriptPlayer, true ) ) {
+    Engine::LuaObject::BindTemplateToObject( obj->GetLuaObjectId(), obj, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, scriptPlayer.getData() );
+    memory playerData;
+    if( __fileManager->GetFile( "data/temp/player_data.txt", playerData ) ) {
+      Engine::LuaObject::LoadObjectDataFromDump( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, ( unsigned char* ) playerData.getData(), playerData.getLength() );
+      Engine::LuaObject::CallFunction( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, "OnCreate" );
+    }
+  }
+
   /*
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
   quad->SetColor( Vec4( 1.0f, 1.0f, 1.0f, worldAlpha ) );
@@ -120,7 +132,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   __log.PrintInfo( Filelevel_DEBUG, "sizeof( RenderableQuad ) = %d", sizeof( RenderableQuad ) );
 
-  //ÙÓÌÓ‚‡ˇ Í‡ÚËÌÍ‡
+  //—Ñ–æ–Ω–æ–≤–∞—è –∫–∞—Ä—Ç–∏–Ω–∫–∞
 
   /*
   obj = game->core->CreateObject( "bg-0" );
@@ -237,7 +249,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         bool doSave = false;
         if( f.Open( name, File_mode_READ ) == aOK ) { //file exists. replace?
           f.Close();
-          auto result = MessageBox( game->core->GetWindowHandle(), ( "‘‡ÈÎ '" + name + "' ÛÊÂ ÒÛ˘ÂÒÚ‚ÛÂÚ. «‡ÏÂÌËÚ¸?" ).c_str(), "¬ÌËÏ‡ÌËÂ!", MB_YESNO | MB_ICONWARNING );
+          auto result = MessageBox( game->core->GetWindowHandle(), ( "–§–∞–π–ª '" + name + "' —É–∂–µ —Å—É—â–µ—Å—Ç–≤—É–µ—Ç. –ó–∞–º–µ–Ω–∏—Ç—å?" ).c_str(), "–í–Ω–∏–º–∞–Ω–∏–µ!", MB_YESNO | MB_ICONWARNING );
           doSave = ( result == IDYES );
         } else {
           doSave = true;
@@ -329,7 +341,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
     if( game->core->keyboard.IsPressed( VK_SPACE ) )
     {
-      //font->SetText( "Omfg, is work ›O_oE" );
+      //font->SetText( "Omfg, is work –≠O_oE" );
     }
     */
 
@@ -464,6 +476,16 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   }
   //MessageBox( NULL, "Ok", "Debug", MB_OK );
 
+  __log.PrintInfo( Filelevel_DEBUG, "Player: x%p", game->core->GetObject( "player" ) );
+  __log.PrintInfo( Filelevel_DEBUG, "Player id: %d", game->core->GetObject( "player" )->GetLuaObjectId() );
+  Engine::LuaObject::CallFunction( game->core->GetObject( "player" )->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, "OnDestroy" );
+  char *playerSaveData = 0;
+  size_t playerSaveDataSize = 0;
+  Engine::LuaObject::SaveObjectDataToDump( game->core->GetObject( "player" )->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, playerSaveData, playerSaveDataSize );
+  File f( "data/temp/player_data.txt", File_mode_WRITE );
+  f.Write( playerSaveData, playerSaveDataSize );
+  f.Close();
+
   game->world->SaveToFile( "data/temp/testworld.fu" );
   DEF_DELETE( game );
 
@@ -567,6 +589,9 @@ void Game::ClearLuaTimers() {
     auto iterEnd = game->luaTimers.end();
     for( auto iter = game->luaTimers.begin(); iter != iterEnd; ++iter ) {
       if( !iter->dontPause ) {
+        if( iter->luaFunctionId ) {
+          game->lua->Unref( iter->luaFunctionId );
+        }
         game->luaTimers.erase( iter );
         deleted = true;
         break;
@@ -614,15 +639,18 @@ void Game::UpdateLuaTimers()
       timer.time -= ( this->core->GetState() == CORE_STATE_PAUSED && !timer.dontPause ? 0.0f : sTimer.GetDeltaF() );
       if( timer.time <= 0.0f ) {
         timer.active = false;
-        if( !timer.funcName.empty() ) {
-          timerProcs.push_back( GameLuaTimer( timer.id, timer.funcName ) );
+        if( !timer.funcName.empty() || timer.luaFunctionId ) {
+          timerProcs.push_back( GameLuaTimer( timer.id, timer.funcName, timer.luaFunctionId ) );
         }
       }
     }
   }
   for( auto &timer: timerProcs ) {
-    //__log.PrintInfo( Filelevel_DEBUG, "Game::UpdateLuaTimers => id[%d] func['%s']", timer.id, timer.funcName.c_str() );
-    LUACALLBACK_Timer( this->lua, timer.id, timer.funcName );
+    LUACALLBACK_Timer( this->lua, timer.id, timer.funcName, timer.luaFunctionId );
+    if( timer.luaFunctionId ) {
+      game->lua->Unref( timer.luaFunctionId );
+      timer.luaFunctionId = 0;
+    }
   }
 }//UpdateLuaTimers
 
@@ -798,7 +826,7 @@ void Game::LUA_SetCollisionStatic( const std::string &name, bool isStatic )
   LUA_SetTimer
 =============
 */
-Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPause )
+Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPause, const int luaFunctionId )
 {
   //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s']", funcName.c_str() );
   Dword id, count = game->luaTimers.size();
@@ -819,7 +847,8 @@ Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPaus
   game->luaTimers[ id ].funcName  = funcName;
   game->luaTimers[ id ].dontPause = dontPause;
   game->luaTimers[ id ].id = id;
-  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s'] id[%d] done", funcName.c_str(), id );
+  game->luaTimers[ id ].luaFunctionId = luaFunctionId;
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s'] id[%d] luaFunctionId[%d] done", funcName.c_str(), id, luaFunctionId );
   return id;
 }//LUA_SetTimer
 
@@ -833,6 +862,10 @@ void Game::LUA_StopTimer( Dword id )
 {
   if( id < game->luaTimers.size() ) {
     game->luaTimers[ id ].active = false;
+    if( game->luaTimers[ id ].luaFunctionId ) {
+      game->lua->Unref( game->luaTimers[ id ].luaFunctionId );
+      game->luaTimers[ id ].luaFunctionId = 0;
+    }
   }
 }//LUA_StopTimer
 
@@ -1265,7 +1298,7 @@ void Game::LUA_ObjectAddTrigger( const std::string &triggerName, const std::stri
 /*
 =============
   OnRemoveTrigger
-  œÓ‰˜Ë˘‡ÂÏ ‚ Ë„Â ‚Ò∏, ˜ÚÓ Ò‚ˇÁ‡ÌÓ Ò ÚË„„Â‡ÏË
+  –ü–æ–¥—á–∏—â–∞–µ–º –≤ –∏–≥—Ä–µ –≤—Å—ë, —á—Ç–æ —Å–≤—è–∑–∞–Ω–æ —Å —Ç—Ä–∏–≥–≥–µ—Ä–∞–º–∏
 =============
 */
 void Game::OnRemoveTrigger( ObjectTrigger *trigger )
@@ -1381,8 +1414,8 @@ std::string Game::LUA_GetCamera()
 void Game::LUA_ClearScene()
 {
   /*
-    1. ◊ËÒÚËÏ ÔÓÚÓÏÍÓ‚ core->root
-    2. ◊ËÒÚËÏ ÒÒ˚ÎÍË Ì‡ Ó·˙ÂÍÚ˚ ‚ ÏË‡ı World::__worldGridList (ObjectPointer)
+    1. –ß–∏—Å—Ç–∏–º –ø–æ—Ç–æ–º–∫–æ–≤ core->root
+    2. –ß–∏—Å—Ç–∏–º —Å—Å—ã–ª–∫–∏ –Ω–∞ –æ–±—ä–µ–∫—Ç—ã –≤ –º–∏—Ä–∞—Ö World::__worldGridList (ObjectPointer)
       
   */
   __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene core" );

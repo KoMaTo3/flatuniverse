@@ -251,6 +251,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
 {
   srand( ( Word ) time( 0 ) );
   Math::Init();
+  _tzset();
 
   char tmp[ 1024 ];
   GetModuleFileName( GetModuleHandle( NULL ), tmp, 1024 );
@@ -1563,11 +1564,11 @@ void Core::SetWindowTitle( const std::string &title )
   CreateObject
 =============
 */
-Object* Core::CreateObject( const std::string& name, Object *parent )
+Object* Core::CreateObject( const std::string& name, Object *parent, const bool initLuaUserdata )
 {
   if( !parent )
     parent = this->_rootObject;
-  Object* newObject = new Object( name, parent ); //parent автоматом аттачит this как дочерний объект
+  Object* newObject = new Object( name, parent, true, initLuaUserdata ); //parent автоматом аттачит this как дочерний объект
   //__log.PrintInfo( Filelevel_DEBUG, "Core::CreateObject => name['%s'] parent[x%X] parentName['%s']", name.c_str(), parent, parent->GetNameFull().c_str() );
 
   return newObject;

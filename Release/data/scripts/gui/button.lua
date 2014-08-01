@@ -90,12 +90,12 @@ function GUIButton:Render( dx, dy )
     dy = dy + 1
   end
   local offset = ( self.state == 1 and self.isHover ) and 1 or 0
-  Render( 'sprite', x0 + offset, y0 + offset, 0, x1 + offset, y1 + offset, 0, 'data/temp/blank.png', color.middle )
-  Render( 'line', x0 + offset, y0 + offset, 0, x1 + offset, y0 + offset, 0, color.light )
-  Render( 'line', x0 + offset, y0 + offset, 0, x0 + offset, y1 + offset, 0, color.light )
-  Render( 'line', x0 + offset, y1 + offset, 0, x1 + offset, y1 + offset, 0, color.dark )
-  Render( 'line', x1 + offset, y0 + offset, 0, x1 + offset, y1 + offset, 0, color.dark )
-  Render( 'text', x0 + 2 + offset,y0 + 2 + offset, 0, self.text, '000000ff' )
+  Debug.Render( 'sprite', x0 + offset, y0 + offset, 0, x1 + offset, y1 + offset, 0, 'data/temp/blank.png', color.middle )
+  Debug.Render( 'line', x0 + offset, y0 + offset, 0, x1 + offset, y0 + offset, 0, color.light )
+  Debug.Render( 'line', x0 + offset, y0 + offset, 0, x0 + offset, y1 + offset, 0, color.light )
+  Debug.Render( 'line', x0 + offset, y1 + offset, 0, x1 + offset, y1 + offset, 0, color.dark )
+  Debug.Render( 'line', x1 + offset, y0 + offset, 0, x1 + offset, y1 + offset, 0, color.dark )
+  Debug.Render( 'text', x0 + 2 + offset,y0 + 2 + offset, 0, self.text, '000000ff' )
   -- childs
   for key, item in pairs( self.childs ) do
     item:Render( dx + self.rect.left, dy + self.rect.top )

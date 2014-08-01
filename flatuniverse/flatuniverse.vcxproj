@@ -156,11 +156,47 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)\objectwidgetrenderable.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\src\game\lua.cpp" />
+    <ClCompile Include="..\src\game\luaobject.cpp" />
+    <ClCompile Include="..\src\game\luaobjects\camera.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)luaobjects_camera</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\config.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)luaobjects_config</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\core.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)luaobjects_core</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\debug.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)luaobjects_debug</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\keyboard.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)luaobjects_keyboard</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\mouse.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)luaobjects_mouse</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\object.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)luaobjects_object</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\scene.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)luaobjects_scene</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\tools.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)luaobjects_tools</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\src\game\luastatecheck.cpp" />
     <ClCompile Include="..\src\game\main.cpp" />
     <ClCompile Include="..\src\game\worldgrid.cpp" />
     <ClCompile Include="..\src\game\worldgridmgr.cpp" />
     <ClCompile Include="..\src\game\worldsaver.cpp" />
+    <ClCompile Include="..\src\luabins\fwrite.c" />
+    <ClCompile Include="..\src\luabins\load.c" />
+    <ClCompile Include="..\src\luabins\luabins.c" />
+    <ClCompile Include="..\src\luabins\luainternals.c" />
+    <ClCompile Include="..\src\luabins\lualess.c" />
+    <ClCompile Include="..\src\luabins\save.c" />
+    <ClCompile Include="..\src\luabins\savebuffer.c" />
+    <ClCompile Include="..\src\luabins\write.c" />
     <ClCompile Include="..\src\lua\lapi.c" />
     <ClCompile Include="..\src\lua\lauxlib.c" />
     <ClCompile Include="..\src\lua\lbaselib.c" />
@@ -363,6 +399,16 @@
     <ClInclude Include="..\src\core\widgets\renderable.h" />
     <ClInclude Include="..\src\game\game.h" />
     <ClInclude Include="..\src\game\lua.h" />
+    <ClInclude Include="..\src\game\luaobject.h" />
+    <ClInclude Include="..\src\game\luaobjects\camera.h" />
+    <ClInclude Include="..\src\game\luaobjects\config.h" />
+    <ClInclude Include="..\src\game\luaobjects\core.h" />
+    <ClInclude Include="..\src\game\luaobjects\debug.h" />
+    <ClInclude Include="..\src\game\luaobjects\keyboard.h" />
+    <ClInclude Include="..\src\game\luaobjects\mouse.h" />
+    <ClInclude Include="..\src\game\luaobjects\object.h" />
+    <ClInclude Include="..\src\game\luaobjects\scene.h" />
+    <ClInclude Include="..\src\game\luaobjects\tools.h" />
     <ClInclude Include="..\src\game\luastatecheck.h" />
     <ClInclude Include="..\src\game\worldgrid.h" />
     <ClInclude Include="..\src\game\worldgridmgr.h" />
@@ -381,6 +427,14 @@
     <ClInclude Include="..\src\jpeglib\jpeglib.h" />
     <ClInclude Include="..\src\jpeglib\jversion.h" />
     <ClInclude Include="..\src\jpeglib\transupp.h" />
+    <ClInclude Include="..\src\luabins\fwrite.h" />
+    <ClInclude Include="..\src\luabins\luabins.h" />
+    <ClInclude Include="..\src\luabins\luaheaders.h" />
+    <ClInclude Include="..\src\luabins\luainternals.h" />
+    <ClInclude Include="..\src\luabins\lualess.h" />
+    <ClInclude Include="..\src\luabins\savebuffer.h" />
+    <ClInclude Include="..\src\luabins\saveload.h" />
+    <ClInclude Include="..\src\luabins\write.h" />
     <ClInclude Include="..\src\lua\lapi.h" />
     <ClInclude Include="..\src\lua\lauxlib.h" />
     <ClInclude Include="..\src\lua\lcode.h" />

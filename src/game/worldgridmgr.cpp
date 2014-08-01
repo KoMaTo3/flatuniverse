@@ -1,4 +1,4 @@
-#include "worldgridmgr.h"
+п»ї#include "worldgridmgr.h"
 #include "core/tools.h"
 #include "core/timer.h"
 #include "core/file.h"
@@ -57,13 +57,13 @@ void World::GridManager::Update( bool forceLoadGrids )
 
     World::GridObjectList::iterator iter, iterEnd;
     Short x, y;
-    World::GridList greedsToUnload = *__worldGridList;  //список гридов, которые можно выгрузить
+    World::GridList greedsToUnload = *__worldGridList;  //СЃРїРёСЃРѕРє РіСЂРёРґРѕРІ, РєРѕС‚РѕСЂС‹Рµ РјРѕР¶РЅРѕ РІС‹РіСЂСѓР·РёС‚СЊ
     World::Grid *grid;
 
     //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => grids to unload %d", greedsToUnload.size() );
     //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => active objects %d", this->activeObjects.size() );
 
-    //проверка на валидность
+    //РїСЂРѕРІРµСЂРєР° РЅР° РІР°Р»РёРґРЅРѕСЃС‚СЊ
     bool isActiveObjectsValid;
     do
     {
@@ -93,12 +93,12 @@ void World::GridManager::Update( bool forceLoadGrids )
         grid = this->IsGridLoaded( newPos );
         if( !grid )
         {
-          //подгружаем новый грид
+          //РїРѕРґРіСЂСѓР¶Р°РµРј РЅРѕРІС‹Р№ РіСЂРёРґ
           this->LoadGrid( newPos, forceLoadGrids );
         }
         else
         {
-          //убираем грид из списка на выгрузку т.к. грид ещё нам нужен
+          //СѓР±РёСЂР°РµРј РіСЂРёРґ РёР· СЃРїРёСЃРєР° РЅР° РІС‹РіСЂСѓР·РєСѓ С‚.Рє. РіСЂРёРґ РµС‰С‘ РЅР°Рј РЅСѓР¶РµРЅ
           World::GridList::iterator iterGrid, iterGridEnd = greedsToUnload.end();
           for( iterGrid = greedsToUnload.begin(); iterGrid != iterGridEnd; ++iterGrid )
             if( *iterGrid == grid )
@@ -121,7 +121,7 @@ void World::GridManager::Update( bool forceLoadGrids )
       iterGrid = greedsToUnload.begin();
     }
 
-    //перенос объектов из грида в грид
+    //РїРµСЂРµРЅРѕСЃ РѕР±СЉРµРєС‚РѕРІ РёР· РіСЂРёРґР° РІ РіСЂРёРґ
     iterGridEnd = __worldGridList->end();
     bool  finded,
           keepChecking = true;
@@ -147,7 +147,7 @@ void World::GridManager::Update( bool forceLoadGrids )
         }
       }//for
     }//for
-    //Проверка на выход объектов за пределы гридов: проверяем все динамические коллизии
+    //РџСЂРѕРІРµСЂРєР° РЅР° РІС‹С…РѕРґ РѕР±СЉРµРєС‚РѕРІ Р·Р° РїСЂРµРґРµР»С‹ РіСЂРёРґРѕРІ: РїСЂРѕРІРµСЂСЏРµРј РІСЃРµ РґРёРЅР°РјРёС‡РµСЃРєРёРµ РєРѕР»Р»РёР·РёРё
     /*
     if( __objectByCollision && __objectByCollision->size() ) {
       ObjectByCollisionList::iterator iter, iterTmp, iterEnd;
@@ -409,7 +409,7 @@ void World::GridManager::LoadFromFile( const std::string& fileName )
 /*
 =============
   ClearWorld
-  Очистка текущих гридов от объектов. Сами гриды при этом остаются
+  РћС‡РёСЃС‚РєР° С‚РµРєСѓС‰РёС… РіСЂРёРґРѕРІ РѕС‚ РѕР±СЉРµРєС‚РѕРІ. РЎР°РјРё РіСЂРёРґС‹ РїСЂРё СЌС‚РѕРј РѕСЃС‚Р°СЋС‚СЃСЏ
 =============
 */
 void World::GridManager::ClearWorld()

@@ -122,16 +122,16 @@ function GUISliderVertical:Render( dx, dy )
       GUI.tooltip:SetText( string.format( self.textFormat, self.value ) )
       GUI.tooltip:CropByTextWidth()
     end
-    Render( 'sprite', x0 + 4, bgTop - 2, -1, x1 - 6, bgBottom + 2, -1, 'data/temp/blank.png', 'ffffffff' )
-    Render( 'rect', x0 + 4, bgTop - 3, -1, x1 - 5, bgBottom + 2, -1, '444444ff' )
-    Render( 'sprite', x0 + 6, bgTop, -1, x1 - 8, bgBottom, -1, 'data/temp/blank.png', '888888aa' )
+    Debug.Render( 'sprite', x0 + 4, bgTop - 2, -1, x1 - 6, bgBottom + 2, -1, 'data/temp/blank.png', 'ffffffff' )
+    Debug.Render( 'rect', x0 + 4, bgTop - 3, -1, x1 - 5, bgBottom + 2, -1, '444444ff' )
+    Debug.Render( 'sprite', x0 + 6, bgTop, -1, x1 - 8, bgBottom, -1, 'data/temp/blank.png', '888888aa' )
   else
     self.rulerOffset = 0
   end
-  Render( 'sprite', x0, y0 + self.rulerOffset + resRulerOffset - 4, rulerZ, x1, y1 + self.rulerOffset + resRulerOffset + 4, rulerZ, 'data/textures/gui/slider-vertical.tga', self.isHover and 'aa4444ff' or ( self.isEnabled and 'ffffffff' or 'ffffff55' ) )
+  Debug.Render( 'sprite', x0, y0 + self.rulerOffset + resRulerOffset - 4, rulerZ, x1, y1 + self.rulerOffset + resRulerOffset + 4, rulerZ, 'data/textures/gui/slider-vertical.tga', self.isHover and 'aa4444ff' or ( self.isEnabled and 'ffffffff' or 'ffffff55' ) )
   if self.isHover then
     local text = self.title..': '..string.format( self.textFormat, self.value )
-    Render( 'text', x0 + 8 - math.floor( Render( 'getTextWidth', text ) / 2 ), y0 + 15, -0.9, text, '000000ff' )
+    Debug.Render( 'text', x0 + 8 - math.floor( Debug.Render( 'getTextWidth', text ) / 2 ), y0 + 15, -0.9, text, '000000ff' )
   end
 
   -- childs

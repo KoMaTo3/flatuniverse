@@ -175,6 +175,7 @@ private:
   ObjectTrigger   *trigger;
   Tags            *tags;    //список тегов
   std::string     luaScript;  //скрипты
+  int             luaObjectId; //id объекта в реестре lua
 
   /*
   struct {
@@ -209,7 +210,7 @@ protected:
 
 public:
   Object();
-  Object( const std::string &objectName, Object* parentObject, bool setIsSaveable = true );
+  Object( const std::string &objectName, Object* parentObject, bool setIsSaveable = true, bool setLuaUserdata = false );
   virtual ~Object();
 
   const std::string&  GetName             ();
@@ -263,6 +264,10 @@ public:
   const std::string&  GetLuaScript        () { return this->luaScript; }
   void                RecalculateRenderableZ( const float z );
   void                SetNeedToUnload     ( const bool unload );
+  inline
+  int                 GetLuaObjectId      () { return this->luaObjectId; }
+  inline
+  void                SetLuaObjectId      ( const int setId ) { this->luaObjectId = setId; }
 
   static
     RenderableQuad*   CreateExternalRenderableInList( float zIndex, CoreRenderableList *inRenderableList, CoreRenderableListIndicies  *inRenderableIndicies, CoreRenderableListIndicies  *inRenderableFreeIndicies, GLushort *outIndex );

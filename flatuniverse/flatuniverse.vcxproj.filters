@@ -31,6 +31,12 @@
     <Filter Include="core\widgets">
       <UniqueIdentifier>{cbaa2d77-d5c4-4da1-ac8a-03edae0fb66d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="luabins">
+      <UniqueIdentifier>{8ff18b69-8643-489c-914e-fd1ed87835c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\luaobjects">
+      <UniqueIdentifier>{99abdb3f-e107-48df-936d-86f6f7d9616b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\collision.cpp">
@@ -621,6 +627,60 @@
     <ClCompile Include="..\src\core\entity.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\luabins\fwrite.c">
+      <Filter>luabins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\luabins\load.c">
+      <Filter>luabins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\luabins\luabins.c">
+      <Filter>luabins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\luabins\luainternals.c">
+      <Filter>luabins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\luabins\lualess.c">
+      <Filter>luabins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\luabins\save.c">
+      <Filter>luabins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\luabins\savebuffer.c">
+      <Filter>luabins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\luabins\write.c">
+      <Filter>luabins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobject.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\object.cpp">
+      <Filter>game\luaobjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\debug.cpp">
+      <Filter>game\luaobjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\core.cpp">
+      <Filter>game\luaobjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\keyboard.cpp">
+      <Filter>game\luaobjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\mouse.cpp">
+      <Filter>game\luaobjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\camera.cpp">
+      <Filter>game\luaobjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\config.cpp">
+      <Filter>game\luaobjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\scene.cpp">
+      <Filter>game\luaobjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game\luaobjects\tools.cpp">
+      <Filter>game\luaobjects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\collision.h">
@@ -964,6 +1024,60 @@
     </ClInclude>
     <ClInclude Include="..\src\core\entity.h">
       <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\luabins\fwrite.h">
+      <Filter>luabins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\luabins\luabins.h">
+      <Filter>luabins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\luabins\luaheaders.h">
+      <Filter>luabins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\luabins\luainternals.h">
+      <Filter>luabins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\luabins\lualess.h">
+      <Filter>luabins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\luabins\savebuffer.h">
+      <Filter>luabins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\luabins\saveload.h">
+      <Filter>luabins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\luabins\write.h">
+      <Filter>luabins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobject.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobjects\object.h">
+      <Filter>game\luaobjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobjects\debug.h">
+      <Filter>game\luaobjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobjects\core.h">
+      <Filter>game\luaobjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobjects\keyboard.h">
+      <Filter>game\luaobjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobjects\mouse.h">
+      <Filter>game\luaobjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobjects\camera.h">
+      <Filter>game\luaobjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobjects\config.h">
+      <Filter>game\luaobjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobjects\scene.h">
+      <Filter>game\luaobjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game\luaobjects\tools.h">
+      <Filter>game\luaobjects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

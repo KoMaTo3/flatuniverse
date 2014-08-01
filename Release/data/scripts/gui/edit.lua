@@ -117,7 +117,7 @@ function GUIEdit:Create( x0, y0, width, setText, setOnChangeHandler, parent, set
   else
     parent.childs[ #parent.childs + 1 ] = obj
   end
-  res.cursorPosPixel = Render( 'getTextWidth', setText )
+  res.cursorPosPixel = Debug.Render( 'getTextWidth', setText )
   return res
 end -- Create
 
@@ -139,26 +139,26 @@ function GUIEdit:Render( dx, dy )
   elseif cursorX + self.contentRenderOffset < x0 + 2 then
     self.contentRenderOffset = x0 - cursorX + 2
   end
-  Render( 'sprite', x0, y0, 0, x1, y1, 0, 'data/temp/blank.png', self.colors.inner )
-  Render( 'rect', x0, y0, 0, x1, y1, 0, self.colors.border )
-  Render( 'scissorEnable', x0, settings.windowSize.y - y1 + 2, x1 - 2, settings.windowSize.y - y0 )
+  Debug.Render( 'sprite', x0, y0, 0, x1, y1, 0, 'data/temp/blank.png', self.colors.inner )
+  Debug.Render( 'rect', x0, y0, 0, x1, y1, 0, self.colors.border )
+  Debug.Render( 'scissorEnable', x0, settings.windowSize.y - y1 + 2, x1 - 2, settings.windowSize.y - y0 )
   if self.selection ~= 0 then -- selection: background
-    Render( 'sprite', x0 + self.cursorPosPixel + 1 + self.contentRenderOffset, y0 + 1, 0, x0 + self.cursorPosPixel + 1 + self.contentRenderOffset + ( self.selection > 0 and self.selectionWidth or -self.selectionWidth ), y1 - 1, 0, 'data/temp/blank.png', self.colors.selection )
+    Debug.Render( 'sprite', x0 + self.cursorPosPixel + 1 + self.contentRenderOffset, y0 + 1, 0, x0 + self.cursorPosPixel + 1 + self.contentRenderOffset + ( self.selection > 0 and self.selectionWidth or -self.selectionWidth ), y1 - 1, 0, 'data/temp/blank.png', self.colors.selection )
   end
-  Render( 'text', x0 + 2 + self.contentRenderOffset,y0, 0, self.text, '000000ff' )
+  Debug.Render( 'text', x0 + 2 + self.contentRenderOffset,y0, 0, self.text, '000000ff' )
   if self.selection ~= 0 then -- selection: highlight text
     local selectionStartPos = self.cursorPos + self.selection
     local selectionLeft = math.min( self.cursorPos, selectionStartPos )
     local selectionRight = math.max( self.cursorPos, selectionStartPos )
-    local selectionLeftPixel = Render( 'getTextWidth', self.text:sub( 1, selectionLeft ) )
+    local selectionLeftPixel = Debug.Render( 'getTextWidth', self.text:sub( 1, selectionLeft ) )
     local selectedText = self.text:sub( selectionLeft + 1, selectionRight )
-    --local selectionWidthPixel = Render( 'getTextWidth', selectedText )
-    Render( 'text', x0 + self.contentRenderOffset + selectionLeftPixel + 2,y0, 0, selectedText, 'ffffffff' )
+    --local selectionWidthPixel = Debug.Render( 'getTextWidth', selectedText )
+    Debug.Render( 'text', x0 + self.contentRenderOffset + selectionLeftPixel + 2,y0, 0, selectedText, 'ffffffff' )
   end
   if self.state > 0 then -- cursor
-    Render( 'line', cursorX + self.contentRenderOffset, y0 + 1, 0, cursorX + self.contentRenderOffset, y1 - 1, 0, cursorColor )
+    Debug.Render( 'line', cursorX + self.contentRenderOffset, y0 + 1, 0, cursorX + self.contentRenderOffset, y1 - 1, 0, cursorColor )
   end
-  Render( 'scissorDisable' )
+  Debug.Render( 'scissorDisable' )
   -- childs
   for key, item in pairs( self.childs ) do
     item:Render( dx + self.rect.left, dy + self.rect.top )
@@ -183,16 +183,16 @@ function GUIEdit:TestInRect( x, y, dx, dy )
     self.hoverPos.x = x - ( self.rect.left + dx )
     self.hoverPos.y = y - ( self.rect.top + dy )
     if self.state == 2 then -- select my mouse
-      -- Alert(2)
+      -- Debug.Alert(2)
       -- calculate cursor position
-      LogWrite( self.hoverPos.x )
+      Debug.Log( self.hoverPos.x )
       local x
       local oldX = self.contentRenderOffset
       local oldCursorPos = self.cursorPos
       -- = self.contentRenderOffset
       self.cursorPos = #self.text
       for q = 1, #self.text do
-        x = self.contentRenderOffset + Render( 'getTextWidth', self.text:sub( 1, q ) )
+        x = self.contentRenderOffset + Debug.Render( 'getTextWidth', self.text:sub( 1, q ) )
         if x > self.hoverPos.x then
           self.cursorPos = q - 1
           do break end
@@ -239,7 +239,7 @@ function GUIEdit:OnClick( id, isPressed )
       -- = self.contentRenderOffset
       self.cursorPos = #self.text
       for q = 1, #self.text do
-        x = self.contentRenderOffset + Render( 'getTextWidth', self.text:sub( 1, q ) )
+        x = self.contentRenderOffset + Debug.Render( 'getTextWidth', self.text:sub( 1, q ) )
         if x > self.hoverPos.x then
           self.cursorPos = q - 1
           do break end
@@ -414,7 +414,7 @@ function GUIEdit:OnKeyboard( id, isPressed )
             char = self.charTranslate[ id ]
           else
             -- char = string.format( "%c", id )
-            -- Alert(id)
+            -- Debug.Alert(id)
           end
         end
         if #char > 0 and self.selection ~= 0 then
@@ -441,12 +441,12 @@ end -- OnKeyboard
 
 --[[ UpdateCursor ]]
 function GUIEdit:UpdateCursor()
-  self.cursorPosPixel = Render( 'getTextWidth', self.text:sub( 1, self.cursorPos ) )
-  -- Alert(self.selection)
+  self.cursorPosPixel = Debug.Render( 'getTextWidth', self.text:sub( 1, self.cursorPos ) )
+  -- Debug.Alert(self.selection)
   if self.selection ~= 0 then
-    self.selectionWidth = self.selection > 0 and Render( 'getTextWidth', self.text:sub( self.cursorPos + 1, self.cursorPos + self.selection ) ) or Render( 'getTextWidth', self.text:sub( self.cursorPos + self.selection + 1, self.cursorPos ) )
+    self.selectionWidth = self.selection > 0 and Debug.Render( 'getTextWidth', self.text:sub( self.cursorPos + 1, self.cursorPos + self.selection ) ) or Debug.Render( 'getTextWidth', self.text:sub( self.cursorPos + self.selection + 1, self.cursorPos ) )
   else
     self.selectionWidth = 0
   end
-  -- Alert(self.selectionWidth)
+  -- Debug.Alert(self.selectionWidth)
 end -- UpdateCursor

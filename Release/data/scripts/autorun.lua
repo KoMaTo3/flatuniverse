@@ -29,6 +29,32 @@ function table.copy( t )
   return t2
 end
 
+--[[ UpdatePlayerAnimation ]]
+function UpdatePlayerAnimation( timerid )
+  local curTime = GetTime()
+  local timer = 0.2
+  if curTime - playerState.onGroundTime < 0.1 then  -- on ground
+    if playerState.currentAction == 2 then
+      playerState.currentAction = 1
+      ObjectSetAnimation( 'player', 'player/mario', ( math.abs( playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
+    end
+  else  -- on air
+    timer = 0.5
+    if playerState.currentAction ~= 2 then
+      playerState.currentAction = 2
+      ObjectSetAnimation( 'player', 'player/mario', 'jump-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
+    end
+  end
+  Core.SetTimer( timer, UpdatePlayerAnimation, true )
+end -- UpdatePlayerAnimation
+
+--(
+function UpdateBackGround( timerId )
+  local x, y = ObjectGetPos( 'player' )
+  ObjectSetPos( 'background', x, y * 0.5 + 50 )
+  Core.SetTimer( 0, UpdateBackGround, true )
+end --)
+
 --[[ Main ]]
 function Main()
   LoadScript( 'data/scripts/gui.lua' )
@@ -53,13 +79,13 @@ function Main()
   -- ObjectAttr( 'wall', { 'textureName' } )
   -- ObjectAttr( 'wall', { 'textureName' } )
   -- local r,g,b,a = ObjectAttr( 'wall', { 'color' } )
-  -- Alert( '', r..':'..g..':'..b..':'..a )
-  ListenKeyboard( 'PlayerControl' )
+  -- Debug.Alert( '', r..':'..g..':'..b..':'..a )
+  Keyboard.Listen( 'PlayerControl' )
   ListenCollision( 'player', 'CollisionPlayer' )
   ObjectAddTag( 'player', 'player' )
   ObjectSetAnimation( 'player', 'player/mario', 'stay-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
-  SetTimer( 1 / 10, 'UpdatePlayerAnimation', true )
-  SetTimer( 0, 'UpdateBackGround', true )
+  Core.SetTimer( 1 / 10, UpdatePlayerAnimation, true )
+  Core.SetTimer( 0, UpdateBackGround, true )
   ObjectAttr( 'player', { collisionAcceleration = '0 1500', lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1', lightPointPenetration = 3 } )
   SetLightAmbient( settings.ambientLight.R, settings.ambientLight.G, settings.ambientLight.B, settings.ambientLight.A )
   -- ObjectAttr( 'background', { z = 1 } )
@@ -67,11 +93,11 @@ function Main()
   -- ObjectRemove( 'camera-mario-style' )
   -- ObjectCreate( 'camera-mario-style', 0, 0, 0 )
   -- SetCamera( 'camera-mario-style' )
-  -- SetTimer( 1/60, 'UpdateCamera' )
+  -- Core.SetTimer( 1/60, 'UpdateCamera' )
   -- local dump = serialize( Main )
-  -- Alert( '', dump )
+  -- Debug.Alert( '', dump )
   -- local test = load( dump )()
-  -- Alert('',test('player','player',false))
+  -- Debug.Alert('',test('player','player',false))
 end -- Main
 Main()
 
@@ -117,7 +143,34 @@ function CollisionPlayer( player, target, flags, vx, vy )
     end
   elseif IsObjectUnderThis( player, target ) then
     if ObjectHasTag( target, 'brick-breakable' ) then
-      animation[ 'timer'..SetTimer( 0.5, 'DoAnimationBrickDisplace' ) ] = { step = 1, time = 0, timeMax = 8, object = target }
+      animation[ 'timer'..Core.SetTimer( 0.5, function( timerId )
+          local keyByTimer = 'timer'..timerId
+          if animation[ keyByTimer ] == nil then
+            do return false end
+          end
+
+          local anim = animation[ keyByTimer ]
+
+          if anim.step == 1 then
+            ObjectStopAnimation( anim.object )
+            ObjectRemoveTag( anim.object, 'push-bottom' )
+            ObjectAddTag( anim.object, 'brick-breakable' )
+            ObjectAttr( anim.object, { color = '1 1 1 1', renderableRotation = 0 } )
+            animation[ keyByTimer ] = nil
+            --[[
+            anim.time = anim.time + 1
+            if anim.time < anim.timeMax then
+              ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y - math.sin( anim.time / anim.timeMax * 3.14 ) * 10 ) } )
+              animation[ 'timer'..Core.SetTimer( 1/60, 'DoAnimationBrickDisplace' ) ] = anim
+            else
+              ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y ) } )
+              ObjectRemoveTag( anim.object, 'push-bottom' )
+              ObjectAddTag( anim.object, 'brick-breakable' )
+            end
+            ]]
+          end
+        end
+      ) ] = { step = 1, time = 0, timeMax = 8, object = target }
       ObjectAddTag( target, 'push-bottom' )
       ObjectRemoveTag( target, 'brick-breakable' )
       ObjectStopAnimation( target )
@@ -159,8 +212,8 @@ function PlayerControl( id, isPressed )
             StopTimer( playerState.PlayerEndLongJumpTimer )
             playerState.PlayerEndLongJumpTimer = -1
           end
-          playerState.longJumpTimer = SetTimer( 0.1, 'PlayerDoLongJump' )
-          playerState.PlayerEndLongJumpTimer = SetTimer( 0.5, 'PlayerEndLongJump' )
+          playerState.longJumpTimer = Core.SetTimer( 0.1, PlayerDoLongJump )
+          playerState.PlayerEndLongJumpTimer = Core.SetTimer( 0.5, PlayerEndLongJump )
           playerState.onGroundTime = 0
           ObjectSetAnimation( 'player', 'player/mario', 'jump-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
           playerState.currentAction = 2
@@ -259,7 +312,7 @@ function PlayerDoLongJump( timerId )
     local vx, vy = ObjectAttr( 'player', { 'collisionVelocity' } )
     playerState.longJumpStep = playerState.longJumpStep + 1
     ObjectAttr( 'player', { collisionVelocity = vx..' '..( vy - playerState.longJumpPower / playerState.longJumpStep )  } )
-    SetTimer( 0.1, 'PlayerDoLongJump' )
+    Core.SetTimer( 0.1, PlayerDoLongJump )
   end
 end -- PlayerDoLongJump
 
@@ -272,32 +325,6 @@ function PlayerEndLongJump( timerId )
     playerState.longJumpTimer = -1
   end
 end -- PlayerEndLongJump
-
---[[ UpdatePlayerAnimation ]]
-function UpdatePlayerAnimation( timerid )
-  local curTime = GetTime()
-  local timer = 0.2
-  if curTime - playerState.onGroundTime < 0.1 then  -- on ground
-    if playerState.currentAction == 2 then
-      playerState.currentAction = 1
-      ObjectSetAnimation( 'player', 'player/mario', ( math.abs( playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
-    end
-  else  -- on air
-    timer = 0.5
-    if playerState.currentAction ~= 2 then
-      playerState.currentAction = 2
-      ObjectSetAnimation( 'player', 'player/mario', 'jump-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
-    end
-  end
-  SetTimer( timer, 'UpdatePlayerAnimation', true )
-end -- UpdatePlayerAnimation
-
---(
-function UpdateBackGround( timerId )
-  local x, y = ObjectGetPos( 'player' )
-  ObjectSetPos( 'background', x, y * 0.5 + 50 )
-  SetTimer( 0, 'UpdateBackGround', true )
-end --)
 
 --[[ IsObjectUnderThis ]]
 function IsObjectUnderThis( object, target )
@@ -368,11 +395,11 @@ function PushMushroom( object )
   local brickX, brickY = ObjectGetPos( object )
   ObjectCreate( itemName, brickX, brickY, -0.1 )
   ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '32 32', collision = true, collisionSize = '32 32', collisionStatic = true } )
-  animation[ 'timer'..SetTimer( 0.1, 'DoAnimationMushroom' ) ] = { step = 1, time = 0, object = itemName, tile = object }
+  animation[ 'timer'..Core.SetTimer( 0.1, DoAnimationMushroom ) ] = { step = 1, time = 0, object = itemName, tile = object }
   ObjectRemoveTag( object, 'has-mushroom' )
   ObjectAttr( object, { renderable = false } )
   ObjectSetAnimation( object, 'supermario/brick2', 'do' )
-  animation[ 'timer'..SetTimer( 0.5, 'DoAnimationBrick' ) ] = { step = 1, time = 0, object = itemName, tile = object }
+  animation[ 'timer'..Core.SetTimer( 0.5, DoAnimationBrick ) ] = { step = 1, time = 0, object = itemName, tile = object }
 end -- PushMushroom
 
 --[[ PushCoin]]
@@ -382,14 +409,14 @@ function PushCoin( object )
   ObjectCreate( itemName, brickX, brickY, -1.0, true )
   -- ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/coin0.png', renderableSize = '32 32' } )
   ObjectSetAnimation( itemName, 'supermario/coin', 'do' )
-  animation[ 'timer'..SetTimer( 1.0, 'DoAnimationCoin' ) ] = { step = 1, time = 0, object = itemName, tile = object }
+  animation[ 'timer'..Core.SetTimer( 1.0, DoAnimationCoin ) ] = { step = 1, time = 0, object = itemName, tile = object }
   ObjectRemoveTag( object, 'has-coin' )
   ObjectAttr( object, { renderable = false, lightPoint = false } )
   ObjectSetAnimation( object, 'supermario/brick2', 'do' )
-  animation[ 'timer'..SetTimer( 0.5, 'DoAnimationBrick' ) ] = { step = 1, time = 0, object = itemName, tile = object }
+  animation[ 'timer'..Core.SetTimer( 0.5, DoAnimationBrick ) ] = { step = 1, time = 0, object = itemName, tile = object }
   -- ObjectAttr( object, { textureName = 'textures/tiles/bricks/brick2.png' } )
   -- ObjectAttr( itemName, { renderable = true, textureName = 'textures/tiles/coin0.png', renderableSize = '32 32' } )
-  -- animation[ 'timer'..SetTimer( 0.1, 'DoAnimationCoin' ) ] = { step = 1, time = 0, object = itemName, tile = object }
+  -- animation[ 'timer'..Core.SetTimer( 0.1, 'DoAnimationCoin' ) ] = { step = 1, time = 0, object = itemName, tile = object }
   -- ObjectRemoveTag( object, 'has-coin' )
 end -- PushCoin
 
@@ -407,7 +434,7 @@ function DoAnimationMushroom( timerId )
     local x, y = ObjectGetPos( anim.object )
     ObjectSetPos( anim.object, x, y - 1 )
     if anim.time < 32 then
-      animation[ 'timer'..SetTimer( 1/40, 'DoAnimationMushroom' ) ] = anim
+      animation[ 'timer'..Core.SetTimer( 1/40, DoAnimationMushroom ) ] = anim
     else
       -- ObjectAddTag( anim.tile, 'has-mushroom' )
       animation[ keyByTimer ] = nil
@@ -498,37 +525,8 @@ function UpdateCamera( timerId )
   local _, cy = ObjectGetPos( camera )
   local px, _ = ObjectGetPos( 'player' )
   ObjectSetPos( camera, math.max( px, 0 ), cy )
-  SetTimer( 0, 'UpdateCamera', true ) -- стараться избегать 0-таймеров, т.к. они зависят от быстродействия приложения и исполняются каждый тик
+  Core.SetTimer( 0, UpdateCamera, true ) -- стараться избегать 0-таймеров, т.к. они зависят от быстродействия приложения и исполняются каждый тик
 end -- UpdateCamera
-
---[[ DoAnimationBrickDisplace ]]
-function DoAnimationBrickDisplace( timerId )
-  local keyByTimer = 'timer'..timerId
-  if animation[ keyByTimer ] == nil then
-    do return false end
-  end
-
-  local anim = animation[ keyByTimer ]
-
-  if anim.step == 1 then
-    ObjectStopAnimation( anim.object )
-    ObjectRemoveTag( anim.object, 'push-bottom' )
-    ObjectAddTag( anim.object, 'brick-breakable' )
-    ObjectAttr( anim.object, { color = '1 1 1 1', renderableRotation = 0 } )
-    animation[ keyByTimer ] = nil
-    --[[
-    anim.time = anim.time + 1
-    if anim.time < anim.timeMax then
-      ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y - math.sin( anim.time / anim.timeMax * 3.14 ) * 10 ) } )
-      animation[ 'timer'..SetTimer( 1/60, 'DoAnimationBrickDisplace' ) ] = anim
-    else
-      ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y ) } )
-      ObjectRemoveTag( anim.object, 'push-bottom' )
-      ObjectAddTag( anim.object, 'brick-breakable' )
-    end
-    ]]
-  end
-end -- DoAnimationBrickDisplace
 
 -- Objects test
 
@@ -561,10 +559,10 @@ end
 -- это пишет разраб
 local object = {
   OnLoad = function()
-    LogWrite( 'custom OnLoad' )
+    Debug.Log( 'custom OnLoad' )
   end,
   OnUnload = function()
-    LogWrite( 'custom OnUnload' )
+    Debug.Log( 'custom OnUnload' )
   end,
   somethingValue = 123,
 }
@@ -572,3 +570,31 @@ local object = {
 object.name = 'wall123'
 RegisterObject( object )
 object = nil  -- garbage collecting
+
+--[[
+local objectsList = {}
+for q = 1,10 do
+  local object = Object.New( 'testobject123-14-'..q, '', true )
+  object.fn.api:SetAnimation( 'bullet/test000', 'right' )
+  table.insert( objectsList, object )
+end
+
+function LuaObjectTest()
+  local num = 1
+  for id, object in pairs( objectsList ) do
+    local obj = Object.Get( 'testobject123-14-'..num )
+    Debug.Log( 'type of object = '..type( obj )..', fn = '..type( obj.fn ) )
+    obj.fn.api:Destroy()
+    -- object.fn.api:Destroy()
+    num = num + 1
+  end
+end
+Core.SetTimer( 3, 'LuaObjectTest' )
+]]
+
+Core.SetTimer( 0.1, function()
+    local object = Object.Get( 'player' )
+    object.fn:TestUserData()
+    -- object.fn:TestUserDataAgain()
+  end
+)

@@ -32,7 +32,7 @@ end -- GUILabel:SetPosition
 
 --[[ GUILabel:CropByTextWidth ]]
 function GUILabel:CropByTextWidth()
-  local width = Render( 'getTextWidth', self.text )
+  local width = Debug.Render( 'getTextWidth', self.text )
   self.rect.right = self.rect.left + width + 8
 end -- GUILabel:CropByTextWidth
 
@@ -86,9 +86,9 @@ function GUILabel:Render( dx, dy )
   local y0 = self.rect.top + dy
   local x1 = self.rect.right + dx
   local y1 = self.rect.bottom + dy
-  Render( 'sprite', x0, y0, self.z, x1, y1, self.z, 'data/temp/blank.png', self.colors.inner )
-  Render( 'rect', x0, y0, self.z, x1, y1, self.z, self.colors.border )
-  Render( 'text', x0 + 4,y0, self.z, self.text, '000000ff' )
+  Debug.Render( 'sprite', x0, y0, self.z, x1, y1, self.z, 'data/temp/blank.png', self.colors.inner )
+  Debug.Render( 'rect', x0, y0, self.z, x1, y1, self.z, self.colors.border )
+  Debug.Render( 'text', x0 + 4,y0, self.z, self.text, '000000ff' )
   -- childs
   for key, item in pairs( self.childs ) do
     item:Render( dx + self.rect.left, dy + self.rect.top )

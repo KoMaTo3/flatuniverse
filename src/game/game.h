@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "core/core.h"
 #include "core/object.h"
@@ -25,18 +25,19 @@ public:
   Lua                 *lua;
   bool                isActive; //true - playing, false - editing
 
-  //lua-таймеры
+  //lua-С‚Р°Р№РјРµСЂС‹
   struct GameLuaTimer
   {
     bool active;
     float time;
     std::string funcName;
-    bool dontPause; //не паузится от Game::SetActive
+    bool dontPause; //РЅРµ РїР°СѓР·РёС‚СЃСЏ РѕС‚ Game::SetActive
     Dword id;
+    int luaFunctionId;
 
     GameLuaTimer(){}
     GameLuaTimer( const GameLuaTimer& from )
-    :active( from.active ), time( from.time ), funcName( from.funcName ), dontPause( from.dontPause ), id( from.id )
+    :active( from.active ), time( from.time ), funcName( from.funcName ), dontPause( from.dontPause ), id( from.id ), luaFunctionId( from.luaFunctionId )
     { }
     GameLuaTimer& operator=( const GameLuaTimer& from ) {
       this->active = from.active;
@@ -44,26 +45,27 @@ public:
       this->funcName = from.funcName;
       this->id = from.id;
       this->time = from.time;
+      this->luaFunctionId = from.luaFunctionId;
       return *this;
     }
-    GameLuaTimer( int setId, const std::string& setFuncName )
-    :id( setId ), funcName( setFuncName )
+    GameLuaTimer( int setId, const std::string& setFuncName, const int setLuaFunctionId )
+    :id( setId ), funcName( setFuncName ), luaFunctionId( setLuaFunctionId )
     { }
   };
   std::vector< GameLuaTimer > luaTimers;
 
-  //lua-слушатели клавиатуры и мыши
+  //lua-СЃР»СѓС€Р°С‚РµР»Рё РєР»Р°РІРёР°С‚СѓСЂС‹ Рё РјС‹С€Рё
   typedef std::vector< std::string > luaKeyboardListenersList;
   luaKeyboardListenersList
       luaKeyboardListeners,
       luaMouseKeyListeners,
       luaMouseMoveListeners;
 
-  //lua-слушатели коллизий
+  //lua-СЃР»СѓС€Р°С‚РµР»Рё РєРѕР»Р»РёР·РёР№
   luaCollisionListenersList luaCollisionListeners;
   luaTriggerListenersList luaTriggerListeners;
 
-  //триггеры
+  //С‚СЂРёРіРіРµСЂС‹
   struct GameObjectTrigger
   {
     std::string   funcName;
@@ -90,7 +92,7 @@ public:
   static bool   LUA_RemoveObject      ( const std::string &name );
   static Vec2   LUA_GetObjectPos      ( const std::string &name );
   static void   LUA_SetObjectPos      ( const std::string &name, const Vec2 &pos );
-  static Dword  LUA_SetTimer          ( float time, const std::string &funcName, bool dontPause );
+  static Dword  LUA_SetTimer          ( float time, const std::string &funcName, bool dontPause, const int luaFunctionId );
   static void   LUA_StopTimer         ( Dword id );
   static void   LUA_CreateObject      ( const std::string &name, const Vec3 &pos, int notInGrid );
   static void   LUA_ListenKeyboard    ( const std::string &funcName );

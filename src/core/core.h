@@ -162,7 +162,7 @@ public:
   bool    Update              ();
   bool    Redraw              ();
 
-  Object* CreateObject        ( const std::string& name, Object *parent = NULL );
+  Object* CreateObject        ( const std::string& name, Object *parent = NULL, const bool initLuaUserdata = false );
   Font*   CreateFont          ( const std::string& name, Object *parent = NULL );
   Object* GetObject           ( const std::string& name, Object *parent = NULL );
   bool    RemoveObject        ( const std::string& name, bool useLockToDeleteFlag = false );

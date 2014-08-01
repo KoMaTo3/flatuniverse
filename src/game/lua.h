@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 
 extern "C" {
 
@@ -16,11 +16,12 @@ extern "C" {
 #define DEBU
 
 class Lua;
+class Game;
 
 typedef bool  LUAFUNCPROC_RemoveObject      ( const std::string &name );
 typedef Vec2  LUAFUNCPROC_GetObjectPos      ( const std::string &name );
 typedef void  LUAFUNCPROC_SetObjectPos      ( const std::string &name, const Vec2 &pos );
-typedef Dword LUAFUNCPROC_SetTimer          ( float time, const std::string &funcName, bool dontPause );
+typedef Dword LUAFUNCPROC_SetTimer          ( float time, const std::string &funcName, bool dontPause, const int luaFunctionId );
 typedef void  LUAFUNCPROC_StopTimer         ( Dword id );
 typedef void  LUAFUNCPROC_LogWrite          ( const std::string &text );
 typedef void  LUAFUNCPROC_CreateObject      ( const std::string &name, const Vec3 &pos, int notInGrid );
@@ -134,7 +135,7 @@ extern LUAFUNCPROC_WorldLoad        *LUAFUNC_WorldLoad;
 
 
 //callbacks
-void LUACALLBACK_Timer            ( Lua *lua, Dword id, const std::string &funcName );
+void LUACALLBACK_Timer            ( Lua *lua, Dword id, const std::string &funcName, const int luaFunctionId );
 void LUACALLBACK_ListenKeyboard   ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
 void LUACALLBACK_ListenMouseKey   ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
 void LUACALLBACK_ListenMouseMove  ( Lua *lua, const std::string &funcName, const Vec2 &pos );
@@ -149,25 +150,28 @@ class Lua
 {
 private:
   lua_State *luaState;
-  static File log;
 
 public:
+  static File log;
+
   Lua();
   virtual ~Lua();
 
-  bool  Init          ();
+  bool  Init          ( Game *game );
   void  Destroy       ();
   bool  RunFile       ( const std::string &fileName );
   bool  RunScript     ( const std::string &script );
   bool  CallFunction  ( const std::string &funcName );
   bool  CallTableTableFunction    ( const std::string &table, const std::string &key, const std::string &function );
   int   GetStackParmsCount();
+  void  Unref         ( const int referenceId );
+  static int  GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color );
 
   void  ShowError     ( const std::string &comment, const std::string &errorName );
 
   static int ErrorHandler       ( lua_State *lua );
 
-  //Lua-ÙÛÌÍˆËË
+  //Lua-—Ñ—É–Ω–∫—Ü–∏–∏
   static int LUA_Alert            ( lua_State *lua );
   static int LUA_ObjectRemove     ( lua_State *lua );
   static int LUA_GetObjectPos     ( lua_State *lua );
@@ -227,7 +231,7 @@ public:
   static int LUA_WorldLoad        ( lua_State *lua );
 
   //callbacks
-  static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName );
+  static void LUACALLBACK_Timer           ( Lua *lua, Dword id, const std::string &funcName, const int luaFunctionId );
   static void LUACALLBACK_ListenKeyboard  ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
   static void LUACALLBACK_ListenMouseKey  ( Lua *lua, const std::string &funcName, Dword keyId, bool isPressed );
   static void LUACALLBACK_ListenMouseMove ( Lua *lua, const std::string &funcName, const Vec2 &pos );
@@ -237,7 +241,6 @@ public:
   static void LUACALLBACK_ListenTrigger   ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, bool isInTrigger );
 
 private:
-  static int  GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color );
   static VariableAttributesListByPrioritet attrsListByPrioritet;
   void        LoadLibs();
 };

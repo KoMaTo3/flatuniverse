@@ -1,4 +1,4 @@
-#include "worldsaver.h"
+п»ї#include "worldsaver.h"
 #include "worldgrid.h"
 #include "core/file.h"
 #include "core/filemanager.h"
@@ -222,7 +222,7 @@ void World::Saver::SaveToFile( const std::string& fileName )
   memory header;
   MemoryWriter headerWriter( header, 1 );
 
-  //свободные блоки
+  //СЃРІРѕР±РѕРґРЅС‹Рµ Р±Р»РѕРєРё
   Dword freeBlocksCount = this->freeBlocks.size();
   headerWriter << freeBlocksCount;
   GridNumList::iterator iterFree, iterFreeEnd = this->freeBlocks.end();
@@ -230,7 +230,7 @@ void World::Saver::SaveToFile( const std::string& fileName )
     headerWriter << *iterFree;
   }
 
-  //гриды
+  //РіСЂРёРґС‹
   Dword gridsCount = this->grids.size();
   headerWriter << gridsCount;
   GridsList::iterator iter, iterEnd = this->grids.end();
@@ -247,7 +247,7 @@ void World::Saver::SaveToFile( const std::string& fileName )
     }
   }
 
-  //заголовок и его длина
+  //Р·Р°РіРѕР»РѕРІРѕРє Рё РµРіРѕ РґР»РёРЅР°
   Dword headerLength = header.getLength();
   f.Write( header.getData(), headerLength );
   f.Write( &headerLength, sizeof( headerLength ) );
@@ -296,7 +296,7 @@ Dword World::Saver::LoadFromFile( const std::string& fileName )
   this->worldData.Alloc( worldDataLength );
   memcpy( this->worldData.getData(), data.getData() + sizeof( World::VERSION ), worldDataLength );
 
-  //свободные блоки
+  //СЃРІРѕР±РѕРґРЅС‹Рµ Р±Р»РѕРєРё
   this->freeBlocks.clear();
   Dword freeBlocksCount;
   headerReader >> freeBlocksCount;
@@ -308,7 +308,7 @@ Dword World::Saver::LoadFromFile( const std::string& fileName )
     this->freeBlocks.push_back( blockNum );
   }
 
-  //гриды
+  //РіСЂРёРґС‹
   this->grids.clear();
   Dword gridsCount;
   headerReader >> gridsCount;

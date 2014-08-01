@@ -104,22 +104,22 @@ function GUISelect:Render( dx, dy )
   local x1 = self.rect.right + dx
   local y1 = self.rect.bottom + dy
 
-  Render( 'sprite', x0, y0, 0, x1, ( y0 + y1 ) / 2, 0, 'data/temp/blank.png', self.colors.middle0 )
-  Render( 'sprite', x0, ( y0 + y1 ) / 2, 0, x1, y1, 0, 'data/temp/blank.png', self.colors.middle1 )
-  Render( 'line', x0, y0, 0, x1, y0, 0, self.colors.light )
-  Render( 'line', x0, y0, 0, x0, y1, 0, self.colors.light )
-  Render( 'line', x0, y1, 0, x1, y1, 0, self.colors.dark )
-  Render( 'line', x1, y0, 0, x1, y1, 0, self.colors.dark )
-  Render( 'text', x0 + 3,y0, 0, self.values[ self.value ], '000000ff' )
-  Render( 'sprite', x1 - 10, y0 + 7, 0, x1 - 3, y0 + 11, 0, 'data/textures/gui/select.png', 'ffffffff' )
+  Debug.Render( 'sprite', x0, y0, 0, x1, ( y0 + y1 ) / 2, 0, 'data/temp/blank.png', self.colors.middle0 )
+  Debug.Render( 'sprite', x0, ( y0 + y1 ) / 2, 0, x1, y1, 0, 'data/temp/blank.png', self.colors.middle1 )
+  Debug.Render( 'line', x0, y0, 0, x1, y0, 0, self.colors.light )
+  Debug.Render( 'line', x0, y0, 0, x0, y1, 0, self.colors.light )
+  Debug.Render( 'line', x0, y1, 0, x1, y1, 0, self.colors.dark )
+  Debug.Render( 'line', x1, y0, 0, x1, y1, 0, self.colors.dark )
+  Debug.Render( 'text', x0 + 3,y0, 0, self.values[ self.value ], '000000ff' )
+  Debug.Render( 'sprite', x1 - 10, y0 + 7, 0, x1 - 3, y0 + 11, 0, 'data/textures/gui/select.png', 'ffffffff' )
 
   if self.state == 1 then
     local y = y1 + 1, color
     for value,name in pairs( self.values ) do
       color = ( self.valueHover == value ) and self.colors.focus or ( ( self.value == value ) and self.colors.current or self.colors.default )
-      Render( 'sprite', x0, y - 1, -1, x1, y + self.rect.height - 1, -1, 'data/temp/blank.png', color.bg )
-      Render( 'line', x0, y + self.rect.height - 1, -1, x1, y + self.rect.height - 1, -1, self.colors.dark )
-      Render( 'text', x0 + 5, y, -1, name, color.text )
+      Debug.Render( 'sprite', x0, y - 1, -1, x1, y + self.rect.height - 1, -1, 'data/temp/blank.png', color.bg )
+      Debug.Render( 'line', x0, y + self.rect.height - 1, -1, x1, y + self.rect.height - 1, -1, self.colors.dark )
+      Debug.Render( 'text', x0 + 5, y, -1, name, color.text )
       y = y + self.rect.height
     end
   end
