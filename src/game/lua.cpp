@@ -201,17 +201,26 @@ bool Lua::Init( Game *game )
   };
   //Object
   static const luaL_Reg object_functions[] = {
+    { "AddTrigger", &Engine::LuaObject_AddTrigger },
     { "Destroy", &Engine::LuaObject_Destroy },
-    { "SetAnimation", &Engine::LuaObject_SetAnimation },
+    { "GetId", &Engine::LuaObject_GetId },
     { "GetName", &Engine::LuaObject_GetName },
     { "GetNameFull", &Engine::LuaObject_GetNameFull },
     { "GetParentNameFull", &Engine::LuaObject_GetParentNameFull },
+    { "GetPos", &Engine::LuaObject_GetPos },
+    { "SetAnimation", &Engine::LuaObject_SetAnimation },
+    { "SetPos", &Engine::LuaObject_SetPos },
+    { "SetScript", &Engine::LuaObject_SetScript },
     { NULL, NULL }
   };
 
   static const luaL_Reg object_library_functions[] = {
-    { "New", &Engine::LuaObject_New },
     { "Get", &Engine::LuaObject_Get },
+    { "GetByPoint", &Engine::LuaObject_GetByPoint },
+    { "GetByRect", &Engine::LuaObject_GetByRect },
+    { "GetSelected", &Engine::LuaObject_GetSelected },
+    { "New", &Engine::LuaObject_New },
+    { "Select", &Engine::LuaObject_Select },
     { NULL, NULL }
   };
   Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, this->luaState, "Object", "", object_functions, object_library_functions /*, Sprite_gc */ );
@@ -220,8 +229,8 @@ bool Lua::Init( Game *game )
   static const luaL_Reg debug_library_functions[] = {
     { "Alert", &Engine::LuaDebug_Alert },
     { "Log", &Engine::LuaDebug_Log },
-    { "RenderState", &Engine::LuaDebug_RenderState },
     { "Render", &Engine::LuaDebug_Render },
+    { "RenderState", &Engine::LuaDebug_RenderState },
     { NULL, NULL }
   };
   Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_DEBUG, this->luaState, "Debug", "", none_functions, debug_library_functions );
@@ -229,6 +238,7 @@ bool Lua::Init( Game *game )
   //Core
   static const luaL_Reg core_library_functions[] = {
     { "SetTimer", &Engine::LuaCore_SetTimer },
+    { "StopTimer", &Engine::LuaCore_StopTimer },
     { NULL, NULL }
   };
   Engine::LuaObject::InitLibrary( game, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE, this->luaState, "Core", "", none_functions, core_library_functions );
@@ -293,6 +303,8 @@ bool Lua::Init( Game *game )
     Lua::attrsListByPrioritet.resize( __LUA_OBJECT_ATTRS_PRIORITET_COUNT );
   }
 
+  __log.PrintInfo( Filelevel_DEBUG, "Lua::Init => lua stack initial value %d", lua_gettop( this->luaState ) );
+
   return true;
 }//Init
 
@@ -353,6 +365,7 @@ void Lua::Destroy()
 {
   if( this->luaState )
   {
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::Destroy => stack = %d", lua_gettop( this->luaState ) );
     lua_close( this->luaState );
     this->luaState = NULL;
     __log.PrintInfo( Filelevel_DEBUG, "Lua::Destroy => destroyed" );
@@ -710,25 +723,29 @@ int Lua::LUA_StopTimer( lua_State *lua )
 */
 void Lua::LUACALLBACK_Timer( Lua *lua, Dword id, const std::string &funcName, const int luaFunctionId )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => funcName['%s'] luaFunctionId[%d]", funcName.c_str(), luaFunctionId );
+  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => timer id[%d] funcName['%s'] luaFunctionId[%d] stack[%d]", id, funcName.c_str(), luaFunctionId, lua->GetStackParmsCount() );
   LuaStateCheck state( lua->luaState );
 
   if( luaFunctionId ) {
     lua_rawgeti( lua->luaState, LUA_REGISTRYINDEX, luaFunctionId );
-    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => luaFunctionId[%d]", luaFunctionId );
+    __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => luaFunctionId[%d] isfunction[%d]", luaFunctionId, lua_isfunction( lua->luaState, -1 ) );
+    if( !lua_isfunction( lua->luaState, -1 ) ) {
+      lua_pop( lua->luaState, 1 );
+      __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => [%d] is not a function, stack[%d]", luaFunctionId, lua->GetStackParmsCount() );
+      return;
+    }
   } else {
     __log.PrintInfo( Filelevel_DEBUG, "Lua::LUACALLBACK_Timer => function['%s']", funcName.c_str() );
     lua_getglobal( lua->luaState, funcName.c_str() ); //stack: funcName
-    if( !lua_isfunction( lua->luaState, -1 ) )
-    {
+    if( !lua_isfunction( lua->luaState, -1 ) ) {
       __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => '%s' is not a function", funcName.c_str() );
       lua_pop( lua->luaState, 1 );  //stack:
+      return;
     }
   }
 
   lua_pushinteger( lua->luaState, id ); //stack: funcName id
-  if( lua_pcall( lua->luaState, 1, 0, 0 ) )
-  {
+  if( lua_pcall( lua->luaState, 1, 0, 0 ) ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_Timer => error by calling function '%s' or %d: %s", funcName.c_str(), luaFunctionId, lua_tostring( lua->luaState, -1 ) );
     lua_pop( lua->luaState, 1 );
     return;
@@ -820,7 +837,7 @@ void Lua::LUACALLBACK_ListenMouseKey( Lua *lua, const std::string &funcName, Dwo
   lua_pushboolean( lua->luaState, isPressed ); //stack: funcName keyId isPressed
   if( lua_pcall( lua->luaState, 2, 0, 0 ) )
   {
-    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenMouseKey => error by calling function '%s'", funcName.c_str() );
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenMouseKey => error by calling function '%s': %s", funcName.c_str(), lua_tostring( lua->luaState, -1 ) );
     return;
   }
 }//LUACALLBACK_ListenMouseKey
@@ -2081,6 +2098,7 @@ void Lua::LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, co
   if( !lua_isfunction( lua->luaState, -1 ) ) {
     __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenCollision => '%s' is not a function", funcName.c_str() );
     lua_pop( lua->luaState, 1 );  //stack:
+    return;
   }
 
   lua_pushstring( lua->luaState, objectName.c_str() ); //stack: funcName objectName
@@ -2089,7 +2107,8 @@ void Lua::LUACALLBACK_ListenCollision( Lua *lua, const std::string &funcName, co
   lua_pushnumber( lua->luaState, velocity.x ); //stack: funcName objectName targetName flags velocity.x
   lua_pushnumber( lua->luaState, velocity.y ); //stack: funcName objectName targetName flags velocity.x velocity.y
   if( lua_pcall( lua->luaState, 5, 0, 0 ) ) {
-    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenCollision => error by calling function '%s'", funcName.c_str() );
+    __log.PrintInfo( Filelevel_ERROR, "Lua::LUACALLBACK_ListenCollision => error by calling function '%s': %s", funcName.c_str(), lua_tostring( lua->luaState, -1 ) );
+    lua_pop( lua->luaState, 1 );
     return;
   }
 }//LUACALLBACK_ListenCollision

@@ -11,6 +11,17 @@
 
 class Lua;
 
+const std::string GAME_OBJECT_HANDLER_ONCOLLISION     = "OnCollision";
+const std::string GAME_OBJECT_HANDLER_ONCREATE        = "OnCreate";
+const std::string GAME_OBJECT_HANDLER_ONUPDATE        = "OnUpdate";
+const std::string GAME_OBJECT_HANDLER_ONFRAME         = "OnFrame";
+const std::string GAME_OBJECT_HANDLER_ONDESTROY       = "OnDestroy";
+const std::string GAME_OBJECT_HANDLER_ONKEYPRESS      = "OnKeyPress";
+const std::string GAME_OBJECT_HANDLER_ONKEYRELEASE    = "OnKeyRelease";
+const std::string GAME_OBJECT_HANDLER_ONMOUSEMOVE     = "OnMouseMove";
+const std::string GAME_OBJECT_HANDLER_ONMOUSEKEYPRESS = "OnMouseKeyPress";
+const std::string GAME_OBJECT_HANDLER_ONMOUSEKEYRELEASE = "OnMouseKeyRelease";
+
 class Game
 {
 public:
@@ -86,6 +97,22 @@ public:
   typedef std::hash_map< std::string, Animation::ANIMATION_SET_ACTION > AnimationSetActionByName;
   AnimationSetActionByName animationSetActionByName;
 
+  struct LuaFunctionHandler {
+    int referenceId;
+
+    LuaFunctionHandler( int setReferenceId ): referenceId( setReferenceId ) {}
+  };
+  typedef std::deque< LuaFunctionHandler > LuaFunctionHandlersList;
+  LuaFunctionHandlersList
+    luaObjectOnUpdate,
+    luaObjectOnFrame,
+    luaObjectOnKeyPress,
+    luaObjectOnKeyRelease,
+    luaObjectOnMouseMove,
+    luaObjectOnMouseKeyPress,
+    luaObjectOnMouseKeyRelease,
+    luaObjectOnCollision;
+
 public:
   Game();
   ~Game();
@@ -139,6 +166,8 @@ public:
   static void   LUA_WorldSave         ( const std::string& fileName );
   static void   LUA_WorldLoad         ( const std::string& fileName );
 
+  static void   LuaObject_OnSetScript ( Object *object );
+
   void Update();
   void UpdateLuaTimers();
   void SetActive( bool setActive );
@@ -156,6 +185,7 @@ public:
 
   static void   ObjectOnLoad          ( Object* obj );
   static void   ObjectOnUnload        ( Object* obj );
+  void          EraseLuaHandler       ( const int luaReferenceId, const std::string &functionName, LuaFunctionHandlersList &handlersList );
 
   //debug/test
 };

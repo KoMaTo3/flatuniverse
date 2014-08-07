@@ -13,6 +13,7 @@
 #include "core/interngl.h"
 #include "lua.h"
 #include "game/luaobject.h"
+#include "game/luaobjects/object.h"
 
 Game *game = NULL;
 
@@ -103,7 +104,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     memory playerData;
     if( __fileManager->GetFile( "data/temp/player_data.txt", playerData ) ) {
       Engine::LuaObject::LoadObjectDataFromDump( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, ( unsigned char* ) playerData.getData(), playerData.getLength() );
-      Engine::LuaObject::CallFunction( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, "OnCreate" );
+      Engine::LuaObject::CallFunction( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCREATE );
     }
   }
 
@@ -181,8 +182,19 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   while( game->core->Update() )
   {
+    int collisionManagerUpdateTimes = game->core->CollisionManagerIsUpdated();
 
-    if( false ) { //max FPS
+    //lua Object.OnUpdate
+    if( game->isActive && !game->luaObjectOnUpdate.empty() ) {
+      __log.PrintInfo( Filelevel_DEBUG, "collisionManagerUpdateTimes = %d", collisionManagerUpdateTimes );
+      for( int q = 0; q < collisionManagerUpdateTimes; ++q ) {
+        for( auto &reference: game->luaObjectOnUpdate ) {
+          Engine::LuaObject::CallFunction( reference.referenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONUPDATE );
+        }
+      }
+    }
+
+    if( true ) { //max FPS
       game->core->Redraw();
       ++currentFps;
     } else { //limited FPS
@@ -470,7 +482,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     */
       //obj->SetPosition( Vec3( -20.0f, 50.0f + Math::Sin16( rot * 5.0f ) * 50.0f, 0.0f ) );
 
-      sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d] cListeners[%d]", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), World::__worldGridList->size(), game->luaCollisionListeners.size() );
+      sprintf_s( tempChar, 1024, "FPS[%d] quads[%d/%d] grids[%d] cListeners[%d] %d", fps, __coreRenderableListIndicies->size(), __coreGUIIndicies->size(), World::__worldGridList->size(), game->luaCollisionListeners.size(), game->lua->GetStackParmsCount() );
     game->core->SetWindowTitle( tempChar );
     game->core->__Test();
   }
@@ -478,7 +490,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
   __log.PrintInfo( Filelevel_DEBUG, "Player: x%p", game->core->GetObject( "player" ) );
   __log.PrintInfo( Filelevel_DEBUG, "Player id: %d", game->core->GetObject( "player" )->GetLuaObjectId() );
-  Engine::LuaObject::CallFunction( game->core->GetObject( "player" )->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, "OnDestroy" );
+  Engine::LuaObject::CallFunction( game->core->GetObject( "player" )->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONDESTROY );
   char *playerSaveData = 0;
   size_t playerSaveDataSize = 0;
   Engine::LuaObject::SaveObjectDataToDump( game->core->GetObject( "player" )->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, playerSaveData, playerSaveDataSize );
@@ -487,6 +499,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   f.Close();
 
   game->world->SaveToFile( "data/temp/testworld.fu" );
+  __log.PrintInfo( Filelevel_DEBUG, "game->world->SaveToFile() done" );
   DEF_DELETE( game );
 
   //_CrtDumpMemoryLeaks();
@@ -552,6 +565,8 @@ Game::Game()
   LUAFUNC_SetPause          = Game::LUA_SetPause;
   LUAFUNC_SetLightAmbient   = Game::LUA_SetLightAmbient;
 
+  Engine::LuaObject_callback_SetOnSetScript( Game::LuaObject_OnSetScript );
+
   Collision::SetInitCollisionHandler( Game::LUA_ListenCollision );
   Collision::SetDefaultCollisionHandler( Game::CollisionProc );
   Collision::SetCollisionListenerList( &this->luaCollisionListeners );
@@ -569,12 +584,48 @@ Game::Game()
 
 Game::~Game()
 {
+  __log.PrintInfo( Filelevel_DEBUG, "~Game => core->Destroy..." );
   this->core->Destroy();
+  __log.PrintInfo( Filelevel_DEBUG, "~Game => delete lua..." );
   DEF_DELETE( this->lua );
+  __log.PrintInfo( Filelevel_DEBUG, "~Game => delete world..." );
   DEF_DELETE( this->world );
+  __log.PrintInfo( Filelevel_DEBUG, "~Game => delete core..." );
   DEF_DELETE( this->core );
+  __log.PrintInfo( Filelevel_DEBUG, "~Game done" );
 }//destructor
 
+
+
+void Game::LuaObject_OnSetScript( Object *object ) {
+  Engine::LuaObject::CallFunction( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCREATE );
+  if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONUPDATE ) ) {
+    game->luaObjectOnUpdate.push_back( object->GetLuaObjectId() );
+  }
+  if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONFRAME ) ) {
+    game->luaObjectOnFrame.push_back( object->GetLuaObjectId() );
+  }
+  if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONKEYPRESS ) ) {
+    game->luaObjectOnKeyPress.push_back( object->GetLuaObjectId() );
+  }
+  if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONKEYRELEASE ) ) {
+    game->luaObjectOnKeyRelease.push_back( object->GetLuaObjectId() );
+  }
+  if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONMOUSEKEYPRESS ) ) {
+    game->luaObjectOnMouseKeyPress.push_back( object->GetLuaObjectId() );
+  }
+  if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONMOUSEKEYRELEASE ) ) {
+    game->luaObjectOnMouseKeyRelease.push_back( object->GetLuaObjectId() );
+  }
+  if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONMOUSEMOVE ) ) {
+    game->luaObjectOnMouseMove.push_back( object->GetLuaObjectId() );
+  }
+  if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCOLLISION ) ) {
+    __log.PrintInfo( Filelevel_DEBUG, "object '%s' has OnColision", object->GetNameFull().c_str() );
+    game->luaObjectOnCollision.push_back( object->GetLuaObjectId() );
+    Game::LUA_ListenCollision( object->GetNameFull(), "__k_null" ); //!!!HACK
+  }
+}//LuaObject_OnSetScript
 
 
 /*
@@ -591,6 +642,7 @@ void Game::ClearLuaTimers() {
       if( !iter->dontPause ) {
         if( iter->luaFunctionId ) {
           game->lua->Unref( iter->luaFunctionId );
+          iter->luaFunctionId = 0;
         }
         game->luaTimers.erase( iter );
         deleted = true;
@@ -622,6 +674,11 @@ void Game::SetActive( bool setActive ) {
 */
 void Game::Update()
 {
+  if( game->isActive ) {
+    for( auto &reference: this->luaObjectOnFrame ) {
+      Engine::LuaObject::CallFunction( reference.referenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONFRAME );
+    }
+  }
   this->UpdateLuaTimers();
 }//Update
 
@@ -702,9 +759,8 @@ std::string Game::ObjectListToString( const ObjectList &list ) const {
 =============
 */
 void Game::ObjectOnLoad( Object* obj ) {
-  if( !obj->GetLuaScript().empty() ) {
-    game->lua->RunScript( obj->GetLuaScript() );
-    game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "OnLoad" );
+  if( obj->GetLuaObjectId() && !obj->GetLuaScript().empty() ) {
+    Game::LuaObject_OnSetScript( obj );
   }
 }//ObjectOnLoad
 
@@ -717,9 +773,18 @@ void Game::ObjectOnLoad( Object* obj ) {
 =============
 */
 void Game::ObjectOnUnload( Object* obj ) {
-  if( !obj->GetLuaScript().empty() ) {
-    game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "OnUnload" );
-    game->lua->CallTableTableFunction( "FUObjectList", obj->GetNameFull(), "__fu_destroy" );
+  if( obj->GetLuaObjectId() ) {
+    Engine::LuaObject::CallFunction( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONDESTROY );
+
+    //erase lua function references
+    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONUPDATE, game->luaObjectOnUpdate );
+    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONFRAME, game->luaObjectOnFrame );
+    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONKEYPRESS, game->luaObjectOnKeyPress );
+    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONKEYRELEASE, game->luaObjectOnKeyRelease );
+    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEKEYPRESS, game->luaObjectOnMouseKeyPress );
+    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEKEYRELEASE, game->luaObjectOnMouseKeyRelease );
+    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEMOVE, game->luaObjectOnMouseMove );
+    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONCOLLISION, game->luaObjectOnCollision );
   }
 }//ObjectOnUnload
 
@@ -759,6 +824,25 @@ void Game::OnRemoveObject( const std::string& objectName ) {
     }
   }
 }//OnRemoveObject
+
+
+
+void Game::EraseLuaHandler( const int luaReferenceId, const std::string &functionName, LuaFunctionHandlersList &handlersList ) {
+  if( !luaReferenceId || !Engine::LuaObject::IsFunctionExists( luaReferenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, functionName ) ) {
+    return;
+  }
+
+  auto
+    iter = handlersList.begin(),
+    iterEnd = handlersList.end();
+  while( iter != iterEnd ) {
+    if( iter->referenceId == luaReferenceId ) {
+      handlersList.erase( iter );
+      break;
+    }
+    ++iter;
+  }
+}//EraseLuaHandler
 
 
 
@@ -1143,11 +1227,25 @@ void Game::LUA_ListenMouseMove( const std::string &funcName )
 */
 void Game::KeyboardProc( Dword keyId, bool isPressed )
 {
-  if( game->luaKeyboardListeners.empty() )
+  if( game->isActive ) {
+    if( isPressed ) {
+      for( auto &handler: game->luaObjectOnKeyPress ) {
+        Engine::LuaObject::CallFunction( handler.referenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONKEYPRESS );
+      }
+    } else {
+      for( auto &handler: game->luaObjectOnKeyRelease ) {
+        Engine::LuaObject::CallFunction( handler.referenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONKEYRELEASE );
+      }
+    }
+  }
+
+  if( game->luaKeyboardListeners.empty() ) {
     return;
+  }
   luaKeyboardListenersList::iterator iter, iterEnd = game->luaKeyboardListeners.end();
-  for( iter = game->luaKeyboardListeners.begin(); iter != iterEnd; ++iter )
+  for( iter = game->luaKeyboardListeners.begin(); iter != iterEnd; ++iter ) {
     LUACALLBACK_ListenKeyboard( game->lua, *iter, keyId, isPressed );
+  }
 }//KeyboardProc
 
 
@@ -1158,11 +1256,25 @@ void Game::KeyboardProc( Dword keyId, bool isPressed )
 */
 void Game::MouseKeyProc( Dword keyId, bool isPressed )
 {
-  if( game->luaMouseKeyListeners.empty() )
+  if( game->isActive ) {
+    if( isPressed ) {
+      for( auto &handler: game->luaObjectOnMouseKeyPress ) {
+        Engine::LuaObject::CallFunction( handler.referenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONMOUSEKEYPRESS );
+      }
+    } else {
+      for( auto &handler: game->luaObjectOnMouseKeyRelease ) {
+        Engine::LuaObject::CallFunction( handler.referenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONMOUSEKEYRELEASE );
+      }
+    }
+  }
+
+  if( game->luaMouseKeyListeners.empty() ) {
     return;
+  }
   luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseKeyListeners.end();
-  for( iter = game->luaMouseKeyListeners.begin(); iter != iterEnd; ++iter )
+  for( iter = game->luaMouseKeyListeners.begin(); iter != iterEnd; ++iter ) {
     LUACALLBACK_ListenMouseKey( game->lua, *iter, keyId, isPressed );
+  }
 }//MouseKeyProc
 
 
@@ -1173,11 +1285,19 @@ void Game::MouseKeyProc( Dword keyId, bool isPressed )
 */
 void Game::MouseMoveProc( const Vec2 &pos )
 {
-  if( game->luaMouseMoveListeners.empty() )
+  if( game->isActive ) {
+    for( auto &handler: game->luaObjectOnMouseMove ) {
+      Engine::LuaObject::CallFunction( handler.referenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONMOUSEMOVE );
+    }
+  }
+
+  if( game->luaMouseMoveListeners.empty() ) {
     return;
+  }
   luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseMoveListeners.end();
-  for( iter = game->luaMouseMoveListeners.begin(); iter != iterEnd; ++iter )
+  for( iter = game->luaMouseMoveListeners.begin(); iter != iterEnd; ++iter ) {
     LUACALLBACK_ListenMouseMove( game->lua, *iter, pos );
+  }
 }//MouseMoveProc
 
 
@@ -2211,6 +2331,17 @@ void Game::CollisionProc( Collision *a, Collision *b, Byte flags, const Vec3 &ve
   for( iter = game->luaCollisionListeners.begin(); iter != iterEnd; ++iter ) {
     if( iter->object == a ) {
       LUACALLBACK_ListenCollision( game->lua, iter->funcName, objectA->GetNameFull(), objectB->GetNameFull(), flags, velocity );
+      int objectAluaObjectId = objectA->GetLuaObjectId();
+      int objectBluaObjectId = objectB->GetLuaObjectId();
+      if( objectAluaObjectId || objectBluaObjectId )
+      for( auto &luaHandler: game->luaObjectOnCollision ) {
+        if( luaHandler.referenceId == objectAluaObjectId ) {
+          Engine::LuaObject::CallFunction( objectAluaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCOLLISION );
+        }
+        if( luaHandler.referenceId == objectBluaObjectId ) {
+          Engine::LuaObject::CallFunction( objectBluaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCOLLISION );
+        }
+      }
     }
   }
 }//CollisionProc

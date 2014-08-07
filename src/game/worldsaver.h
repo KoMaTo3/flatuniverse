@@ -9,7 +9,7 @@ namespace World {
 
 
 //Версия файла сохранений
-const Dword VERSION = 0x0000000B;
+const Dword VERSION = 0x0000000C;
 
 
 class Saver

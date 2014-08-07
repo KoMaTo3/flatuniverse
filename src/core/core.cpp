@@ -134,7 +134,7 @@ public:
 
 Core::Core()
 :_state( CORE_STATE_UNKNOWN ), _rootObject( NULL ), /*_rootGUIObject( NULL ), */ collisionManager( NULL ), triggerManager( NULL ), camera( NULL ), animationMgr( NULL )
-,objectUnloaderTimer( 0.0f )
+,objectUnloaderTimer( 0.0f ), collisionManagerIsUpdated( 0 )
 {
   this->_window.isActive  = true;
   this->_window.dc        = NULL;
@@ -176,8 +176,10 @@ Core::~Core()
 bool Core::Destroy()
 {
   Animation::Destroy();
+  __log.PrintInfo( Filelevel_DEBUG, "Core::Destroy() => objects..." );
   DEF_DELETE( this->_rootObject );
   //DEF_DELETE( this->_rootGUIObject );
+  __log.PrintInfo( Filelevel_DEBUG, "Core::Destroy() => other..." );
   DEF_DELETE( this->collisionManager );
   DEF_DELETE( this->triggerManager );
   DEF_DELETE( this->animationMgr );
@@ -217,6 +219,7 @@ bool Core::Destroy()
   //DEF_DELETE( __objectByGui );
   //DEF_DELETE( __guiList );
 
+  __log.PrintInfo( Filelevel_DEBUG, "Core::Destroy() done" );
   return true;
 }//Destroy
 
@@ -1488,12 +1491,14 @@ bool Core::Update()
   Animation::Update( delta );
 
   //обновл€ем физ-объекты. они обновл€ют положени€ объектов
-  if( this->collisionManager )
-    this->collisionManager->Update( delta );
+  if( this->collisionManager ) {
+    this->collisionManagerIsUpdated = this->collisionManager->Update( delta );
+  }
 
   //триггеры
-  if( this->triggerManager )
+  if( this->triggerManager ) {
     this->triggerManager->Update();
+  }
 
   //обновл€ем объекты. они обновл€ют положени€ спрайтов
   this->_rootObject->Update( delta );

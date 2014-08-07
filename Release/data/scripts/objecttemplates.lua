@@ -339,12 +339,13 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/temp/enemy0.png',
         attr = {
           renderable = true, textureName = 'temp/enemy0.png',
-          collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '-200 0',
+          collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '0 0',
           trigger = false,
           lightBlockByCollision = true,
         },
         creationScript = function( name )
         end,
+        templateScriptName = 'data/scripts/objects/crow.lua',
       },
       --
     },  -- npc
@@ -360,6 +361,7 @@ function GetObjectsTabbedTemplates()  --(
         tags = {
           'respawn',
         },
+        templateScriptName = 'data/scripts/objects/test.lua',
       },
       --
     },  -- other

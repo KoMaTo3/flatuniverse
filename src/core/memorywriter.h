@@ -19,6 +19,7 @@ public:
   inline Dword  GetLength() { return this->pos; }
 
   MemoryWriter& operator<<( const std::string &str );
+  MemoryWriter& Write( const char *data, const size_t dataSize );
 
   template< class T >
   MemoryWriter& operator<<( T data );

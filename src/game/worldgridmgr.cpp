@@ -352,7 +352,7 @@ bool World::GridManager::UnloadGrid( const World::Grid::Position gridPos, const 
   {
     if( ( *iterGrid )->GetPosition() == gridPos )
     {
-      //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::UnloadGrid => grid[%d; %d] unloading...", gridPos.x, gridPos.y );
+      __log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::UnloadGrid => grid[%d; %d] unloading...", gridPos.x, gridPos.y );
       if( ( *iterGrid )->GetState() != WORLDGRID_STATE_DONE && !forceUnload ) {
         break;
       }
@@ -387,9 +387,13 @@ bool World::GridManager::UnloadGrid( const World::Grid::Position gridPos, const 
 */
 void World::GridManager::SaveToFile( const std::string& fileName )
 {
-  while( !__worldGridList->empty() )
+  __log.PrintInfo( Filelevel_DEBUG, "World::GridManager::SaveToFile => begin" );
+  while( !__worldGridList->empty() ) {
     this->UnloadGrid( (  *__worldGridList->begin() )->GetPosition(), true );
+  }
+  __log.PrintInfo( Filelevel_DEBUG, "World::GridManager::SaveToFile => grids unloaded" );
   this->worldSaver.SaveToFile( fileName );
+  __log.PrintInfo( Filelevel_DEBUG, "World::GridManager::SaveToFile => done" );
 }//SaveToFile
 
 

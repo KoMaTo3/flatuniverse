@@ -28,19 +28,22 @@ CollisionManager::~CollisionManager()
   Update
 =============
 */
-bool CollisionManager::Update( float dt )
+int CollisionManager::Update( float dt )
 {
-  if( !__collisionList )
-    return false;
+  if( !__collisionList ) {
+    return 0;
+  }
 
   CollisionList::iterator iter0, iter1, iterEnd = __collisionList->end();
 
   this->time += dt;
   bool forceUpdate = ( dt == 0.0f );
   float updateInterval = ( forceUpdate ? 0.0f : COLLISION_UPDATE_FREQUENCY );
+  int isUpdated = 0;
 
   while( this->time > COLLISION_UPDATE_FREQUENCY || forceUpdate )
   {
+    ++isUpdated;
     //Обновляем позиции, сбрасываем решения коллизий
     //__log.PrintInfo( Filelevel_DEBUG, "__collisionPairList => count[%d]", __collisionPairList.size() );
     for( auto &pair: __collisionPairList ) {
@@ -114,7 +117,7 @@ bool CollisionManager::Update( float dt )
     }
   }//while
 
-  return true;
+  return isUpdated;
 }//Update
 
 

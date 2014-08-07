@@ -578,10 +578,10 @@ function OnEditorKey( id, isPressed )
         SetEditorMode( 3 )
       end
       if id == 0x2E then    -- Del
-        local object = GetSelectedObject() -- GuiGetText( 'editor/object.object_name' )
-        local objectList = Explode( object, '//' )
-        for num,name in pairs( objectList ) do --(
+        local objectList = Object.GetSelected() -- GuiGetText( 'editor/object.object_name' )
+        for _,object in pairs( objectList ) do --(
           -- buffer
+          local name = object.api:GetNameFull()
           local
             x, y, z
             , isRenderable, isCollision, isTrigger, isLightBlockByCollision, isLightPoint
@@ -632,14 +632,14 @@ function OnEditorKey( id, isPressed )
           --
           ObjectRemove( name )
         end --)
-        SelectObject( '' )
+        Object.Select( nil )
         if settings.editorMode == 2 then
           settings.editorMode = 0
         end
         UpdateGuiBySelectedObject()
       end
       if id == 0x20 then    -- Space
-        SelectObject( '' )
+        Object.Select( nil )
         UpdateGuiBySelectedObject()
         if settings.editorMode == 2 then
           settings.editorMode = 0
@@ -719,7 +719,7 @@ function OnEditorMouseKey( id, isPressed )
             settings.editorMode = 20
             settings.move.mouseStart.x = mousePos.x
             settings.move.mouseStart.y = mousePos.y
-            SelectObject( '' )
+            Object.Select( nil )
             UpdateGuiBySelectedObject()
           else --)(
             doMultiSelect = true
@@ -744,7 +744,6 @@ function OnEditorMouseKey( id, isPressed )
           local cx, cy = GetCameraPos()
           settings.multiSelectStartPoint.x = mousePos.x + cx
           settings.multiSelectStartPoint.y = mousePos.y + cy
-          Debug.Log( 'start multiselect' )
         end
       else --)( released
       end --)
@@ -752,8 +751,8 @@ function OnEditorMouseKey( id, isPressed )
     [1] = function()
       if isPressed then
       else
-        local object = GetSelectedObject()
-        if #object > 0 then
+        local objects = Object.GetSelected()
+        if TableSize( objects ) > 0 then
           settings.editorMode = 2
         else
           settings.editorMode = 0
@@ -772,9 +771,9 @@ function OnEditorMouseKey( id, isPressed )
           settings.objectMode3Moved = false
         end --)
       else
-        local object = GetObjectUnderCursorByMode()
-        if #object > 0 then
-          SelectObject( object )
+        local objects = GetObjectUnderCursorByMode()
+        if TableSize( objects ) > 0 then
+          Object.Select( objects )
           UpdateGuiBySelectedObject()
         end
       end
@@ -784,26 +783,12 @@ function OnEditorMouseKey( id, isPressed )
       else
         if settings.objectMode3Moved then
           settings.editorMode = 2
-          --[[
-          local x, y = ObjectGetPos( GetSelectedObject() )
-          settings.objectMode3Moved = false
-          if settings.objectMode3StartPosition[ 1 ] ~= x or settings.objectMode3StartPosition[ 2 ] ~= y then
-            local name = GetSelectedObject()
-            local oldX = settings.objectMode3StartPosition[ 1 ]
-            local oldY = settings.objectMode3StartPosition[ 2 ]
-            PushToBuffer( function()
-              end, function()
-                ObjectSetPos( name, oldX, oldY )
-              end
-            )
-          end
-          ]]
         else
-          local object = GetObjectUnderCursorByMode()
-          Debug.Log( 'GetObjectUnderCursorByMode => '..object )
-          SelectObject( object )
+          local objects = GetObjectUnderCursorByMode()
+          -- Debug.Log( 'GetObjectUnderCursorByMode => '..object )
+          Object.Select( objects )
           UpdateGuiBySelectedObject()
-          if #object > 0 then
+          if TableSize( objects ) > 0 then
             settings.editorMode = 2
           else
             settings.editorMode = 0
@@ -834,7 +819,7 @@ function OnEditorMouseKey( id, isPressed )
             GUI.templates.currentItem = num
             -- Debug.RenderState( 0 )
             settings.editorType = 0
-            -- SelectObject( '' )
+            -- Object.Select( nil )
             -- UpdateGuiBySelectedObject()
           end
         end
@@ -857,12 +842,15 @@ function OnEditorMouseKey( id, isPressed )
     end,
     [20] = function()
       settings.editorMode = 0
-      local name = EditorInsertItemByTemplate( mousePos.x, mousePos.y )
-      SelectObject( name )
+      local objects = {}
+      table.insert( objects, EditorInsertItemByTemplate( mousePos.x, mousePos.y ) )
+      Object.Select( objects )
       UpdateGuiBySelectedObject()
       PushToBuffer( function()
         end, function()
-          ObjectRemove( name )
+          for _,object in pairs( objects ) do
+            object.api:Destroy()
+          end
         end
       )
     end,
@@ -883,18 +871,19 @@ function OnEditorMouseKey( id, isPressed )
         right, bottom = GetTilePosByPixel( right, bottom )
         -- local texture = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].icon
         local names = {}
+        local objects = {}
         for tx = left, right do
         for ty = top, bottom do
           x, y = GetPixelByTile( tx, ty )
-          names[ #names + 1 ] = EditorInsertItemByTemplate( x, y )
+          table.insert( objects, EditorInsertItemByTemplate( x, y ) )
         end
         end
-        SelectObject( Implode( names, '//' ) )
+        Object.Select( objects )
         UpdateGuiBySelectedObject()
         PushToBuffer( function()
           end, function()
-            for q = 1,#names do
-              ObjectRemove( names[ q ] )
+            for _,object in pairs( objects ) do
+              object.api:Remove()
             end
           end
         )
@@ -907,28 +896,28 @@ function OnEditorMouseKey( id, isPressed )
         local newX = mousePos.x + cx
         local newY = mousePos.y + cy
         if settings.multiSelectStartPoint.x == newX and settings.multiSelectStartPoint.y == newY then --( one-select
-          local object = GetObjectUnderCursorByMode()
-          if #object > 0 then --(
+          local objects = GetObjectUnderCursorByMode()
+          if TableSize( objects ) > 0 then --(
             if settings.keys.isCtrl then  --( add
-              local oldObject = GetSelectedObject()
-              if( #oldObject > 0 ) then
-                object = AddObjectsToList( oldObject, object )
+              local oldObjects = Object.GetSelected()
+              if( TableSize( oldObjects ) > 0 ) then
+                objects = AddObjectsToList( oldObjects, objects )
               end
             end --)
             if settings.keys.isAlt then --( exclude
-              local oldObject = GetSelectedObject()
-              if( #oldObject > 0 ) then
-                object = RemoveObjectsFromList( oldObject, object )
+              local oldObjects = Object.GetSelected()
+              if( TableSize( oldObjects ) > 0 ) then
+                objects = RemoveObjectsFromList( oldObjects, objects )
               end
             end --)
-            SelectObject( object )
+            Object.Select( objects )
             settings.editorMode = 2
           else --)(
             settings.editorMode = 0
           end --)
         else --)( multi-select
           local objects = SelectObjectsInRectangle( settings.multiSelectStartPoint.x, settings.multiSelectStartPoint.y, newX, newY, settings.editorType )
-          if #objects > 0 then
+          if TableSize( objects ) > 0 then
             settings.editorMode = 2
           else
             settings.editorMode = 0
@@ -950,6 +939,7 @@ function OnEditorMouseKey( id, isPressed )
   if mode[ settings.editorMode ] ~= nil then
     mode[ settings.editorMode ]()
   end
+  Debug.Log( settings.editorMode )
 end --) OnEditorMouseKey
 
 -- Обработка движения мыши
@@ -977,8 +967,7 @@ function OnEditorMouseMove( x, y )  --(
       [2] = function()
       end,
       [3] = function()
-        local object = GetSelectedObject()
-        -- local oldX, oldY = ObjectGetPos( object )
+        local objectList = Object.GetSelected()
         if not settings.objectMode3Moved then
           -- settings.move.objectStart.x = oldX
           -- settings.move.objectStart.y = oldY
@@ -991,7 +980,6 @@ function OnEditorMouseMove( x, y )  --(
         -- local newY = settings.move.objectStart.y + y - settings.move.mouseStart.y
         local tileSize = tonumber( GetTileSize() )
         local offsetX, offsetY = GetTileOffset()
-        objectList = Explode( object, '//' )
         local dx, dy = math.floor( ( mousePos.x - settings.move.mouseStart.x ) / tileSize ) * tileSize, math.floor( ( mousePos.y - settings.move.mouseStart.y ) / tileSize ) * tileSize
         if settings.keys.isAlt then
           dx, dy = mousePos.x - settings.move.mouseStart.x, mousePos.y - settings.move.mouseStart.y
@@ -1000,9 +988,10 @@ function OnEditorMouseMove( x, y )  --(
         settings.move.lastOffset.x = settings.move.lastOffset.x + moveByX
         settings.move.lastOffset.y = settings.move.lastOffset.y + moveByY
         Debug.Log( settings.move.lastOffset.x..':'..settings.move.lastOffset.y..' => '..moveByX..':'..moveByY )
-        for num,name in pairs( objectList ) do
-          local x, y = ObjectGetPos( name )
-          ObjectSetPos( name, x + moveByX, y + moveByY )
+        for _,objectByName in pairs( objectList ) do
+          -- local objectByName = Object.Get( name )
+          local x, y = objectByName.api:GetPos()
+          objectByName.api:SetPos( x + moveByX, y + moveByY )
           -- newX = math.floor( newX / tileSize ) * tileSize + offsetX
           -- newY = math.floor( newY / tileSize ) * tileSize + offsetY
         end
@@ -1010,9 +999,10 @@ function OnEditorMouseMove( x, y )  --(
         if moveByX ~= 0 or moveByY ~= 0 then
           PushToBuffer( function()
             end, function()
-              for num,name in pairs( objectList ) do
-                local x, y = ObjectGetPos( name )
-                ObjectSetPos( name, x - moveByX, y - moveByY )
+              for _,objectByName in pairs( objectList ) do
+                -- local objectByName = Object.Get( name )
+                local x, y = objectByName.api:GetPos()
+                objectByName.api:SetPos( x - moveByX, y - moveByY )
               end
             end
           )
@@ -1048,18 +1038,31 @@ function GetObjectUnderCursorByMode()
       y = cy + my - height * 0.5
     }
     -- local layer = 'default' -- GuiGetText( 'editor/settings.layer' )
-    local name = GetSelectedObject()
+    local objects = Object.GetSelected()
+    local name = ''
+    for _,object in pairs( objects ) do
+      name = object.api:GetNameFull()
+      break
+    end
+    local objectByPoint = {}
     if settings.editorType == 1 then
-      name = GetObjectByPoint( 1, pos.x, pos.y, name )
-      Debug.Log( string.format( 'GetObjectByPoint => [1][%3.1f][%3.1f]["%s"]', pos.x, pos.y, name ) )
+      -- name = GetObjectByPoint( 1, pos.x, pos.y, name )
+      objectByPoint = { Object.GetByPoint( 1, pos.x, pos.y, name ) }
+      local tmp = nil
+      for _,v in pairs( objectByPoint ) do
+        tmp = v
+        break
+      end
     end
     if settings.editorType == 2 then
-      name = GetObjectByPoint( 2, pos.x, pos.y, name )
+      -- name = GetObjectByPoint( 2, pos.x, pos.y, name )
+      objectByPoint = { Object.GetByPoint( 2, pos.x, pos.y, name ) }
     end
     if settings.editorType == 3 then
-      name = GetObjectByPoint( 3, pos.x, pos.y, name )
+      -- name = GetObjectByPoint( 3, pos.x, pos.y, name )
+      objectByPoint = { Object.GetByPoint( 3, pos.x, pos.y, name ) }
     end
-    return name
+    return objectByPoint
 end --GetObjectUnderCursorByMode
 
 -- Чекбокс "Renderable"
@@ -1180,13 +1183,20 @@ function EditorUpdateDebug( timerId )
 end -- EditorUpdateDebug
 
 function UpdateGuiBySelectedObject()
-  local object = GetSelectedObject()
-  local objectList = Explode( object, '//' )
+  -- local object = GetSelectedObject()
+  -- local objectList = Explode( object, '//' )
+  local objectList = Object.GetSelected()
   local doReset = false
-  if( #objectList == 1 ) then --( one object
-    if #object < 1 then
+  if( TableSize( objectList ) == 1 ) then --( one object
+    if TableSize( objectList ) < 1 then
       doReset = true
     else
+      local object = nil
+      for _,obj in pairs( objectList ) do
+        object = obj
+        break
+      end
+      object = object.api:GetNameFull()
       local isRenderable
         , isCollision
         , isTrigger
@@ -1225,7 +1235,8 @@ function UpdateGuiBySelectedObject()
     end
   else --)( multi-object
     local isRenderable, isCollision, isTrigger, isLightBlockByCollision, isLightPoint, objectZ = false, false, false, false, false, 0.0
-    for num,name in pairs( objectList ) do
+    for _,object in pairs( objectList ) do
+      local name = object.api:GetNameFull()
       isRenderable = isRenderable or ObjectAttr( name, { 'renderable' } )
       isCollision = isCollision or ObjectAttr( name, { 'collision' } )
       isTrigger = isTrigger or ObjectAttr( name, { 'trigger' } )
@@ -1445,7 +1456,14 @@ function EditorInsertItemByTemplate( px, py )
     ListenTrigger( name, attrs['_triggerFunc'] )
     -- attrs['_triggerFunc'] = nil
   end
+
   local currentItem = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ]
+
+  if currentItem.templateScriptName ~= nil then
+    local obj = Object.Get( name )
+    obj.api:SetScript( currentItem.templateScriptName )
+  end
+
   if currentItem.creationScript ~= nil then
     currentItem.creationScript( name )
   end
@@ -1492,79 +1510,74 @@ function PopFromBuffer()
     settings.buffer[ #settings.buffer ].CancelAction()
     settings.buffer[ #settings.buffer ] = nil
   end
-  SelectObject( '' )
+  Object.Select( nil )
   UpdateGuiBySelectedObject()
 end -- PopFromBuffer
 
 --[[ OnChangeIsRenderable ]]
 function OnChangeIsRenderable( isRenderableGuiElement )
-  local object = GetSelectedObject()
+  local objectList = Object.GetSelected()
   local checked = isRenderableGuiElement:GetIsChecked()
-  local objectList = Explode( object, '//' )
-  for num,name in pairs( objectList ) do --(
-    ObjectAttr( name, { renderable = checked } )
+  for _,object in pairs( objectList ) do --(
+    ObjectAttr( object.api:GetNameFull(), { renderable = checked } )
   end
   if checked then
     local tileSize = GetTileSize()
-    for num,name in pairs( objectList ) do --(
-      ObjectAttr( name, { textureName = 'data/textures/null.png', renderableSize = tileSize..' '..tileSize } )
+    for _,object in pairs( objectList ) do --(
+      ObjectAttr( object.api:GetNameFull(), { textureName = 'data/textures/null.png', renderableSize = tileSize..' '..tileSize } )
     end
   end
 end -- OnChangeIsRenderable
 
 --[[ OnChangeIsCollision ]]
 function OnChangeIsCollision( isCollisionGuiElement )
-  local object = GetSelectedObject()
+  local objectList = Object.GetSelected()
   local checked = isCollisionGuiElement:GetIsChecked()
-  local objectList = Explode( object, '//' )
-  for num,name in pairs( objectList ) do --(
-    ObjectAttr( name, { collision = checked } )
+  for _,object in pairs( objectList ) do --(
+    ObjectAttr( object.api:GetNameFull(), { collision = checked } )
   end
   if checked then
     local tileSize = GetTileSize()
-    for num,name in pairs( objectList ) do --(
-      ObjectAttr( name, { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
+    for _,object in pairs( objectList ) do --(
+      ObjectAttr( object.api:GetNameFull(), { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
     end
   end
 end -- OnChangeIsCollision
 
 --[[ OnChangeIsCollision ]]
 function OnChangeIsTrigger( isTriggerGuiElement )
-  local object = GetSelectedObject()
+  local objectList = Object.GetSelected()
   local checked = isTriggerGuiElement:GetIsChecked()
-  local objectList = Explode( object, '//' )
-  for num,name in pairs( objectList ) do --(
-    ObjectAttr( name, { trigger = checked } )
+  for _,object in pairs( objectList ) do --(
+    ObjectAttr( object.api:GetNameFull(), { trigger = checked } )
   end
   if checked then
     local tileSize = GetTileSize()
-    for num,name in pairs( objectList ) do --(
-      ObjectAttr( name, { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
+    for _,object in pairs( objectList ) do --(
+      ObjectAttr( object.api:GetNameFull(), { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
     end
   end
 end -- OnChangeIsCollision
 
 --[[ OnChangeIsLightBlockByCollision ]]
 function OnChangeIsLightBlockByCollision( isLightBlockByCollisionGuiElement )
-  local object = GetSelectedObject()
+  local objectList = Object.GetSelected()
   local checked = isLightBlockByCollisionGuiElement:GetIsChecked()
-  local objectList = Explode( object, '//' )
-  for num,name in pairs( objectList ) do --(
-    ObjectAttr( name, { lightBlockByCollision = checked } )
+  for _,object in pairs( objectList ) do --(
+    ObjectAttr( object.api:GetNameFull(), { lightBlockByCollision = checked } )
   end
 end -- OnChangeIsLightBlockByCollision
 
 --[[ OnChangeIsLightPoint ]]
 function OnChangeIsLightPoint( isLightPointGuiElement )
-  local object = GetSelectedObject()
+  local objectList = Object.GetSelected()
   local checked = isLightPointGuiElement:GetIsChecked()
-  local objectList = Explode( object, '//' )
-  for num,name in pairs( objectList ) do --(
-    ObjectAttr( name, { lightPoint = checked } )
+  for _,object in pairs( objectList ) do --(
+    ObjectAttr( object.api:GetNameFull(), { lightPoint = checked } )
   end
   if checked then
-    for num,name in pairs( objectList ) do --(
-      ObjectAttr( name, { lightPointSize = 400, lightPointColor = ( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' 1' } )
+    for _,object in pairs( objectList ) do --(
+      ObjectAttr( object.api:GetNameFull(), { lightPointSize = 400, lightPointColor = ( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' 1' } )
     end
   end
 end -- OnChangeIsLightPoint
@@ -1573,10 +1586,9 @@ end -- OnChangeIsLightPoint
 function OnChangeZ( setZ )
   GUI.elements.objectZ:SetText( setZ )
   GUI.elements.objectZslider:SetText( setZ )
-  local object = GetSelectedObject()
-  local objectList = Explode( object, '//' )
-  for num,name in pairs( objectList ) do --(
-    ObjectAttr( name, { z = tonumber( setZ ) } )
+  local objectList = Object.GetSelected()
+  for _,object in pairs( objectList ) do --(
+    ObjectAttr( object.api:GetNameFull(), { z = tonumber( setZ ) } )
   end
 end -- OnChangeZ
 
@@ -1598,14 +1610,16 @@ end -- OnChangeLayer
 --[[ OnChangeTileSize ]]
 function OnChangeTileSize( tileSizeGuiElement )
   local tileSize = tileSizeGuiElement:GetText()
-  local object = GetSelectedObject()
-  if #object > 0 then --(
-    if settings.editorType == 1 then
-      ObjectAttr( object, { renderableSize = string.format( '%d %d', tileSize, tileSize ) } )
-    elseif settings.editorType == 2 then
-      ObjectAttr( object, { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
-    elseif settings.editorType == 3 then
-      ObjectAttr( object, { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
+  local objectList = Object.GetSelected()
+  if TableSize( objectList ) > 0 then --(
+    for _,object in pairs( objectList ) do
+      if settings.editorType == 1 then
+        ObjectAttr( object.api:GetNameFull(), { renderableSize = string.format( '%d %d', tileSize, tileSize ) } )
+      elseif settings.editorType == 2 then
+        ObjectAttr( object.api:GetNameFull(), { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
+      elseif settings.editorType == 3 then
+        ObjectAttr( object.api:GetNameFull(), { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
+      end
     end
   end --)
 end -- OnChangeTileSize
@@ -1623,21 +1637,24 @@ function SelectObjectsInRectangle( left, top, right, bottom, editorType )
   width, height = width * 0.5, height * 0.5
   left, right, top, bottom = left - width, right - width, top - height, bottom - height
 
-  local objects = GetObjectByRect( settings.editorType, left, top, right, bottom ) --GetObjects()
+  local objects = Object.GetByRect( settings.editorType, left, top, right, bottom ) --GetObjects()
+
   if settings.keys.isCtrl then  -- add
-    local oldObject = GetSelectedObject()
-    if( #oldObject > 0 ) then
-      objects = oldObject..'//'..objects
+    local oldObjects = Object.GetSelected()
+    if( TableSize( oldObjects ) > 0 ) then
+      for _,v in pairs( oldObjects ) do
+        table.insert( objects, v )
+      end
+      -- objects = oldObject..'//'..objects
     end
   end
   if settings.keys.isAlt then --( exclude
-    local oldObject = GetSelectedObject()
-    if( #oldObject > 0 ) then
+    local oldObjects = Object.GetSelected()
+    if( TableSize( oldObjects ) > 0 ) then
       objects = RemoveObjectsFromList( oldObject, objects )
     end
   end
-  SelectObject( objects )
-  -- Debug.Log( left..':'..top..' => '..right..':'..bottom )
+  Object.Select( objects )
   return objects
 end --)
 
@@ -1668,18 +1685,20 @@ end --)
 
 --( Добавление объектов в список (для мульти-селекта)
 function AddObjectsToList( list, objects )
-  listTable = Explode( list, '//' )
-  objectsList = Explode( objects, '//' )
-  for kObj,obj in pairs( objectsList ) do
+  -- listTable = Explode( list, '//' )
+  -- objectsList = Explode( objects, '//' )
+  for _,obj in pairs( objects ) do
     local alreadyExist = false
-    for kT,t in pairs( listTable ) do
-      if t == obj then
+    local objId = obj.api:GetId()
+    for _,t in pairs( list ) do
+      if objId == t.api:GetId() then
         alreadyExist = true
         break
       end
     end
     if not alreadyExist then
-      list = list..( #list > 0 and '//' or '' )..obj
+      -- list = list..( #list > 0 and '//' or '' )..obj
+      table.insert( list, obj )
     end
   end
   return list
@@ -1687,17 +1706,17 @@ end --)
 
 --( Добавление объектов в список (для мульти-селекта)
 function RemoveObjectsFromList( list, objects )
-  listTable = Explode( list, '//' )
-  objectsList = Explode( objects, '//' )
-  for kObj,obj in pairs( objectsList ) do
-    for kT,t in pairs( listTable ) do
-      if t == obj then
-        table.remove( listTable, kT )
+  -- listTable = Explode( list, '//' )
+  -- objectsList = Explode( objects, '//' )
+  for _,obj in pairs( objects ) do
+    local objId = obj.api:GetId()
+    for kT,t in pairs( list ) do
+      if objId == t.api:GetId() then
+        table.remove( list, kT )
         break
       end
     end
   end
-  list = Implode( listTable, '//' )
   return list
 end --)
 

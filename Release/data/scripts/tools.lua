@@ -55,6 +55,14 @@ function Implode( items, div )
   return table.concat( items, div )
 end --)
 
+function TableSize( T )
+  local count = 0
+  for _ in pairs( T ) do
+    count = count + 1
+  end
+  return count
+end
+
 --[[
 function char(c) return ("\\%3d"):format(c:byte()) end
 function szstr( s ) return ('"%s"'):format(s:gsub("[^ !#-~]", char)) end

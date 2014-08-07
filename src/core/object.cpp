@@ -4,6 +4,7 @@
 #include "animationpack.h"
 #include "lightrenderer.h"
 #include "game/luaobject.h"
+#include "core/filemanager.h"
 //#include "glui2/glui2.h"
 
 extern CoreRenderableList *__coreRenderableList;
@@ -199,7 +200,7 @@ Object::Object( const std::string &objectName, Object* parentObject, bool setIsS
     this->nameFull = "/" + this->name;
   //__log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%p] parent[x%p] nameFull['%s']", this, this->_parent, this->nameFull.c_str() );
   if( setLuaUserdata ) {
-    this->luaObjectId = Engine::LuaObject::InitUserData( this, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+    this->InitLuaUserData();
   }
 }//constructor
 
@@ -1315,6 +1316,7 @@ void Object::RemoveForce( long forceId )
 */
 void Object::SaveToBuffer( MemoryWriter &writer )
 {
+  __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => name['%s']", this->GetNameFull().c_str() );
   if( this->OnUnload ) {
     this->OnUnload( this );
   }
@@ -1350,6 +1352,49 @@ void Object::SaveToBuffer( MemoryWriter &writer )
     this->tags->SaveToBuffer( writer );
   }
 
+  //animation
+  isAnimation = ( this->_animation != NULL );
+  writer << isAnimation;
+  if( isAnimation ) {
+    this->_animation->SaveToBuffer( writer );
+  }
+
+  //file name of object template scripts
+  __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => name '%s'", this->GetNameFull().c_str() );
+  writer << this->luaScriptFileName;
+  __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => luaScriptFileName '%s'", this->luaScriptFileName.c_str() );
+
+  //lua userdata
+  bool hasUserData = this->GetLuaObjectId() ? true : false;
+  writer << hasUserData;
+  if( hasUserData ) {
+    char *userData = 0;
+    size_t userDataSize = 0;
+    __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => '%s' has user data", this->GetNameFull().c_str() );
+    if( Engine::LuaObject::SaveObjectDataToDump( this->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, userData, userDataSize ) ) {
+      __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => has user data, size[%d]", userDataSize );
+      writer << userDataSize;
+      if( userDataSize ) {
+        writer.Write( userData, userDataSize );
+        __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => user data saved" );
+      }
+    } else {
+      writer << userDataSize;
+      __log.PrintInfo( Filelevel_ERROR, "Object::SaveToBuffer => failed to making dump" );
+    }
+  }
+
+  //Width::LightBlockByCollision
+  isLightBlockByCollision = ( this->widget && this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION ) );
+  writer << isLightBlockByCollision;
+
+  //Width::LightPoint
+  isLightPoint = ( this->widget && this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT ) );
+  writer << isLightPoint;
+  if( isLightPoint ) {
+    this->widget->GetWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT )->SaveToBuffer( writer );
+  }
+
   //childs
   Dword childsCount = 0;
   if( !this->_childs ) {
@@ -1373,27 +1418,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
     }
   }
 
-  //animation
-  isAnimation = ( this->_animation != NULL );
-  writer << isAnimation;
-  if( isAnimation ) {
-    this->_animation->SaveToBuffer( writer );
-  }
-
-  //scripts
-  //тут нужна сериализация объекта посредством вызова lua-функции
-  writer << this->luaScript;
-
-  //Width::LightBlockByCollision
-  isLightBlockByCollision = ( this->widget && this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTBLOCKBYCOLLISION ) );
-  writer << isLightBlockByCollision;
-
-  //Width::LightPoint
-  isLightPoint = ( this->widget && this->widget->WidgetExists( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT ) );
-  writer << isLightPoint;
-  if( isLightPoint ) {
-    this->widget->GetWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT )->SaveToBuffer( writer );
-  }
+  __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => name['%s'] done", this->GetNameFull().c_str() );
 }//SaveToBuffer
 
 
@@ -1406,6 +1431,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 */
 void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dword version )
 {
+  __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => begin" );
   bool isRenderable, isCollision, isTrigger;
   std::string tmpName, parentName;
   Vec3 newPosition;
@@ -1454,18 +1480,6 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     this->tags->LoadFromBuffer( reader );
   }
 
-  //childs
-  Dword childsCount;
-  reader >> childsCount;
-  if( childsCount ) //TODO: надо допиливать подгрузку дочерних объектов
-  {
-    for( Dword num = 0; num < childsCount; ++num ) {
-      Object *child = new Object( "", this );
-      child->LoadFromBuffer( reader, this, version );
-    }
-    //__log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
-  }
-
   if( version >= 0x00000006 ) {
     //animation
     bool isAnimation;
@@ -1493,7 +1507,39 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     }
 
     if( version >= 0x00000007 ) {
-      reader >> this->luaScript;
+      reader >> this->luaScriptFileName;
+      if( !this->luaScriptFileName.empty() ) {
+        this->InitLuaUserData();
+        memory scriptData;
+        if( __fileManager->GetFile( this->luaScriptFileName, scriptData, true ) ) {
+          __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => Engine::LuaObject::BindTemplateToObject()..." );
+          Engine::LuaObject::BindTemplateToObject( this->GetLuaObjectId(), this, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, scriptData.getData() );
+          __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => Engine::LuaObject::BindTemplateToObject() done" );
+        } else {
+          __log.PrintInfo( Filelevel_ERROR, "Object::LoadFromBuffer => scipt '%s' not found", this->luaScriptFileName.c_str() );
+        }
+      }
+
+      if( version >= 0x0000000C ) {
+        bool hasUserData;
+        reader >> hasUserData;
+        __log.PrintInfo( Filelevel_DEBUG, "'%s' hasUserData = %d", this->GetNameFull().c_str(), hasUserData );
+        if( hasUserData ) {
+          memory userData;
+          size_t userDataSize;
+          reader >> userDataSize;
+          __log.PrintInfo( Filelevel_DEBUG, "userDataSize = %d", userDataSize );
+          if( userDataSize ) {
+            userData.Alloc( userDataSize );
+            reader.Read( userData.getData(), userData.getLength() );
+            __log.PrintInfo( Filelevel_DEBUG, "userData readed" );
+            this->InitLuaUserData();
+            __log.PrintInfo( Filelevel_DEBUG, "userData initialized" );
+            Engine::LuaObject::LoadObjectDataFromDump( this->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, reinterpret_cast< const unsigned char* >( userData.getData() ), userData.getLength() );
+            __log.PrintInfo( Filelevel_DEBUG, "userData loaded" );
+          }
+        }
+      }//C
 
       if( version >= 0x00000008 ) {
         bool isLightBlockByCollision;
@@ -1509,14 +1555,28 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
             ObjectWidget::WidgetLightPoint *widget = this->EnableLightPoint();
             widget->LoadFromBuffer( reader );
           }
-        }//8
+        }//9
       }//8
     }//7
   }//6
 
+  //childs
+  Dword childsCount;
+  reader >> childsCount;
+  if( childsCount ) //TODO: надо допиливать подгрузку дочерних объектов
+  {
+    for( Dword num = 0; num < childsCount; ++num ) {
+      Object *child = new Object( "", this );
+      child->LoadFromBuffer( reader, this, version );
+    }
+    //__log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
+  }
+
   if( this->OnLoad ) {
     this->OnLoad( this );
   }
+
+  __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => end" );
 }//LoadFromBuffer
 
 
@@ -1871,7 +1931,7 @@ Animation::IAnimationObject* Object::MakeInstance( const std::string& setName ) 
 =============
 */
 void Object::SetLuaScript( const std::string& setScript ) {
-  this->luaScript = setScript;
+  this->luaScriptFileName = setScript;
 }//SetLuaScript
 
 
@@ -1949,6 +2009,15 @@ ObjectWidget::WidgetLightPoint* Object::GetLightPoint() {
   }
   return static_cast< ObjectWidget::WidgetLightPoint* >( this->widget->GetWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT ) );
 }//GetLightPoint
+
+
+void Object::InitLuaUserData() {
+  if( this->luaObjectId ) {
+    return;
+  }
+
+  this->luaObjectId = Engine::LuaObject::InitUserData( this, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, false );
+}//InitLuaUserData
 
 
 void Object::__Test() {

@@ -50,8 +50,8 @@ end -- UpdatePlayerAnimation
 
 --(
 function UpdateBackGround( timerId )
-  local x, y = ObjectGetPos( 'player' )
-  ObjectSetPos( 'background', x, y * 0.5 + 50 )
+  local x, y = Object.Get( 'player' ).api:GetPos()
+  Object.Get( 'background' ).api:SetPos( x, y * 0.5 + 50 )
   Core.SetTimer( 0, UpdateBackGround, true )
 end --)
 
@@ -143,7 +143,7 @@ function CollisionPlayer( player, target, flags, vx, vy )
     end
   elseif IsObjectUnderThis( player, target ) then
     if ObjectHasTag( target, 'brick-breakable' ) then
-      animation[ 'timer'..Core.SetTimer( 0.5, function( timerId )
+      animation[ 'timer'..Core.SetTimer( 0.5, function( timerId ) --(
           local keyByTimer = 'timer'..timerId
           if animation[ keyByTimer ] == nil then
             do return false end
@@ -169,7 +169,7 @@ function CollisionPlayer( player, target, flags, vx, vy )
             end
             ]]
           end
-        end
+        end --)
       ) ] = { step = 1, time = 0, timeMax = 8, object = target }
       ObjectAddTag( target, 'push-bottom' )
       ObjectRemoveTag( target, 'brick-breakable' )
@@ -205,11 +205,11 @@ function PlayerControl( id, isPressed )
           playerState.isHoldJump = true
           playerState.longJumpStep = 0
           if playerState.longJumpTimer ~= -1 then
-            StopTimer( playerState.longJumpTimer )
+            Core.StopTimer( playerState.longJumpTimer )
             playerState.longJumpTimer = -1
           end
           if playerState.PlayerEndLongJumpTimer ~= -1 then
-            StopTimer( playerState.PlayerEndLongJumpTimer )
+            Core.StopTimer( playerState.PlayerEndLongJumpTimer )
             playerState.PlayerEndLongJumpTimer = -1
           end
           playerState.longJumpTimer = Core.SetTimer( 0.1, PlayerDoLongJump )
@@ -278,7 +278,7 @@ function PlayerControl( id, isPressed )
 
     if id == 0x58 then  -- X - fire
       if isPressed then
-        local x,y = ObjectGetPos( 'player' )
+        local x, y = Object.Get( 'player' ).api:GetPos()
         local object = 'player-bullet-.'..x..'.'..y..'.'..string.format( '%f', settings.timer )
         local isRight = playerState.lastDirection > 0 and true or false
         ObjectCreate( object, x + ( isRight and 30 or -30 ), y - 10, 0 )
@@ -308,10 +308,11 @@ end -- PlayerControl
 
 --[[ PlayerDoLongJump ]]
 function PlayerDoLongJump( timerId )
+  playerState.longJumpTimer = -1
   if playerState.isHoldJump then
     local vx, vy = ObjectAttr( 'player', { 'collisionVelocity' } )
     playerState.longJumpStep = playerState.longJumpStep + 1
-    ObjectAttr( 'player', { collisionVelocity = vx..' '..( vy - playerState.longJumpPower / playerState.longJumpStep )  } )
+    ObjectAttr( 'player', { collisionVelocity = vx..' '..( vy - playerState.longJumpPower / playerState.longJumpStep ) } )
     Core.SetTimer( 0.1, PlayerDoLongJump )
   end
 end -- PlayerDoLongJump
@@ -319,17 +320,25 @@ end -- PlayerDoLongJump
 --[[ PlayerEndLongJump ]]
 function PlayerEndLongJump( timerId )
   playerState.isHoldJump = false
+  playerState.PlayerEndLongJumpTimer = -1
   if playerState.PlayerEndLongJumpTimer ~= -1 then
-    -- StopTimer( playerState.PlayerEndLongJumpTimer )
-    playerState.PlayerEndLongJumpTimer = -1
+    -- Core.StopTimer( playerState.PlayerEndLongJumpTimer )
+    -- playerState.PlayerEndLongJumpTimer = -1
     playerState.longJumpTimer = -1
   end
 end -- PlayerEndLongJump
 
 --[[ IsObjectUnderThis ]]
 function IsObjectUnderThis( object, target )
-  local _, ty    = ObjectGetPos( target )
-  local _, y      = ObjectGetPos( object )
+  local targetObject = Object.Get( target )
+  local _, ty, y = 0, 0, 0
+  if targetObject ~= nil then
+    _, ty = targetObject.api:GetPos()
+  end
+  local objectObject = Object.Get( object )
+  if objectObject ~= nil then
+    _, y = objectObject.api:GetPos()
+  end
   local _, tRectY = ObjectAttr( target, { 'collisionSize' } )
   local _, rectY  = ObjectAttr( object, { 'collisionSize' } )
   local tRectYd2 = tRectY / 2
@@ -341,8 +350,15 @@ end -- IsObjectUnderThis
 
 --[[ IsObjectUpperThis ]]
 function IsObjectUpperThis( object, target )
-  local _, ty    = ObjectGetPos( target )
-  local _, y      = ObjectGetPos( object )
+  local targetObject = Object.Get( target )
+  local ty, y = 0, 0
+  if targetObject ~= nil then
+    _, ty = targetObject.api:GetPos()
+  end
+  local objectObject = Object.Get( object )
+  if objectObject ~= nil then
+    _, y = objectObject.api:GetPos()
+  end
   local _, tRectY = ObjectAttr( target, { 'collisionSize' } )
   local _, rectY  = ObjectAttr( object, { 'collisionSize' } )
   local tRectYd2 = tRectY / 2
@@ -353,8 +369,15 @@ end -- IsObjectUpperThis
 
 --[[ IsObjectRightThis ]]
 function IsObjectRightThis( object, target )
-  local tx, _    = ObjectGetPos( target )
-  local x, _      = ObjectGetPos( object )
+  local targetObject = Object.Get( target )
+  local _, tx, x = 0, 0, 0
+  if targetObject ~= nil then
+    tx, _ = targetObject.api:GetPos()
+  end
+  local objectObject = Object.Get( object )
+  if objectObject ~= nil then
+    x, _ = objectObject.api:GetPos()
+  end
   local tRectX, _ = ObjectAttr( target, { 'collisionSize' } )
   local rectX, _  = ObjectAttr( object, { 'collisionSize' } )
   local tRectXd2 = tRectX / 2
@@ -365,8 +388,15 @@ end -- IsObjectRightThis
 
 --[[ IsObjectLeftThis ]]
 function IsObjectLeftThis( object, target )
-  local tx, _    = ObjectGetPos( target )
-  local x, _      = ObjectGetPos( object )
+  local targetObject = Object.Get( target )
+  local _, tx, x = 0, 0, 0
+  if targetObject ~= nil then
+    tx, _ = targetObject.api:GetPos()
+  end
+  local objectObject = Object.Get( object )
+  if objectObject ~= nil then
+    x, _ = objectObject.api:GetPos()
+  end
   local tRectX, _ = ObjectAttr( target, { 'collisionSize' } )
   local rectX, _  = ObjectAttr( object, { 'collisionSize' } )
   local tRectXd2 = tRectX / 2
@@ -392,7 +422,7 @@ end -- pairsByKeys
 --[[ PushMushroom ]]
 function PushMushroom( object )
   local itemName = object..'-mushroom-'..string.format( '%f', GetTime() )
-  local brickX, brickY = ObjectGetPos( object )
+  local brickX, brickY = Object.Get( object ).api:GetPos()
   ObjectCreate( itemName, brickX, brickY, -0.1 )
   ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '32 32', collision = true, collisionSize = '32 32', collisionStatic = true } )
   animation[ 'timer'..Core.SetTimer( 0.1, DoAnimationMushroom ) ] = { step = 1, time = 0, object = itemName, tile = object }
@@ -405,7 +435,7 @@ end -- PushMushroom
 --[[ PushCoin]]
 function PushCoin( object )
   local itemName = object..'-coin-'..string.format( '%f', GetTime() )
-  local brickX, brickY = ObjectGetPos( object )
+  local brickX, brickY = Object.Get( object ).api:GetPos()
   ObjectCreate( itemName, brickX, brickY, -1.0, true )
   -- ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/coin0.png', renderableSize = '32 32' } )
   ObjectSetAnimation( itemName, 'supermario/coin', 'do' )
@@ -431,7 +461,7 @@ function DoAnimationMushroom( timerId )
 
   if anim.step == 1 then
     anim.time = anim.time + 1
-    local x, y = ObjectGetPos( anim.object )
+    local x, y = Object.Get( anim.object ).api:GetPos()
     ObjectSetPos( anim.object, x, y - 1 )
     if anim.time < 32 then
       animation[ 'timer'..Core.SetTimer( 1/40, DoAnimationMushroom ) ] = anim
@@ -500,7 +530,7 @@ function CollisionBullet( bullet, target, flags, vx, vy )
   local isJumped = false
   if bit32.band( flags, 4 ) == 4 then
     vy = -vy * 0.9
-    local x, y = ObjectGetPos( bullet )
+    local x, y = Object.Get( bullet ).api:GetPos()
     y = y - 1
     ObjectSetPos( bullet, x, y )
     isJumped = true
@@ -522,8 +552,8 @@ end --)
 --[[ UpdateCamera ]]
 function UpdateCamera( timerId )
   local camera = GetCamera( 'camera-mario-style' )
-  local _, cy = ObjectGetPos( camera )
-  local px, _ = ObjectGetPos( 'player' )
+  local _, cy = Object.Get( camera ).api:GetPos()
+  local px, _ = Object.Get( 'player' ).api:GetPos()
   ObjectSetPos( camera, math.max( px, 0 ), cy )
   Core.SetTimer( 0, UpdateCamera, true ) -- стараться избегать 0-таймеров, т.к. они зависят от быстродействия приложения и исполняются каждый тик
 end -- UpdateCamera
@@ -575,7 +605,7 @@ object = nil  -- garbage collecting
 local objectsList = {}
 for q = 1,10 do
   local object = Object.New( 'testobject123-14-'..q, '', true )
-  object.fn.api:SetAnimation( 'bullet/test000', 'right' )
+  object.api:SetAnimation( 'bullet/test000', 'right' )
   table.insert( objectsList, object )
 end
 
@@ -584,8 +614,8 @@ function LuaObjectTest()
   for id, object in pairs( objectsList ) do
     local obj = Object.Get( 'testobject123-14-'..num )
     Debug.Log( 'type of object = '..type( obj )..', fn = '..type( obj.fn ) )
-    obj.fn.api:Destroy()
-    -- object.fn.api:Destroy()
+    obj.api:Destroy()
+    -- object.api:Destroy()
     num = num + 1
   end
 end
@@ -593,8 +623,25 @@ Core.SetTimer( 3, 'LuaObjectTest' )
 ]]
 
 Core.SetTimer( 0.1, function()
-    local object = Object.Get( 'player' )
-    object.fn:TestUserData()
-    -- object.fn:TestUserDataAgain()
+    --[[
+    while true do
+      local object = Object.Get( 'game-object' )
+      if object == nil then
+        break
+      end
+      object.api:Destroy()
+    end
+    local object = Object.New( 'game-object' )
+    object.api:SetAnimation( 'editor/respawn', 'default' )
+    object.api:SetPos( 0, 0 )
+    object = object.api:SetScript( 'data/scripts/objects/test.lua' )
+    object:Init()
+    ]]
+
+    -- local object = Object.Get( 'game-object' )
+    -- object:DoSomething()
   end
 )
+
+function __k_null()
+end

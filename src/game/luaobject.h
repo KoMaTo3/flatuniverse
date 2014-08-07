@@ -70,12 +70,13 @@ public:
   static void Destroy( LuaObjectType *object, LUAOBJECT_LIBRARIESLIST libraryType );
   static void RemoveFromLuaTable( const std::string& objectName, LUAOBJECT_LIBRARIESLIST libraryType );
   static void RemoveFromLuaTable( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType );
-  static void BindTemplateToObject( const int luaObjectId, const LuaObjectType *object, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& luaTemplateTable );
+  static void BindTemplateToObject( const int luaObjectId, const LuaObjectType *object, LUAOBJECT_LIBRARIESLIST libraryType, const char* luaTemplateTable );
   static void LoadObjectDataFromDump( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const unsigned char *data, size_t dataSize );
   static bool SaveObjectDataToDump( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, char *&outData, size_t &dataSize );
   static int InitUserData( const LuaObjectType *object, LUAOBJECT_LIBRARIESLIST libraryType, const bool returnLuaObjectToStack = true );
   static void InitUserData( const LuaObjectType *object, const std::string& objectName, LUAOBJECT_LIBRARIESLIST libraryType, const bool returnLuaObjectToStack = true );
   static void CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName );
+  static bool IsFunctionExists( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName );
 
   static bool LuaCheckStackParametersCount( LUAOBJECT_LIBRARIESLIST libraryType, int minCount );
   static bool LuaCheckStackParametersCountExact( LUAOBJECT_LIBRARIESLIST libraryType, int count );

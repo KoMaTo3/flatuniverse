@@ -10,6 +10,7 @@ namespace Engine {
 
   
 int LuaCore_SetTimer( lua_State *lua );
+int LuaCore_StopTimer( lua_State *lua );
 
   
 };

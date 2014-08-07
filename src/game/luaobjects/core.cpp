@@ -56,5 +56,29 @@ int Engine::LuaCore_SetTimer( lua_State *lua ) {
 
   lua_pushinteger( lua, id );
 
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaCore_SetTimer => timer id[%d] function id[%d] name['%s']", id, luaFunctionId, funcName.c_str() );
+
   return 1;
-}//LuaDebug_RenderState
+}//LuaCore_SetTimer
+
+
+int Engine::LuaCore_StopTimer( lua_State *lua ) {
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE );
+
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount != 1 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaCore_SetTimer => use: Core.StopTimer( timerId )" );
+    return 0;
+  }
+
+  Dword id = ( Dword ) lua_tonumber( lua, 1 );
+  if( id < lib->game->luaTimers.size() ) {
+    lib->game->luaTimers[ id ].active = false;
+    if( lib->game->luaTimers[ id ].luaFunctionId ) {
+      luaL_unref( lua, LUA_REGISTRYINDEX, lib->game->luaTimers[ id ].luaFunctionId );
+      lib->game->luaTimers[ id ].luaFunctionId = 0;
+    }
+  }
+
+  return 1;
+}//LuaCore_StopTimer

@@ -33,6 +33,16 @@ MemoryWriter& MemoryWriter::operator<<( const std::string &str )
 
 
 
+MemoryWriter& MemoryWriter::Write( const char *data, const size_t dataSize ) {
+  this->CheckSizeToWrite( dataSize );
+  memcpy( this->buffer.getData() + this->pos, data, dataSize );
+  this->pos += dataSize;
+
+  return *this;
+}//Write
+
+
+
 
 /*
 =============

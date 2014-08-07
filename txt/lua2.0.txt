@@ -7,19 +7,19 @@
 Object:
     +ObjectRemove
     +ObjectCreate
-    ObjectGetPos
-    ObjectSetPos
-    ObjectAddTrigger
-    ObjectRenderable
-    ObjectCollision
-    ObjectTrigger
-    ObjectLightBlockByCollision
-    CollisionGetStatic
-    CollisionSetStatic
-    GetObjectByPoint
-    GetObjectByRect
-    SelectObject
-    GetSelectedObject
+    +ObjectGetPos
+    +ObjectSetPos
+    +ObjectAddTrigger
+    -ObjectRenderable
+    -ObjectCollision
+    -ObjectTrigger
+    -ObjectLightBlockByCollision
+    -CollisionGetStatic
+    -CollisionSetStatic
+    +GetObjectByPoint
+    +GetObjectByRect
+    +SelectObject
+    +GetSelectedObject
     ObjectAttr
     ListenCollision
     ListenTrigger

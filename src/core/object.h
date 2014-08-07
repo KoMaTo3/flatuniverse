@@ -174,7 +174,7 @@ private:
   Collision       *collision;
   ObjectTrigger   *trigger;
   Tags            *tags;    //список тегов
-  std::string     luaScript;  //скрипты
+  std::string     luaScriptFileName;  //скрипты
   int             luaObjectId; //id объекта в реестре lua
 
   /*
@@ -261,7 +261,7 @@ public:
   inline Object*      GetParent           () { return this->_parent; }
   void                SetLuaScript        ( const std::string& setScript );
   inline
-  const std::string&  GetLuaScript        () { return this->luaScript; }
+  const std::string&  GetLuaScript        () { return this->luaScriptFileName; }
   void                RecalculateRenderableZ( const float z );
   void                SetNeedToUnload     ( const bool unload );
   inline
@@ -327,6 +327,7 @@ public:
   bool                IsHasTag            ( const std::string& tag ) const;
   void                AddTag              ( const std::string& tag );
   void                RemoveTag           ( const std::string& tag );
+  void                InitLuaUserData     ();
 
   void __Test();
 };

@@ -123,6 +123,7 @@ private:
   Animation::Manager      *animationMgr;
   LightMap::LightRenderer *lightRenderer;
   LightMap::LightList     *lightList;
+  int                     collisionManagerIsUpdated;
 
 public:
   Keyboard  keyboard;
@@ -181,6 +182,7 @@ public:
   inline HWND GetWindowHandle() const { return this->_window.hwnd; }
   inline CoreStates GetState() { return this->_state; }
   inline LightMap::LightRenderer* GetLightRenderer() { return this->lightRenderer; }
+  inline int CollisionManagerIsUpdated() { return this->collisionManagerIsUpdated; }
   /*
   inline
   void    SetGuiVisibility    ( bool setShow ) { this->gui.show = setShow; }
