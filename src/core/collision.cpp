@@ -11,7 +11,7 @@
 Vec3 __nullCollisionPosition( 0.0f, 0.0f, 0.0f );
 
 Collision::CollisionHandlerInit *Collision::InitCollisionHandler = NULL;
-luaCollisionListenersList *Collision::collisionLintenersList = NULL;
+luaCollisionListenersList *Collision::collisionListenersList = NULL;
 Collision::CollisionHandler *Collision::defaultCollisionHandler = NULL;
 
 
@@ -625,21 +625,23 @@ void Collision::SaveToBuffer( MemoryWriter &writer )
   this->collisionElement->SaveToBuffer( writer );
 
   //handlers
+  /*
   Dword count = ( this->handlers ? this->handlers->size() : 0 );
   writer << count;
   if( this->handlers ) {
     __log.PrintInfo( Filelevel_DEBUG, "Collision::SaveToBuffer => handlerList[x%p]", this->handlers );
   }
-  if( count && Collision::collisionLintenersList ) {
+  if( count && Collision::collisionListenersList ) {
     __log.PrintInfo( Filelevel_DEBUG, "Collision::SaveToBuffer => handlers[x%p] count[%d]", this->handlers, count );
-    luaCollisionListenersList::const_iterator iter, iterEnd = Collision::collisionLintenersList->end();
-    for( iter = Collision::collisionLintenersList->begin(); iter != iterEnd; ++iter ) {
+    luaCollisionListenersList::const_iterator iter, iterEnd = Collision::collisionListenersList->end();
+    for( iter = Collision::collisionListenersList->begin(); iter != iterEnd; ++iter ) {
       if( iter->object == this ) {
         writer << iter->funcName;
         __log.PrintInfo( Filelevel_DEBUG, "Collision::SaveToBuffer => . handler['%s']", iter->funcName.c_str() );
       }
     }
   }
+  */
 }//SaveToBuffer
 
 
@@ -702,17 +704,17 @@ void Collision::LoadFromBuffer( MemoryReader &reader, const std::string &thisObj
       break;
   }
 
-  if( version >= 0x00000003 ) {
+  if( version >= 0x00000003 && version < 0x0000000C ) {
     //handlers
     Dword count;
     reader >> count;
     //__log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => handlers[%d]", count );
     std::string s;
-    if( count && this->InitCollisionHandler && Collision::collisionLintenersList ) { //something wrong...
+    if( count && this->InitCollisionHandler && Collision::collisionListenersList ) { //something wrong...
       for( Dword q = 0; q < count; ++q ) {
         reader >> s;
         //__log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => . handler['%s']", s.c_str() );
-        //Collision::collisionLintenersList->push_back( luaCollisionListenerStruct( this, s ) );
+        //Collision::collisionListenersList->push_back( luaCollisionListenerStruct( this, s ) );
         this->InitCollisionHandler( s, thisObjectName );
         //this->AddHandler( Collision::defaultCollisionHandler );
       }

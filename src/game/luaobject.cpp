@@ -381,7 +381,7 @@ const LuaObject::LuaObjectLibrary* LuaObject::GetLibrary( LUAOBJECT_LIBRARIESLIS
 }//GetLibrary
 
 
-void LuaObject::CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName ) {
+void LuaObject::CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName, const LuaObject::FunctionCallParametersList* parametersList ) {
   if( !luaObjectId ) {
     __log.PrintInfo( Filelevel_ERROR, "LuaObject::CallFunction => luaObjectId is NULL" );
     return;
@@ -397,12 +397,57 @@ void LuaObject::CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST lib
     //__log.PrintInfo( Filelevel_WARNING, "LuaObject::CallFunction => function '%s' not exists in object luaObjectId[%d]", functionName.c_str(), luaObjectId );
     lua_pop( lib->lua, 3 );
   } else {
-    lua_rawgeti( lib->lua, LUA_REGISTRYINDEX, luaObjectId );
+    lua_pushvalue( lib->lua, -3 );
     lua_getfield( lib->lua, -1, LUAOBJECT_TEMPLATE_FIELD_NAME );
     lua_remove( lib->lua, -2 );
-    if( lua_pcall( lib->lua, 1, 0, 0 ) ) {
+    int parametersCount = 1;
+
+    if( parametersList ) {
+      for( auto &parameter: *parametersList ) {
+        switch( parameter.type ) {
+          case LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_NIL: {
+            lua_pushnil( lib->lua );
+            ++parametersCount;
+            __log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%s', nil", functionName.c_str() );
+          } break;
+          case LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_INTEGER: {
+            lua_pushinteger( lib->lua, parameter.valueInteger );
+            ++parametersCount;
+            __log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%s', integer %d", functionName.c_str(), parameter.valueInteger );
+          } break;
+          case LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_NUMBER: {
+            lua_pushnumber( lib->lua, parameter.valueNumber );
+            ++parametersCount;
+            __log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%s', number %3.3f", functionName.c_str(), parameter.valueNumber );
+          } break;
+          case LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_STRING: {
+            lua_pushstring( lib->lua, parameter.valueString );
+            ++parametersCount;
+            __log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%s', string '%s'", functionName.c_str(), parameter.valueString );
+          } break;
+          case LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_BOOLEAN: {
+            lua_pushboolean( lib->lua, parameter.valueBoolean );
+            ++parametersCount;
+            __log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%s', boolean %d", functionName.c_str(), parameter.valueBoolean );
+          } break;
+          case LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE: {
+            lua_rawgeti( lib->lua, LUA_REGISTRYINDEX, parameter.valueInteger );
+            if( lua_istable( lib->lua, -1 ) ) {
+              lua_getfield( lib->lua, -1, LUAOBJECT_TEMPLATE_FIELD_NAME );
+              lua_remove( lib->lua, -2 );
+              ++parametersCount;
+              __log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%s', reference %d", functionName.c_str(), parameter.valueInteger );
+            } else {
+              __log.PrintInfo( Filelevel_ERROR, "LuaObject::CallFunction => function '%s', reference %d is not a table", functionName.c_str(), parameter.valueInteger );
+            }
+          } break;
+        }//switch
+      }//for auto
+    }//parametersList
+
+    if( lua_pcall( lib->lua, parametersCount, 0, 0 ) ) {
       __log.PrintInfo( Filelevel_ERROR, "LuaObject::CallFunction => failed to call function '%s' in object %d: %s", functionName.c_str(), luaObjectId, lua_tostring( lib->lua, -1 ) );
-      lua_pop( lib->lua, 1 );
+      lua_pop( lib->lua, 2 );
     }
     lua_pop( lib->lua, 2 );
   }

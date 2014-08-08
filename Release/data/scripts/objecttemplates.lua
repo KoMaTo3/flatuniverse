@@ -341,7 +341,6 @@ function GetObjectsTabbedTemplates()  --(
           renderable = true, textureName = 'temp/enemy0.png',
           collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '0 0',
           trigger = false,
-          lightBlockByCollision = true,
         },
         creationScript = function( name )
         end,

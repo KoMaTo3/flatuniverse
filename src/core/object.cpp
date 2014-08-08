@@ -1445,7 +1445,9 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
   //__log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => name['%s'] parent['%s']", tmpName.c_str(), parentName.c_str() );
 
   this->name = tmpName;
+  __log.PrintInfo( Filelevel_DEBUG, "%d", __LINE__ );
   this->_parent = ( rootObject->GetNameFull() == parentName ? rootObject: rootObject->GetObject( parentName ) );
+  __log.PrintInfo( Filelevel_DEBUG, "%d", __LINE__ );
 
   if( this->_parent ) {
     this->nameFull = ( this->_parent->_parent ? this->_parent->GetNameFull() + "/" : "" ) + this->name;
@@ -1457,10 +1459,12 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
   this->SetPosition( newPosition );
 
   if( isRenderable ) {
+    __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => renderable..." );
     ( ( RenderableQuad* ) this->EnableRenderable( RENDERABLE_TYPE_QUAD ) )->LoadFromBuffer( reader );
   }
 
   if( isCollision ) {
+    __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => collision..." );
     this->EnableCollision()->LoadFromBuffer( reader, this->nameFull, version );
 
     //test light block
@@ -1468,6 +1472,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
   }
 
   if( isTrigger ) {
+    __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => trigger..." );
     this->EnableTrigger()->LoadFromBuffer( reader, this->nameFull, version );
   }
 
@@ -1475,6 +1480,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
   Dword tagsCount;
   reader >> tagsCount;
   if( tagsCount ) {
+    __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => tags..." );
     reader.SeekFromCur( -1 * long( sizeof( tagsCount ) ) );
     this->tags = new Tags();
     this->tags->LoadFromBuffer( reader );
@@ -1482,6 +1488,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
 
   if( version >= 0x00000006 ) {
     //animation
+    __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => animation..." );
     bool isAnimation;
     reader >> isAnimation;
     if( isAnimation ) {
@@ -1507,6 +1514,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     }
 
     if( version >= 0x00000007 ) {
+      __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => lua template..." );
       reader >> this->luaScriptFileName;
       if( !this->luaScriptFileName.empty() ) {
         this->InitLuaUserData();
@@ -1521,6 +1529,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
       }
 
       if( version >= 0x0000000C ) {
+        __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => lua userdata..." );
         bool hasUserData;
         reader >> hasUserData;
         __log.PrintInfo( Filelevel_DEBUG, "'%s' hasUserData = %d", this->GetNameFull().c_str(), hasUserData );
@@ -1542,6 +1551,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
       }//C
 
       if( version >= 0x00000008 ) {
+        __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => light block by collision..." );
         bool isLightBlockByCollision;
         reader >> isLightBlockByCollision;
         if( isLightBlockByCollision ) {
@@ -1549,6 +1559,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
         }
 
         if( version >= 0x00000009 ) {
+          __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => light point..." );
           bool isLightPoint;
           reader >> isLightPoint;
           if( isLightPoint ) {
@@ -1603,10 +1614,10 @@ Object* Object::GetObject( const std::string& name, Object *parent )
   }
 
   long slashPos = name.find_first_of( "/" );
-  if( slashPos == 0 ) //начинается со слеша => 1 или 3
+  if( slashPos == 0 ) { //начинается со слеша => 1 или 3
+    __log.PrintInfo( Filelevel_DEBUG, "%d", __LINE__ );
     return this->GetObject( &name[ 1 ], parent );
-  else
-  {
+  } else {
     if( slashPos < 0 )  //нет слешей => 2 или 4
     {
       return parent->GetChild( name );
@@ -1622,8 +1633,10 @@ Object* Object::GetObject( const std::string& name, Object *parent )
           parent = parent->_parent;
       }
       Object *obj = parent->GetChild( currentLevel );
-      if( !obj )
+      if( !obj ) {
         return NULL;
+      }
+      __log.PrintInfo( Filelevel_DEBUG, "%d", __LINE__ );
       return this->GetObject( nextLevel, obj );
     }
   }
@@ -1648,7 +1661,9 @@ Object* Object::GetObjectInPoint( const Vec2& pos )
     ObjectList::iterator iter, iterEnd = this->_childs->end();
     for( iter = this->_childs->begin(); iter != iterEnd; ++iter )
     {
+      __log.PrintInfo( Filelevel_DEBUG, "%d", __LINE__ );
       Object *obj = ( *iter )->GetObjectInPoint( pos );
+      __log.PrintInfo( Filelevel_DEBUG, "%d", __LINE__ );
       if( obj )
         return obj;
     }

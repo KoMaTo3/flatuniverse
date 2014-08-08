@@ -73,7 +73,7 @@ public:
       luaMouseMoveListeners;
 
   //lua-слушатели коллизий
-  luaCollisionListenersList luaCollisionListeners;
+  luaCollisionListenersList collisionListeners;
   luaTriggerListenersList luaTriggerListeners;
 
   //триггеры

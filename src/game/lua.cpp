@@ -2153,6 +2153,7 @@ int Lua::LUA_ListenCollision( lua_State *lua ) {
   }
   std::string objectName  = lua_tostring( lua, 1 );
   std::string funcName    = lua_tostring( lua, 2 );
+  __log.PrintInfo( Filelevel_DEBUG, "Lua::LUA_ListenCollision => object['%s'] function['%s']", objectName.c_str(), funcName.c_str() );
   LUAFUNC_ListenCollision( objectName, funcName );
   return 0;
 }//LUA_ListenCollision

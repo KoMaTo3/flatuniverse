@@ -17,21 +17,27 @@ class luaCollisionListenerStruct {
 public:
   Collision *object;
   std::string funcName;
+  int luaHandlerId;
 
   luaCollisionListenerStruct()
-  :object( nullptr ), funcName( "" )
+  :object( nullptr ), funcName( "" ), luaHandlerId( 0 )
   { }
   luaCollisionListenerStruct( const luaCollisionListenerStruct& setFrom )
-    :object( setFrom.object ), funcName( setFrom.funcName ) {
+    :object( setFrom.object ), funcName( setFrom.funcName ), luaHandlerId( setFrom.luaHandlerId ) {
   }
 
   luaCollisionListenerStruct( Collision *setObject, const std::string &setFuncName )
     :object( setObject ), funcName( setFuncName ) {
   }
 
+  luaCollisionListenerStruct( Collision *setObject, const int setLuaHandlerId )
+    :object( setObject ), luaHandlerId( setLuaHandlerId ) {
+  }
+
   luaCollisionListenerStruct& operator=( const luaCollisionListenerStruct& setFrom ) {
     this->funcName  = setFrom.funcName;
     this->object    = setFrom.object;
+    this->luaHandlerId = setFrom.luaHandlerId;
     return *this;
   }
 };
@@ -66,7 +72,7 @@ private:
       *handlers,
       *newHandlers;
   static CollisionHandlerInit *InitCollisionHandler;
-  static luaCollisionListenersList *collisionLintenersList;
+  static luaCollisionListenersList *collisionListenersList;
   static CollisionHandler *defaultCollisionHandler;
 
   struct CollisionResolver
@@ -126,7 +132,7 @@ public:
   void        SaveToBuffer    ( MemoryWriter &writer );
   void        LoadFromBuffer  ( MemoryReader &reader, const std::string &thisObjectName, const Dword version );
   static inline void SetInitCollisionHandler( CollisionHandlerInit setHandler ) { Collision::InitCollisionHandler = setHandler; }
-  static inline void SetCollisionListenerList( luaCollisionListenersList *setList ) { Collision::collisionLintenersList = setList; }
+  static inline void SetCollisionListenerList( luaCollisionListenersList *setList ) { Collision::collisionListenersList = setList; }
   static inline void SetDefaultCollisionHandler( CollisionHandler *setHandler ) { Collision::defaultCollisionHandler = setHandler; }
   Vec3&       GetSquareSizeModifier() {
     return static_cast< CollisionElementSquare* >( this->collisionElement )->GetSizeModifier();

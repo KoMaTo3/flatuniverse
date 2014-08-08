@@ -1631,8 +1631,7 @@ Object* Core::CreateGUIObject( const std::string& name, Object *parent )
 Object* Core::GetObject( const std::string& name, Object *parent )
 {
   //__log.PrintInfo( Filelevel_DEBUG, "Core::GetObject => name[%s] parent[%s]", name.c_str(), ( parent ? parent->GetNameFull().c_str() : "<NULL>" ) );
-  if( !name.length() )
-  {
+  if( name.empty() ) {
     __log.PrintInfo( Filelevel_WARNING, "Core::GetObject => name is NULL" );
     return NULL;
   }

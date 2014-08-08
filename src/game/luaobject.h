@@ -11,6 +11,7 @@ extern "C" {
 #include "lua/lauxlib.h"
 }
 
+#include "core/file.h"
 
 
 class Game;
@@ -33,6 +34,15 @@ enum LUAOBJECT_LIBRARIESLIST {
   LUAOBJECT_LIBRARY_TOOLS,
   
   LUAOBJECT_LIBRARY_FFFF,
+};
+
+enum LUAOBJECT_PARAMETERS_LIST {
+  LUAOBJECT_PARAMETER_NIL,
+  LUAOBJECT_PARAMETER_NUMBER,
+  LUAOBJECT_PARAMETER_INTEGER,
+  LUAOBJECT_PARAMETER_STRING,
+  LUAOBJECT_PARAMETER_BOOLEAN,
+  LUAOBJECT_PARAMETER_REFERENCE,
 };
 
 class LuaObject;
@@ -62,6 +72,45 @@ public:
     }
   };
 
+  struct FunctionCallParameter {
+    LUAOBJECT_PARAMETERS_LIST type;
+    char *valueString;
+    int valueInteger;
+    double valueNumber;
+    bool valueBoolean;
+
+    explicit FunctionCallParameter()
+      :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_NIL ) {
+        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => nil" );
+    }
+
+    explicit FunctionCallParameter( char *setString )
+      :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_STRING ), valueString( setString ) {
+        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => string '%s'", setString );
+    }
+
+    explicit FunctionCallParameter( double setNumber )
+      :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_NUMBER ), valueNumber( setNumber ) {
+        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => number %3.3f", setNumber );
+    }
+
+    explicit FunctionCallParameter( int setInteger )
+      :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_INTEGER ), valueInteger( setInteger ) {
+        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => integer %d", setInteger );
+    }
+
+    explicit FunctionCallParameter( bool setBoolean )
+      :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_BOOLEAN ), valueBoolean( setBoolean ) {
+        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => boolean %d", setBoolean );
+    }
+
+    explicit FunctionCallParameter( LUAOBJECT_PARAMETERS_LIST typeInteger, int luaReferenceId )
+      :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE ), valueInteger( luaReferenceId ) {
+        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => reference %d", luaReferenceId );
+    }
+  };
+  typedef std::deque< FunctionCallParameter > FunctionCallParametersList;
+
   //static int GarbageCollector( lua_State *lua, LUAOBJECT_LIBRARIESLIST libraryType );
   //static LuaObject** New( lua_State *lua, LuaObject *object, LUAOBJECT_LIBRARIESLIST libraryType );
   static const LuaObjectType* Push( lua_State *lua, const LuaObjectType *object, LUAOBJECT_LIBRARIESLIST libraryType, const bool insertToObjectsList = true );
@@ -75,7 +124,7 @@ public:
   static bool SaveObjectDataToDump( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, char *&outData, size_t &dataSize );
   static int InitUserData( const LuaObjectType *object, LUAOBJECT_LIBRARIESLIST libraryType, const bool returnLuaObjectToStack = true );
   static void InitUserData( const LuaObjectType *object, const std::string& objectName, LUAOBJECT_LIBRARIESLIST libraryType, const bool returnLuaObjectToStack = true );
-  static void CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName );
+  static void CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName, const FunctionCallParametersList* parametersList = NULL );
   static bool IsFunctionExists( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName );
 
   static bool LuaCheckStackParametersCount( LUAOBJECT_LIBRARIESLIST libraryType, int minCount );

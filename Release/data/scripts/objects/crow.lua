@@ -30,7 +30,9 @@ return {
     -- self.api:SetPos( x + 1, y )
   end,
 
-  OnCollision = function( self )
+  OnCollision = function( self, target, flags, vx, vy )
     self.data.jumpCooldown = 0
+    local x, y = target.api:GetPos()
+    target.api:SetPos( x, y + 1 )
   end,
 }
