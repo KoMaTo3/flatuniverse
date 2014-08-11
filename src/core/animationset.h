@@ -34,6 +34,11 @@ class AnimationSetAction {
 public:
   ANIMATION_SET_ACTION action;
   std::string animation;
+  void *userData;
+  int luaFunctionId;
+
+  typedef void OnAnimationEndCallback( AnimationSetAction *action );
+  OnAnimationEndCallback *callback;
 
   AnimationSetAction();
   AnimationSetAction( const AnimationSetAction& from );

@@ -386,7 +386,10 @@ function EditorInit()
   -- ListenMouseMove( 'OnEditorMouseMove' )
   GUIRenderer.OnClickDefault = OnEditorMouseKey
   GUIRenderer.OnMouseMoveDefault = OnEditorMouseMove
-  GUIRenderer.OnKeyboardDefault = OnEditorKey
+  -- GUIRenderer.OnKeyboardDefault = OnEditorKey
+
+  local editor = Object.New( 'editor', '', false )
+  editor.api:SetScript( 'data/scripts/objects/editor.lua' )
 
   -- GUI
   GUI.tooltip = GUILabel:Create( 0, settings.windowSize.y, 200, 13, '', nil, function( self ) self.SetPosition( self, 0, settings.windowSize.y ) end, -9 )
@@ -1402,7 +1405,7 @@ end --tableLength
 --[[ EditorInsertItemByTemplate ]]
 function EditorInsertItemByTemplate( px, py )
   if GUI.tabbedTemplates.currentItem == 0 then
-    return ''
+    return nil
   end
 
   local cameraX, cameraY = GetCameraPos()
@@ -1485,7 +1488,7 @@ function EditorInsertItemByTemplate( px, py )
     end
   end
 
-  return name
+  return Object.Get( name )
 end --EditorInsertItemByTemplate
 
 --[[ ToggleGrid ]]

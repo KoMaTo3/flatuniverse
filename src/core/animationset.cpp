@@ -3,24 +3,28 @@
 #include "file.h"
 
 
-Animation::AnimationSetAction::AnimationSetAction() {
+Animation::AnimationSetAction::AnimationSetAction()
+:callback( NULL ), luaFunctionId( 0 ) {
 }
 
 
 Animation::AnimationSetAction::AnimationSetAction( const AnimationSetAction& from )
-:action( from.action ), animation( from.animation ) {
+:action( from.action ), animation( from.animation ), userData( from.userData ), callback( from.callback ), luaFunctionId( from.luaFunctionId ) {
 }
 
 
 Animation::AnimationSetAction& Animation::AnimationSetAction::operator=( const Animation::AnimationSetAction& from ) {
   this->action = from.action;
   this->animation = from.animation;
+  this->userData = from.userData;
+  this->callback = from.callback;
+  this->luaFunctionId = from.luaFunctionId;
   return *this;
 }
 
 
 Animation::AnimationSetAction::AnimationSetAction( const Animation::ANIMATION_SET_ACTION setAction, const std::string &setAnimation )
-:action( setAction ), animation( setAnimation ) {
+:action( setAction ), animation( setAnimation ), luaFunctionId( 0 ), callback( NULL ) {
 }
 
 
@@ -82,6 +86,10 @@ void Animation::AnimationSet::Update( float dt ) {
             this->_time = 0.0f;
           }
           break;
+        }
+        if( this->_actionAfterAnimationDone.callback ) {
+          __log.PrintInfo( Filelevel_DEBUG, "this->_actionAfterAnimationDone.callback => functionId[%d]", this->_actionAfterAnimationDone.luaFunctionId );
+          this->_actionAfterAnimationDone.callback( &this->_actionAfterAnimationDone );
         }
       }
     } else {

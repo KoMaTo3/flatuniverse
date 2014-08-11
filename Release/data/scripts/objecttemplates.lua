@@ -15,6 +15,7 @@ function GetObjectsTabbedTemplates()  --(
         tags = {
           'brick-breakable',
         },
+        templateScriptName = 'data/scripts/objects/brick-0.lua',
       },
       --
       {
@@ -327,7 +328,7 @@ function GetObjectsTabbedTemplates()  --(
         attr = {
           renderable = true, textureName = 'textures/items/mushroom.png',
           collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500',
-          lightBlockByCollision = true,
+          -- lightBlockByCollision = true,
         },
       },
       --

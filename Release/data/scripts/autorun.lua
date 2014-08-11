@@ -80,8 +80,8 @@ function Main()
   -- ObjectAttr( 'wall', { 'textureName' } )
   -- local r,g,b,a = ObjectAttr( 'wall', { 'color' } )
   -- Debug.Alert( '', r..':'..g..':'..b..':'..a )
-  Keyboard.Listen( 'PlayerControl' )
-  ListenCollision( 'player', 'CollisionPlayer' )
+  -- Keyboard.Listen( 'PlayerControl' )
+  -- ListenCollision( 'player', 'CollisionPlayer' )
   ObjectAddTag( 'player', 'player' )
   ObjectSetAnimation( 'player', 'player/mario', 'stay-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
   Core.SetTimer( 1 / 10, UpdatePlayerAnimation, true )
@@ -123,6 +123,7 @@ function CoinCollect( trigger, object, isInTrigger )
 end -- CoinCollect
 
 --[[ CollisionPlayer ]]
+--[[
 function CollisionPlayer( player, target, flags, vx, vy )
   if ObjectHasTag( target, 'no-reset-player-velocity' ) then
     ObjectAttr( player, { collisionVelocity = vx..' '..vy } )
@@ -157,17 +158,6 @@ function CollisionPlayer( player, target, flags, vx, vy )
             ObjectAddTag( anim.object, 'brick-breakable' )
             ObjectAttr( anim.object, { color = '1 1 1 1', renderableRotation = 0 } )
             animation[ keyByTimer ] = nil
-            --[[
-            anim.time = anim.time + 1
-            if anim.time < anim.timeMax then
-              ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y - math.sin( anim.time / anim.timeMax * 3.14 ) * 10 ) } )
-              animation[ 'timer'..Core.SetTimer( 1/60, 'DoAnimationBrickDisplace' ) ] = anim
-            else
-              ObjectAttr( anim.object, { position = string.format( '%g %g', anim.pos.x, anim.pos.y ) } )
-              ObjectRemoveTag( anim.object, 'push-bottom' )
-              ObjectAddTag( anim.object, 'brick-breakable' )
-            end
-            ]]
           end
         end --)
       ) ] = { step = 1, time = 0, timeMax = 8, object = target }
@@ -185,8 +175,10 @@ function CollisionPlayer( player, target, flags, vx, vy )
     end
   end
 end -- CollisionPlayer
+]]
 
 --[[ PlayerControl ]]
+--[[
 function PlayerControl( id, isPressed )
   if GUIRenderer.focusedItem ~= nil then
     return
@@ -305,8 +297,9 @@ function PlayerControl( id, isPressed )
     end
   end
 end -- PlayerControl
+]]
 
---[[ PlayerDoLongJump ]]
+--[[
 function PlayerDoLongJump( timerId )
   playerState.longJumpTimer = -1
   if playerState.isHoldJump then
@@ -317,7 +310,6 @@ function PlayerDoLongJump( timerId )
   end
 end -- PlayerDoLongJump
 
---[[ PlayerEndLongJump ]]
 function PlayerEndLongJump( timerId )
   playerState.isHoldJump = false
   playerState.PlayerEndLongJumpTimer = -1
@@ -327,6 +319,7 @@ function PlayerEndLongJump( timerId )
     playerState.longJumpTimer = -1
   end
 end -- PlayerEndLongJump
+]]
 
 --[[ IsObjectUnderThis ]]
 function IsObjectUnderThis( object, target )
@@ -558,48 +551,6 @@ function UpdateCamera( timerId )
   Core.SetTimer( 0, UpdateCamera, true ) -- стараться избегать 0-таймеров, т.к. они зависят от быстродействия приложения и исполняются каждый тик
 end -- UpdateCamera
 
--- Objects test
-
-
-----------------------
-----------------------
--- Инициализация объекта, добавление неопределённых функций
-FUObjectList = {}
-function RegisterObject( obj )
-  FUObjectList[ obj.name ] = obj
-  local functionList = {
-    'OnLoad',
-    'OnUnload',
-  }
-  for key, funcName in pairs( functionList ) do
-    if type( obj[ funcName ] ) ~= 'function' then
-      obj[ funcName ].OnLoad = function() end
-    end
-  end
-  --[[
-    на объект у нас 2 указателья - object и FUObjectList[ '...' ]
-    object удаляем сразу после регистрации
-    из FUObjectList удаляем вызовом __fu_destroy из движка
-  ]]
-  obj.__fu_destroy = function()
-    RegisterObject.obj = nil
-  end
-end
-
--- это пишет разраб
-local object = {
-  OnLoad = function()
-    Debug.Log( 'custom OnLoad' )
-  end,
-  OnUnload = function()
-    Debug.Log( 'custom OnUnload' )
-  end,
-  somethingValue = 123,
-}
--- досюда. остальное всё подставляется движком, инициализируя объект
-object.name = 'wall123'
-RegisterObject( object )
-object = nil  -- garbage collecting
 
 --[[
 local objectsList = {}
@@ -642,6 +593,3 @@ Core.SetTimer( 0.1, function()
     -- object:DoSomething()
   end
 )
-
-function __k_null()
-end

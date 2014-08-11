@@ -23,7 +23,6 @@ return {
       local vx, vy = ObjectAttr( name, { 'collisionVelocity' } )
       vy = -700
       ObjectAttr( name, { collisionVelocity = vx..' '..vy } )
-      Debug.Log( 'jump' )
     end
 
     self.data.jumpCooldown = self.data.jumpCooldown + 1
@@ -32,7 +31,5 @@ return {
 
   OnCollision = function( self, target, flags, vx, vy )
     self.data.jumpCooldown = 0
-    local x, y = target.api:GetPos()
-    target.api:SetPos( x, y + 1 )
   end,
 }

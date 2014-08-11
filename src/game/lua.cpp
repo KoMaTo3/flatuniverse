@@ -201,6 +201,7 @@ bool Lua::Init( Game *game )
   };
   //Object
   static const luaL_Reg object_functions[] = {
+    { "AddTag", &Engine::LuaObject_AddTag },
     { "AddTrigger", &Engine::LuaObject_AddTrigger },
     { "Destroy", &Engine::LuaObject_Destroy },
     { "GetId", &Engine::LuaObject_GetId },
@@ -208,6 +209,7 @@ bool Lua::Init( Game *game )
     { "GetNameFull", &Engine::LuaObject_GetNameFull },
     { "GetParentNameFull", &Engine::LuaObject_GetParentNameFull },
     { "GetPos", &Engine::LuaObject_GetPos },
+    { "RemoveTag", &Engine::LuaObject_RemoveTag },
     { "SetAnimation", &Engine::LuaObject_SetAnimation },
     { "SetPos", &Engine::LuaObject_SetPos },
     { "SetScript", &Engine::LuaObject_SetScript },

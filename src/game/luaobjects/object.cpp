@@ -16,6 +16,7 @@ extern "C" {
 }
 
 
+
 using namespace Engine;
 
 
@@ -28,6 +29,7 @@ void Engine::LuaObject_callback_SetOnSetScript( LuaObject_Callback *callback ) {
 
 int Engine::LuaObject_New( lua_State *lua ) {
   int argc = lua_gettop( lua );
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_New => argc[%d]", argc );
 
   if( argc < 1 ) {
     luaL_error( lua, "Engine::LuaObject_New => object name required" );
@@ -35,12 +37,16 @@ int Engine::LuaObject_New( lua_State *lua ) {
 
   const char* nameStr = luaL_checkstring( lua, 1 );
   const char* parentName = NULL;
-  //bool isSaveable = true;
+  bool isSaveable = true;
 
   if( argc > 1 ) {
     parentName = luaL_checkstring( lua, 2 );
     if( !parentName || !parentName[ 0 ] ) {
       parentName = NULL;
+    }
+
+    if( argc > 2 ) {
+      isSaveable = lua_toboolean( lua, 3 ) ? true : false;
     }
   }
 
@@ -64,6 +70,7 @@ int Engine::LuaObject_New( lua_State *lua ) {
     for( iter = path.begin(); iter != iterEnd; ++iter, ++num ) {
       //__log.PrintInfo( Filelevel_DEBUG, ". iter: '%s'", iter->c_str() );
       obj = lib->game->core->CreateObject( *iter, ( currentPath.length() ? lib->game->core->GetObject( currentPath ) : NULL ), num == pathLength - 1 );
+      obj->SetSaveable( isSaveable );
       obj->SetPosition( Vec3Null );
       currentPath += ( currentPath.length() ? "/" : "" ) + *iter;
       lib->game->world->AttachObjectToGrid( lib->game->world->GetGridPositionByObject( *obj ), obj );
@@ -73,9 +80,10 @@ int Engine::LuaObject_New( lua_State *lua ) {
     //parentObj = game->core->GetObject( currentLevel );
   } else {
     obj = lib->game->core->CreateObject( name, NULL, true );
+    obj->SetSaveable( isSaveable );
     obj->SetPosition( Vec3Null );
     obj->Update( 0.0f );
-    if( !notInGrid ) {
+    if( !notInGrid && isSaveable ) {
       World::Grid::Position gridPos = lib->game->world->GetGridPositionByObject( *obj );
       lib->game->world->AttachObjectToGrid( gridPos, obj );
     }
@@ -311,7 +319,7 @@ int Engine::LuaObject_SetAnimation( lua_State *lua ) {
 
   const char *str;
   if( argc < 3 ) {
-    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetAnimation => use: object.fn.api:SetAnimation( animationTemplateName, animationName, animationAfterCompleteName )", argc );
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetAnimation => use: object.api:SetAnimation( animationTemplateName, animationName, animationAfterCompleteName )", argc );
     return 0;
   }
   str = lua_tostring( lua, 2 );
@@ -319,20 +327,33 @@ int Engine::LuaObject_SetAnimation( lua_State *lua ) {
     templateName = str,
     animation,
     animationAfterAnimationComplete;
+  int luaCallbackId = 0;
 
   if( argc > 2 ) {
     str = lua_tostring( lua, 3 );
     animation = str;
 
     if( argc > 3 ) {
-      str = lua_tostring( lua, 4 );
-      animationAfterAnimationComplete = str;
+      if( lua_isfunction( lua, 4 ) ) {
+        __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation => callback is function" );
+        lua_pushvalue( lua, 4 );
+        luaCallbackId = luaL_ref( lua, LUA_REGISTRYINDEX );
+        __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation => function[%d]", luaCallbackId );
+      } else {
+        str = lua_tostring( lua, 4 );
+        animationAfterAnimationComplete = str;
+      }
     } else {
       animationAfterAnimationComplete = animation;
     }
   }
 
   Animation::AnimationSetAction actionAfterAnimation( Animation::ANIMATION_SET_ACTION_REPEAT, animationAfterAnimationComplete );
+  if( luaCallbackId ) {
+    actionAfterAnimation.callback = Engine::LuaObject_AnimationCallback;
+    actionAfterAnimation.luaFunctionId = luaCallbackId;
+    actionAfterAnimation.userData = object;
+  }
   /*
   if( !actionAfterAnimationComplete.empty() ) {
     auto &searchResult = game->animationSetActionByName.find( actionAfterAnimationComplete );
@@ -343,6 +364,7 @@ int Engine::LuaObject_SetAnimation( lua_State *lua ) {
     }
   }
   */
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation => luaFunctionId[%d]", actionAfterAnimation.luaFunctionId );
 
   Animation::AnimationPack *pack = object->ApplyAnimation( actionAfterAnimation, templateName, animation );
   if( pack ) {
@@ -351,6 +373,27 @@ int Engine::LuaObject_SetAnimation( lua_State *lua ) {
 
   return 0;
 }//Object_SetAnimation
+
+
+void Engine::LuaObject_AnimationCallback( Animation::AnimationSetAction *action ) {
+  if( !action->luaFunctionId ) {
+    return;
+  }
+  Object *object = reinterpret_cast< Object* >( action->userData );
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_AnimationCallback => object['%s']", object->GetNameFull().c_str() );
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+  if( object->GetLuaObjectId() ) {
+    object->InitLuaUserData();
+  }
+
+  lua_rawgeti( lib->lua, LUA_REGISTRYINDEX, action->luaFunctionId );
+  lua_rawgeti( lib->lua, LUA_REGISTRYINDEX, object->GetLuaObjectId() );
+  lua_getfield( lib->lua, -1, "fn" );
+  lua_remove( lib->lua, -2 );
+  lua_pcall( lib->lua, 1, 0, 0 );
+  luaL_unref( lib->lua, LUA_REGISTRYINDEX, action->luaFunctionId );
+  action->luaFunctionId = 0;
+}//LuaObject_AnimationCallback
 
 
 int Engine::LuaObject_GetName( lua_State *lua ) {
@@ -421,8 +464,8 @@ int Engine::LuaObject_SetPos( lua_State *lua ) {
 
   int argc = lua_gettop( lua );
   if( argc != 3 ) {
-    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetPos => use: Object.fn.api:SetPos( x, y )" );
-    luaL_error( lua, "Engine::LuaObject_SetPos => use: Object.fn.api:SetPos( x, y )" );
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetPos => use: object.api:SetPos( x, y )" );
+    luaL_error( lua, "Engine::LuaObject_SetPos => use: object.api:SetPos( x, y )" );
     return 0;
   }
 
@@ -445,8 +488,8 @@ int Engine::LuaObject_AddTrigger( lua_State *lua ) {
 
   int argc = lua_gettop( lua );
   if( argc != 2 ) {
-    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_AddTrigger => use: Object.fn.api:AddTrigger( functionName )" );
-    luaL_error( lua, "Engine::LuaObject_AddTrigger => use: Object.fn.api:AddTrigger( functionName )" );
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_AddTrigger => use: object.api:AddTrigger( functionName )" );
+    luaL_error( lua, "Engine::LuaObject_AddTrigger => use: object.api:AddTrigger( functionName )" );
     return 0;
   }
 
@@ -542,6 +585,7 @@ int Engine::LuaObject_GetId( lua_State *lua ) {
 
 
 int Engine::LuaObject_SetScript( lua_State *lua ) {
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetScript ..." );
   luaL_checktype( lua, 1, LUA_TUSERDATA );
   Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
   if( object == NULL ) {
@@ -552,8 +596,8 @@ int Engine::LuaObject_SetScript( lua_State *lua ) {
   int argc = lua_gettop( lua );
 
   if( argc != 2 ) {
-    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetScript => use: Object.fn.api:SetScript( scriptFileName )" );
-    luaL_error( lua, "Engine::LuaObject_SetScript => use: Object.fn.api:SetScript( scriptFileName )" );
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetScript => use: object.api:SetScript( scriptFileName )" );
+    luaL_error( lua, "Engine::LuaObject_SetScript => use: object.api:SetScript( scriptFileName )" );
     return 0;
   }
 
@@ -579,8 +623,55 @@ int Engine::LuaObject_SetScript( lua_State *lua ) {
   lua_getfield( lua, -1, "fn" );
   lua_remove( lua, -2 );
 
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetScript done" );
   return 1;
 }//LuaObject_SetScript
+
+
+int Engine::LuaObject_AddTag( lua_State *lua ) {
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_AddTag => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_AddTag => object is NULL" );
+  }
+
+  int argc = lua_gettop( lua );
+
+  const char *tag;
+  if( argc < 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_AddTag => use: object.api:AddTag( tagName )" );
+    return 0;
+  }
+  tag = lua_tostring( lua, 2 );
+
+  object->AddTag( tag );
+
+  return 0;
+}//LuaObject_AddTag
+
+
+int Engine::LuaObject_RemoveTag( lua_State *lua ) {
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_RemoveTag => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_RemoveTag => object is NULL" );
+  }
+
+  int argc = lua_gettop( lua );
+
+  const char *tag;
+  if( argc < 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_RemoveTag => use: object.api:RemoveTag( tagName )" );
+    return 0;
+  }
+  tag = lua_tostring( lua, 2 );
+
+  object->RemoveTag( tag );
+
+  return 0;
+}//LuaObject_RemoveTag
 
 
 

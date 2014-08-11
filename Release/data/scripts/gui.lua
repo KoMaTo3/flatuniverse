@@ -9,7 +9,7 @@ GUIRenderer = {
   OnKeyboardDefault = nil,
 
   RenderEnable = function()
-    Core.SetTimer( 0.1, 'GUIRendererRender' )
+    Core.SetTimer( 0.1, GUIRendererRender )
   end,
 }
 

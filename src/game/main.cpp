@@ -81,6 +81,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   */
 
   obj = game->core->CreateObject( "player", NULL, true );
+  obj->SetLuaScript( "data/scripts/objects/player.lua" );
   obj->SetLockToDelete( true );
   col = obj->EnableCollision();
   col->InitSquare( Vec3( 14.0f, 20.0f, 0.0f ) );
@@ -104,7 +105,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     memory playerData;
     if( __fileManager->GetFile( "data/temp/player_data.txt", playerData ) ) {
       Engine::LuaObject::LoadObjectDataFromDump( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, ( unsigned char* ) playerData.getData(), playerData.getLength() );
-      Engine::LuaObject::CallFunction( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCREATE );
+      //Engine::LuaObject::CallFunction( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCREATE );
+      __log.PrintInfo( Filelevel_DEBUG, "player->ObjectOnLoad()..." );
+      game->ObjectOnLoad( obj );
     }
   }
 
@@ -712,7 +715,6 @@ void Game::UpdateLuaTimers()
     LUACALLBACK_Timer( this->lua, timer.id, timer.funcName, timer.luaFunctionId );
     if( timer.luaFunctionId ) {
       game->lua->Unref( timer.luaFunctionId );
-      timer.luaFunctionId = 0;
     }
   }
 }//UpdateLuaTimers
@@ -1233,7 +1235,8 @@ void Game::LUA_ListenMouseMove( const std::string &funcName )
 */
 void Game::KeyboardProc( Dword keyId, bool isPressed )
 {
-  if( game->isActive ) {
+  //if( game->isActive )
+  {
     if( isPressed ) {
       for( auto &handler: game->luaObjectOnKeyPress ) {
         Engine::LuaObject::FunctionCallParametersList parameters;
@@ -1266,7 +1269,8 @@ void Game::KeyboardProc( Dword keyId, bool isPressed )
 */
 void Game::MouseKeyProc( Dword keyId, bool isPressed )
 {
-  if( game->isActive ) {
+  //if( game->isActive )
+  {
     if( isPressed ) {
       for( auto &handler: game->luaObjectOnMouseKeyPress ) {
         Engine::LuaObject::FunctionCallParametersList parameters;
@@ -1299,7 +1303,8 @@ void Game::MouseKeyProc( Dword keyId, bool isPressed )
 */
 void Game::MouseMoveProc( const Vec2 &pos )
 {
-  if( game->isActive ) {
+  //if( game->isActive )
+  {
     for( auto &handler: game->luaObjectOnMouseMove ) {
       Engine::LuaObject::FunctionCallParametersList parameters;
       parameters.push_back( Engine::LuaObject::FunctionCallParameter( ( int ) pos.x ) );
