@@ -185,6 +185,7 @@ public:
 
   static void   ObjectOnLoad          ( Object* obj );
   static void   ObjectOnUnload        ( Object* obj );
+  static void   ObjectOnDestroy       ( Object* obj );
   void          EraseLuaHandler       ( const int luaReferenceId, const std::string &functionName, LuaFunctionHandlersList &handlersList );
 
   //debug/test

@@ -520,6 +520,7 @@ Game::Game()
   this->lua = new Lua();
   Object::OnLoad = Game::ObjectOnLoad;
   Object::OnUnload = Game::ObjectOnUnload;
+  Object::OnDestroy = Game::ObjectOnDestroy;
 
   LUAFUNC_RemoveObject      = Game::LUA_RemoveObject;
   LUAFUNC_GetObjectPos      = Game::LUA_GetObjectPos;
@@ -795,6 +796,14 @@ void Game::ObjectOnUnload( Object* obj ) {
     game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONCOLLISION, game->luaObjectOnCollision );
   }
 }//ObjectOnUnload
+
+
+
+void Game::ObjectOnDestroy( Object* obj ) {
+  if( obj->GetLuaObjectId() ) {
+    Game::ObjectOnUnload( obj );
+  }
+}//ObjectOnDestroy
 
 
 

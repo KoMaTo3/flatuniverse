@@ -336,7 +336,7 @@ function GetObjectsTabbedTemplates()  --(
     npc = {
       --
       {
-        name = 'Моб: ворона',
+        name = 'Моб: ворона (прыгучая)',
         icon = 'data/temp/enemy0.png',
         attr = {
           renderable = true, textureName = 'temp/enemy0.png',
@@ -346,6 +346,21 @@ function GetObjectsTabbedTemplates()  --(
         creationScript = function( name )
         end,
         templateScriptName = 'data/scripts/objects/crow.lua',
+        animation = { 'crow/0', 'default', 'repeat' },
+      },
+      --
+      {
+        name = 'Моб: ворона (убегающая)',
+        icon = 'data/temp/enemy0.png',
+        attr = {
+          renderable = true, textureName = 'temp/enemy0.png',
+          collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '0 0',
+          trigger = false,
+        },
+        creationScript = function( name )
+        end,
+        templateScriptName = 'data/scripts/objects/crow-flee.lua',
+        animation = { 'crow/0', 'default', 'repeat' },
       },
       --
     },  -- npc

@@ -117,6 +117,7 @@ public:
 
   static ObjectEvent *OnLoad;
   static ObjectEvent *OnUnload;
+  static ObjectEvent *OnDestroy;
   /*
   class GuiConstructor { //конструктор создания glui-объектов
   public:

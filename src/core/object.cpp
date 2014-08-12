@@ -23,6 +23,7 @@ ObjectByTriggerList   *__objectByTrigger    = NULL;
 
 Object::ObjectEvent *Object::OnLoad = NULL;
 Object::ObjectEvent *Object::OnUnload = NULL;
+Object::ObjectEvent *Object::OnDestroy = NULL;
 ObjectsToRemoveList __objectsToRemove;
 
 
@@ -212,6 +213,10 @@ Object::~Object()
   //__log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%p] name['%s']", this, this->GetNameFull().c_str() );
   //if( !this->_parent )
   //  __log.PrintInfo( Filelevel_DEBUG, "is a root object" );
+
+  if( this->OnDestroy ) {
+    this->OnDestroy( this );
+  }
 
   this->DisableRenderable();
   this->DisableLightBlockByCollision();
