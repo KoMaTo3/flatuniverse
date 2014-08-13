@@ -20,7 +20,7 @@ Object:
     +GetObjectByRect
     +SelectObject
     +GetSelectedObject
-    ObjectAttr
+    +ObjectAttr
     ListenCollision
     ListenTrigger
     SetObjectForce

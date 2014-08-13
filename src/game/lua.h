@@ -145,6 +145,18 @@ void LUACALLBACK_ListenCollision  ( Lua *lua, const std::string &funcName, const
 void LUACALLBACK_ListenTrigger    ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, bool isInTrigger );
 
 
+//очерёдность применения атрибутов при вызове ObjectAttr({...})
+enum {
+  LUA_OBJECT_ATTRS_PRIORITET_RENDERABLE = 0,
+  LUA_OBJECT_ATTRS_PRIORITET_COLLISION,
+  LUA_OBJECT_ATTRS_PRIORITET_COLLISION_SIZE,
+  LUA_OBJECT_ATTRS_PRIORITET_LIGHTBLOCKBYCOLLISION,
+  LUA_OBJECT_ATTRS_PRIORITET_TRIGGER,
+  LUA_OBJECT_ATTRS_PRIORITET_LIGHTPOINT,
+  LUA_OBJECT_ATTRS_PRIORITET_DEFAULT,
+  __LUA_OBJECT_ATTRS_PRIORITET_COUNT
+};
+
 
 class Lua
 {
@@ -241,7 +253,8 @@ public:
   static void LUACALLBACK_ListenCollision ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, Byte flags, const Vec3 &velocity );
   static void LUACALLBACK_ListenTrigger   ( Lua *lua, const std::string &funcName, const std::string &objectName, const std::string &targetName, bool isInTrigger );
 
-private:
   static VariableAttributesListByPrioritet attrsListByPrioritet;
+
+private:
   void        LoadLibs();
 };

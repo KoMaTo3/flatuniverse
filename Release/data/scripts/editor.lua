@@ -958,7 +958,8 @@ function EditorInsertItemByTemplate( px, py )
 
   -- remove bad attrs
 
-  ObjectAttr( name, attrs )
+  -- ObjectAttr( name, attrs )
+  Object.Get( name ).api:Attr( attrs )
   if attrs['_triggerFunc'] ~= nil and attrs.trigger ~= nil then
     ListenTrigger( name, attrs['_triggerFunc'] )
     -- attrs['_triggerFunc'] = nil

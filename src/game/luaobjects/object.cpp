@@ -5,6 +5,7 @@
 #include "core/animationpack.h"
 #include "core/animationpack.h"
 #include "game/luastatecheck.h"
+#include "core/textparser.h"
 
 extern "C" {
 #include "../../lua/lua.h"
@@ -21,6 +22,7 @@ using namespace Engine;
 
 
 Engine::LuaObject_Callback *LuaObject_OnSetScript = NULL;
+
 
 void Engine::LuaObject_callback_SetOnSetScript( LuaObject_Callback *callback ) {
   LuaObject_OnSetScript = callback;
@@ -699,6 +701,750 @@ int Engine::LuaObject_GetParent( lua_State *lua ) {
 
   return 1;
 }//LuaObject_GetParent
+
+
+int Engine::LuaObject_Attr( lua_State *lua ) {
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_Attr => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_Attr => object is NULL" );
+  }
+
+  int argc = lua_gettop( lua );
+
+  if( argc < 2 || !lua_istable( lua, 2 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_Attr => use: object.api:Attr( parametersTableList )" );
+    return 0;
+  }
+
+  VariableAttributesList setAttrs, getAttrs;
+  VariableAttribute *attr = NULL;
+  int returnValuesCount = 0;
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_Attr => is table[%d]", lua_istable( lua, -1 ) );
+  lua_pushnil( lua );
+  while( lua_next( lua, -2 ) ) {
+    if( lua_isnumber( lua, -2 ) ) { //get: ключ = число == без ключа, возвращаем значения
+      const std::string parameterName = luaL_checkstring( lua, -1 );
+      attr = new VariableAttribute();
+      attr->name = parameterName;
+      getAttrs.push_back( attr );
+    } else { //set
+      const std::string parameterName = luaL_checkstring( lua, -2 );
+      attr = NULL;
+      if( lua_isboolean( lua, -1 ) ) {
+        attr = new VariableAttribute();
+        attr->value.SetBoolean( lua_toboolean( lua, -1 ) ? true : false );
+      } else if( lua_isnil( lua, -1 ) || lua_isnone( lua, -1 ) ) {
+        attr = new VariableAttribute();
+        attr->value.SetNull();
+      } else if( lua_isnumber( lua, -1 ) ) {
+        attr = new VariableAttribute();
+        attr->value.SetNumber( ( float ) lua_tonumber( lua, -1 ) );
+      } else if( lua_isstring( lua, -1 ) ) {
+        attr = new VariableAttribute();
+        attr->value.SetString( lua_tostring( lua, -1 ) );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_Attr => parameter's  key '%s' has bad value", parameterName.c_str() );
+      }
+      if( attr ) {
+        attr->name = parameterName;;
+        if( attr->name == "collision" ) {
+          Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_COLLISION ].push_back( attr );
+        } else if( attr->name == "collisionSize" ) {
+          Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_COLLISION_SIZE ].push_back( attr );
+        } else if( attr->name == "lightBlockByCollision" ) {
+          Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_LIGHTBLOCKBYCOLLISION ].push_back( attr );
+        } else if( attr->name == "renderable" ) {
+          Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_RENDERABLE ].push_back( attr );
+        } else if( attr->name == "trigger" ) {
+          Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_TRIGGER ].push_back( attr );
+        } else if( attr->name == "lightPoint" ) {
+          Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_LIGHTPOINT ].push_back( attr );
+        }
+        else {
+          Lua::attrsListByPrioritet[ LUA_OBJECT_ATTRS_PRIORITET_DEFAULT ].push_back( attr );
+        }
+        //__log.PrintInfo( Filelevel_DEBUG, ". '%s' => '%s'", attr->name.c_str(), attr->value.GetString().c_str() );
+      }
+    }
+    lua_pop( lua, 1 );
+  }//while next
+  lua_pop( lua, 1 );
+
+  for( auto &attrsList: Lua::attrsListByPrioritet ) {
+    for( auto &attr: attrsList ) {
+      setAttrs.push_back( attr );
+    }
+    attrsList.clear();
+  }
+
+  RenderableQuad  *renderable;
+  Collision       *collision;
+  ObjectTrigger   *trigger;
+
+  // set
+  for( auto &attr: setAttrs ) {
+    if( attr->name == "renderable" ) {
+      if( attr->value.GetBoolean() ) {
+        object->EnableRenderable( RENDERABLE_TYPE_QUAD );
+      } else {
+        object->DisableRenderable();
+      }
+      continue;
+    }
+    if( attr->name == "collision" ) {
+      if( attr->value.GetBoolean() ) {
+        object->EnableCollision();
+      } else {
+        object->DisableCollision();
+      }
+      continue;
+    }//collision
+    if( attr->name == "trigger" ) {
+      if( attr->value.GetBoolean() ) {
+        object->EnableTrigger();
+      } else {
+        object->DisableTrigger();
+      }
+      continue;
+    }//trigger
+    if( attr->name == "lightBlockByCollision" ) {
+      if( attr->value.GetBoolean() ) {
+        object->EnableLightBlockByCollision();
+      } else {
+        object->DisableLightBlockByCollision();
+      }
+      continue;
+    }//lightBlockByCollision
+    if( attr->name == "lightPoint" ) {
+      if( attr->value.GetBoolean() ) {
+        object->EnableLightPoint();
+      } else {
+        object->DisableLightPoint();
+      }
+      continue;
+    }//lightPoint
+    if( attr->name == "position" ) {
+      Vec3 pos = object->GetPosition();
+      sscanf_s( attr->value.GetString().c_str(), "%f %f", &pos.x, &pos.y );
+      object->SetPosition( pos );
+      continue;
+    }//position
+
+    //renderable
+    if( attr->name == "textureName" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      std::string textureFileName = std::string( FileManager_DATADIRECTORY ) + "/" + attr->value.GetString();
+      if( renderable && __fileManager->FileExists( textureFileName ) ) {
+        renderable->SetTexture( textureFileName );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => texture '%s' not found or object not renderable", textureFileName.c_str() );
+      }
+      continue;
+    }//textureName
+    if( attr->name == "renderableSize" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        Vec2 size( 1.0f, 1.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &size.x, &size.y );
+        if( res < 2 ) {
+          size.y = size.x;
+        }
+        renderable->SetSize( size );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderableSize: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//renderableSize
+    if( attr->name == "renderablePosition" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        Vec3 pos( 0, 0, 0 );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &pos.x, &pos.y );
+        if( res < 2 ) {
+          pos.y = pos.x;
+        }
+        renderable->SetPosition( pos );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderablePosition: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//renderablePosition
+    if( attr->name == "color" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        Vec4 color( 1.0f, 1.0f, 1.0f, 1.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f %f %f", &color.x, &color.y, &color.z, &color.w );
+        if( res < 4 ) {
+          color.y = color.z = color.w = color.x;
+        }
+        renderable->SetColor( color );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => color: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//color
+    if( attr->name == "renderableScale" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        Vec2 scale( 1.0f, 1.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &scale.x, &scale.y );
+        if( res < 2 ) {
+          scale.y = scale.x;
+        }
+        renderable->SetScale( scale );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderableScale: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//renderableScale
+    if( attr->name == "renderableRotation" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        float angle = attr->value.GetNumber();
+        renderable->SetRotation( DEG2RAD( angle ) );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderableRotation: object '%s' not renderable", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//renderableRotation
+
+    //collision
+    if( attr->name == "collisionSize" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 size( 1.0f, 1.0f, 0.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &size.x, &size.y );
+        if( res < 2 ) {
+          size.y = size.x;
+        }
+        collision->InitSquare( size );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionSize: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionSize
+    if( attr->name == "collisionAcceleration" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 vec( 0.0f, 0.0f, 0.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &vec.x, &vec.y );
+        if( res < 2 ) {
+          vec.y = vec.x;
+        }
+        collision->SetAcceleration( vec );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionAcceleration: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionAcceleration
+    if( attr->name == "collisionVelocity" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 vec( 0.0f, 0.0f, 0.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &vec.x, &vec.y );
+        if( res < 2 ) {
+          vec.y = vec.x;
+        }
+        collision->SetVelocity( vec );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionVelocity: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionVelocity
+    if( attr->name == "collisionStatic" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        collision->SetIsStatic( attr->value.GetBoolean( true ) );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionStatic: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionStatic
+    if( attr->name == "collisionForce" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 vec = collision->GetForce();
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &vec.x, &vec.y );
+        if( res < 2 ) {
+          vec.y = vec.x;
+        }
+        collision->SetForce( vec );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionForce: object '%s' not collision", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//collisionForce
+
+    //trigger
+    if( attr->name == "triggerSize" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        Vec3 size( 1.0f, 1.0f, 0.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &size.x, &size.y );
+        if( res < 2 ) {
+          size.y = size.x;
+        }
+        trigger->SetSize( size );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => triggerSize: object '%s' not triger", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//triggerSize
+    if( attr->name == "triggerPolygon" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        CollisionElementPolygon::PointList points;
+        TextParser parser( attr->value.GetString().c_str(), attr->value.GetString().size() );
+        TextParser::Result parserValue;
+        int step = 0;
+        Vec2 point;
+        while( parser.GetNext( parserValue ) ) {
+          if( parserValue.type != TPL_NUMBER ) {
+            __log.PrintInfo( Filelevel_WARNING, "triggerPolygon => bad format of string '%s'", attr->value.GetString().c_str() );
+            break;
+          } else {
+            if( step == 0 ) {
+              point.x = parserValue.GetFloat();
+            } else {
+              point.y = parserValue.GetFloat();
+              //__log.PrintInfo( Filelevel_DEBUG, "triggerPolygon => point[%3.3f; %3.3f]", point.x, point.y );
+              points.push_back( point );
+            }
+          }
+          step ^= 1;
+        }
+        trigger->SetPolygon( points );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => triggerPolygon: object '%s' not trigger", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//triggerPolygon
+    if( attr->name == "lightPointSize" ) {
+      ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
+      if( widget ) {
+        Vec2 size( 1.0f, 1.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &size.x, &size.y );
+        __log.PrintInfo( Filelevel_DEBUG, "lightPointSize => [%3.3f; %3.3f]", size.x, size.y );
+        if( res < 2 ) {
+          size.y = size.x;
+        }
+        widget->SetSize( size );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => lightPointSize: object '%s' not lightPoint", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//lightPointSize
+    if( attr->name == "lightPointColor" ) {
+      ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
+      if( widget ) {
+        Vec4 color( 1.0f, 1.0f, 1.0f, 1.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f %f %f", &color.x, &color.y, &color.z, &color.w );
+        if( res < 4 ) {
+          color.y = color.z = color.w = color.x;
+        }
+        __log.PrintInfo( Filelevel_DEBUG, "lightPointColor[%3.3f; %3.3f; %3.3f; %3.3f]", color.x, color.y, color.z, color.w );
+        widget->SetColor( color );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => color: object '%s' not lightPoint", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//lightPointColor
+    if( attr->name == "lightPointPenetration" ) {
+      ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
+      if( widget ) {
+        float penetration;
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f", &penetration );
+        __log.PrintInfo( Filelevel_DEBUG, "lightPointPenetration => %3.3f", penetration );
+        widget->SetPenetration( penetration );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => lightPointPenetration: object '%s' not lightPoint", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//lightPointPenetration
+    if( attr->name == "z" ) {
+      object->SetZ( attr->value.GetNumber() );
+      continue;
+    }//z
+  }//set
+
+  //get
+  for( auto &attr: getAttrs ) {
+    if( attr->name == "renderable" ) {
+      //attr->value.SetBoolean( object->IsRenderable() );
+      lua_pushboolean( lua, object->IsRenderable() );
+      ++returnValuesCount;
+      continue;
+    }//renderable
+    if( attr->name == "collision" ) {
+      //attr->value.SetBoolean( object->IsCollision() );
+      lua_pushboolean( lua, object->IsCollision() );
+      ++returnValuesCount;
+      continue;
+    }//collision
+    if( attr->name == "trigger" ) {
+      //attr->value.SetBoolean( object->IsTrigger() );
+      lua_pushboolean( lua, object->IsTrigger() );
+      ++returnValuesCount;
+      continue;
+    }//trigger
+    if( attr->name == "lightBlockByCollision" ) {
+      //attr->value.SetBoolean( object->IsLightBlockByCollision() );
+      lua_pushboolean( lua, object->IsLightBlockByCollision() );
+      ++returnValuesCount;
+      continue;
+    }//lightBlockByCollision
+    if( attr->name == "lightPoint" ) {
+      //attr->value.SetBoolean( object->IsLightPoint() );
+      lua_pushboolean( lua, object->IsLightPoint() );
+      ++returnValuesCount;
+      continue;
+    }//lightPoint
+    if( attr->name == "position" ) {
+      //attr->value.SetVec3( object->GetPosition() );
+      const auto &pos = object->GetPosition();
+      lua_pushnumber( lua, pos.x );
+      lua_pushnumber( lua, pos.y );
+      lua_pushnumber( lua, pos.z );
+      returnValuesCount += 3;
+      continue;
+    }//position
+
+    //renderable
+    if( attr->name == "textureName" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        const std::string &texture = renderable->GetTextureFileName();
+        //attr->value.SetString( texture.empty() ? texture : &renderable->GetTextureFileName()[ strlen( FileManager_DATADIRECTORY ) + 1 ] );
+        lua_pushstring( lua, ( texture.empty() ? texture : &renderable->GetTextureFileName()[ strlen( FileManager_DATADIRECTORY ) + 1 ] ).c_str() );
+        ++returnValuesCount;
+      } else {
+        //attr->value.SetString( "" );
+        lua_pushstring( lua, "" );
+        ++returnValuesCount;
+      }
+      continue;
+    }//textureName
+    if( attr->name == "renderableSize" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        //attr->value.SetVec2( renderable->GetSize() );
+        const auto &size = renderable->GetSize();
+        lua_pushnumber( lua, size.x );
+        lua_pushnumber( lua, size.y );
+        returnValuesCount += 2;
+      } else {
+        //attr->value.SetVec2( Vec2Null );
+        lua_pushnumber( lua, 0.0 );
+        lua_pushnumber( lua, 0.0 );
+        returnValuesCount += 2;
+      }
+      continue;
+    }//renderableSize
+    if( attr->name == "renderablePosition" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        const Vec3 &pos = renderable->GetPosition();
+        //attr->value.SetVec2( Vec2( pos.x, pos.y ) );
+        lua_pushnumber( lua, pos.x );
+        lua_pushnumber( lua, pos.y );
+        returnValuesCount += 2;
+      } else {
+        //attr->value.SetVec2( Vec2Null );
+        lua_pushnumber( lua, 0.0 );
+        lua_pushnumber( lua, 0.0 );
+        returnValuesCount += 2;
+      }
+      continue;
+    }//renderablePosition
+    if( attr->name == "color" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        //attr->value.SetVec4( renderable->GetColor() );
+        const auto &color = renderable->GetColor();
+        lua_pushnumber( lua, color.x );
+        lua_pushnumber( lua, color.y );
+        lua_pushnumber( lua, color.z );
+        lua_pushnumber( lua, color.w );
+        returnValuesCount += 4;
+      } else {
+        //attr->value.SetVec4( Vec4Null );
+        lua_pushnumber( lua, 0.0f );
+        lua_pushnumber( lua, 0.0f );
+        lua_pushnumber( lua, 0.0f );
+        lua_pushnumber( lua, 0.0f );
+        returnValuesCount += 4;
+      }
+      continue;
+    }//color
+    if( attr->name == "renderableScale" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        //attr->value.SetVec2( renderable->GetScale() );
+        const auto &scale = renderable->GetScale();
+        lua_pushnumber( lua, scale.x );
+        lua_pushnumber( lua, scale.y );
+        returnValuesCount += 2;
+      } else {
+        //attr->value.SetVec2( Vec2Null );
+        lua_pushnumber( lua, 0.0 );
+        lua_pushnumber( lua, 0.0 );
+        returnValuesCount += 2;
+      }
+      continue;
+    }//renderableScale
+    if( attr->name == "renderableRotation" ) {
+      renderable = ( RenderableQuad* ) object->GetRenderable();
+      if( renderable ) {
+        //attr->value.SetNumber( renderable->GetRotation() );
+        lua_pushnumber( lua, renderable->GetRotation() );
+        ++returnValuesCount;
+      } else {
+        //attr->value.SetNumber( 0.0f );
+        lua_pushnumber( lua, 0.0 );
+        ++returnValuesCount;
+      }
+      continue;
+    }//renderableRotation
+
+    //collision
+    if( attr->name == "collisionSize" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        const Vec3 &size = collision->GetSize();
+        //attr->value.SetVec2( Vec2( size.x, size.y ) );
+        lua_pushnumber( lua, size.x );
+        lua_pushnumber( lua, size.y );
+        returnValuesCount += 2;
+      } else {
+        //attr->value.SetVec2( Vec2Null );
+        lua_pushnumber( lua, 0.0 );
+        lua_pushnumber( lua, 0.0 );
+        returnValuesCount += 2;
+      }
+      continue;
+    }//collisionSize
+    if( attr->name == "collisionAcceleration" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 acceleration = collision->GetAcceleration();
+        //attr->value.SetVec2( Vec2( acceleration.x, acceleration.y ) );
+        lua_pushnumber( lua, acceleration.x );
+        lua_pushnumber( lua, acceleration.y );
+        returnValuesCount += 2;
+      } else {
+        //attr->value.SetVec2( Vec2Null );
+        lua_pushnumber( lua, 0.0 );
+        lua_pushnumber( lua, 0.0 );
+        returnValuesCount += 2;
+      }
+      continue;
+    }//collisionAcceleration
+    if( attr->name == "collisionVelocity" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 velocity = collision->GetVelocity();
+        //attr->value.SetVec2( Vec2( velocity.x, velocity.y ) );
+        lua_pushnumber( lua, velocity.x );
+        lua_pushnumber( lua, velocity.y );
+        returnValuesCount += 2;
+      } else {
+        //attr->value.SetVec2( Vec2Null );
+        lua_pushnumber( lua, 0.0 );
+        lua_pushnumber( lua, 0.0 );
+        returnValuesCount += 2;
+      }
+      continue;
+    }//collisionVelocity
+    if( attr->name == "collisionStatic" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        //attr->value.SetBoolean( collision->IsStatic() );
+        lua_pushboolean( lua, collision->IsStatic() );
+        ++returnValuesCount;
+      } else {
+        //attr->value.SetBoolean( false );
+        lua_pushboolean( lua, 0 );
+        ++returnValuesCount;
+      }
+      continue;
+    }//collisionStatic
+    if( attr->name == "collisionForce" ) {
+      collision = object->GetCollision();
+      if( collision ) {
+        Vec3 force = collision->GetForce();
+        //attr->value.SetVec2( Vec2( force.x, force.y ) );
+        lua_pushnumber( lua, force.x );
+        lua_pushnumber( lua, force.y );
+        returnValuesCount += 2;
+      } else {
+        //attr->value.SetVec2( Vec2Null );
+        lua_pushnumber( lua, 0.0 );
+        lua_pushnumber( lua, 0.0 );
+        returnValuesCount += 2;
+      }
+      continue;
+    }//collisionForce
+
+    //trigger
+    if( attr->name == "triggerType" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        CollisionElementType type = trigger->GetType();
+        //std::string typeName = "";
+        switch( type ) {
+        case COLLISION_ELEMENT_TYPE_SQUARE:
+          //typeName = "square";
+          lua_pushstring( lua, "square" );
+          ++returnValuesCount;
+          break;
+        case COLLISION_ELEMENT_TYPE_CIRCLE:
+          //typeName = "circle";
+          lua_pushstring( lua, "circle" );
+          ++returnValuesCount;
+          break;
+        case COLLISION_ELEMENT_TYPE_POLYGON:
+          //typeName = "polygon";
+          lua_pushstring( lua, "polygon" );
+          ++returnValuesCount;
+          break;
+        }
+        //attr->value.SetString( typeName );
+      } else {
+        lua_pushstring( lua, "" );
+        ++returnValuesCount;
+        //attr->value.SetString( "" );
+      }
+      continue;
+    }//triggerType
+    if( attr->name == "triggerSize" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        Vec3 size = trigger->GetSize();
+        //attr->value.SetVec2( Vec2( size.x, size.y ) );
+        lua_pushnumber( lua, size.x );
+        lua_pushnumber( lua, size.y );
+        returnValuesCount += 2;
+      } else {
+        //attr->value.SetVec2( Vec2Null );
+        lua_pushnumber( lua, 0.0 );
+        lua_pushnumber( lua, 0.0 );
+        returnValuesCount += 2;
+      }
+      continue;
+    }//triggerSize
+    if( attr->name == "triggerPolygon" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        CollisionElementPolygon::PointList pointList;
+        if( trigger->GetPolygon( pointList ) ) {
+          std::string result = "";
+          char temp[ 1024 ];
+          for( auto &point: pointList ) {
+            sprintf_s( temp, sizeof( temp ), "%s%3.3f %3.3f", result.size() ? " " : "", point.x, point.y );
+            result += temp;
+          }
+          //attr->value.SetString( result );
+          lua_pushstring( lua, result.c_str() );
+          ++returnValuesCount;
+        } else {
+          //attr->value.SetString( "" );
+          lua_pushstring( lua, "" );
+          ++returnValuesCount;
+        }
+      } else {
+        //attr->value.SetString( "" );
+        lua_pushstring( lua, "" );
+        ++returnValuesCount;
+      }
+      continue;
+    }//triggerPolygon
+    if( attr->name == "z" ) {
+      float z = object->GetPosition().z;
+      //attr->value.SetNumber( z );
+      lua_pushnumber( lua, z );
+      ++returnValuesCount;
+      continue;
+    }//z
+  }//get
+
+  /*
+  if( !getAttrs.empty() ) { //return parameters
+    //__log.PrintInfo( Filelevel_DEBUG, ". getAttrs[%d]", getAttrs.size() );
+    VariableAttributesList::iterator iter, iterEnd = getAttrs.end();
+    VariableAttribute *var;
+    for( iter = getAttrs.begin(); iter != iterEnd; ++iter ) {
+      var = *iter;
+      //__log.PrintInfo( Filelevel_DEBUG, ". type[%d]", var->value.GetType() );
+      switch( ( *iter )->value.GetType() ) {
+        case VariableType_NUMBER: {
+          //__log.PrintInfo( Filelevel_DEBUG, ". number[%3.3f]", var->value.GetNumber() );
+          lua_pushnumber( lua, var->value.GetNumber() );
+          ++returnValuesCount;
+          break;
+        }
+        case VariableType_STRING: {
+          //__log.PrintInfo( Filelevel_DEBUG, ". string['%s']", var->value.GetString().c_str() );
+          lua_pushstring( lua, var->value.GetString().c_str() );
+          ++returnValuesCount;
+          break;
+        }
+        case VariableType_BOOLEAN: {
+          //__log.PrintInfo( Filelevel_DEBUG, ". bool[%d]", var->value.GetBoolean() );
+          lua_pushboolean( lua, var->value.GetBoolean() );
+          ++returnValuesCount;
+          break;
+        }
+        case VariableType_NULL: {
+          //__log.PrintInfo( Filelevel_DEBUG, ". null" );
+          lua_pushnil( lua );
+          ++returnValuesCount;
+          break;
+        }
+        case VariableType_VEC2: {
+          //__log.PrintInfo( Filelevel_DEBUG, ". vec2[%3.3f; %3.3f]", var->value.GetVec2().x, var->value.GetVec2().y );
+          lua_pushnumber( lua, var->value.GetVec2().x );
+          lua_pushnumber( lua, var->value.GetVec2().y );
+          returnValuesCount += 2;
+          break;
+        }
+        case VariableType_VEC3: {
+          //__log.PrintInfo( Filelevel_DEBUG, ". vec3[%3.3f; %3.3f; %3.3f]", var->value.GetVec3().x, var->value.GetVec3().y, var->value.GetVec3().z );
+          lua_pushnumber( lua, var->value.GetVec3().x );
+          lua_pushnumber( lua, var->value.GetVec3().y );
+          lua_pushnumber( lua, var->value.GetVec3().z );
+          returnValuesCount += 3;
+          break;
+        }
+        case VariableType_VEC4: {
+          //__log.PrintInfo( Filelevel_DEBUG, ". vec4[%3.3f; %3.3f; %3.3f; %3.3f]", var->value.GetVec4().x, var->value.GetVec4().y, var->value.GetVec4().z, var->value.GetVec4().w );
+          lua_pushnumber( lua, var->value.GetVec4().x );
+          lua_pushnumber( lua, var->value.GetVec4().y );
+          lua_pushnumber( lua, var->value.GetVec4().z );
+          lua_pushnumber( lua, var->value.GetVec4().w );
+          returnValuesCount += 4;
+          break;
+        }
+      }//switch
+    }//for
+  }
+  */
+
+  VariableAttributesList::iterator iter, iterEnd = setAttrs.end();
+  for( iter = setAttrs.begin(); iter != iterEnd; ++iter ) {
+    delete *iter;
+  }
+  setAttrs.clear();
+
+  iterEnd = getAttrs.end();
+  for( iter = getAttrs.begin(); iter != iterEnd; ++iter ) {
+    delete *iter;
+  }
+  getAttrs.clear();
+
+  return returnValuesCount;
+}//LuaObject_Attr
 
 
 

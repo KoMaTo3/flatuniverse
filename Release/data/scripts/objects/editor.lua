@@ -187,15 +187,17 @@ return {
         for tx = left, right do
         for ty = top, bottom do
           x, y = GetPixelByTile( tx, ty )
-          table.insert( objects, EditorInsertItemByTemplate( x, y ) )
+          local obj = EditorInsertItemByTemplate( x, y )
+          table.insert( objects, obj )
+          table.insert( names, obj.api:GetNameFull() )
         end
         end
         Object.Select( objects )
         self:UpdateGuiBySelectedObject()
         PushToBuffer( function()
           end, function()
-            for _,object in pairs( objects ) do
-              object.api:Remove()
+            for _,name in pairs( names ) do
+              Object.Get( name ).api:Destroy()
             end
           end
         )

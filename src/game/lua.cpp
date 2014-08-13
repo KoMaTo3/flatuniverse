@@ -82,19 +82,6 @@ LUAFUNCPROC_WorldLoad         *LUAFUNC_WorldLoad            = NULL;
 //LUACALLBACKPROC_Timer     *LUACALLBACK_Timer            = NULL;
 
 
-//очерёдность применения атрибутов при вызове ObjectAttr({...})
-enum {
-  LUA_OBJECT_ATTRS_PRIORITET_RENDERABLE = 0,
-  LUA_OBJECT_ATTRS_PRIORITET_COLLISION,
-  LUA_OBJECT_ATTRS_PRIORITET_COLLISION_SIZE,
-  LUA_OBJECT_ATTRS_PRIORITET_LIGHTBLOCKBYCOLLISION,
-  LUA_OBJECT_ATTRS_PRIORITET_TRIGGER,
-  LUA_OBJECT_ATTRS_PRIORITET_LIGHTPOINT,
-  LUA_OBJECT_ATTRS_PRIORITET_DEFAULT,
-  __LUA_OBJECT_ATTRS_PRIORITET_COUNT
-};
-
-
 
 Lua::Lua()
 :luaState( NULL )
@@ -203,6 +190,7 @@ bool Lua::Init( Game *game )
   static const luaL_Reg object_functions[] = {
     { "AddTag", &Engine::LuaObject_AddTag },
     { "AddTrigger", &Engine::LuaObject_AddTrigger },
+    { "Attr", &Engine::LuaObject_Attr },
     { "Destroy", &Engine::LuaObject_Destroy },
     { "GetId", &Engine::LuaObject_GetId },
     { "GetName", &Engine::LuaObject_GetName },

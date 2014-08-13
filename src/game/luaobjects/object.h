@@ -15,6 +15,7 @@ namespace Engine {
   
 int LuaObject_AddTag( lua_State *lua );
 int LuaObject_AddTrigger( lua_State *lua );
+int LuaObject_Attr( lua_State *lua );
 int LuaObject_Destroy( lua_State *lua );
 int LuaObject_Get( lua_State *lua );
 int LuaObject_GetId( lua_State *lua );
