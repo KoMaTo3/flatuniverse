@@ -676,112 +676,34 @@ int Engine::LuaObject_RemoveTag( lua_State *lua ) {
 }//LuaObject_RemoveTag
 
 
+int Engine::LuaObject_GetParent( lua_State *lua ) {
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_GetParent => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_GetParent => object is NULL" );
+  }
+
+  Object *parent = object->GetParent();
+  if( !parent->GetParent() ) {
+    lua_pushnil( lua );
+    return 1;
+  }
+
+  if( !parent->GetLuaObjectId() ) {
+    parent->InitLuaUserData();
+  }
+  lua_rawgeti( lua, LUA_REGISTRYINDEX, parent->GetLuaObjectId() );
+  lua_getfield( lua, -1, "fn" );
+  lua_remove( lua, -2 );
+
+  return 1;
+}//LuaObject_GetParent
+
+
 
 /*
 static int Object_gc( lua_State *lua ) {
   return Engine::LuaObject::GarbageCollector( lua, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
 }//Object_gc
-*/
-
-
-/*
-static int Sprite_Callback( lua_State *lua ) {
-  Sprite *object = static_cast< Sprite* >( Engine::LuaObject::Check( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SPRITE ) );
-  luaL_argcheck( lua, object != NULL, 1, "Error object" );
-
-  int callbackReference = 0;
-
-  if( lua_isfunction( lua, 2 ) ) {
-    lua_pushvalue( lua, 2 );
-    callbackReference = luaL_ref( lua, LUA_REGISTRYINDEX );
-    lua_pop( lua, 1 );
-  }
-  printf( "callbackReference = %d\n", callbackReference );
-  object->callbackFunction = callbackReference;
-
-  return 0;
-}//Sprite_Callback
-
-
-static int Sprite_CallbackDo( lua_State *lua ) {
-  Sprite *object = static_cast< Sprite* >( Engine::LuaObject::Check( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SPRITE ) );
-  luaL_argcheck( lua, object != NULL, 1, "Error object" );
-
-  int num = lua_tointeger( lua, 2 );
-
-  if( object->callbackFunction ) {
-    lua_rawgeti( lua, LUA_REGISTRYINDEX, object->callbackFunction );
-    //luaL_unref( lua, LUA_REGISTRYINDEX, object->callbackFunction );
-    lua_pushnumber( lua, num );
-    lua_pcall( lua, 1, 0, 0 );
-  }
-
-  return 0;
-}//Sprite_CallbackDo
-
-
-static int Sprite_CallbackRemove( lua_State *lua ) {
-  Sprite *object = static_cast< Sprite* >( Engine::LuaObject::Check( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SPRITE ) );
-  luaL_argcheck( lua, object != NULL, 1, "Error object" );
-
-  if( object->callbackFunction ) {
-    luaL_unref( lua, LUA_REGISTRYINDEX, object->callbackFunction );
-  }
-
-  return 0;
-}//Sprite_CallbackRemove
-
-
-static int Sprite_Save( lua_State *lua ) {
-  Sprite *object = static_cast< Sprite* >( Engine::LuaObject::Check( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SPRITE ) );
-  luaL_argcheck( lua, object != NULL, 1, "Error object" );
-
-  const char* dumpFileName = luaL_checkstring( lua, 2 );
-  char *str;
-  size_t size = 0;
-  Engine::LuaObject::SaveObjectDataToDump( object->luaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SPRITE, str, size );
-
-  FILE *f = NULL;
-  fopen_s( &f, dumpFileName, "wb+" );
-  fwrite( str, size, 1, f );
-  fclose( f );
-
-  return 0;
-}//Sprite_Save
-
-
-static int Sprite_Load( lua_State *lua ) {
-  Sprite *object = static_cast< Sprite* >( Engine::LuaObject::Check( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SPRITE ) );
-  luaL_argcheck( lua, object != NULL, 1, "Error object" );
-
-  const char* dumpFileName = luaL_checkstring( lua, 2 );
-  const char* scriptFileName = luaL_checkstring( lua, 3 );
-
-  FILE *fscripts = NULL;
-  fopen_s( &fscripts, scriptFileName, "rb+" );
-  fseek( fscripts, 0, SEEK_END );
-  size_t size = ftell( fscripts );
-  char *script = new char[ size + 1 ];
-  script[ size ] = 0;
-  fseek( fscripts, 0, SEEK_SET );
-  fread( script, size, 1, fscripts );
-  fclose( fscripts );
-
-  FILE *f = NULL;
-  fopen_s( &f, dumpFileName, "rb+" );
-  fseek( f, 0, SEEK_END );
-  size = ftell( f );
-  unsigned char *str = new unsigned char[ size + 1 ];
-  str[ size ] = 0;
-  fseek( f, 0, SEEK_SET );
-  fread( str, size, 1, f );
-  fclose( f );
-
-  Engine::LuaObject::BindTemplateToObject( object->luaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SPRITE, script );
-  Engine::LuaObject::LoadObjectDataFromDump( object->luaObjectId, object, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SPRITE, str, size );
-
-  delete [] str;
-
-  return 0;
-}//Sprite_Load
 */

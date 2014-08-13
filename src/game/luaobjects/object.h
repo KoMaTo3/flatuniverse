@@ -22,6 +22,7 @@ int LuaObject_GetByPoint( lua_State *lua );
 int LuaObject_GetByRect( lua_State *lua );
 int LuaObject_GetName( lua_State *lua );
 int LuaObject_GetNameFull( lua_State *lua );
+int LuaObject_GetParent( lua_State *lua );
 int LuaObject_GetParentNameFull( lua_State *lua );
 int LuaObject_GetPos( lua_State *lua );
 int LuaObject_GetSelected( lua_State *lua );

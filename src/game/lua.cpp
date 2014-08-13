@@ -207,6 +207,7 @@ bool Lua::Init( Game *game )
     { "GetId", &Engine::LuaObject_GetId },
     { "GetName", &Engine::LuaObject_GetName },
     { "GetNameFull", &Engine::LuaObject_GetNameFull },
+    { "GetParent", &Engine::LuaObject_GetParent },
     { "GetParentNameFull", &Engine::LuaObject_GetParentNameFull },
     { "GetPos", &Engine::LuaObject_GetPos },
     { "RemoveTag", &Engine::LuaObject_RemoveTag },
