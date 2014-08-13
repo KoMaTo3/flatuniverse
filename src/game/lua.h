@@ -166,6 +166,7 @@ public:
   int   GetStackParmsCount();
   void  Unref         ( const int referenceId );
   static int  GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color );
+  bool  GetBoolean    ( const int stackIndex, const bool removeFromStack = false );
 
   void  ShowError     ( const std::string &comment, const std::string &errorName );
 

@@ -14,7 +14,9 @@ class Lua;
 const std::string GAME_OBJECT_HANDLER_ONCOLLISION     = "OnCollision";
 const std::string GAME_OBJECT_HANDLER_ONCREATE        = "OnCreate";
 const std::string GAME_OBJECT_HANDLER_ONUPDATE        = "OnUpdate";
+const std::string GAME_OBJECT_HANDLER_ONUPDATECORE    = "OnUpdateCore";
 const std::string GAME_OBJECT_HANDLER_ONFRAME         = "OnFrame";
+const std::string GAME_OBJECT_HANDLER_ONFRAMECORE     = "OnFrameCore";
 const std::string GAME_OBJECT_HANDLER_ONDESTROY       = "OnDestroy";
 const std::string GAME_OBJECT_HANDLER_ONKEYPRESS      = "OnKeyPress";
 const std::string GAME_OBJECT_HANDLER_ONKEYRELEASE    = "OnKeyRelease";
@@ -105,7 +107,9 @@ public:
   typedef std::deque< LuaFunctionHandler > LuaFunctionHandlersList;
   LuaFunctionHandlersList
     luaObjectOnUpdate,
+    luaObjectOnUpdateCore,
     luaObjectOnFrame,
+    luaObjectOnFrameCore,
     luaObjectOnKeyPress,
     luaObjectOnKeyRelease,
     luaObjectOnMouseMove,
@@ -187,6 +191,7 @@ public:
   static void   ObjectOnUnload        ( Object* obj );
   static void   ObjectOnDestroy       ( Object* obj );
   void          EraseLuaHandler       ( const int luaReferenceId, const std::string &functionName, LuaFunctionHandlersList &handlersList );
+  static void   OnCollisionMgrUpdate  ();
 
   //debug/test
 };

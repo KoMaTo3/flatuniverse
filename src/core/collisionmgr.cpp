@@ -7,7 +7,7 @@ CollisionPairList __collisionPairList;
 
 
 CollisionManager::CollisionManager()
-:time( 0.0f )
+:time( 0.0f ), OnUpdateCallback( NULL )
 {
   if( !__collisionList )
     __collisionList = new CollisionList();
@@ -112,6 +112,9 @@ int CollisionManager::Update( float dt )
     }
 
     this->time -= updateInterval;
+    if( this->OnUpdateCallback ) {
+      this->OnUpdateCallback();
+    }
     if( forceUpdate ) {
       break;
     }

@@ -360,6 +360,24 @@ void Lua::Unref( const int referenceId ) {
 
 /*
 =============
+  GetBoolean
+=============
+*/
+bool Lua::GetBoolean( const int stackIndex, const bool removeFromStack ) {
+  bool result = false;
+  if( lua_isboolean( this->luaState, stackIndex ) ) {
+    result = lua_toboolean( this->luaState, stackIndex ) ? true : false;
+    if( removeFromStack ) {
+      lua_pop( this->luaState, 1 );
+    }
+  }
+  return result;
+}//GetBoolean
+
+
+
+/*
+=============
   Destroy
 =============
 */

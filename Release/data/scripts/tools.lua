@@ -33,6 +33,23 @@ function GetPixelByTile( x, y )
   return px, py
 end -- GetPixelByTile
 
+
+function GetWorldToScreen( x, y ) --(
+  local cameraX, cameraY = GetCameraPos()
+  x = x + settings.windowSize.x * 0.5 - cameraX
+  y = y + settings.windowSize.y * 0.5 - cameraY
+  return x, y
+end --) GetWorldToScreen
+
+
+function GetScreenToWorld( x, y ) --(
+  local cameraX, cameraY = GetCameraPos()
+  x = x - settings.windowSize.x * 0.5 + cameraX
+  y = y - settings.windowSize.y * 0.5 + cameraY
+  return x, y
+end --) GetScreenToWorld
+
+
 --[[ GetGridByCoords ]]
 function GetGridByCoords( x, y )
   local size = Config.GetGridSize()

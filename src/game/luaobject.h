@@ -124,7 +124,7 @@ public:
   static bool SaveObjectDataToDump( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, char *&outData, size_t &dataSize );
   static int InitUserData( const LuaObjectType *object, LUAOBJECT_LIBRARIESLIST libraryType, const bool returnLuaObjectToStack = true );
   static void InitUserData( const LuaObjectType *object, const std::string& objectName, LUAOBJECT_LIBRARIESLIST libraryType, const bool returnLuaObjectToStack = true );
-  static void CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName, const FunctionCallParametersList* parametersList = NULL );
+  static void CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName, const FunctionCallParametersList* parametersList = NULL, const int resultsCount = 0 );
   static bool IsFunctionExists( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName );
 
   static bool LuaCheckStackParametersCount( LUAOBJECT_LIBRARIESLIST libraryType, int minCount );

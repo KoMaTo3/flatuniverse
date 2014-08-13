@@ -45,6 +45,7 @@ public:
   virtual bool IsHasPoint( const Vec2& pos ) = NULL;
   virtual bool IsIntersectRect( const Vec2& leftTop, const Vec2& rightBottom ) = NULL;
   virtual void SetEnabled( bool isEnabled ) = NULL;
+  virtual void SetIsSaveable( bool isSaveable ) = NULL;
 };
 
 #pragma pack( push, 4 )
@@ -68,6 +69,7 @@ public:
           rotationNew;
     Vec4  colorNew,
           colorPrev;
+    bool isSaveable;
   };
   //
 
@@ -120,6 +122,8 @@ public:
   virtual bool            IsIntersectRect ( const Vec2& leftTop, const Vec2& rightBottom );
   virtual void SetEnabled( bool isEnabled );
   inline GLshort  GetIndexInList() { return ( this->info ? this->info->indexInRenderableList : 0 ); }
+  virtual void SetIsSaveable( bool isSaveable ) { if( this->info ) { this->info->isSaveable = isSaveable; } }
+  inline bool  IsSaveable() { return this->info ? this->info->isSaveable : true; }
 
   bool  Render();
 

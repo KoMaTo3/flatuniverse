@@ -2,20 +2,6 @@
 
 Визуальный редактор
 
-settings.editorMode:
--- 0: none, default
--- 1: нажал ЛКМ и смотрим, будет ли двигать мышью
--- 2: выбран объект
--- 3: перемещение выбранного объекта
--- 10: mouseover на GUI.templates
--- 11: перемещение GUI.templates
--- 12: скролл GUI.templates
--- 20: промежуточный режим вставки тайла: нажал мышь и ждём отпускания или движения
--- 21: вставка блока тайлов: рисование прямоугольной области
--- 22: мульти-селект (рисование рамки)
--- 30: mouseover на GUI.tabbedTemplates
--- 11: перемещение GUI.tabbedTemplates
--- 12: скролл GUI.tabbedTemplates
 ]]
 settings = {
     guiVisibility     = false,  -- отображение GUI
@@ -36,6 +22,10 @@ settings = {
       lastOffset = {
         x = 0,
         y = 0,
+      },
+      blockAxis = {
+        x = false,
+        y = false,
       },
     },
     timer = 0.0,
@@ -384,8 +374,8 @@ function EditorInit()
   -- Keyboard.Listen( 'OnEditorKey' )
   -- Mouse.ListenKey( 'OnEditorMouseKey' )
   -- ListenMouseMove( 'OnEditorMouseMove' )
-  GUIRenderer.OnClickDefault = OnEditorMouseKey
-  GUIRenderer.OnMouseMoveDefault = OnEditorMouseMove
+  -- GUIRenderer.OnClickDefault = OnEditorMouseKey
+  -- GUIRenderer.OnMouseMoveDefault = OnEditorMouseMove
   -- GUIRenderer.OnKeyboardDefault = OnEditorKey
 
   local editor = Object.New( 'editor', '', false )
@@ -491,10 +481,10 @@ function EditorInit()
   settings.guiVisibility = true
   --SetGuiVisibility( settings.guiVisibility )
 
-  UpdateGuiBySelectedObject()
+  Object.Get( 'editor' ):UpdateGuiBySelectedObject()
 
   EditorUpdateDebug( 0 )
-  RenderGUI( 0 )
+  -- RenderGUI( 0 )
   UpdateEditorCamera( 0 )
 end --EditorInit
 
@@ -521,172 +511,6 @@ function UpdateEditorCamera( timerId )
   Core.SetTimer( 0.01, UpdateEditorCamera, true )
 end -- UpdateEditorCamera
 
---( Обработка кнопок клавы
-function OnEditorKey( id, isPressed )
-  if settings.gamePaused then
-    if id == 0x26 or id == 0x57 then  -- Up
-      if isPressed then --(
-        settings.cameraDirection = bit32.bor( settings.cameraDirection, 8 )
-      else --) (
-        settings.cameraDirection = bit32.band( settings.cameraDirection, bit32.bnot( 8 ) )
-      end --)
-    end
-    if id == 0x25 or id == 0x41 then  -- Left
-      if isPressed then --(
-        settings.cameraDirection = bit32.bor( settings.cameraDirection, 4 )
-      else --) (
-        settings.cameraDirection = bit32.band( settings.cameraDirection, bit32.bnot( 4 ) )
-      end --)
-    end
-    if id == 0x27 or id == 0x44 then  -- Right
-      if isPressed then --(
-        settings.cameraDirection = bit32.bor( settings.cameraDirection, 1 )
-      else --) (
-        settings.cameraDirection = bit32.band( settings.cameraDirection, bit32.bnot( 1 ) )
-      end --)
-    end
-    if id == 0x28 or id == 0x53 then  -- Down
-      if isPressed then --(
-        settings.cameraDirection = bit32.bor( settings.cameraDirection, 2 )
-      else --) (
-        settings.cameraDirection = bit32.band( settings.cameraDirection, bit32.bnot( 2 ) )
-      end --)
-    end
-  end
-  if isPressed then
-      if id == 0x1B then    -- Esc
-        GameExit()
-      end
-      if id == 0x5A then    -- Z
-        if settings.keys.isCtrl then  -- Ctrl+Z
-          PopFromBuffer()
-        else
-          settings.guiVisibility = not settings.guiVisibility
-          if not settings.guiVisibility then
-            settings.editorMode = 0
-          end
-          --SetGuiVisibility( settings.guiVisibility )
-        end
-      end
-      if id == 0xC0 then    -- ~
-        SetEditorMode( 0 )
-      end
-      if id == 0x31 then    -- 1
-        SetEditorMode( 1 )
-      end
-      if id == 0x32 then    -- 2
-        SetEditorMode( 2 )
-      end
-      if id == 0x33 then    -- 3
-        SetEditorMode( 3 )
-      end
-      if id == 0x2E then    -- Del
-        local objectList = Object.GetSelected() -- GuiGetText( 'editor/object.object_name' )
-        for _,object in pairs( objectList ) do --(
-          -- buffer
-          local name = object.api:GetNameFull()
-          local
-            x, y, z
-            , isRenderable, isCollision, isTrigger, isLightBlockByCollision, isLightPoint
-            , setTextureName, renderableSizeX, renderableSizeY, renderablePositionX, renderablePositionY, colorR, colorG, colorB, colorA, renderableScaleX, renderableScaleY, setRenderableRotation
-            , collisionSizeX, collisionSizeY, collisionAccelerationX, collisionAccelerationY
-            =
-            ObjectAttr( name, {
-              'position'
-              , 'renderable', 'collision', 'trigger', 'lightBlockByCollision', 'lightPoint'
-              , 'textureName', 'renderableSize', 'renderablePosition', 'color', 'renderableScale', 'renderableRotation'
-              , 'collisionSize', 'collisionAcceleration'
-            } )
-          local
-            triggerType
-            , setCollisionStatic, collisionForceX, collisionForceY, collisionVelocityX, collisionVelocityY
-            =
-            ObjectAttr( name, {
-              'triggerType'
-              , 'collisionStatic', 'collisionForce', 'collisionVelocity'
-            } )
-          local setTriggerPolygon = ''
-          if triggerType == "polygon" then
-            setTriggerPolygon = ObjectAttr( name, { 'triggerPolygon' } )
-          end
-          PushToBuffer( function()
-            end, function()
-              ObjectCreate( name, x, y, z )
-              ObjectAttr( name, { renderable = isRenderable, collision = isCollision, trigger = isTrigger, lightBlockByCollision = isLightBlockByCollision, lightPoint = isLightPoint } )
-              if isRenderable then
-                ObjectAttr( name, {
-                  textureName = setTextureName, renderableSize = renderableSizeX..' '..renderableSizeY, renderablePosition = renderablePositionX..' '..renderablePositionY
-                  , color = colorR..' '..colorG..' '..colorB..' '..colorA, renderableScale = renderableScaleX..' '..renderableScaleY, renderableRotation = setRenderableRotation
-                } )
-              end
-              if isCollision then
-                ObjectAttr( name, {
-                  collisionSize = collisionSizeX..' '..collisionSizeY, collisionAcceleration = collisionAccelerationX..' '..collisionAccelerationY
-                  -- , collisionVelocity = collisionVelocityX..' '..collisionVelocityY --, collisionStatic = setCollisionStatic, collisionForce = collisionForceX..' '..collisionForceY
-                } )
-              end
-              if isTrigger then
-                if triggerType == "polygon" then
-                  ObjectAttr( name, { triggerPolygon = setTriggerPolygon } )
-                end
-              end
-            end
-          )
-          --
-          ObjectRemove( name )
-        end --)
-        Object.Select( nil )
-        if settings.editorMode == 2 then
-          settings.editorMode = 0
-        end
-        UpdateGuiBySelectedObject()
-      end
-      if id == 0x20 then    -- Space
-        Object.Select( nil )
-        UpdateGuiBySelectedObject()
-        if settings.editorMode == 2 then
-          settings.editorMode = 0
-        end
-        -- GUI.templates.currentItem = 0
-        GUI.tabbedTemplates.currentItem = 0
-      end
-      --[[
-      if id == 0x51 then    -- Q: Prev template
-        if GUI.templates.currentItem > 1 then
-          GUI.templates.currentItem = GUI.templates.currentItem - 1
-        end
-      end
-      if id == 0x45 then    -- E: Next template
-        if GUI.templates.currentItem < #GUI.templates.items then
-          GUI.templates.currentItem = GUI.templates.currentItem + 1
-        end
-      end
-      ]]
-      if id == 0x47 then    -- G: toggle showing grid
-        ToggleGrid()
-      end
-      if id == 0x0D then    -- Enter
-        DoPause( not settings.gamePaused )
-      end
-      if id == 0x72 then    -- F3
-        settings.gamePaused = true
-        settings.editorMode = 0
-        settings.buffer = {}
-        settings.keys.isShift = false
-        settings.keys.isCtrl = false
-        settings.keys.isAlt = false
-      end
-  end
-  if id == 0x10 then    -- Shift
-    settings.keys.isShift = isPressed
-  end
-  if id == 0x11 then    -- Control
-    settings.keys.isCtrl = isPressed
-  end
-  if id == 0x12 then    -- Alt
-    settings.keys.isAlt = isPressed
-  end
-end --) OnEditorKey
 
 --( Переключение режима паузы(редактора) и игры
 function DoPause( setPause )
@@ -706,328 +530,6 @@ function DoPause( setPause )
     -- OnChangeLayer( GUI.elements.layer )
   end
 end --)
-
---( Обработка кнопок мыши
-function OnEditorMouseKey( id, isPressed )
-  -- if not settings.gamePaused then
-  --   return false
-  -- end
-  local mode = {
-    [0] = function() --(
-      if isPressed then --(
-        local doMultiSelect = false
-        if settings.editorType == 0 then --(
-          -- if GUI.templates.currentItem > 0 then --
-          if GUI.tabbedTemplates.currentItem > 0 then --(
-            settings.editorMode = 20
-            settings.move.mouseStart.x = mousePos.x
-            settings.move.mouseStart.y = mousePos.y
-            Object.Select( nil )
-            UpdateGuiBySelectedObject()
-          else --)(
-            doMultiSelect = true
-          end --)
-          --[[
-        else
-          local object = GetObjectUnderCursorByMode()
-          if #object > 0 then
-              SelectObject( object )
-              UpdateGuiBySelectedObject()
-              settings.editorMode = 1
-          else
-            settings.editorMode = 1
-              -- multiselect?
-          end
-          ]]
-        else --)(
-          doMultiSelect = true
-        end --)
-        if doMultiSelect then
-          settings.editorMode = 22
-          local cx, cy = GetCameraPos()
-          settings.multiSelectStartPoint.x = mousePos.x + cx
-          settings.multiSelectStartPoint.y = mousePos.y + cy
-        end
-      else --)( released
-      end --)
-    end, --)
-    [1] = function()
-      if isPressed then
-      else
-        local objects = Object.GetSelected()
-        if TableSize( objects ) > 0 then
-          settings.editorMode = 2
-        else
-          settings.editorMode = 0
-        end
-      end
-    end,
-    [2] = function()
-      if isPressed then
-        if settings.keys.isCtrl --[[ or settings.keys.isAlt ]] then --(
-          settings.editorMode = 22
-          local cx, cy = GetCameraPos()
-          settings.multiSelectStartPoint.x = mousePos.x + cx
-          settings.multiSelectStartPoint.y = mousePos.y + cy
-        else --)(
-          settings.editorMode = 3
-          settings.objectMode3Moved = false
-        end --)
-      else
-        local objects = GetObjectUnderCursorByMode()
-        if TableSize( objects ) > 0 then
-          Object.Select( objects )
-          UpdateGuiBySelectedObject()
-        end
-      end
-    end,
-    [3] = function()
-      if isPressed then
-      else
-        if settings.objectMode3Moved then
-          settings.editorMode = 2
-        else
-          local objects = GetObjectUnderCursorByMode()
-          -- Debug.Log( 'GetObjectUnderCursorByMode => '..object )
-          Object.Select( objects )
-          UpdateGuiBySelectedObject()
-          if TableSize( objects ) > 0 then
-            settings.editorMode = 2
-          else
-            settings.editorMode = 0
-          end
-        end
-      end
-    end,
-    [10] = function()
-      if isPressed then
-        if mousePos.x >= GUI.templates.x and
-           mousePos.x <= GUI.templates.x + GUI.templates.width and
-           mousePos.y >= GUI.templates.y and
-           mousePos.y <= GUI.templates.y + 15
-           then
-          settings.editorMode = 11
-          GUI.templates.moving.x = mousePos.x
-          GUI.templates.moving.y = mousePos.y
-        elseif mousePos.x >= GUI.templates.x + GUI.templates.width - 15 and
-          mousePos.x <= GUI.templates.x + GUI.templates.width and
-          mousePos.y >= GUI.templates.y + 15 and
-          mousePos.y <= GUI.templates.y + GUI.templates.height then
-            settings.editorMode = 12
-            TestMouseOnGUI( mousePos.x, mousePos.y )
-        else
-          local num = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) ) + 1
-          if num > 0 and num <= #GUI.templates.items then
-            DoPause( true )
-            GUI.templates.currentItem = num
-            -- Debug.RenderState( 0 )
-            settings.editorType = 0
-            -- Object.Select( nil )
-            -- UpdateGuiBySelectedObject()
-          end
-        end
-      else
-      end
-    end,
-    [11] = function()
-      if isPressed then
-      else
-        settings.editorMode = 10
-      end
-    end,
-    [12] = function()
-      if isPressed then
-      else
-        if settings.editorMode == 12 then
-          settings.editorMode = 10
-        end
-      end
-    end,
-    [20] = function()
-      settings.editorMode = 0
-      local objects = {}
-      table.insert( objects, EditorInsertItemByTemplate( mousePos.x, mousePos.y ) )
-      Object.Select( objects )
-      UpdateGuiBySelectedObject()
-      PushToBuffer( function()
-        end, function()
-          for _,object in pairs( objects ) do
-            object.api:Destroy()
-          end
-        end
-      )
-    end,
-    [21] = function() --(
-      if isPressed then
-      else
-        settings.editorMode = 0
-        local cx, cy = GetCameraPos()
-        local x = settings.move.mouseStart.x - cx + settings.windowSize.x * 0.5
-        local y = settings.move.mouseStart.y - cy + settings.windowSize.y * 0.5
-        local newX = mousePos.x
-        local newY = mousePos.y
-        local left   = x < newX and x or newX
-        local right  = x < newX and newX or x
-        local top    = y < newY and y or newY
-        local bottom = y < newY and newY or y
-        left, top = GetTilePosByPixel( left, top )
-        right, bottom = GetTilePosByPixel( right, bottom )
-        -- local texture = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].icon
-        local names = {}
-        local objects = {}
-        for tx = left, right do
-        for ty = top, bottom do
-          x, y = GetPixelByTile( tx, ty )
-          table.insert( objects, EditorInsertItemByTemplate( x, y ) )
-        end
-        end
-        Object.Select( objects )
-        UpdateGuiBySelectedObject()
-        PushToBuffer( function()
-          end, function()
-            for _,object in pairs( objects ) do
-              object.api:Remove()
-            end
-          end
-        )
-      end
-    end, --) 21
-    [22] = function() --(
-      if isPressed then --(
-      else --)(
-        local cx, cy = GetCameraPos()
-        local newX = mousePos.x + cx
-        local newY = mousePos.y + cy
-        if settings.multiSelectStartPoint.x == newX and settings.multiSelectStartPoint.y == newY then --( one-select
-          local objects = GetObjectUnderCursorByMode()
-          if TableSize( objects ) > 0 then --(
-            if settings.keys.isCtrl then  --( add
-              local oldObjects = Object.GetSelected()
-              if( TableSize( oldObjects ) > 0 ) then
-                objects = AddObjectsToList( oldObjects, objects )
-              end
-            end --)
-            if settings.keys.isAlt then --( exclude
-              local oldObjects = Object.GetSelected()
-              if( TableSize( oldObjects ) > 0 ) then
-                objects = RemoveObjectsFromList( oldObjects, objects )
-              end
-            end --)
-            Object.Select( objects )
-            settings.editorMode = 2
-          else --)(
-            settings.editorMode = 0
-          end --)
-        else --)( multi-select
-          local objects = SelectObjectsInRectangle( settings.multiSelectStartPoint.x, settings.multiSelectStartPoint.y, newX, newY, settings.editorType )
-          if TableSize( objects ) > 0 then
-            settings.editorMode = 2
-          else
-            settings.editorMode = 0
-          end
-        end --)
-        UpdateGuiBySelectedObject()
-      end --)
-    end, --) 22
-    [30] = function() --(
-      GUI.tabbedTemplates.OnMouseClick( id, isPressed )
-    end,  --) 30
-    [31] = function() --(
-      GUI.tabbedTemplates.OnMouseClick( id, isPressed )
-    end,  --) 31
-    [32] = function() --(
-      GUI.tabbedTemplates.OnMouseClick( id, isPressed )
-    end,  --) 32
-  }
-  if mode[ settings.editorMode ] ~= nil then
-    mode[ settings.editorMode ]()
-  end
-  Debug.Log( settings.editorMode )
-end --) OnEditorMouseKey
-
--- Обработка движения мыши
-function OnEditorMouseMove( x, y )  --(
-  --[[
-  if TestMouseOnGUI( x, y ) then
-    local num = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) ) + 1
-    if num > 0 and num <= #GUI.templates.items then
-      GUI.tooltip:SetPosition( x + 1, y - 25 )
-      GUI.tooltip:SetText( GUI.templates.items[ num ].name )
-      GUI.tooltip:CropByTextWidth()
-    else
-      GUI.tooltip:SetPosition( 0, settings.windowSize.y )
-    end
-  else ]]
-  if GUI.tabbedTemplates.isHovered then
-  else  --(
-    GUI.tooltip:SetPosition( 0, settings.windowSize.y )
-    local mode = {
-      [0] = function()
-      end,
-      [1] = function()
-        settings.editorMode = 3
-      end,
-      [2] = function()
-      end,
-      [3] = function()
-        local objectList = Object.GetSelected()
-        if not settings.objectMode3Moved then
-          -- settings.move.objectStart.x = oldX
-          -- settings.move.objectStart.y = oldY
-          settings.move.mouseStart.x = mousePos.x
-          settings.move.mouseStart.y = mousePos.y
-          settings.move.lastOffset.x = 0
-          settings.move.lastOffset.y = 0
-        end
-        -- local newX = settings.move.objectStart.x + x - settings.move.mouseStart.x
-        -- local newY = settings.move.objectStart.y + y - settings.move.mouseStart.y
-        local tileSize = tonumber( GetTileSize() )
-        local offsetX, offsetY = GetTileOffset()
-        local dx, dy = math.floor( ( mousePos.x - settings.move.mouseStart.x ) / tileSize ) * tileSize, math.floor( ( mousePos.y - settings.move.mouseStart.y ) / tileSize ) * tileSize
-        if settings.keys.isAlt then
-          dx, dy = mousePos.x - settings.move.mouseStart.x, mousePos.y - settings.move.mouseStart.y
-        end
-        local moveByX, moveByY = -settings.move.lastOffset.x + dx, -settings.move.lastOffset.y + dy
-        settings.move.lastOffset.x = settings.move.lastOffset.x + moveByX
-        settings.move.lastOffset.y = settings.move.lastOffset.y + moveByY
-        Debug.Log( settings.move.lastOffset.x..':'..settings.move.lastOffset.y..' => '..moveByX..':'..moveByY )
-        for _,objectByName in pairs( objectList ) do
-          -- local objectByName = Object.Get( name )
-          local x, y = objectByName.api:GetPos()
-          objectByName.api:SetPos( x + moveByX, y + moveByY )
-          -- newX = math.floor( newX / tileSize ) * tileSize + offsetX
-          -- newY = math.floor( newY / tileSize ) * tileSize + offsetY
-        end
-        -- buffer
-        if moveByX ~= 0 or moveByY ~= 0 then
-          PushToBuffer( function()
-            end, function()
-              for _,objectByName in pairs( objectList ) do
-                -- local objectByName = Object.Get( name )
-                local x, y = objectByName.api:GetPos()
-                objectByName.api:SetPos( x - moveByX, y - moveByY )
-              end
-            end
-          )
-        end
-        --
-        settings.objectMode3Moved = true
-      end,
-      [20] = function()
-        settings.editorMode = 21
-        local cx, cy = GetCameraPos()
-        settings.move.mouseStart.x = mousePos.x - settings.windowSize.x * 0.5 + cx
-        settings.move.mouseStart.y = mousePos.y - settings.windowSize.y * 0.5 + cy
-      end,
-    }
-    if mode[ settings.editorMode ] ~= nil then
-      mode[ settings.editorMode ]()
-    end
-  end --)
-  GUI.tabbedTemplates.OnMouseMove( x, y )
-  mousePos.x = x
-  mousePos.y = y
-end --) OnEditorMouseMove
 
 
 -- Возвращает объект под курсором
@@ -1148,7 +650,7 @@ function TileApply( guiName )
   ToggleRenderable( 'editor/object.is_renderable' )
   ToggleCollision( 'editor/object.is_collision' )
   ToggleTrigger( 'editor/object.is_trigger' )
-  UpdateGuiBySelectedObject()
+  Object.Get( 'editor' ):UpdateGuiBySelectedObject()
   settings.editorMode = 2
 end --TileApply
 ]]
@@ -1185,6 +687,7 @@ function EditorUpdateDebug( timerId )
   Core.SetTimer( 0.01, EditorUpdateDebug, true )
 end -- EditorUpdateDebug
 
+--[[
 function UpdateGuiBySelectedObject()
   -- local object = GetSelectedObject()
   -- local objectList = Explode( object, '//' )
@@ -1283,6 +786,7 @@ function UpdateGuiBySelectedObject()
     GUI.elements.isLightPoint:SetIsChecked( false )
   end
 end --UpdateGuiBySelectedObject
+]]
 
 --[[
 function ToggleRenderableSize()
@@ -1514,7 +1018,7 @@ function PopFromBuffer()
     settings.buffer[ #settings.buffer ] = nil
   end
   Object.Select( nil )
-  UpdateGuiBySelectedObject()
+  Object.Get( 'editor' ):UpdateGuiBySelectedObject()
 end -- PopFromBuffer
 
 --[[ OnChangeIsRenderable ]]
@@ -1683,7 +1187,7 @@ function SetEditorMode( setMode )
   -- OnChangeLayer( GUI.elements.layer )
   -- settings.editorMode = 0
   -- SelectObject( '' )
-  -- UpdateGuiBySelectedObject()
+  -- Object.Get( 'editor' ):UpdateGuiBySelectedObject()
 end --)
 
 --( Добавление объектов в список (для мульти-селекта)

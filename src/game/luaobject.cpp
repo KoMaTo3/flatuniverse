@@ -381,7 +381,7 @@ const LuaObject::LuaObjectLibrary* LuaObject::GetLibrary( LUAOBJECT_LIBRARIESLIS
 }//GetLibrary
 
 
-void LuaObject::CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName, const LuaObject::FunctionCallParametersList* parametersList ) {
+void LuaObject::CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName, const LuaObject::FunctionCallParametersList* parametersList, const int resultsCount ) {
   if( !luaObjectId ) {
     __log.PrintInfo( Filelevel_ERROR, "LuaObject::CallFunction => luaObjectId is NULL" );
     return;
@@ -445,11 +445,13 @@ void LuaObject::CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST lib
       }//for auto
     }//parametersList
 
-    if( lua_pcall( lib->lua, parametersCount, 0, 0 ) ) {
+    if( lua_pcall( lib->lua, parametersCount, resultsCount, 0 ) ) {
       __log.PrintInfo( Filelevel_ERROR, "LuaObject::CallFunction => failed to call function '%s' in object %d: %s", functionName.c_str(), luaObjectId, lua_tostring( lib->lua, -1 ) );
       lua_pop( lib->lua, 2 );
     }
-    lua_pop( lib->lua, 2 );
+    lua_remove( lib->lua, -1 - resultsCount );
+    lua_remove( lib->lua, -1 - resultsCount );
+    //lua_pop( lib->lua, 2 );
   }
 
   __log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => stack[%d] after", lua_gettop( lib->lua ) );

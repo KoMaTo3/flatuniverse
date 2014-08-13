@@ -336,6 +336,20 @@ function GetObjectsTabbedTemplates()  --(
     npc = {
       --
       {
+        name = 'Моб: Goomba',
+        icon = 'data/temp/enemy0.png',
+        attr = {
+          renderable = true, textureName = 'temp/enemy0.png',
+          collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '-50 0',
+          trigger = false,
+        },
+        creationScript = function( name )
+        end,
+        templateScriptName = 'data/scripts/objects/goomba.lua',
+        animation = { 'goomba/0', 'default', 'repeat' },
+      },
+      --
+      {
         name = 'Моб: ворона (прыгучая)',
         icon = 'data/temp/enemy0.png',
         attr = {
@@ -345,7 +359,7 @@ function GetObjectsTabbedTemplates()  --(
         },
         creationScript = function( name )
         end,
-        templateScriptName = 'data/scripts/objects/crow.lua',
+        templateScriptName = 'data/scripts/objects/crow-jump.lua',
         animation = { 'crow/0', 'default', 'repeat' },
       },
       --

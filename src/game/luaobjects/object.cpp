@@ -73,7 +73,9 @@ int Engine::LuaObject_New( lua_State *lua ) {
       obj->SetSaveable( isSaveable );
       obj->SetPosition( Vec3Null );
       currentPath += ( currentPath.length() ? "/" : "" ) + *iter;
-      lib->game->world->AttachObjectToGrid( lib->game->world->GetGridPositionByObject( *obj ), obj );
+      if( !notInGrid && isSaveable ) {
+        lib->game->world->AttachObjectToGrid( lib->game->world->GetGridPositionByObject( *obj ), obj );
+      }
     }
     //std::string nextLevel = &name[ slashPos ];
     //std::string currentLevel = name.substr( 0, slashPos );

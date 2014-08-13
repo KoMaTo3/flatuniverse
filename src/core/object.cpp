@@ -475,6 +475,7 @@ Renderable* Object::EnableRenderable( RenderableType renderType )
     {
       this->renderable.type = renderType;
       result = Object::CreateExternalRenderableInList( zIndex, this->_renderableList, this->_renderableIndicies, this->_renderableFreeIndicies, &this->renderable.num );
+      result->SetIsSaveable( this->IsSaveable() );
       /*
       __log.PrintInfo( Filelevel_DEBUG, "Free indicies in x%p = %d", this->_renderableFreeIndicies, this->_renderableFreeIndicies->size() );
       if( this->_renderableFreeIndicies->size() )

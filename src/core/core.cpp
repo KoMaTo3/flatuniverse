@@ -1258,6 +1258,9 @@ bool Core::Redraw()
           RenderableQuad *quad;
           for( iterIndex = __coreRenderableListIndicies->begin(); iterIndex != iterIndexEnd; ++iterIndex ) {
             quad = &( ( *__coreRenderableList )[ *iterIndex ] );
+            if( !quad->IsSaveable() ) {
+              continue;
+            }
             pos = quad->GetPosition() - camera;
             size = quad->GetSize() * 0.5f;
             size.x *= quad->GetScale().x;
@@ -1277,7 +1280,7 @@ bool Core::Redraw()
           if( !this->debug.selectedObjects.empty() ) {
             glColor4f( 1.0f, 0.0f, 0.0f, alpha );
             for( auto &obj: this->debug.selectedObjects ) {
-              if( obj->IsRenderable() ) {
+              if( obj->IsRenderable() && obj->IsSaveable() ) {
                 quad = &( ( *__coreRenderableList )[ static_cast< RenderableQuad* >( obj->GetRenderable() )->GetIndexInList() ] );
                 pos = quad->GetPosition() - camera;
                 size = quad->GetSize() * 0.5f;

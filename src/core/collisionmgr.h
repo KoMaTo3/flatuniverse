@@ -36,4 +36,7 @@ public:
   int   Update        ( float dt );
 
   bool  CheckDistance ( const Collision &item0, const Collision &item1 );
+
+  typedef void OnUpdateCallbackProc();
+  OnUpdateCallbackProc *OnUpdateCallback;
 };
