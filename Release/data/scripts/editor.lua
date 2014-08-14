@@ -148,7 +148,7 @@ GUI = {
     position = {
       x = 0,
       y = 20,
-      height = 250,
+      height = 150,
       width = nil,
     },
     tileSize = 24,
@@ -463,6 +463,52 @@ function EditorInit()
   y = y + 15
   GUI.elements.isLightPoint = GUICheckbox:Create( 5, y, 'Light point', false, OnChangeIsLightPoint, GUI.elements.windowObject, false )
 
+  local objectsList = Object.GetRoot()
+  local tree = {}
+  for k,obj in pairs( objectsList ) do
+    local childsList = obj.api:GetChilds()
+    local treeChilds = {}
+    if childsList ~= nil then
+      for k0,obj0 in pairs( childsList ) do
+        table.insert( treeChilds, {
+          name = obj0.api:GetName(),
+          nameFull = obj0.api:GetNameFull(),
+          childs = {},
+        })
+      end
+    end
+    table.insert( tree, {
+      name = obj.api:GetName(),
+      nameFull = obj.api:GetNameFull(),
+      childs = treeChilds,
+      OnClick = function( button, object )
+        local objectsList = {}
+        if settings.keys.isCtrl then
+          objectsList = Object.GetSelected()
+          local isSelected =  false
+          for k,obj in pairs( objectsList ) do
+            if obj.api:GetNameFull() == object.nameFull then
+              isSelected = true
+              objectsList[ k ] = nil
+              break
+            end
+          end
+          if not isSelected then
+            table.insert( objectsList, Object.Get( object.nameFull ) )
+          end
+        else
+          local text = button:GetText()
+          local isChecked = text:sub( 1, 1 ) == '-' and true or false
+          button:SetText( ( isChecked and '+' or '-' )..' '..object.name )
+          objectsList = isChecked and { Object.Get( object.nameFull ) } or nil
+        end
+        Object.Select( objectsList )
+        Object.Get( 'editor' ):UpdateGuiBySelectedObject()
+      end,
+    })
+  end
+  GUI.elements.objectsTree = GUITree:Create( 5, 180, 320, 150, 'tree', tree, nil, nil, nil )
+
   -- GUIEdit:Create( 200, 50, 100, 'test123', function() Debug.Alert(2) end )
 
   -- Ставим обработчики чекбоксов и кнопок редактора
@@ -682,7 +728,7 @@ function EditorUpdateDebug( timerId )
     x = cx + mx - width * 0.5,
     y = cy + my - height * 0.5
   }
-  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] pixel[%d; %d] mode[%d] test[%d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), math.floor( pos.x ), math.floor( pos.y ), settings.editorMode, ( GUI.tabbedTemplates.isHovered and '1' or '0' ) ) )
+  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] pixel[%d; %d] mode[%d] test[%d] gui[%d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), math.floor( pos.x ), math.floor( pos.y ), settings.editorMode, ( GUI.tabbedTemplates.isHovered and '1' or '0' ), ( GUIRenderer.guiFocused and '1' or '0' ) ) )
   -- GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
   Core.SetTimer( 0.01, EditorUpdateDebug, true )
 end -- EditorUpdateDebug

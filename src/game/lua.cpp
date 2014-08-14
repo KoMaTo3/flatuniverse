@@ -192,6 +192,7 @@ bool Lua::Init( Game *game )
     { "AddTrigger", &Engine::LuaObject_AddTrigger },
     { "Attr", &Engine::LuaObject_Attr },
     { "Destroy", &Engine::LuaObject_Destroy },
+    { "GetChilds", &Engine::LuaObject_GetChilds },
     { "GetId", &Engine::LuaObject_GetId },
     { "GetName", &Engine::LuaObject_GetName },
     { "GetNameFull", &Engine::LuaObject_GetNameFull },
@@ -209,6 +210,7 @@ bool Lua::Init( Game *game )
     { "Get", &Engine::LuaObject_Get },
     { "GetByPoint", &Engine::LuaObject_GetByPoint },
     { "GetByRect", &Engine::LuaObject_GetByRect },
+    { "GetRoot", &Engine::LuaObject_GetRoot },
     { "GetSelected", &Engine::LuaObject_GetSelected },
     { "New", &Engine::LuaObject_New },
     { "Select", &Engine::LuaObject_Select },
@@ -357,11 +359,41 @@ bool Lua::GetBoolean( const int stackIndex, const bool removeFromStack ) {
   if( lua_isboolean( this->luaState, stackIndex ) ) {
     result = lua_toboolean( this->luaState, stackIndex ) ? true : false;
     if( removeFromStack ) {
-      lua_pop( this->luaState, 1 );
+      lua_remove( this->luaState, stackIndex );
     }
   }
   return result;
 }//GetBoolean
+
+
+
+void Lua::DumpStack() {
+  int count = lua_gettop( this->luaState );
+  __log.PrintInfo( Filelevel_DEBUG, "Lua::DumpStack => size[%d]:", count );
+  char t[ 1024 ];
+  for( int q = 1; q <= count; ++q ) {
+    int type = lua_type( this->luaState, q );
+    t[ 0 ] = 0;
+    switch( type ) {
+    case LUA_TBOOLEAN:
+      sprintf_s( t, sizeof( t ), "%s", lua_toboolean( this->luaState, q ) ? "true" : "false" );
+      break;
+    case LUA_TNUMBER:
+      sprintf_s( t, sizeof( t ), "%3.3f", lua_tonumber( this->luaState, q ) );
+      break;
+    case LUA_TSTRING:
+      sprintf_s( t, sizeof( t ), "'%s'", lua_tostring( this->luaState, q ) );
+      break;
+    }
+    __log.PrintInfo( Filelevel_DEBUG, ". [%d/%d] %s = %s", q, count, lua_typename( this->luaState, type ), t );
+  }
+}//DumpStack
+
+
+
+void Lua::Pop( const int count ) {
+  lua_pop( this->luaState, count );
+}//Pop
 
 
 

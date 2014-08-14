@@ -1963,6 +1963,12 @@ Object* Core::GetRenderableInPoint( const Vec2& pos, const std::string &afterObj
 
 
 
+void Core::GetRootObjects( ObjectList &result ) {
+  this->_rootObject->GetChilds( result );
+}//GetRootObjects
+
+
+
 
 
 

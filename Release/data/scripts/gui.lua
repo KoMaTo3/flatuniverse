@@ -7,6 +7,7 @@ GUIRenderer = {
   OnClickDefault = nil,
   OnMouseMoveDefault = nil,
   OnKeyboardDefault = nil,
+  guiFocused = false,
 
   RenderEnable = function()
     Core.SetTimer( 0.1, GUIRendererRender )
@@ -26,6 +27,7 @@ function GUIInit()
   LoadScript( 'data/scripts/gui/select.lua' )
   LoadScript( 'data/scripts/gui/edit.lua' )
   LoadScript( 'data/scripts/gui/slider-vertical.lua' )
+  LoadScript( 'data/scripts/gui/tree.lua' )
   Keyboard.Listen( 'GUIKeyboard' )
   Mouse.ListenKey( 'GUIMouseKey' )
   ListenMouseMove( 'GUIMouseMove' )
@@ -99,6 +101,7 @@ local doDefaultHandler = false
   if doDefaultHandler and GUIRenderer.OnMouseMoveDefault ~= nil then
     GUIRenderer.OnMouseMoveDefault( x, y )
   end
+  GUIRenderer.guiFocused = not doDefaultHandler
 
   -- labelDebug:SetText( GUIRenderer.activeItem == nil and '-' or GUIRenderer.activeItem:GetType() )
 end -- GUIMouseMove

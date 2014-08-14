@@ -2083,3 +2083,15 @@ void Object::SetNeedToUnload( const bool unload ) {
     }
   }
 }//SetNeedToUnload
+
+
+void Object::GetChilds( ObjectList &result ) {
+  if( !this->_childs ) {
+    return;
+  }
+  for( auto &object: *this->_childs ) {
+    if( object->IsSaveable() ) {
+      result.push_back( object );
+    }
+  }
+}//GetChilds

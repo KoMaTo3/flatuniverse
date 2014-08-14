@@ -23,6 +23,7 @@ const std::string GAME_OBJECT_HANDLER_ONKEYRELEASE    = "OnKeyRelease";
 const std::string GAME_OBJECT_HANDLER_ONMOUSEMOVE     = "OnMouseMove";
 const std::string GAME_OBJECT_HANDLER_ONMOUSEKEYPRESS = "OnMouseKeyPress";
 const std::string GAME_OBJECT_HANDLER_ONMOUSEKEYRELEASE = "OnMouseKeyRelease";
+const std::string GAME_OBJECT_HANDLER_ONTRIGGER       = "OnTrigger";
 
 class Game
 {
@@ -115,7 +116,8 @@ public:
     luaObjectOnMouseMove,
     luaObjectOnMouseKeyPress,
     luaObjectOnMouseKeyRelease,
-    luaObjectOnCollision;
+    luaObjectOnCollision,
+    luaObjectOnTrigger;
 
 public:
   Game();

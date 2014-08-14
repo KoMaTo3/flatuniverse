@@ -21,7 +21,7 @@ Object:
     +SelectObject
     +GetSelectedObject
     +ObjectAttr
-    ListenCollision
+    -ListenCollision
     ListenTrigger
     SetObjectForce
     RemoveObjectForce

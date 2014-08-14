@@ -184,6 +184,7 @@ public:
   inline LightMap::LightRenderer* GetLightRenderer() { return this->lightRenderer; }
   inline int CollisionManagerIsUpdated() { return this->collisionManagerIsUpdated; }
   inline void SetOnCollisionMgrUpdate( CollisionManager::OnUpdateCallbackProc *callback ) { if( this->collisionManager ) { this->collisionManager->OnUpdateCallback = callback; } }
+  void   GetRootObjects       ( ObjectList &result );
   /*
   inline
   void    SetGuiVisibility    ( bool setShow ) { this->gui.show = setShow; }

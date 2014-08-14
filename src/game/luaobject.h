@@ -133,6 +133,7 @@ public:
   static const bool LuaGetBoolean( LUAOBJECT_LIBRARIESLIST libraryType, int n );
   static void LuaSetNil( LUAOBJECT_LIBRARIESLIST libraryType );
   static const LuaObjectLibrary* GetLibrary( LUAOBJECT_LIBRARIESLIST libraryType );
+  static void DumpStack( LUAOBJECT_LIBRARIESLIST libraryType );
 
 private:
   static int __LoadLibrary( lua_State *lua );

@@ -144,7 +144,7 @@ function GUIButton:OnClick( id, isPressed )
       if self.state == 1 then
         self.state = 0
         if self.OnClickHandler ~= nil then
-          self.OnClickHandler()
+          self.OnClickHandler( self )
         end
       end
     end

@@ -11,8 +11,9 @@ return {
   -- 21: вставка блока тайлов: рисование прямоугольной области
   -- 22: мульти-селект (рисование рамки)
   -- 30: mouseover на GUI.tabbedTemplates
-  -- 11: перемещение GUI.tabbedTemplates
-  -- 12: скролл GUI.tabbedTemplates
+  -- 31: перемещение GUI.tabbedTemplates
+  -- 32: скролл GUI.tabbedTemplates
+  -- 50: GUIRenderer.guiFocused
   mode = {
     [0] = function( self, id, isPressed ) --(
       if isPressed then --(
@@ -94,6 +95,7 @@ return {
           local objects = GetObjectUnderCursorByMode()
           -- Debug.Log( 'GetObjectUnderCursorByMode => '..object )
           Object.Select( objects )
+          self:HideSelectedInterface()
           self:UpdateGuiBySelectedObject()
           if TableSize( objects ) > 0 then
             settings.editorMode = 2
@@ -448,7 +450,13 @@ return {
 
   OnMouseMove = function( self, x, y ) --(
     Debug.Log( string.format( 'editor.OnMouseMove => %d:%d', x, y ) )
-    if GUI.tabbedTemplates.isHovered then
+    if GUI.tabbedTemplates.isHovered or GUIRenderer.guiFocused then
+      if GUIRenderer.guiFocused then
+        if settings.editorMode ~= 50 then
+          self.lastEditorMode = settings.editorMode
+          settings.editorMode = 50
+        end
+      end
     else  --(
       GUI.tooltip:SetPosition( 0, settings.windowSize.y )
       local mode = {
@@ -495,19 +503,7 @@ return {
             -- newY = math.floor( newY / tileSize ) * tileSize + offsetY
           end
 
-          local x, y, count = 0, 0, 0
-          for _,object in pairs( objectList ) do
-            local x0, y0 = object.api:GetPos()
-            x = x + x0
-            y = y + y0
-            count = count + 1
-          end --for
-          x = x / count
-          y = y / count
-          self.selectedInterface.x = x
-          self.selectedInterface.y = y
-          self.selectedInterface.arrowUp:Move( x, y )
-          self.selectedInterface.arrowRight:Move( x, y )
+          self:UpdateSelectedInterfacePosition( objectList )
 
           -- buffer
           if moveByX ~= 0 or moveByY ~= 0 then
@@ -530,6 +526,10 @@ return {
           settings.move.mouseStart.x = mousePos.x - settings.windowSize.x * 0.5 + cx
           settings.move.mouseStart.y = mousePos.y - settings.windowSize.y * 0.5 + cy
         end,
+        [50] = function() --(
+          settings.editorMode = self.lastEditorMode
+          self.lastEditorMode = 0
+        end, --) 50
       }
       if mode[ settings.editorMode ] ~= nil then
         mode[ settings.editorMode ]()
@@ -541,10 +541,10 @@ return {
   end, --) OnMouseMove
 
   ShowSelectedInterface = function( self ) --(
+    self:HideSelectedInterface()
     local objectsList = Object.GetSelected()
-    if( TableSize( objectsList ) > 0 ) then
-    else
-      self:HideSelectedInterface()
+    if( TableSize( objectsList ) < 1 ) then
+      while true do return end
     end
 
     local x, y, count = 0, 0, 0
@@ -654,6 +654,11 @@ return {
     Debug.Log( 'OnUpdateCore' )
     Debug.Log( 'editor.OnUpdate' )
     self:Render()
+
+    if self.selectedInterface ~= false then
+      local objectsList = Object.GetSelected()
+      self:UpdateSelectedInterfacePosition( objectsList )
+    end
   end, --) OnUpdate
 
 
@@ -757,4 +762,23 @@ return {
       GUI.elements.isLightPoint:SetIsChecked( false )
     end --)
   end, --) UpdateGuiBySelectedObject
+
+  UpdateSelectedInterfacePosition = function( self, objectList ) --(
+    if self.selectedInterface == false then
+      do return end
+    end
+    local x, y, count = 0, 0, 0
+    for _,object in pairs( objectList ) do
+      local x0, y0 = object.api:GetPos()
+      x = x + x0
+      y = y + y0
+      count = count + 1
+    end --for
+    x = x / count
+    y = y / count
+    self.selectedInterface.x = x
+    self.selectedInterface.y = y
+    self.selectedInterface.arrowUp:Move( x, y )
+    self.selectedInterface.arrowRight:Move( x, y )
+  end, --) UpdateSelectedInterfacePosition
 }

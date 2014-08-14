@@ -1448,6 +1448,70 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
 
 
 
+int Engine::LuaObject_GetRoot( lua_State *lua ) {
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+  ObjectList objectsList;
+  lib->game->core->GetRootObjects( objectsList );
+
+  if( objectsList.empty() ) {
+    lua_pushnil( lua );
+  } else {
+    lua_newtable( lua );
+    char t[ 1024 ];
+    int num = 1;
+    for( auto &object: objectsList ) {
+      sprintf_s( t, sizeof( t ), "%d", num );
+      if( !object->GetLuaObjectId() ) {
+        object->InitLuaUserData();
+      }
+      lua_rawgeti( lua, LUA_REGISTRYINDEX, object->GetLuaObjectId() );
+      lua_getfield( lua, -1, "fn" );
+      lua_remove( lua, -2 );
+      lua_setfield( lua, -2, t );
+      ++num;
+    }
+  }
+
+  return 1;
+}//LuaObject_GetRoot
+
+
+
+int Engine::LuaObject_GetChilds( lua_State *lua ) {
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_GetChilds => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_GetChilds => object is NULL" );
+  }
+
+  ObjectList objectsList;
+  object->GetChilds( objectsList );
+
+  if( objectsList.empty() ) {
+    lua_pushnil( lua );
+  } else {
+    lua_newtable( lua );
+    char t[ 1024 ];
+    int num = 1;
+    for( auto &object: objectsList ) {
+      sprintf_s( t, sizeof( t ), "%d", num );
+      if( !object->GetLuaObjectId() ) {
+        object->InitLuaUserData();
+      }
+      lua_rawgeti( lua, LUA_REGISTRYINDEX, object->GetLuaObjectId() );
+      lua_getfield( lua, -1, "fn" );
+      lua_remove( lua, -2 );
+      lua_setfield( lua, -2, t );
+      ++num;
+    }
+  }
+
+  return 1;
+}//LuaObject_GetChilds
+
+
+
 /*
 static int Object_gc( lua_State *lua ) {
   return Engine::LuaObject::GarbageCollector( lua, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );

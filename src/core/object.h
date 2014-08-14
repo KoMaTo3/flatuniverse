@@ -227,6 +227,7 @@ public:
   Object*             SetZ                ( const float z );
   inline const Vec3&  GetPosition         () const { return this->position; }
   Object*             GetChild            ( const std::string& name );
+  void                GetChilds           ( ObjectList &result );
   void                SetForce            ( long forceId, const Vec3& vec );
   void                RemoveForce         ( long forceId );
   const Mat4&         GetMatrixTransform  ();

@@ -1,5 +1,6 @@
 return {
   OnCreate = function( self ) --(
+    Debug.Log( 'arrow-right: created' )
     ObjectAttr( self.api:GetNameFull(), {
       renderable = true, textureName = 'textures/tiles/tile000d.png', renderableSize = '10 10'
     })
@@ -7,6 +8,10 @@ return {
     self.isFocused = false
     self.state = 0
   end, --) OnCreate
+
+  OnDestroy = function( self )
+    Debug.Log( 'arrow-right: destroyed' )
+  end,
 
   Init = function( self, x, y ) --(
     self:Move( x, y )

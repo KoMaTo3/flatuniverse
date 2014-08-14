@@ -230,4 +230,8 @@ return {
       self.data.playerState.longJumpTimer = -1
     end
   end, --) PlayerEndLongJump
+
+  OnTrigger = function( self, target, isInTrigger ) --(
+    Debug.Log( 'OnTrigger' )
+  end, --) OnTrigger
 }
