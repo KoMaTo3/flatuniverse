@@ -10,6 +10,8 @@ namespace Engine {
 
   
 int LuaCamera_Get( lua_State *lua );
+int LuaCamera_GetPos( lua_State *lua );
+int LuaCamera_Set( lua_State *lua );
 
   
 };

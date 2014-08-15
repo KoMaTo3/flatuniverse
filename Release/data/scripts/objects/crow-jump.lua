@@ -19,10 +19,9 @@ return {
     local px, py = Object.Get( 'player' ).api:GetPos()
     local dist = math.sqrt( ( px - x ) * ( px - x ) + ( py - y ) * ( py - y ) )
     if dist < 100 and self.data.jumpCooldown < 1 then
-      local name = self.api:GetNameFull()
-      local vx, vy = ObjectAttr( name, { 'collisionVelocity' } )
+      local vx, vy = self.api({ 'collisionVelocity' })
       vy = -700
-      ObjectAttr( name, { collisionVelocity = vx..' '..vy } )
+      self.api:Attr({ collisionVelocity = vx..' '..vy })
     end
 
     self.data.jumpCooldown = self.data.jumpCooldown + 1

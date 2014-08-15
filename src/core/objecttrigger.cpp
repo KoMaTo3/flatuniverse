@@ -254,6 +254,7 @@ void ObjectTrigger::SaveToBuffer( MemoryWriter &writer )
   this->triggerRect->SaveToBuffer( writer );
 
   //handlers
+  /*
   Dword count = this->handlers.size();
   writer << count;
   if( count && ObjectTrigger::triggerLintenersList ) {
@@ -266,6 +267,7 @@ void ObjectTrigger::SaveToBuffer( MemoryWriter &writer )
       }
     }
   }
+  */
   __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::SaveToBuffer done" );
 }//SaveToBuffer
 
@@ -287,6 +289,7 @@ void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const std::string &thi
   this->triggerRect = new Collision( this->position );
   this->triggerRect->LoadFromBuffer( reader, "", version );
 
+  /*
   if( version >= 0x00000005 ) {
     //handlers
     Dword count;
@@ -301,6 +304,7 @@ void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const std::string &thi
       }
     }
   }
+  */
 }//LoadFromBuffer
 
 

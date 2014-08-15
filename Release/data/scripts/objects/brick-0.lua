@@ -40,11 +40,10 @@ return {
 
     if bit32.band( flags, 4 ) == 4 and self.data.state == 1 then
       Debug.Log( 'test collision' )
-      local name = target.api:GetNameFull()
-      local isStatic, vx, vy = ObjectAttr( name, { 'collisionStatic', 'collisionVelocity' } )
+      local isStatic, vx, vy = target.api:Attr({ 'collisionStatic', 'collisionVelocity' })
       if isStatic == false and vy >= 0 then
         vy = -500
-        ObjectAttr( name, { collisionVelocity = vx..' '..vy } )
+        target.api:Attr({ collisionVelocity = vx..' '..vy })
       end
     end
   end, --) OnCollision

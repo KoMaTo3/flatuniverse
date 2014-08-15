@@ -16,14 +16,13 @@ return {
     local x, y = self.api:GetPos()
     local px, py = Object.Get( 'player' ).api:GetPos()
     local dist = math.sqrt( ( px - x ) * ( px - x ) + ( py - y ) * ( py - y ) )
-    local name = self.api:GetNameFull()
     if dist < 100 then
-      local vx, vy = ObjectAttr( name, { 'collisionVelocity' } )
+      local vx, vy = self.api:Attr({ 'collisionVelocity' })
       vx = ( px < x ) and 100 or -100
-      ObjectAttr( name, { collisionVelocity = vx..' '..vy } )
+      self.api:Attr({ collisionVelocity = vx..' '..vy })
     else
-      local _, vy = ObjectAttr( name, { 'collisionVelocity' } )
-      ObjectAttr( name, { collisionVelocity = '0 '..vy } )
+      local _, vy = self.api:Attr({ 'collisionVelocity' })
+      self.api:Attr({ collisionVelocity = '0 '..vy })
     end
   end,
 }

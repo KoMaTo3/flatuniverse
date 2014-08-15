@@ -132,7 +132,7 @@ function GUIEdit:Render( dx, dy )
   local y0 = self.rect.top + dy
   local x1 = self.rect.right + dx
   local y1 = self.rect.bottom + dy
-  local cursorColor = ( math.floor( GetTime() * 2 ) % 2 == 1 and ( self.selection == 0 and '00000000' or 'ffffffff' ) or self.colors.cursor );
+  local cursorColor = ( math.floor( Core.GetTime() * 2 ) % 2 == 1 and ( self.selection == 0 and '00000000' or 'ffffffff' ) or self.colors.cursor );
   local cursorX = x0 + self.cursorPosPixel + 2
   if cursorX + self.contentRenderOffset > x1 - 2 then
     self.contentRenderOffset = x1 - cursorX - 2
@@ -183,7 +183,6 @@ function GUIEdit:TestInRect( x, y, dx, dy )
     self.hoverPos.x = x - ( self.rect.left + dx )
     self.hoverPos.y = y - ( self.rect.top + dy )
     if self.state == 2 then -- select my mouse
-      -- Debug.Alert(2)
       -- calculate cursor position
       Debug.Log( self.hoverPos.x )
       local x
@@ -378,9 +377,9 @@ function GUIEdit:OnKeyboard( id, isPressed )
             local selectionRight = math.max( self.cursorPos, selectionStartPos )
             text = self.text:sub( selectionLeft + 1, selectionRight )
           end
-          SetClipboard( text )
+          Tools.SetClipboard( text )
         elseif id == 0x56 then  -- Ctrl+V
-          local text = GetClipboard()
+          local text = Tools.GetClipboard()
           -- self.text = text
           if #text > 0 and self.selection ~= 0 then
             self.text = ( self.selection > 0 and self.text:sub( 1, self.cursorPos )..self.text:sub( self.cursorPos + self.selection + 1 ) or self.text:sub( 1, self.cursorPos + self.selection )..self.text:sub( self.cursorPos + 1 ) )
@@ -414,7 +413,6 @@ function GUIEdit:OnKeyboard( id, isPressed )
             char = self.charTranslate[ id ]
           else
             -- char = string.format( "%c", id )
-            -- Debug.Alert(id)
           end
         end
         if #char > 0 and self.selection ~= 0 then
@@ -442,11 +440,9 @@ end -- OnKeyboard
 --[[ UpdateCursor ]]
 function GUIEdit:UpdateCursor()
   self.cursorPosPixel = Debug.Render( 'getTextWidth', self.text:sub( 1, self.cursorPos ) )
-  -- Debug.Alert(self.selection)
   if self.selection ~= 0 then
     self.selectionWidth = self.selection > 0 and Debug.Render( 'getTextWidth', self.text:sub( self.cursorPos + 1, self.cursorPos + self.selection ) ) or Debug.Render( 'getTextWidth', self.text:sub( self.cursorPos + self.selection + 1, self.cursorPos ) )
   else
     self.selectionWidth = 0
   end
-  -- Debug.Alert(self.selectionWidth)
 end -- UpdateCursor

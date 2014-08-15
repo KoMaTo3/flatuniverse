@@ -26,8 +26,8 @@ return {
       changeSpeed = true
     end
     if changeSpeed then
-      local _, vy = ObjectAttr( self.name, { 'collisionVelocity' } )
-      ObjectAttr( self.name, { collisionVelocity = vx..' '..vy } )
+      local _, vy = self.api:Attr({ 'collisionVelocity' })
+      self.api:Attr({ collisionVelocity = vx..' '..vy })
     end
   end, --) OnCollision
 

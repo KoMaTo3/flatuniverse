@@ -112,6 +112,18 @@ function GetObjectsTabbedTemplates()  --(
         },
       },
       --
+      {
+        name = 'Триггер',
+        icon = 'data/temp/null.png',
+        attr = {
+          renderable = true, textureName = 'temp/null.png',
+          collision = false,
+          -- trigger = true, _triggerFunc = 'TestFunc', triggerPolygon = '-12 -12  12 -12  0 12'
+          trigger = true, _triggerScale = 1,
+        },
+        templateScriptName = 'data/scripts/objects/trigger-jump.lua',
+      },
+      --
     },  -- blocks
     grass = {
       -- Grass-0
@@ -278,7 +290,7 @@ function GetObjectsTabbedTemplates()  --(
         attr = {
           renderable = true, textureName = 'textures/tiles/tile000a.png',
           collision = false,
-          trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -0.8,-1, 0.8,-1, 0,1 }, _triggerScale = 1,
+          -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -0.8,-1, 0.8,-1, 0,1 }, _triggerScale = 1,
           lightBlockByCollision = true,
         },
       },
@@ -288,7 +300,7 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/textures/tiles/tile000b.png',
         attr = {
           renderable = true, textureName = 'textures/tiles/tile000b.png',
-          trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 0.8,1, -0.8,1, 0,-1 }, _triggerScale = 1,
+          -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 0.8,1, -0.8,1, 0,-1 }, _triggerScale = 1,
           lightBlockByCollision = true,
         },
       },
@@ -298,7 +310,7 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/textures/tiles/tile000c.png',
         attr = {
           renderable = true, textureName = 'textures/tiles/tile000c.png',
-          trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 1,-0.8, 1,0.8, -1,0 }, _triggerScale = 1,
+          -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 1,-0.8, 1,0.8, -1,0 }, _triggerScale = 1,
           lightBlockByCollision = true,
         },
       },
@@ -308,7 +320,7 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/textures/tiles/tile000d.png',
         attr = {
           renderable = true, textureName = 'textures/tiles/tile000d.png',
-          trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -1,-0.8, 1,0, -1,0.8 }, _triggerScale = 1,
+          -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -1,-0.8, 1,0, -1,0.8 }, _triggerScale = 1,
           lightBlockByCollision = true,
         },
       },
@@ -318,7 +330,7 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/textures/tiles/coin0.png',
         attr = {
           renderable = true, textureName = 'textures/tiles/coin0.png',
-          trigger = true, _triggerScale = 1, _triggerFunc = 'CoinCollect',
+          -- trigger = true, _triggerScale = 1, _triggerFunc = 'CoinCollect',
         },
       },
       -- Mushroom0

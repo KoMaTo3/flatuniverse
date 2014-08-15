@@ -1,7 +1,7 @@
 return {
   OnCreate = function( self ) --(
     Debug.Log( 'arrow-up: created' )
-    ObjectAttr( self.api:GetNameFull(), {
+    self.api:Attr({
       renderable = true, textureName = 'textures/tiles/tile000b.png', renderableSize = '10 10'
     })
     self.mousePos = { x = 0, y = 0 }
@@ -43,7 +43,7 @@ return {
     local lastIsFocused = self.isFocused
     self.isFocused = ( mx >= x - 5 and mx <= x + 5 and my >= y - 5 and my <= y + 5 )
     if lastIsFocused ~= self.isFocused then
-      ObjectAttr( self.api:GetNameFull(), { renderableSize = self.isFocused and '15 15' or '10 10' } )
+      self.api:Attr({ renderableSize = self.isFocused and '15 15' or '10 10' })
     end
   end, --) OnMouseMove
 

@@ -4,7 +4,7 @@ return {
   end, --)
 
   OnCreate = function( self ) --(
-    Debug.Log( Tools.GetTime( '%Y.%m.%d %H:%M:%S' )..' "'..self.api:GetName()..'" created' )
+    Debug.Log( Tools.GetTimeFormatted( '%Y.%m.%d %H:%M:%S' )..' "'..self.api:GetName()..'" created' )
     if self.data.savedValue == nil then
       self.data.savedValue = 1
     end
@@ -25,33 +25,33 @@ return {
 
   OnDestroy = function( self ) --(
     self.data.savedValue = self.data.savedValue + 1
-    Debug.Log( Tools.GetTime( '%Y.%m.%d %H:%M:%S' )..' "'..self.api:GetName()..'" destroyed' )
+    Debug.Log( Tools.GetTimeFormatted( '%Y.%m.%d %H:%M:%S' )..' "'..self.api:GetName()..'" destroyed' )
   end, --) OnDestroy
 
   OnCollision = function( self, target, flags, vx, vy ) --(
-    local target = target.api:GetNameFull()
+    local targetName = target.api:GetNameFull()
     local player = self.api:GetNameFull()
-    -- Debug.Log( string.format( 'player OnCollision with "%s": flags[%d] v[%3.1f; %3.1f]', target, flags, vx, vy ) )
-    if ObjectHasTag( target, 'no-reset-player-velocity' ) then
-      ObjectAttr( player, { collisionVelocity = vx..' '..vy } )
+    -- Debug.Log( string.format( 'player OnCollision with "%s": flags[%d] v[%3.1f; %3.1f]', targetName, flags, vx, vy ) )
+    if target.api:HasTag( 'no-reset-player-velocity' ) then
+      self.api:Attr({ collisionVelocity = vx..' '..vy })
     end
-    if ObjectHasTag( target, 'mushroom' ) then
-      ObjectRemove( target )
+    if target.api:HasTag( 'mushroom' ) then
+      Object.Get( targetName ).api:Destroy()
       return false
       -- local cx, cy, rx, ry = ObjectAttr( player, { 'collisionSize', 'renderableSize' } )
       -- ObjectAttr( player, { collisionSize = string.format( '%f %f', cx * 1.2, cy * 1.2 ), renderableSize = string.format( '%f %f', rx * 1.2, ry * 1.2 ) } )
       -- do return false end
     end
-    if IsObjectUpperThis( player, target ) then
+    if IsObjectUpperThis( player, targetName ) then
       self.data.playerState.allowDoubleJump = true
-      self.data.playerState.onGroundTime = GetTime()
+      self.data.playerState.onGroundTime = Core.GetTime()
       if self.data.playerState.currentAction == 2 then
         self.data.playerState.currentAction = 1
-        ObjectSetAnimation( player, 'player/mario', ( math.abs( self.data.playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+        self.api:SetAnimation( 'player/mario', ( math.abs( self.data.playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
       end
-    elseif IsObjectUnderThis( player, target ) then
+    elseif IsObjectUnderThis( player, targetName ) then
       --[[
-      if ObjectHasTag( target, 'brick-breakable' ) then
+      if ObjectHasTag( targetName, 'brick-breakable' ) then
         animation[ 'timer'..Core.SetTimer( 0.5, function( timerId ) --(
             local keyByTimer = 'timer'..timerId
             if animation[ keyByTimer ] == nil then
@@ -68,18 +68,18 @@ return {
               animation[ keyByTimer ] = nil
             end
           end --)
-        ) ] = { step = 1, time = 0, timeMax = 8, object = target }
-        ObjectAddTag( target, 'push-bottom' )
-        ObjectRemoveTag( target, 'brick-breakable' )
-        ObjectStopAnimation( target )
-        ObjectSetAnimation( target, 'supermario/brick0', 'do', 'stop' )
-        ObjectAttr( target, { color = '0 0 0 0' } )
+        ) ] = { step = 1, time = 0, timeMax = 8, object = targetName }
+        ObjectAddTag( targetName, 'push-bottom' )
+        ObjectRemoveTag( targetName, 'brick-breakable' )
+        ObjectStopAnimation( targetName )
+        ObjectSetAnimation( targetName, 'supermario/brick0', 'do', 'stop' )
+        ObjectAttr( targetName, { color = '0 0 0 0' } )
       end
-      if ObjectHasTag( target, 'has-mushroom' ) then
-        PushMushroom( target )
+      if ObjectHasTag( targetName, 'has-mushroom' ) then
+        PushMushroom( targetName )
       end
-      if ObjectHasTag( target, 'has-coin' ) then
-        PushCoin( target )
+      if ObjectHasTag( targetName, 'has-coin' ) then
+        PushCoin( targetName )
       end
       ]]
     end
@@ -93,13 +93,13 @@ return {
     else
       Debug.Log( string.format( 'player key: %d', id ) )
       if id == 0x26 or id == 0x57 then  -- Up
-        local curTime = GetTime()
+        local curTime = Core.GetTime()
         if curTime - self.data.playerState.onGroundTime < 0.1 or self.data.playerState.allowDoubleJump then  -- do jump
           if curTime - self.data.playerState.onGroundTime >= 0.1 then -- is a double jump
             self.data.playerState.allowDoubleJump = false
           end
-          local vx, _ = ObjectAttr( 'player', { 'collisionVelocity' } )
-          ObjectAttr( 'player', { collisionVelocity = vx..' '..( self.data.playerState.jumpPower )  } )
+          local vx, _ = self.api:Attr({ 'collisionVelocity' })
+          self.api:Attr({ collisionVelocity = vx..' '..( self.data.playerState.jumpPower )  })
           self.data.playerState.isHoldJump = true
           self.data.playerState.longJumpStep = 0
           if self.data.playerState.longJumpTimer ~= -1 then
@@ -113,34 +113,34 @@ return {
           self.data.playerState.longJumpTimer = Core.SetTimer( 0.1, function( timerId ) self:PlayerDoLongJump( timerId ) end )
           self.data.playerState.PlayerEndLongJumpTimer = Core.SetTimer( 0.5, function( timerId ) self:PlayerEndLongJump( timerId ) end )
           self.data.playerState.onGroundTime = 0
-          ObjectSetAnimation( 'player', 'player/mario', 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+          self.api:SetAnimation( 'player/mario', 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
           self.data.playerState.currentAction = 2
         end
       end
 
       if id == 0x25 or id == 0x41 then  -- Left
-        local curTime = GetTime()
-        RemoveObjectForce( 'player', 2 )
-        SetObjectForce( 'player', 4, -300, 0 )
+        local curTime = Core.GetTime()
+        self.api:RemoveForce( 2 )
+        self.api:SetForce( 4, -300, 0 )
         if self.data.playerState.currentAction ~= 2 then
           self.data.playerState.currentAction = 1
         end
         if curTime - self.data.playerState.onGroundTime < 0.1 then
-          ObjectSetAnimation( 'player', 'player/mario', 'walk-left' )
+          self.api:SetAnimation( 'player/mario', 'walk-left' )
         end
         self.data.playerState.lastDirection = -2
       end
 
       if id == 0x27 or id == 0x44 then  -- Right
-        local curTime = GetTime()
-        RemoveObjectForce( 'player', 4 )
-        SetObjectForce( 'player', 2, 300, 0 )
+        local curTime = Core.GetTime()
+        self.api:RemoveForce( 4 )
+        self.api:SetForce( 2, 300, 0 )
         self.data.playerState.lastDirection = 1
         if self.data.playerState.currentAction ~= 2 then
           self.data.playerState.currentAction = 1
         end
         if curTime - self.data.playerState.onGroundTime < 0.1 then
-          ObjectSetAnimation( 'player', 'player/mario', 'walk-right' )
+          self.api:SetAnimation( 'player/mario', 'walk-right' )
         end
         self.data.playerState.lastDirection = 2
       end
@@ -149,25 +149,22 @@ return {
         local x, y = Object.Get( 'player' ).api:GetPos()
         local object = 'player-bullet-.'..x..'.'..y..'.'..string.format( '%f', settings.timer )
         local isRight = self.data.playerState.lastDirection > 0 and true or false
-        ObjectCreate( object, x + ( isRight and 30 or -30 ), y - 10, 0 )
-        ObjectAttr( object, {
+        -- ObjectCreate( object, x + ( isRight and 30 or -30 ), y - 10, 0 )
+        local newObject = Object.New( object )
+        newObject.api:SetPos( x + ( isRight and 30 or -30 ), y - 10, 0 )
+        newObject.api:Attr({
           collision = true, collisionSize = '12 12', collisionAcceleration = '0 900', collisionVelocity = ( isRight and 150 or -150 )..' -400', collisionStatic = false,
           lightBlockByCollision = true,
           lightPoint = true, lightPointSize = ( math.random( 0, 1000 ) / 1000.0 ) * 300.0 + 30.0, lightPointColor = string.format( '%f %f %f 1', math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2 ), lightPointPenetration = 3
-          } )
-        ObjectSetAnimation( object, 'bullet/test000', isRight and 'right' or 'left' )
-        ListenCollision( object, 'CollisionBullet' )
-      end
-
-      if id == 0x10 then  -- test
-        local object = 'wall.161.63.2.010000'
-        ObjectSetAnimation( object, 'lift/small', 'down' )
+          })
+        newObject.api:SetAnimation( 'bullet/test000', isRight and 'right' or 'left' )
+        -- ListenCollision( object, 'CollisionBullet' )
       end
     end -- !settings.gamePaused
 
     if id == 0x8 then  -- BackSpace
-      ObjectSetPos( 'player', 0, 0 )
-      ObjectAttr( 'player', { collisionVelocity = '0 0' } )
+      self.api:SetPos( 0, 0 )
+      self.api:Attr({ collisionVelocity = '0 0' })
     end
   end, --) OnKeyPress
 
@@ -182,28 +179,28 @@ return {
       end
 
       if id == 0x25 or id == 0x41 then  -- Left
-        local curTime = GetTime()
+        local curTime = Core.GetTime()
         if self.data.playerState.lastDirection < 0 then
-          RemoveObjectForce( 'player', 4 )
+          self.api:RemoveForce( 4 )
           if self.data.playerState.currentAction ~= 2 then
             self.data.playerState.currentAction = 0
           end
           if curTime - self.data.playerState.onGroundTime < 0.1 then
-            ObjectSetAnimation( 'player', 'player/mario', 'stay-left' )
+            self.api:SetAnimation( 'player/mario', 'stay-left' )
           end
           self.data.playerState.lastDirection = -1
         end
       end
 
       if id == 0x27 or id == 0x44 then  -- Right
-        local curTime = GetTime()
+        local curTime = Core.GetTime()
         if self.data.playerState.lastDirection > 0 then
-          RemoveObjectForce( 'player', 2 )
+          self.api:RemoveForce( 2 )
           if self.data.playerState.currentAction ~= 2 then
             self.data.playerState.currentAction = 0
           end
           if curTime - self.data.playerState.onGroundTime < 0.1 then
-            ObjectSetAnimation( 'player', 'player/mario', 'stay-right' )
+            self.api:SetAnimation( 'player/mario', 'stay-right' )
           end
           self.data.playerState.lastDirection = 1
         end
@@ -214,9 +211,9 @@ return {
   PlayerDoLongJump = function( self, timerId ) --(
     self.data.playerState.longJumpTimer = -1
     if self.data.playerState.isHoldJump then
-      local vx, vy = ObjectAttr( 'player', { 'collisionVelocity' } )
+      local vx, vy = self.api:Attr({ 'collisionVelocity' })
       self.data.playerState.longJumpStep = self.data.playerState.longJumpStep + 1
-      ObjectAttr( 'player', { collisionVelocity = vx..' '..( vy - self.data.playerState.longJumpPower / self.data.playerState.longJumpStep ) } )
+      self.api:Attr({ collisionVelocity = vx..' '..( vy - self.data.playerState.longJumpPower / self.data.playerState.longJumpStep ) })
       Core.SetTimer( 0.1, function( timerId ) self:PlayerDoLongJump( timerId ) end )
     end
   end, --) PlayerDoLongJump
@@ -230,8 +227,4 @@ return {
       self.data.playerState.longJumpTimer = -1
     end
   end, --) PlayerEndLongJump
-
-  OnTrigger = function( self, target, isInTrigger ) --(
-    Debug.Log( 'OnTrigger' )
-  end, --) OnTrigger
 }

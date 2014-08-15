@@ -13,3 +13,14 @@ int Engine::LuaConfig_GetGridSize( lua_State *lua ) {
 
   return 1;
 }//LuaConfig_GetGridSize
+
+
+int Engine::LuaConfig_GetWindowSize( lua_State *lua ) {
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CONFIG );
+
+  const Size &size = lib->game->core->GetWindowSize();
+  lua_pushinteger( lua, size.width );
+  lua_pushinteger( lua, size.height );
+
+  return 2;
+}//LuaConfig_GetWindowSize

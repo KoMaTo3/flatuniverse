@@ -46,7 +46,7 @@ return {
         end --)
         if doMultiSelect then
           settings.editorMode = 22
-          local cx, cy = GetCameraPos()
+          local cx, cy = Camera.GetPos()
           settings.multiSelectStartPoint.x = mousePos.x + cx
           settings.multiSelectStartPoint.y = mousePos.y + cy
         end
@@ -70,7 +70,7 @@ return {
       if isPressed then
         if settings.keys.isCtrl --[[ or settings.keys.isAlt ]] then --(
           settings.editorMode = 22
-          local cx, cy = GetCameraPos()
+          local cx, cy = Camera.GetPos()
           settings.multiSelectStartPoint.x = mousePos.x + cx
           settings.multiSelectStartPoint.y = mousePos.y + cy
         else --)(
@@ -172,7 +172,7 @@ return {
       if isPressed then
       else
         settings.editorMode = 0
-        local cx, cy = GetCameraPos()
+        local cx, cy = Camera.GetPos()
         local x = settings.move.mouseStart.x - cx + settings.windowSize.x * 0.5
         local y = settings.move.mouseStart.y - cy + settings.windowSize.y * 0.5
         local newX = mousePos.x
@@ -209,7 +209,7 @@ return {
     [22] = function( self, id, isPressed ) --(
       if isPressed then --(
       else --)(
-        local cx, cy = GetCameraPos()
+        local cx, cy = Camera.GetPos()
         local newX = mousePos.x + cx
         local newY = mousePos.y + cy
         if settings.multiSelectStartPoint.x == newX and settings.multiSelectStartPoint.y == newY then --( one-select
@@ -282,7 +282,7 @@ return {
       end
     end
     if id == 0x1B then    -- Esc
-      GameExit()
+      Core.GameExit()
     end
     if id == 0x5A then    -- Z
       if settings.keys.isCtrl then  -- Ctrl+Z
@@ -318,49 +318,51 @@ return {
           , setTextureName, renderableSizeX, renderableSizeY, renderablePositionX, renderablePositionY, colorR, colorG, colorB, colorA, renderableScaleX, renderableScaleY, setRenderableRotation
           , collisionSizeX, collisionSizeY, collisionAccelerationX, collisionAccelerationY
           =
-          ObjectAttr( name, {
+          object.api:Attr({
             'position'
             , 'renderable', 'collision', 'trigger', 'lightBlockByCollision', 'lightPoint'
             , 'textureName', 'renderableSize', 'renderablePosition', 'color', 'renderableScale', 'renderableRotation'
             , 'collisionSize', 'collisionAcceleration'
-          } )
+          })
         local
           triggerType
           , setCollisionStatic, collisionForceX, collisionForceY, collisionVelocityX, collisionVelocityY
           =
-          ObjectAttr( name, {
+          object.api:Attr({
             'triggerType'
             , 'collisionStatic', 'collisionForce', 'collisionVelocity'
-          } )
+          })
         local setTriggerPolygon = ''
         if triggerType == "polygon" then
-          setTriggerPolygon = ObjectAttr( name, { 'triggerPolygon' } )
+          setTriggerPolygon = object.api:Attr({ 'triggerPolygon' })
         end
         PushToBuffer( function()
           end, function()
-            ObjectCreate( name, x, y, z )
-            ObjectAttr( name, { renderable = isRenderable, collision = isCollision, trigger = isTrigger, lightBlockByCollision = isLightBlockByCollision, lightPoint = isLightPoint } )
+            -- ObjectCreate( name, x, y, z )
+            local newObject = Object.New( name )
+            newObject.api:SetPos( x, y, z )
+            newObject.api:Attr({ renderable = isRenderable, collision = isCollision, trigger = isTrigger, lightBlockByCollision = isLightBlockByCollision, lightPoint = isLightPoint })
             if isRenderable then
-              ObjectAttr( name, {
+              newObject.api:Attr({
                 textureName = setTextureName, renderableSize = renderableSizeX..' '..renderableSizeY, renderablePosition = renderablePositionX..' '..renderablePositionY
                 , color = colorR..' '..colorG..' '..colorB..' '..colorA, renderableScale = renderableScaleX..' '..renderableScaleY, renderableRotation = setRenderableRotation
-              } )
+              })
             end
             if isCollision then
-              ObjectAttr( name, {
+              newObject.api:Attr({
                 collisionSize = collisionSizeX..' '..collisionSizeY, collisionAcceleration = collisionAccelerationX..' '..collisionAccelerationY
                 -- , collisionVelocity = collisionVelocityX..' '..collisionVelocityY --, collisionStatic = setCollisionStatic, collisionForce = collisionForceX..' '..collisionForceY
-              } )
+              })
             end
             if isTrigger then
               if triggerType == "polygon" then
-                ObjectAttr( name, { triggerPolygon = setTriggerPolygon } )
+                newObject.api:Attr({ triggerPolygon = setTriggerPolygon })
               end
             end
           end
         )
         --
-        ObjectRemove( name )
+        Object.Get( name ).api:Destroy()
       end --)
       Object.Select( nil )
       if settings.editorMode == 2 then
@@ -522,7 +524,7 @@ return {
         end,
         [20] = function()
           settings.editorMode = 21
-          local cx, cy = GetCameraPos()
+          local cx, cy = Camera.GetPos()
           settings.move.mouseStart.x = mousePos.x - settings.windowSize.x * 0.5 + cx
           settings.move.mouseStart.y = mousePos.y - settings.windowSize.y * 0.5 + cy
         end,
@@ -587,7 +589,7 @@ return {
     end
     --( вставка блока тайлов
     if settings.editorMode == 21 then
-      local cx, cy = GetCameraPos()
+      local cx, cy = Camera.GetPos()
       local x = settings.move.mouseStart.x - cx + settings.windowSize.x * 0.5
       local y = settings.move.mouseStart.y - cy + settings.windowSize.y * 0.5
       local newX = mousePos.x
@@ -619,7 +621,7 @@ return {
 
     --( рамка мультиселекта
     if settings.editorMode == 22 then
-      local cx, cy = GetCameraPos()
+      local cx, cy = Camera.GetPos()
       left = settings.multiSelectStartPoint.x - cx
       top = settings.multiSelectStartPoint.y - cy
       right = mousePos.x
@@ -677,7 +679,7 @@ return {
         object = obj
         break
       end
-      object = object.api:GetNameFull()
+      -- object = object.api:GetNameFull()
       local isRenderable
         , isCollision
         , isTrigger
@@ -687,7 +689,7 @@ return {
         , renderableSizeX
         , renderableSizeY
         , objectZ
-        = ObjectAttr( object, {
+        = object.api:Attr({
           'renderable',
           'collision',
           'trigger',
@@ -696,9 +698,9 @@ return {
           'textureName',
           'renderableSize',
           'z',
-        } )
+        })
       GUI.elements.objectName:SetEnabled( true )
-      GUI.elements.objectName:SetText( object )
+      GUI.elements.objectName:SetText( object.api:GetNameFull() )
       GUI.elements.objectZ:SetEnabled( true )
       GUI.elements.objectZ:SetText( string.format( '%.3f', objectZ ) )
       GUI.elements.objectZslider:SetEnabled( true )
@@ -718,12 +720,12 @@ return {
       local isRenderable, isCollision, isTrigger, isLightBlockByCollision, isLightPoint, objectZ = false, false, false, false, false, 0.0
       for _,object in pairs( objectList ) do
         local name = object.api:GetNameFull()
-        isRenderable = isRenderable or ObjectAttr( name, { 'renderable' } )
-        isCollision = isCollision or ObjectAttr( name, { 'collision' } )
-        isTrigger = isTrigger or ObjectAttr( name, { 'trigger' } )
-        isLightBlockByCollision = isLightBlockByCollision or ObjectAttr( name, { 'lightBlockByCollision' } )
-        isLightPoint = isLightPoint or ObjectAttr( name, { 'lightPoint' } )
-        objectZ = ObjectAttr( name, { 'z' } )
+        isRenderable = isRenderable or object.api:Attr({ 'renderable' })
+        isCollision = isCollision or object.api:Attr({ 'collision' })
+        isTrigger = isTrigger or object.api:Attr({ 'trigger' })
+        isLightBlockByCollision = isLightBlockByCollision or object.api:Attr({ 'lightBlockByCollision' })
+        isLightPoint = isLightPoint or object.api:Attr({ 'lightPoint' })
+        objectZ = object.api:Attr({ 'z' })
       end
       GUI.elements.objectName:SetEnabled( false )
       GUI.elements.objectName:SetText( '' )

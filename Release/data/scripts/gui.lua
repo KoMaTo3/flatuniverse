@@ -21,22 +21,21 @@ GUIRenderer = {
 --
 labelDebug = false
 function GUIInit()
-  LoadScript( 'data/scripts/gui/button.lua' )
-  LoadScript( 'data/scripts/gui/checkbox.lua' )
-  LoadScript( 'data/scripts/gui/label.lua' )
-  LoadScript( 'data/scripts/gui/select.lua' )
-  LoadScript( 'data/scripts/gui/edit.lua' )
-  LoadScript( 'data/scripts/gui/slider-vertical.lua' )
-  LoadScript( 'data/scripts/gui/tree.lua' )
+  Core.LoadScript( 'data/scripts/gui/button.lua' )
+  Core.LoadScript( 'data/scripts/gui/checkbox.lua' )
+  Core.LoadScript( 'data/scripts/gui/label.lua' )
+  Core.LoadScript( 'data/scripts/gui/select.lua' )
+  Core.LoadScript( 'data/scripts/gui/edit.lua' )
+  Core.LoadScript( 'data/scripts/gui/slider-vertical.lua' )
+  Core.LoadScript( 'data/scripts/gui/tree.lua' )
   Keyboard.Listen( 'GUIKeyboard' )
   Mouse.ListenKey( 'GUIMouseKey' )
-  ListenMouseMove( 'GUIMouseMove' )
+  Mouse.ListenMove( 'GUIMouseMove' )
 end
 
 --[[ GUIRendererRender ]]
 function GUIRendererRender( timerId )
   for id, item in pairs( GUIRenderer.GUIElements ) do
-    --Debug.Alert( item.rect.right )
     item:Render()
   end
   --Core.SetTimer( 0.1, 'GUIRendererRender' )
@@ -59,12 +58,10 @@ function GUIMouseKey( id, isPressed ) --(
         if item:TestInRect( mousePos.x, mousePos.y ) then --(
           inRect = true
           if GUIRenderer.activeItem ~= nil then
-            -- Debug.Alert( GUIRenderer.activeItem:GetType() )
             --labelDebug:SetText( GUIRenderer.activeItem:GetType() )
             if GUIRenderer.activeItem.OnClick ~= nil then
               GUIRenderer.activeItem:OnClick( id, isPressed )
             end
-            -- Debug.Alert( GUIRenderer.activeItem.rect.left )
           end
           do break end
         end --) if

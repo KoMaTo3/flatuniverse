@@ -82,3 +82,37 @@ int Engine::LuaCore_StopTimer( lua_State *lua ) {
 
   return 1;
 }//LuaCore_StopTimer
+
+
+int Engine::LuaCore_GameExit( lua_State *lua ) {
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE );
+
+  lib->game->core->SetState( CORE_STATE_EXIT );
+
+  return 0;
+}//LuaCore_GameExit
+
+
+int Engine::LuaCore_LoadScript( lua_State *lua ) {
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE );
+
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount != 1 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaCore_LoadScript => use: Core.LoadScript( scriptFileName )" );
+    return 0;
+  }
+
+  const std::string fileName = lua_tostring( lua, 1 );
+  lib->game->lua->RunFile( fileName );
+
+  return 0;
+}//LuaCore_LoadScript
+
+
+int Engine::LuaCore_GetTime( lua_State *lua ) {
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE );
+
+  lua_pushnumber( lua, sTimer.GetTime() );
+
+  return 1;
+}//LuaCore_GetTime

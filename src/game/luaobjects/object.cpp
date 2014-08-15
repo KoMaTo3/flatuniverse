@@ -467,7 +467,7 @@ int Engine::LuaObject_SetPos( lua_State *lua ) {
   }
 
   int argc = lua_gettop( lua );
-  if( argc != 3 ) {
+  if( argc < 3 ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetPos => use: object.api:SetPos( x, y )" );
     luaL_error( lua, "Engine::LuaObject_SetPos => use: object.api:SetPos( x, y )" );
     return 0;
@@ -476,10 +476,15 @@ int Engine::LuaObject_SetPos( lua_State *lua ) {
   const Vec2 pos( ( float ) lua_tonumber( lua, 2 ), ( float ) lua_tonumber( lua, 3 ) );
 
   object->SetPosition2D( pos );
+  if( argc >= 4 ) {
+    object->SetZ( ( float ) lua_tonumber( lua, 4 ) );
+  }
+
   object->Update( 0.0f );
 
   return 0;
 }//LuaObject_SetPos
+
 
 
 int Engine::LuaObject_AddTrigger( lua_State *lua ) {
@@ -490,28 +495,21 @@ int Engine::LuaObject_AddTrigger( lua_State *lua ) {
     luaL_error( lua, "Engine::LuaObject_AddTrigger => object is NULL" );
   }
 
-  int argc = lua_gettop( lua );
-  if( argc != 2 ) {
-    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_AddTrigger => use: object.api:AddTrigger( functionName )" );
-    luaL_error( lua, "Engine::LuaObject_AddTrigger => use: object.api:AddTrigger( functionName )" );
-    return 0;
-  }
-
   ObjectTrigger *trigger = object->GetTrigger();
   if( !trigger ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAddTrigger => object '%s' don't have trigger", object->GetNameFull().c_str() );
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_AddTrigger => object '%s' don't have trigger", object->GetNameFull().c_str() );
     return 0;
   }
 
-  const char *funcName = lua_tostring( lua, 2 );
-  trigger->AddHandler( Game::LUA_ObjectTrigger_Handler );
-
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
-
-  lib->game->objectTriggers.push_back( Game::GameObjectTrigger() );
-  Game::GameObjectTrigger *objectTrigger = &( *lib->game->objectTriggers.rbegin() );
-  objectTrigger->funcName = funcName;
-  objectTrigger->trigger  = trigger;
+  if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONTRIGGER ) ) {
+    if( object->IsTrigger() ) {
+      lib->game->luaObjectOnTrigger.push_back( object->GetLuaObjectId() );
+      object->GetTrigger()->AddHandler( Game::LuaObject_OnTrigger );
+    } else {
+      __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_AddTrigger => function '%s' exists, but object '%s' is not trigger", GAME_OBJECT_HANDLER_ONTRIGGER.c_str(), object->GetNameFull().c_str() );
+    }
+  }
 
   return 0;
 }//LuaObject_AddTrigger
@@ -676,6 +674,28 @@ int Engine::LuaObject_RemoveTag( lua_State *lua ) {
 
   return 0;
 }//LuaObject_RemoveTag
+
+
+int Engine::LuaObject_HasTag( lua_State *lua ) {
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_HasTag => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_HasTag => object is NULL" );
+  }
+
+  int argc = lua_gettop( lua );
+
+  if( argc != 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_HasTag => use: object.api:HasTag( tagName )" );
+    return 0;
+  }
+
+  bool hasTag = object->IsHasTag( lua_tostring( lua, 2 ) );
+  lua_pushboolean( lua, hasTag );
+
+  return 1;
+}//LuaObject_HasTag
 
 
 int Engine::LuaObject_GetParent( lua_State *lua ) {
@@ -1509,6 +1529,71 @@ int Engine::LuaObject_GetChilds( lua_State *lua ) {
 
   return 1;
 }//LuaObject_GetChilds
+
+
+
+int Engine::LuaObject_SetForce( lua_State *lua ) {
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_SetForce => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_SetForce => object is NULL" );
+  }
+
+  int argc = lua_gettop( lua );
+
+  if( argc != 4 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetForce => use: Object:SetForce( forceId, powerX, powerY )" );
+    luaL_error( lua, "Engine::LuaObject_SetForce => use: Object:SetForce( forceId, powerX, powerY )" );
+    return 0;
+  }
+
+  long forceId = lua_tointeger( lua, 2 );
+  Vec3 force( ( float ) lua_tonumber( lua, 3 ), ( float ) lua_tonumber( lua, 4 ), 0.0f );
+
+  object->SetForce( forceId, force );
+
+  return 0;
+}//LuaObject_SetForce
+
+
+
+int Engine::LuaObject_RemoveForce( lua_State *lua ) {
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_RemoveForce => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_RemoveForce => object is NULL" );
+  }
+
+  int argc = lua_gettop( lua );
+
+  if( argc != 2 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_RemoveForce => use: Object:RemoveForce( forceId )" );
+    luaL_error( lua, "Engine::LuaObject_RemoveForce => use: Object:RemoveForce( forceId )" );
+    return 0;
+  }
+
+  long forceId = lua_tointeger( lua, 2 );
+
+  object->RemoveForce( forceId );
+
+  return 0;
+}//LuaObject_RemoveForce
+
+
+int Engine::LuaObject_StopAnimation( lua_State *lua ) {
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_StopAnimation => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_StopAnimation => object is NULL" );
+  }
+
+  object->StopAnimation();
+
+  return 0;
+}//LuaObject_StopAnimation
 
 
 

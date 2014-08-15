@@ -704,6 +704,7 @@ void Collision::LoadFromBuffer( MemoryReader &reader, const std::string &thisObj
       break;
   }
 
+  /*
   if( version >= 0x00000003 && version < 0x0000000C ) {
     //handlers
     Dword count;
@@ -721,6 +722,7 @@ void Collision::LoadFromBuffer( MemoryReader &reader, const std::string &thisObj
       //this->InitCollisionHandler(  );
     }
   }
+  */
 }//LoadFromBuffer
 
 

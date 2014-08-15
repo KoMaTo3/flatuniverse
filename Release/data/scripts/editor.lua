@@ -331,7 +331,7 @@ GUI = {
     Render = function()
       local tileSize = GetTileSize()
       local offsetX, offsetY = GetTileOffset()
-      local cameraX, cameraY = GetCameraPos()
+      local cameraX, cameraY = Camera.GetPos()
       local sx, sy
       sx = ( math.floor( settings.windowSize.x * 0.5 - cameraX ) ) % tileSize + tileSize * 0.5 + offsetX
       sy = ( math.floor( settings.windowSize.y * 0.5 - cameraY ) ) % tileSize + tileSize * 0.5 + offsetY
@@ -357,10 +357,10 @@ GUI = {
 
 -- Инициализация
 function EditorInit()
-  LoadScript( 'data/scripts/tools.lua' )
-  LoadScript( 'data/scripts/objecttemplates.lua' )
-  math.randomseed( GetRandomSeed() )
-  local x,y = GetWindowSize()
+  Core.LoadScript( 'data/scripts/tools.lua' )
+  Core.LoadScript( 'data/scripts/objecttemplates.lua' )
+  math.randomseed( Tools.GetRandomSeed() )
+  local x,y = Config.GetWindowSize()
   settings.windowSize.x = x
   settings.windowSize.y = y
 
@@ -538,9 +538,11 @@ end --EditorInit
 -- UpdateEditorCamera
 function UpdateEditorCamera( timerId )
   if settings.gamePaused then
-    SetCamera( 'defaults/camera' )
+    Camera.Set( 'defaults/camera' )
   end
-  local x, y = ObjectAttr( 'defaults/camera', { 'position' } )
+  -- local x, y = ObjectAttr( 'defaults/camera', { 'position' } )
+  local camera = Object.Get( 'defaults/camera' )
+  local x, y = camera.api:Attr({ 'position' })
   if bit32.band( settings.cameraDirection, 8 ) == 8 then
     y = y - 10
   end
@@ -553,7 +555,7 @@ function UpdateEditorCamera( timerId )
   if bit32.band( settings.cameraDirection, 1 ) == 1 then
     x = x + 10
   end
-  ObjectAttr( 'defaults/camera', { position = x..' '..y  } )
+  camera.api:Attr({ position = x..' '..y  })
   Core.SetTimer( 0.01, UpdateEditorCamera, true )
 end -- UpdateEditorCamera
 
@@ -561,15 +563,15 @@ end -- UpdateEditorCamera
 --( Переключение режима паузы(редактора) и игры
 function DoPause( setPause )
   settings.gamePaused = setPause
-  SetPause( not settings.gamePaused )
+  Scene.SetPause( not settings.gamePaused )
   if settings.gamePaused then
-    if GetCamera() ~= 'defaults/camera' then
-      local x, y = ObjectAttr( 'player', { 'position' } )
-      ObjectAttr( 'defaults/camera', { position = x..' '..y } )
+    if Camera.Get().api:GetNameFull() ~= 'defaults/camera' then
+      local x, y = Object.Get( 'player' ).api:Attr({ 'position' })
+      Object.Get( 'defaults/camera' ).api:Attr({ position = x..' '..y })
     end
-    SetCamera( 'defaults/camera' )
+    Camera.Set( 'defaults/camera' )
   else
-    SetCamera( 'player' )
+    Camera.Set( 'player' )
     Debug.RenderState( 0 )
     settings.editorType = 0
     GUI.elements.layer:SetText( 'default' )
@@ -581,9 +583,9 @@ end --)
 -- Возвращает объект под курсором
 -- Если уже выбран какой-то объект, то берётся следующий за ним
 function GetObjectUnderCursorByMode()
-    local mx, my = GetMousePos()
-    local cx, cy = GetCameraPos()
-    local width, height = GetWindowSize()
+    local mx, my = Mouse.GetPos()
+    local cx, cy = Camera.GetPos()
+    local width, height = Config.GetWindowSize()
     local pos = {
       x = cx + mx - width * 0.5,
       y = cy + my - height * 0.5
@@ -690,7 +692,7 @@ end --GetTileSize
 --[[
 function TileApply( guiName )
   local name = GuiGetText( 'editor/object.object_name' )
-  local cameraX, cameraY = GetCameraPos()
+  local cameraX, cameraY = Camera.GetPos()
   ObjectCreate( name, cameraX, cameraY, 0 )
   SelectObject( name )
   ToggleRenderable( 'editor/object.is_renderable' )
@@ -721,9 +723,9 @@ end --ToggleLayer
 -- EditorUpdateDebug
 --
 function EditorUpdateDebug( timerId )
-  local cx, cy = GetCameraPos()
-  local mx, my = GetMousePos()
-  local width, height = GetWindowSize()
+  local cx, cy = Camera.GetPos()
+  local mx, my = Mouse.GetPos()
+  local width, height = Config.GetWindowSize()
   local pos = {
     x = cx + mx - width * 0.5,
     y = cy + my - height * 0.5
@@ -853,7 +855,7 @@ function RenderGUI( timerId )
   end
   --( вставка блока тайлов
   if settings.editorMode == 21 then
-    local cx, cy = GetCameraPos()
+    local cx, cy = Camera.GetPos()
     local x = settings.move.mouseStart.x - cx + settings.windowSize.x * 0.5
     local y = settings.move.mouseStart.y - cy + settings.windowSize.y * 0.5
     local newX = mousePos.x
@@ -885,7 +887,7 @@ function RenderGUI( timerId )
 
   --( рамка мультиселекта
   if settings.editorMode == 22 then
-    local cx, cy = GetCameraPos()
+    local cx, cy = Camera.GetPos()
     left = settings.multiSelectStartPoint.x - cx
     top = settings.multiSelectStartPoint.y - cy
     right = mousePos.x
@@ -958,7 +960,7 @@ function EditorInsertItemByTemplate( px, py )
     return nil
   end
 
-  local cameraX, cameraY = GetCameraPos()
+  local cameraX, cameraY = Camera.GetPos()
   local tileSize = GetTileSize()
   local offsetX, offsetY = GetTileOffset()
   local attrs = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].attr
@@ -999,23 +1001,25 @@ function EditorInsertItemByTemplate( px, py )
   -- local gridPos = GetGridByCoords( x * tileSize, y * tileSize )
   local name = 'wall.'..px..'.'..py..'.'..string.format( '%f', settings.timer )
 
-  --ObjectRemove( name )
-  ObjectCreate( name, x * tileSize + offsetX, y * tileSize + offsetY, 0 )
+  -- ObjectCreate( name, x * tileSize + offsetX, y * tileSize + offsetY, 0 )
+  local newObject = Object.New( name )
+  newObject.api:SetPos( x * tileSize + offsetX, y * tileSize + offsetY, 0 )
 
   -- remove bad attrs
 
   -- ObjectAttr( name, attrs )
-  Object.Get( name ).api:Attr( attrs )
+  newObject.api:Attr( attrs )
+  --[[
   if attrs['_triggerFunc'] ~= nil and attrs.trigger ~= nil then
     ListenTrigger( name, attrs['_triggerFunc'] )
     -- attrs['_triggerFunc'] = nil
   end
+  ]]
 
   local currentItem = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ]
 
   if currentItem.templateScriptName ~= nil then
-    local obj = Object.Get( name )
-    obj.api:SetScript( currentItem.templateScriptName )
+    newObject = newObject.api:SetScript( currentItem.templateScriptName )
   end
 
   if currentItem.creationScript ~= nil then
@@ -1030,16 +1034,16 @@ function EditorInsertItemByTemplate( px, py )
         animationAfterComplete = currentItem.animation[ 4 ]
       end
     end
-    ObjectSetAnimation( name, currentItem.animation[ 1 ], currentItem.animation[ 2 ], actionAfterComplete, animationAfterComplete )
+    Object.Get( anim.tile ).api:SetAnimation( currentItem.animation[ 1 ], currentItem.animation[ 2 ], actionAfterComplete, animationAfterComplete )
   end
 
   if tags ~= nil then
     for q = 1,#tags do
-      ObjectAddTag( name, tags[ q ] )
+      newObject.api:AddTag( tags[ q ] )
     end
   end
 
-  return Object.Get( name )
+  return newObject
 end --EditorInsertItemByTemplate
 
 --[[ ToggleGrid ]]
@@ -1073,12 +1077,12 @@ function OnChangeIsRenderable( isRenderableGuiElement )
   local objectList = Object.GetSelected()
   local checked = isRenderableGuiElement:GetIsChecked()
   for _,object in pairs( objectList ) do --(
-    ObjectAttr( object.api:GetNameFull(), { renderable = checked } )
+    object.api:Attr({ renderable = checked })
   end
   if checked then
     local tileSize = GetTileSize()
     for _,object in pairs( objectList ) do --(
-      ObjectAttr( object.api:GetNameFull(), { textureName = 'data/textures/null.png', renderableSize = tileSize..' '..tileSize } )
+      object.api:Attr({ textureName = 'data/textures/null.png', renderableSize = tileSize..' '..tileSize })
     end
   end
 end -- OnChangeIsRenderable
@@ -1088,12 +1092,12 @@ function OnChangeIsCollision( isCollisionGuiElement )
   local objectList = Object.GetSelected()
   local checked = isCollisionGuiElement:GetIsChecked()
   for _,object in pairs( objectList ) do --(
-    ObjectAttr( object.api:GetNameFull(), { collision = checked } )
+    object.api:Attr({ collision = checked })
   end
   if checked then
     local tileSize = GetTileSize()
     for _,object in pairs( objectList ) do --(
-      ObjectAttr( object.api:GetNameFull(), { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
+      object.api:Attr({ collisionSize = string.format( '%d %d', tileSize, tileSize ) })
     end
   end
 end -- OnChangeIsCollision
@@ -1103,12 +1107,12 @@ function OnChangeIsTrigger( isTriggerGuiElement )
   local objectList = Object.GetSelected()
   local checked = isTriggerGuiElement:GetIsChecked()
   for _,object in pairs( objectList ) do --(
-    ObjectAttr( object.api:GetNameFull(), { trigger = checked } )
+    object.api:Attr({ trigger = checked })
   end
   if checked then
     local tileSize = GetTileSize()
     for _,object in pairs( objectList ) do --(
-      ObjectAttr( object.api:GetNameFull(), { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
+      object.api:Attr({ triggerSize = string.format( '%d %d', tileSize, tileSize ) })
     end
   end
 end -- OnChangeIsCollision
@@ -1118,7 +1122,7 @@ function OnChangeIsLightBlockByCollision( isLightBlockByCollisionGuiElement )
   local objectList = Object.GetSelected()
   local checked = isLightBlockByCollisionGuiElement:GetIsChecked()
   for _,object in pairs( objectList ) do --(
-    ObjectAttr( object.api:GetNameFull(), { lightBlockByCollision = checked } )
+    object.api:Attr({ lightBlockByCollision = checked })
   end
 end -- OnChangeIsLightBlockByCollision
 
@@ -1127,11 +1131,11 @@ function OnChangeIsLightPoint( isLightPointGuiElement )
   local objectList = Object.GetSelected()
   local checked = isLightPointGuiElement:GetIsChecked()
   for _,object in pairs( objectList ) do --(
-    ObjectAttr( object.api:GetNameFull(), { lightPoint = checked } )
+    object.api:Attr({ lightPoint = checked })
   end
   if checked then
     for _,object in pairs( objectList ) do --(
-      ObjectAttr( object.api:GetNameFull(), { lightPointSize = 400, lightPointColor = ( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' 1' } )
+      object.api:Attr({ lightPointSize = 400, lightPointColor = ( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' '..( math.random( 0, 1000 ) / 2000 + 0.5 )..' 1' })
     end
   end
 end -- OnChangeIsLightPoint
@@ -1142,7 +1146,7 @@ function OnChangeZ( setZ )
   GUI.elements.objectZslider:SetText( setZ )
   local objectList = Object.GetSelected()
   for _,object in pairs( objectList ) do --(
-    ObjectAttr( object.api:GetNameFull(), { z = tonumber( setZ ) } )
+    object.api:Attr({ z = tonumber( setZ ) })
   end
 end -- OnChangeZ
 
@@ -1168,11 +1172,11 @@ function OnChangeTileSize( tileSizeGuiElement )
   if TableSize( objectList ) > 0 then --(
     for _,object in pairs( objectList ) do
       if settings.editorType == 1 then
-        ObjectAttr( object.api:GetNameFull(), { renderableSize = string.format( '%d %d', tileSize, tileSize ) } )
+        object.api:Attr({ renderableSize = string.format( '%d %d', tileSize, tileSize ) })
       elseif settings.editorType == 2 then
-        ObjectAttr( object.api:GetNameFull(), { collisionSize = string.format( '%d %d', tileSize, tileSize ) } )
+        object.api:Attr({ collisionSize = string.format( '%d %d', tileSize, tileSize ) })
       elseif settings.editorType == 3 then
-        ObjectAttr( object.api:GetNameFull(), { triggerSize = string.format( '%d %d', tileSize, tileSize ) } )
+        object.api:Attr({ triggerSize = string.format( '%d %d', tileSize, tileSize ) })
       end
     end
   end --)
@@ -1186,8 +1190,8 @@ function SelectObjectsInRectangle( left, top, right, bottom, editorType )
   if top > bottom then
     top, bottom = bottom, top
   end
-  local cx, cy = GetCameraPos()
-  local width, height = GetWindowSize()
+  local cx, cy = Camera.GetPos()
+  local width, height = Config.GetWindowSize()
   width, height = width * 0.5, height * 0.5
   left, right, top, bottom = left - width, right - width, top - height, bottom - height
 
@@ -1277,5 +1281,5 @@ end --)
 --(
 function UpdateAmbientByGUI()
   local R, G, B, A = GUI.elements.ambientLightR:GetText(), GUI.elements.ambientLightG:GetText(), GUI.elements.ambientLightB:GetText(), GUI.elements.ambientLightA:GetText()
-  SetLightAmbient( R, G, B, A )
+  Scene.SetLightAmbient( R, G, B, A )
 end --)

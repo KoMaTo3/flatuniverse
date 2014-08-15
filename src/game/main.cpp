@@ -290,9 +290,10 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         //game->collisionListeners.clear();
         //game->luaTriggerListeners.clear();
         game->core->Update();
-        game->core->SetCamera( game->core->GetObject( "player" ) );
+        game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
         game->world->LoadFromFile( fileName );
-        game->core->GetObject( "player" )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->GetCollision()->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );
+        //game->core->GetObject( "player" )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->GetCollision()->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );
+        game->core->GetObject( "defaults/camera" )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->GetCollision()->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );
         //game->world->AddActiveObject( game->core->GetObject( "player" ) );
         game->SetActive( false );
       }
@@ -511,59 +512,14 @@ Game::Game()
   Object::OnUnload = Game::ObjectOnUnload;
   Object::OnDestroy = Game::ObjectOnDestroy;
 
-  LUAFUNC_RemoveObject      = Game::LUA_RemoveObject;
-  LUAFUNC_GetObjectPos      = Game::LUA_GetObjectPos;
-  LUAFUNC_SetObjectPos      = Game::LUA_SetObjectPos;
-  LUAFUNC_SetTimer          = Game::LUA_SetTimer;
-  LUAFUNC_StopTimer         = Game::LUA_StopTimer;
-  LUAFUNC_CreateObject      = Game::LUA_CreateObject;
-  LUAFUNC_ListenKeyboard    = Game::LUA_ListenKeyboard;
-  LUAFUNC_ListenMouseKey    = Game::LUA_ListenMouseKey;
-  LUAFUNC_ListenMouseMove   = Game::LUA_ListenMouseMove;
-  LUAFUNC_GameExit          = Game::LUA_GameExit;
-  LUAFUNC_GetMousePos       = Game::LUA_GetMousePos;
-  LUAFUNC_GetCameraPos      = Game::LUA_GetCameraPos;
-  LUAFUNC_GetGridSize       = Game::LUA_GetGridSize;
-  LUAFUNC_GetWindowSize     = Game::LUA_GetWindowSize;
-  LUAFUNC_ObjectAddTrigger  = Game::LUA_ObjectAddTrigger;
-  LUAFUNC_SetCamera         = Game::LUA_SetCamera;
-  LUAFUNC_GetCamera         = Game::LUA_GetCamera;
-  LUAFUNC_ClearScene        = Game::LUA_ClearScene;
-  LUAFUNC_ObjectEnableRenderable  = Game::LUA_ObjectEnableRenderable;
-  LUAFUNC_ObjectDisableRenderable = Game::LUA_ObjectDisableRenderable;
-  LUAFUNC_ObjectEnableCollision   = Game::LUA_ObjectEnableCollision;
-  LUAFUNC_ObjectDisableCollision  = Game::LUA_ObjectDisableCollision;
-  LUAFUNC_ObjectEnableTrigger     = Game::LUA_ObjectEnableTrigger;
-  LUAFUNC_ObjectDisableTrigger    = Game::LUA_ObjectDisableTrigger;
-  LUAFUNC_ObjectEnableLightBlockByCollision   = Game::LUA_ObjectEnableLightBlockByCollision;
-  LUAFUNC_ObjectDisableLightBlockByCollision  = Game::LUA_ObjectDisableLightBlockByCollision;
-  LUAFUNC_GetCollisionStatic= Game::LUA_GetCollisionStatic;
-  LUAFUNC_SetCollisionStatic= Game::LUA_SetCollisionStatic;
-  LUAFUNC_DebugRender       = Game::LUA_DebugRender;
-  LUAFUNC_GetObjectByPoint  = Game::LUA_GetObjectByPoint;
-  LUAFUNC_GetObjectByRect   = Game::LUA_GetObjectByRect;
-  LUAFUNC_SelectObject      = Game::LUA_SelectObject;
-  LUAFUNC_GetSelectedObject = Game::LUA_GetSelectedObject;
-  LUAFUNC_LoadScript        = Game::LUA_LoadScript;
-  LUAFUNC_ObjectAttr        = Game::LUA_ObjectAttr;
-  LUAFUNC_ListenCollision   = Game::LUA_ListenCollision;
-  LUAFUNC_ListenTrigger     = Game::LUA_ListenTrigger;
-  LUAFUNC_SetObjectForce    = Game::LUA_SetObjectForce;
-  LUAFUNC_RemoveObjectForce = Game::LUA_RemoveObjectForce;
-  LUAFUNC_ObjectHasTag      = Game::LUA_ObjectHasTag;
-  LUAFUNC_ObjectAddTag      = Game::LUA_ObjectAddTag;
-  LUAFUNC_ObjectRemoveTag   = Game::LUA_ObjectRemoveTag;
-  LUAFUNC_ObjectSetAnimation= Game::LUA_ObjectSetAnimation;
-  LUAFUNC_ObjectStopAnimation = Game::LUA_ObjectStopAnimation;
-  LUAFUNC_SetPause          = Game::LUA_SetPause;
-  LUAFUNC_SetLightAmbient   = Game::LUA_SetLightAmbient;
+  //LUAFUNC_RemoveObject      = Game::LUA_RemoveObject;
 
   Engine::LuaObject_callback_SetOnSetScript( Game::LuaObject_OnSetScript );
 
-  Collision::SetInitCollisionHandler( Game::LUA_ListenCollision );
+  //Collision::SetInitCollisionHandler( Game::LUA_ListenCollision );
   Collision::SetDefaultCollisionHandler( Game::CollisionProc );
   Collision::SetCollisionListenerList( &this->collisionListeners );
-  ObjectTrigger::SetInitTriggerHandler( Game::LUA_ListenTrigger );
+  //ObjectTrigger::SetInitTriggerHandler( Game::LUA_ListenTrigger );
   ObjectTrigger::SetDefaultTriggerHandler( Game::TriggerProc );
   ObjectTrigger::SetTriggerListenerList( &this->luaTriggerListeners );
 
@@ -631,7 +587,12 @@ void Game::LuaObject_OnSetScript( Object *object ) {
     }
   }
   if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONTRIGGER ) ) {
-    game->luaObjectOnTrigger.push_back( object->GetLuaObjectId() );
+    if( object->IsTrigger() ) {
+      game->luaObjectOnTrigger.push_back( object->GetLuaObjectId() );
+      object->GetTrigger()->AddHandler( Game::LuaObject_OnTrigger );
+    } else {
+      __log.PrintInfo( Filelevel_ERROR, "Game::LuaObject_OnSetScript => function '%s' exists, but object '%s' is not trigger", GAME_OBJECT_HANDLER_ONTRIGGER.c_str(), object->GetNameFull().c_str() );
+    }
   }
 }//LuaObject_OnSetScript
 
@@ -714,7 +675,7 @@ void Game::UpdateLuaTimers()
     }
   }
   for( auto &timer: timerProcs ) {
-    LUACALLBACK_Timer( this->lua, timer.id, timer.funcName, timer.luaFunctionId );
+    //LUACALLBACK_Timer( this->lua, timer.id, timer.funcName, timer.luaFunctionId );
     if( timer.luaFunctionId ) {
       game->lua->Unref( timer.luaFunctionId );
     }
@@ -870,379 +831,6 @@ void Game::EraseLuaHandler( const int luaReferenceId, const std::string &functio
 
 
 
-/*
-=============
-  LUA_GetObjectPos
-=============
-*/
-Vec2 Game::LUA_GetObjectPos( const std::string &name )
-{
-  Vec2 res;
-  Object *obj = game->core->GetObject( name );
-  if( obj )
-    res.Set( obj->GetPosition().x, obj->GetPosition().y );
-  return res;
-}//LUA_GetObjectPos
-
-
-/*
-=============
-  LUA_SetObjectPos
-=============
-*/
-void Game::LUA_SetObjectPos( const std::string &name, const Vec2 &pos )
-{
-  Object *obj = game->core->GetObject( name );
-  if( obj ) {
-    obj->SetPosition2D( pos );
-    obj->Update( 0.0f );
-  }
-}//LUA_SetObjectPos
-
-
-/*
-=============
-  LUA_GetCollisionStatic
-=============
-*/
-bool Game::LUA_GetCollisionStatic( const std::string &name )
-{
-  Object *obj = game->core->GetObject( name );
-  if( obj && obj->GetCollision() ) {
-    return obj->GetCollision()->IsStatic();
-  }
-  return false;
-}//LUA_GetCollisionStatic
-
-
-/*
-=============
-  LUA_SetCollisionStatic
-=============
-*/
-void Game::LUA_SetCollisionStatic( const std::string &name, bool isStatic )
-{
-  Object *obj = game->core->GetObject( name );
-  if( obj && obj->GetCollision() ) {
-    obj->GetCollision()->SetIsStatic( isStatic );
-  }
-}//LUA_SetCollisionStatic
-
-
-/*
-=============
-  LUA_SetTimer
-=============
-*/
-Dword Game::LUA_SetTimer( float time, const std::string &funcName, bool dontPause, const int luaFunctionId )
-{
-  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s']", funcName.c_str() );
-  Dword id, count = game->luaTimers.size();
-  bool setted = false;
-  for( Dword q = 0; q < count; ++q ) {
-    if( !game->luaTimers[ q ].active ) {
-      id = q;
-      setted = true;
-      break;
-    }
-  }
-  if( !setted ) {
-    game->luaTimers.push_back( GameLuaTimer() );
-    id = game->luaTimers.size() - 1;
-  }
-  game->luaTimers[ id ].active    = 1;
-  game->luaTimers[ id ].time      = time;
-  game->luaTimers[ id ].funcName  = funcName;
-  game->luaTimers[ id ].dontPause = dontPause;
-  game->luaTimers[ id ].id = id;
-  game->luaTimers[ id ].luaFunctionId = luaFunctionId;
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SetTimer => func['%s'] id[%d] luaFunctionId[%d] done", funcName.c_str(), id, luaFunctionId );
-  return id;
-}//LUA_SetTimer
-
-
-/*
-=============
-  LUA_StopTimer
-=============
-*/
-void Game::LUA_StopTimer( Dword id )
-{
-  if( id < game->luaTimers.size() ) {
-    game->luaTimers[ id ].active = false;
-    if( game->luaTimers[ id ].luaFunctionId ) {
-      game->lua->Unref( game->luaTimers[ id ].luaFunctionId );
-      game->luaTimers[ id ].luaFunctionId = 0;
-    }
-  }
-}//LUA_StopTimer
-
-
-
-/*
-=============
-  LUA_RemoveObject
-=============
-*/
-bool Game::LUA_RemoveObject( const std::string &name )
-{
-  auto nameList = tools::Explode( name, "//" );
-  for( auto &oneName: nameList ) {
-    game->OnRemoveObject( oneName );
-    game->core->RemoveObject( oneName, true );
-  }
-  //game->collisionListeners.push_back( listener );
-  //collision->AddHandler( Game::CollisionProc );
-  return true;
-}//LUA_RemoveObject
-
-
-/*
-=============
-  LUA_CreateObject
-=============
-*/
-void Game::LUA_CreateObject( const std::string &name, const Vec3 &pos, int notInGrid )
-{
-  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject..." );
-  long slashPos = name.find_last_of( "/" );
-  Object *parentObj = NULL;
-  Object *obj       = NULL;
-  if( slashPos > 0 ) {
-    std::string fullPath = &name[ slashPos ];
-    std::vector< std::string > path = tools::Explode( name, "/" );
-    std::vector< std::string >::iterator iter, iterEnd = path.end();
-    std::string currentPath = "";
-    for( iter = path.begin(); iter != iterEnd; ++iter ) {
-      //__log.PrintInfo( Filelevel_DEBUG, ". iter: '%s'", iter->c_str() );
-      obj = game->core->CreateObject( *iter, ( currentPath.length() ? game->core->GetObject( currentPath ) : NULL ) );
-      obj->SetPosition( pos );
-      currentPath += ( currentPath.length() ? "/" : "" ) + *iter;
-      game->world->AttachObjectToGrid( game->world->GetGridPositionByObject( *obj ), obj );
-    }
-    //std::string nextLevel = &name[ slashPos ];
-    //std::string currentLevel = name.substr( 0, slashPos );
-    //parentObj = game->core->GetObject( currentLevel );
-  } else {
-    obj = game->core->CreateObject( name );
-    obj->SetPosition( pos );
-    obj->Update( 0.0f );
-    if( !notInGrid ) {
-      World::Grid::Position gridPos = game->world->GetGridPositionByObject( *obj );
-      //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => gridPos[%d; %d]", gridPos.x, gridPos.y );
-      game->world->AttachObjectToGrid( gridPos, obj );
-    }
-  }
-  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_CreateObject => object['%s'] parent['%s']", obj->GetNameFull().c_str(), obj->GetParentNameFull().c_str() );
-
-  //Object *parentObj = ( parentName.length() ? game->core->GetObject( parentName ) : NULL );
-  //Object *obj = game->core->CreateObject( name, parentObj );
-  /*
-  Collision *col = obj->EnableCollision();
-  col->SetPosition( pos )->SetIsStatic( true )->SetSize( Vec3( size.x, size.y, 0.0f ) );
-  RenderableQuad *quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  quad->SetColor( color );
-  quad->SetSize( Vec2( size.x, size.y ) );
-  quad->SetTexture( textureName, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
-  */
-
-}//LUA_CreateObject
-
-
-
-/*
-=============
-  LUA_ObjectEnableRenderable
-=============
-*/
-void Game::LUA_ObjectEnableRenderable( const std::string &objectName, const std::string &texture, const Vec2 &size, const Vec4 &color )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectEnableRenderable => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  RenderableQuad *render = ( RenderableQuad* ) object->EnableRenderable( RENDERABLE_TYPE_QUAD );
-  render->SetSize( size );
-  render->SetColor( color );
-  render->SetTexture( texture );
-}//LUA_ObjectEnableRenderable
-
-
-
-/*
-=============
-  LUA_ObjectDisableRenderable
-=============
-*/
-void Game::LUA_ObjectDisableRenderable( const std::string &objectName )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectDisableRenderable => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  object->DisableRenderable();
-}//LUA_ObjectDisableRenderable
-
-
-
-/*
-=============
-  LUA_ObjectEnableCollision
-=============
-*/
-void Game::LUA_ObjectEnableCollision( const std::string &objectName, bool isStatic, const Vec3 &size, const Vec3 &velocity, const Vec3 &acceleration )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectEnableCollision => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  Collision *collision = object->EnableCollision();
-  collision->SetIsStatic( isStatic );
-  collision->InitSquare( size );
-  collision->SetVelocity( velocity );
-  collision->SetAcceleration( acceleration );
-}//LUA_ObjectEnableCollision
-
-
-
-/*
-=============
-  LUA_ObjectDisableCollision
-=============
-*/
-void Game::LUA_ObjectDisableCollision( const std::string &objectName )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectDisableCollision => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  object->DisableCollision();
-}//LUA_ObjectDisableCollision
-
-
-
-/*
-=============
-  LUA_ObjectEnableTrigger
-=============
-*/
-void Game::LUA_ObjectEnableTrigger( const std::string &objectName, const Vec3 &size )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectEnableTrigger => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  ObjectTrigger *trigger = object->EnableTrigger();
-  trigger->SetSize( size );
-}//LUA_ObjectEnableTrigger
-
-
-
-/*
-=============
-  LUA_ObjectDisableTrigger
-=============
-*/
-void Game::LUA_ObjectDisableTrigger( const std::string &objectName )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectDisableTrigger => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  object->DisableTrigger();
-}//LUA_ObjectDisableTrigger
-
-
-
-/*
-=============
-  LUA_ObjectEnableLightBlockByCollision
-=============
-*/
-void Game::LUA_ObjectEnableLightBlockByCollision( const std::string &objectName )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectEnableLightBlockByCollision => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  if( object->GetCollision() ) {
-    object->EnableLightBlockByCollision();
-  }
-}//LUA_ObjectEnableLightBlockByCollision
-
-
-
-/*
-=============
-  LUA_ObjectDisableLightBlockByCollision
-=============
-*/
-void Game::LUA_ObjectDisableLightBlockByCollision( const std::string &objectName )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectDisableLightBlockByCollision => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  object->DisableLightBlockByCollision();
-}//LUA_ObjectDisableLightBlockByCollision
-
-
-
-
-/*
-=============
-  LUA_ListenKeyboard
-=============
-*/
-void Game::LUA_ListenKeyboard( const std::string &funcName )
-{
-  luaKeyboardListenersList::iterator iter, iterEnd = game->luaKeyboardListeners.end();
-  for( iter = game->luaKeyboardListeners.begin(); iter != iterEnd; ++iter )
-    if( *iter == funcName )
-      return;
-  game->luaKeyboardListeners.push_back( funcName );
-}//LUA_ListenKeyboard
-
-
-/*
-=============
-  LUA_ListenMouseKey
-=============
-*/
-void Game::LUA_ListenMouseKey( const std::string &funcName )
-{
-  luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseKeyListeners.end();
-  for( iter = game->luaMouseKeyListeners.begin(); iter != iterEnd; ++iter )
-    if( *iter == funcName )
-      return;
-  game->luaMouseKeyListeners.push_back( funcName );
-}//LUA_ListenMouseKey
-
-
-/*
-=============
-  LUA_ListenMouseMove
-=============
-*/
-void Game::LUA_ListenMouseMove( const std::string &funcName )
-{
-  luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseMoveListeners.end();
-  for( iter = game->luaMouseMoveListeners.begin(); iter != iterEnd; ++iter ) {
-    if( *iter == funcName ) {
-      return;
-    }
-  }
-  game->luaMouseMoveListeners.push_back( funcName );
-}//LUA_ListenMouseMove
-
 
 /*
 =============
@@ -1267,13 +855,14 @@ void Game::KeyboardProc( Dword keyId, bool isPressed )
       }
     }
   }
-
+  /*
   if( !game->luaKeyboardListeners.empty() ) {
     luaKeyboardListenersList::iterator iter, iterEnd = game->luaKeyboardListeners.end();
     for( iter = game->luaKeyboardListeners.begin(); iter != iterEnd; ++iter ) {
       LUACALLBACK_ListenKeyboard( game->lua, *iter, keyId, isPressed );
     }
   }
+  */
 }//KeyboardProc
 
 
@@ -1320,6 +909,7 @@ void Game::MouseKeyProc( Dword keyId, bool isPressed )
     }
   }
 
+  /*
   if( game->luaMouseKeyListeners.empty() ) {
     return;
   }
@@ -1327,6 +917,7 @@ void Game::MouseKeyProc( Dword keyId, bool isPressed )
   for( iter = game->luaMouseKeyListeners.begin(); iter != iterEnd; ++iter ) {
     LUACALLBACK_ListenMouseKey( game->lua, *iter, keyId, isPressed );
   }
+  */
 }//MouseKeyProc
 
 
@@ -1347,126 +938,15 @@ void Game::MouseMoveProc( const Vec2 &pos )
     }
   }
 
+  /*
   if( !game->luaMouseMoveListeners.empty() ) {
     luaKeyboardListenersList::iterator iter, iterEnd = game->luaMouseMoveListeners.end();
     for( iter = game->luaMouseMoveListeners.begin(); iter != iterEnd; ++iter ) {
       LUACALLBACK_ListenMouseMove( game->lua, *iter, pos );
     }
   }
+  */
 }//MouseMoveProc
-
-
-/*
-=============
-  LUA_GameExit
-=============
-*/
-void Game::LUA_GameExit()
-{
-  game->core->SetState( CORE_STATE_EXIT );
-}//LUA_GameExit
-
-
-/*
-=============
-  LUA_GetMousePos
-=============
-*/
-Vec2 Game::LUA_GetMousePos()
-{
-  return game->core->mouse.GetCursorPosition();
-}//LUA_GetMousePos
-
-
-/*
-=============
-  LUA_GetCameraPos
-=============
-*/
-Vec2 Game::LUA_GetCameraPos()
-{
-  Object *camera = game->core->GetCamera();
-  if( camera )
-    return Vec2( camera->GetPosition().x, camera->GetPosition().y );
-  return Vec2Null;
-}//LUA_GetCameraPos
-
-
-/*
-=============
-  LUA_GetGridSize
-=============
-*/
-float Game::LUA_GetGridSize()
-{
-  return game->world->GetGridSize();
-}//LUA_GetGridSize
-
-
-/*
-=============
-  LUA_GetWindowSize
-=============
-*/
-Size Game::LUA_GetWindowSize()
-{
-  return game->core->GetWindowSize();
-}//LUA_GetWindowSize
-
-
-
-/*
-=============
-  LUA_ObjectTrigger_Handler
-  ObjectTrigger call this (ObjectTriggerHandler)
-=============
-*/
-void Game::LUA_ObjectTrigger_Handler( ObjectTrigger *trigger, Collision *collision, bool isInTrigger )
-{
-  GameObjectTriggerList::iterator iter, iterEnd = game->objectTriggers.end();
-  for( iter = game->objectTriggers.begin(); iter != iterEnd; ++iter )
-    if( iter->trigger == trigger )
-      LUACALLBACK_ObjectTrigger( game->lua, iter->funcName, game->core->GetObjectByTrigger( iter->trigger )->GetNameFull(), game->core->GetObjectByCollision( collision )->GetNameFull(), isInTrigger );
-}
-
-
-
-
-/*
-=============
-  LUA_ObjectAddTrigger
-=============
-*/
-void Game::LUA_ObjectAddTrigger( const std::string &triggerName, const std::string &funcName )
-{
-  Object *triggerObject = game->core->GetObject( triggerName );
-  if( !triggerObject )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAddTrigger => trigger '%s' not found", triggerName.c_str() );
-    return;
-  }
-
-  ObjectTrigger *trigger = triggerObject->GetTrigger();
-  if( !trigger )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAddTrigger => object '%s' don't have trigger", triggerName.c_str() );
-    return;
-  }
-
-  trigger->AddHandler( Game::LUA_ObjectTrigger_Handler );
-
-  //GameObjectTrigger objectTrigger;
-  //objectTrigger.funcName = funcName;
-  //objectTrigger.trigger = game->core->GetObject( triggerName );
-  //game->core->SetState( CORE_STATE_EXIT );
-  game->objectTriggers.push_back( GameObjectTrigger() );
-  GameObjectTrigger *objectTrigger = &( *game->objectTriggers.rbegin() );
-  objectTrigger->funcName = funcName;
-  objectTrigger->trigger  = trigger;
-
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectAddTrigger => triggerName[%s] funcName[%s]", triggerName.c_str(), funcName.c_str() );
-}//LUA_ObjectAddTrigger
-
 
 
 
@@ -1486,878 +966,6 @@ void Game::OnRemoveTrigger( ObjectTrigger *trigger )
       break;
     }
 }//OnRemoveTrigger
-
-
-/*
-=============
-  LUA_SetCamera
-=============
-*/
-void Game::LUA_SetCamera( const std::string &name )
-{
-  Object *camera = game->core->GetObject( name );
-  if( !camera )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SetCamera => object '%s' not found", name.c_str() );
-    return;
-  }
-  game->core->SetCamera( camera );
-}//LUA_CreateObject
-
-
-/*
-=============
-  LUA_ObjectSetAnimation
-=============
-*/
-void Game::LUA_ObjectSetAnimation( const std::string &actionAfterAnimationComplete, const std::string &animationAfterAnimationComplete, const std::string &objectName, const std::string &templateName, const std::string &animation )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectSetAnimation => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectSetAnimation => object['%s'] template['%s'] animation['%s']", objectName.c_str(), templateName.c_str(), animation.c_str() );
-  Animation::AnimationSetAction actionAfterAnimation( Animation::ANIMATION_SET_ACTION_REPEAT, animationAfterAnimationComplete );
-  if( !actionAfterAnimationComplete.empty() ) {
-    auto &searchResult = game->animationSetActionByName.find( actionAfterAnimationComplete );
-    if( searchResult != game->animationSetActionByName.end() ) {
-      actionAfterAnimation.action = searchResult->second;
-    } else {
-      __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectSetAnimation => unknown action['%s']", actionAfterAnimationComplete.c_str() );
-    }
-  }
-
-  Animation::AnimationPack *pack = object->ApplyAnimation( actionAfterAnimation, templateName, animation );
-  if( pack ) {
-    pack->SetEnabled( true );
-  }
-}//LUA_ObjectSetAnimation
-
-
-/*
-=============
-  LUA_ObjectStopAnimation
-=============
-*/
-void Game::LUA_ObjectStopAnimation( const std::string &objectName )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectStopAnimation => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  object->StopAnimation();
-}//LUA_ObjectStopAnimation
-
-
-/*
-=============
-  LUA_SetPause
-=============
-*/
-void Game::LUA_SetPause( bool isPause )
-{
-  game->SetActive( isPause );
-}//LUA_SetPause
-
-
-/*
-=============
-  LUA_GetCamera
-=============
-*/
-std::string Game::LUA_GetCamera()
-{
-  Object *camera = game->core->GetCamera();
-  if( !camera )
-  {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_GetCamera => camera not attached to object" );
-    return "";
-  }
-  return camera->GetNameFull();
-}//LUA_GetCamera
-
-
-/*
-=============
-  LUA_ClearScene
-=============
-*/
-void Game::LUA_ClearScene()
-{
-  /*
-    1. Чистим потомков core->root
-    2. Чистим ссылки на объекты в мирах World::__worldGridList (ObjectPointer)
-      
-  */
-  __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene core" );
-  game->core->ClearScene();
-  __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene world" );
-  game->world->ClearWorld();
-  __log.PrintInfo( Filelevel_DEBUG, "LUA_ClearScene done" );
-}//LUA_ClearScene
-
-
-
-/*
-=============
-  LUA_DebugRender
-=============
-*/
-void Game::LUA_DebugRender( int flags )
-{
-  game->core->debug.renderRenderable  = ( ( flags&1 ) == 1 );
-  game->core->debug.renderCollision   = ( ( flags&2 ) == 2 );
-  game->core->debug.renderTrigger     = ( ( flags&4 ) == 4 );
-}//LUA_DebugRender
-
-
-/*
-=============
-  LUA_GetObjectByPoint
-=============
-*/
-std::string Game::LUA_GetObjectByPoint( int type, const Vec2 &point, const std::string &afterObject )
-{
-  switch( type ) {
-    case 1: { //renderable
-      __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_GetObjectByPoint => type[%d] point[%3.3f; %3.3f] after['%s'] ...", type, point.x, point.y, afterObject.c_str() );
-      Object *object = game->core->GetRenderableInPoint( point, afterObject );
-      while( object && !object->IsSaveable() ) {
-        object = object->GetParent();
-      }
-      if( object ) {
-        __log.PrintInfo( Filelevel_DEBUG, ". found['%s']", object->GetNameFull().c_str() );
-        return object->GetNameFull();
-      } else {
-        object = game->core->GetRenderableInPoint( point, afterObject );
-        while( object && !object->IsSaveable() ) {
-          object = object->GetParent();
-        }
-        if( object ) {
-          __log.PrintInfo( Filelevel_DEBUG, ". found['%s']", object->GetNameFull().c_str() );
-          return object->GetNameFull();
-        }
-      }
-      __log.PrintInfo( Filelevel_DEBUG, ". not found" );
-      break;
-    }//renderable
-    case 2: { //collision
-      Object *object = game->core->GetCollisionInPoint( point, afterObject );
-      while( object && !object->IsSaveable() ) {
-        object = object->GetParent();
-      }
-      if( object ) {
-        return object->GetNameFull();
-      } else {
-        if( afterObject.length() ) {
-          object = game->core->GetCollisionInPoint( point, "" );
-          while( object && !object->IsSaveable() ) {
-            object = object->GetParent();
-          }
-          if( object ) {
-            return object->GetNameFull();
-          }
-        }
-      }
-      break;
-    }//collision
-    case 3: { //trigger
-      Object *object = game->core->GetTriggerInPoint( point, afterObject );
-      while( object && !object->IsSaveable() ) {
-        object = object->GetParent();
-      }
-      if( object ) {
-        return object->GetNameFull();
-      } else {
-        if( afterObject.length() ) {
-          object = game->core->GetTriggerInPoint( point, "" );
-          while( object && !object->IsSaveable() ) {
-            object = object->GetParent();
-          }
-          if( object ) {
-            return object->GetNameFull();
-          }
-        }
-      }
-      break;
-    }//trigger
-  }//
-  return "";
-}//LUA_GetObjectByPoint
-
-
-/*
-=============
-  LUA_GetObjectByRect
-=============
-*/
-std::string Game::LUA_GetObjectByRect( int type, const Vec2 &leftTop, const Vec2 &rightBottom )
-{
-  ObjectList objectList;
-  game->core->GetObjectsInRect( type, leftTop, rightBottom, objectList );
-  std::string result = "";
-  int num = 0;
-
-  for( auto &object: objectList ) {
-    if( num ) {
-      result += "//";
-    }
-    result += object->GetNameFull();
-    ++num;
-  }
-  return result;
-}//LUA_GetObjectByRect
-
-
-
-/*
-=============
-  LUA_SelectObject
-=============
-*/
-void Game::LUA_SelectObject( const std::string &name )
-{
-  game->core->debug.selectedObjects.clear();
-  if( !name.length() ) {
-    //game->core->debug.selectedObject = NULL;
-    game->core->debug.selectedObjects.clear();
-  } else {
-    auto nameList = tools::Explode( name, "//" );
-    for( auto &oneName: nameList ) {
-      Object *object = game->core->GetObject( oneName );
-      if( !object ) {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SelectObject => object '%s' not found", oneName.c_str() );
-      } else {
-        __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_SelectObject => object '%s'", object->GetNameFull().c_str() );
-        game->core->debug.selectedObjects.push_back( object );
-      }
-    }
-    /*
-    Object *object = game->core->GetObject( name );
-    if( !object ) {
-      __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SelectObject => object '%s' not found", name.c_str() );
-    } else {
-      //game->core->debug.selectedObject = object;
-      game->core->debug.selectedObjects.clear();
-      game->core->debug.selectedObjects.push_back( object );
-    }
-    */
-  }
-}//LUA_SelectObject
-
-
-/*
-=============
-  LUA_GetSelectedObject
-=============
-*/
-std::string Game::LUA_GetSelectedObject()
-{
-  std::string result = "";
-  int num = 0;
-  for( auto &obj: game->core->debug.selectedObjects ) {
-    if( num ) {
-      result += "//";
-    }
-    result += obj->GetNameFull();
-    ++num;
-  }
-  return result;
-  //return ( game->core->debug.selectedObject ? game->core->debug.selectedObject->GetNameFull() : "" );
-}//LUA_GetSelectedObject
-
-
-/*
-=============
-  LUA_LoadScript
-=============
-*/
-void Game::LUA_LoadScript( const std::string &fileName )
-{
-  game->lua->RunFile( fileName );
-}//LUA_LoadScript
-
-
-/*
-=============
-  LUA_ObjectAttr
-=============
-*/
-void Game::LUA_ObjectAttr( const std::string &objectName, VariableAttributesList &setAttributes, VariableAttributesList &getAttributes )
-{
-  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectAttr: %d", setAttributes.size() );
-
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_WARNING, "Game::LUA_ObjectAttr => object '%s' not found", objectName.c_str() );
-    return;
-  }
-
-  VariableAttributesList::iterator iter, iterEnd = setAttributes.end();
-  RenderableQuad  *renderable;
-  Collision       *collision;
-  ObjectTrigger   *trigger;
-  //set
-  for( iter = setAttributes.begin(); iter != iterEnd; ++iter ) {
-    //__log.PrintInfo( Filelevel_DEBUG, ". set %s = '%s'", ( *iter )->name.c_str(), ( *iter )->value.GetString().c_str() );
-
-    const std::string &name = ( *iter )->name;
-    const Variable &value   = ( *iter )->value;
-
-    //object
-    if( name == "renderable" ) {
-      if( value.GetBoolean() ) {
-        //__log.PrintInfo( Filelevel_DEBUG, ". EnableRenderable['%s']", object->GetNameFull().c_str() );
-        object->EnableRenderable( RENDERABLE_TYPE_QUAD );
-      } else {
-        //__log.PrintInfo( Filelevel_DEBUG, ". DisableRenderable['%s']", object->GetNameFull().c_str() );
-        object->DisableRenderable();
-      }
-      continue;
-    }//renderable
-    if( name == "collision" ) {
-      if( value.GetBoolean() ) {
-        //__log.PrintInfo( Filelevel_DEBUG, ". EnableCollision['%s']", object->GetNameFull().c_str() );
-        object->EnableCollision();
-      } else {
-        //__log.PrintInfo( Filelevel_DEBUG, ". DisableCollision['%s']", object->GetNameFull().c_str() );
-        object->DisableCollision();
-      }
-      continue;
-    }//collision
-    if( name == "trigger" ) {
-      if( value.GetBoolean() ) {
-        //__log.PrintInfo( Filelevel_DEBUG, ". EnableTrigger['%s']", object->GetNameFull().c_str() );
-        object->EnableTrigger();
-      } else {
-        //__log.PrintInfo( Filelevel_DEBUG, ". DisableTrigger['%s']", object->GetNameFull().c_str() );
-        object->DisableTrigger();
-      }
-      continue;
-    }//trigger
-    if( name == "lightBlockByCollision" ) {
-      if( value.GetBoolean() ) {
-        object->EnableLightBlockByCollision();
-      } else {
-        object->DisableLightBlockByCollision();
-      }
-      continue;
-    }//lightBlockByCollision
-    if( name == "lightPoint" ) {
-      if( value.GetBoolean() ) {
-        object->EnableLightPoint();
-      } else {
-        object->DisableLightPoint();
-      }
-      continue;
-    }//lightPoint
-    if( name == "position" ) {
-      Vec3 pos = object->GetPosition();
-      sscanf_s( value.GetString().c_str(), "%f %f", &pos.x, &pos.y );
-      object->SetPosition( pos );
-      continue;
-    }//position
-
-    //renderable
-    if( name == "textureName" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      std::string textureFileName = std::string( FileManager_DATADIRECTORY ) + "/" + value.GetString();
-      if( renderable && __fileManager->FileExists( textureFileName ) ) {
-        renderable->SetTexture( textureFileName );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => texture '%s' not found or object not renderable", textureFileName.c_str() );
-      }
-      continue;
-    }//textureName
-    if( name == "renderableSize" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        Vec2 size( 1.0f, 1.0f );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f", &size.x, &size.y );
-        if( res < 2 ) {
-          size.y = size.x;
-        }
-        renderable->SetSize( size );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderableSize: object '%s' not renderable", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//renderableSize
-    if( name == "renderablePosition" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        Vec3 pos( 0, 0, 0 );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f", &pos.x, &pos.y );
-        if( res < 2 ) {
-          pos.y = pos.x;
-        }
-        renderable->SetPosition( pos );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderablePosition: object '%s' not renderable", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//renderablePosition
-    if( name == "color" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        Vec4 color( 1.0f, 1.0f, 1.0f, 1.0f );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f %f %f", &color.x, &color.y, &color.z, &color.w );
-        if( res < 4 ) {
-          color.y = color.z = color.w = color.x;
-        }
-        renderable->SetColor( color );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => color: object '%s' not renderable", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//color
-    if( name == "renderableScale" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        Vec2 scale( 1.0f, 1.0f );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f", &scale.x, &scale.y );
-        if( res < 2 ) {
-          scale.y = scale.x;
-        }
-        renderable->SetScale( scale );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderableScale: object '%s' not renderable", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//renderableScale
-    if( name == "renderableRotation" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        float angle = value.GetNumber();
-        renderable->SetRotation( DEG2RAD( angle ) );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => renderableRotation: object '%s' not renderable", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//renderableRotation
-
-    //collision
-    if( name == "collisionSize" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        Vec3 size( 1.0f, 1.0f, 0.0f );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f", &size.x, &size.y );
-        if( res < 2 ) {
-          size.y = size.x;
-        }
-        collision->InitSquare( size );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionSize: object '%s' not collision", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//collisionSize
-    if( name == "collisionAcceleration" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        Vec3 vec( 0.0f, 0.0f, 0.0f );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f", &vec.x, &vec.y );
-        if( res < 2 ) {
-          vec.y = vec.x;
-        }
-        collision->SetAcceleration( vec );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionAcceleration: object '%s' not collision", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//collisionAcceleration
-    if( name == "collisionVelocity" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        Vec3 vec( 0.0f, 0.0f, 0.0f );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f", &vec.x, &vec.y );
-        if( res < 2 ) {
-          vec.y = vec.x;
-        }
-        collision->SetVelocity( vec );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionVelocity: object '%s' not collision", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//collisionVelocity
-    if( name == "collisionStatic" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        collision->SetIsStatic( value.GetBoolean( true ) );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionStatic: object '%s' not collision", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//collisionStatic
-    if( name == "collisionForce" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        Vec3 vec = collision->GetForce();
-        int res = sscanf_s( value.GetString().c_str(), "%f %f", &vec.x, &vec.y );
-        if( res < 2 ) {
-          vec.y = vec.x;
-        }
-        collision->SetForce( vec );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionForce: object '%s' not collision", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//collisionForce
-
-    //trigger
-    if( name == "triggerSize" ) {
-      trigger = object->GetTrigger();
-      if( trigger ) {
-        Vec3 size( 1.0f, 1.0f, 0.0f );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f", &size.x, &size.y );
-        if( res < 2 ) {
-          size.y = size.x;
-        }
-        trigger->SetSize( size );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => triggerSize: object '%s' not triger", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//triggerSize
-    if( name == "triggerPolygon" ) {
-      trigger = object->GetTrigger();
-      if( trigger ) {
-        CollisionElementPolygon::PointList points;
-        TextParser parser( value.GetString().c_str(), value.GetString().size() );
-        TextParser::Result parserValue;
-        int step = 0;
-        Vec2 point;
-        while( parser.GetNext( parserValue ) ) {
-          if( parserValue.type != TPL_NUMBER ) {
-            __log.PrintInfo( Filelevel_WARNING, "triggerPolygon => bad format of string '%s'", value.GetString().c_str() );
-            break;
-          } else {
-            if( step == 0 ) {
-              point.x = parserValue.GetFloat();
-            } else {
-              point.y = parserValue.GetFloat();
-              //__log.PrintInfo( Filelevel_DEBUG, "triggerPolygon => point[%3.3f; %3.3f]", point.x, point.y );
-              points.push_back( point );
-            }
-          }
-          step ^= 1;
-        }
-        trigger->SetPolygon( points );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => triggerPolygon: object '%s' not trigger", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//triggerPolygon
-    if( name == "lightPointSize" ) {
-      ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
-      if( widget ) {
-        Vec2 size( 1.0f, 1.0f );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f", &size.x, &size.y );
-        __log.PrintInfo( Filelevel_DEBUG, "lightPointSize => [%3.3f; %3.3f]", size.x, size.y );
-        if( res < 2 ) {
-          size.y = size.x;
-        }
-        widget->SetSize( size );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => lightPointSize: object '%s' not lightPoint", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//lightPointSize
-    if( name == "lightPointColor" ) {
-      ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
-      if( widget ) {
-        Vec4 color( 1.0f, 1.0f, 1.0f, 1.0f );
-        int res = sscanf_s( value.GetString().c_str(), "%f %f %f %f", &color.x, &color.y, &color.z, &color.w );
-        if( res < 4 ) {
-          color.y = color.z = color.w = color.x;
-        }
-        __log.PrintInfo( Filelevel_DEBUG, "lightPointColor[%3.3f; %3.3f; %3.3f; %3.3f]", color.x, color.y, color.z, color.w );
-        widget->SetColor( color );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => color: object '%s' not lightPoint", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//lightPointColor
-    if( name == "lightPointPenetration" ) {
-      ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
-      if( widget ) {
-        float penetration;
-        int res = sscanf_s( value.GetString().c_str(), "%f", &penetration );
-        __log.PrintInfo( Filelevel_DEBUG, "lightPointPenetration => %3.3f", penetration );
-        widget->SetPenetration( penetration );
-      } else {
-        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => lightPointPenetration: object '%s' not lightPoint", object->GetNameFull().c_str() );
-      }
-      continue;
-    }//lightPointPenetration
-    if( name == "z" ) {
-      object->SetZ( value.GetNumber() );
-      continue;
-    }//z
-
-  }//for iter
-
-  //get
-  iterEnd = getAttributes.end();
-  for( iter = getAttributes.begin(); iter != iterEnd; ++iter ) {
-    //__log.PrintInfo( Filelevel_DEBUG, ". get '%s'", ( *iter )->name.c_str() );
-
-    const std::string &name = ( *iter )->name;
-    Variable &value         = ( *iter )->value;
-
-    //object
-    if( name == "renderable" ) {
-      value.SetBoolean( object->IsRenderable() );
-      continue;
-    }//renderable
-    if( name == "collision" ) {
-      value.SetBoolean( object->IsCollision() );
-      continue;
-    }//collision
-    if( name == "trigger" ) {
-      value.SetBoolean( object->IsTrigger() );
-      continue;
-    }//trigger
-    if( name == "lightBlockByCollision" ) {
-      value.SetBoolean( object->IsLightBlockByCollision() );
-      continue;
-    }//lightBlockByCollision
-    if( name == "lightPoint" ) {
-      value.SetBoolean( object->IsLightPoint() );
-      continue;
-    }//lightPoint
-    if( name == "position" ) {
-      value.SetVec3( object->GetPosition() );
-      continue;
-    }//position
-
-    //renderable
-    if( name == "textureName" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        const std::string &texture = renderable->GetTextureFileName();
-        value.SetString( texture.empty() ? texture : &renderable->GetTextureFileName()[ strlen( FileManager_DATADIRECTORY ) + 1 ] );
-      } else {
-        value.SetString( "" );
-      }
-      continue;
-    }//textureName
-    if( name == "renderableSize" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        value.SetVec2( renderable->GetSize() );
-      } else {
-        value.SetVec2( Vec2Null );
-      }
-      continue;
-    }//renderableSize
-    if( name == "renderablePosition" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        const Vec3 &pos = renderable->GetPosition();
-        value.SetVec2( Vec2( pos.x, pos.y ) );
-      } else {
-        value.SetVec2( Vec2Null );
-      }
-      continue;
-    }//renderablePosition
-    if( name == "color" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        value.SetVec4( renderable->GetColor() );
-      } else {
-        value.SetVec4( Vec4Null );
-      }
-      continue;
-    }//color
-    if( name == "renderableScale" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        value.SetVec2( renderable->GetScale() );
-      } else {
-        value.SetVec2( Vec2Null );
-      }
-      continue;
-    }//renderableScale
-    if( name == "renderableRotation" ) {
-      renderable = ( RenderableQuad* ) object->GetRenderable();
-      if( renderable ) {
-        value.SetNumber( renderable->GetRotation() );
-      } else {
-        value.SetNumber( 0.0f );
-      }
-      continue;
-    }//renderableRotation
-
-    //collision
-    if( name == "collisionSize" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        const Vec3 &size = collision->GetSize();
-        value.SetVec2( Vec2( size.x, size.y ) );
-      } else {
-        value.SetVec2( Vec2Null );
-      }
-      continue;
-    }//collisionSize
-    if( name == "collisionAcceleration" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        Vec3 acceleration = collision->GetAcceleration();
-        value.SetVec2( Vec2( acceleration.x, acceleration.y ) );
-      } else {
-        value.SetVec2( Vec2Null );
-      }
-      continue;
-    }//collisionAcceleration
-    if( name == "collisionVelocity" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        Vec3 velocity = collision->GetVelocity();
-        value.SetVec2( Vec2( velocity.x, velocity.y ) );
-      } else {
-        value.SetVec2( Vec2Null );
-      }
-      continue;
-    }//collisionVelocity
-    if( name == "collisionStatic" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        value.SetBoolean( collision->IsStatic() );
-      } else {
-        value.SetBoolean( false );
-      }
-      continue;
-    }//collisionStatic
-    if( name == "collisionForce" ) {
-      collision = object->GetCollision();
-      if( collision ) {
-        Vec3 force = collision->GetForce();
-        value.SetVec2( Vec2( force.x, force.y ) );
-      } else {
-        value.SetVec2( Vec2Null );
-      }
-      continue;
-    }//collisionForce
-
-    //trigger
-    if( name == "triggerType" ) {
-      trigger = object->GetTrigger();
-      if( trigger ) {
-        CollisionElementType type = trigger->GetType();
-        std::string typeName = "";
-        switch( type ) {
-        case COLLISION_ELEMENT_TYPE_SQUARE:
-          typeName = "square";
-          break;
-        case COLLISION_ELEMENT_TYPE_CIRCLE:
-          typeName = "circle";
-          break;
-        case COLLISION_ELEMENT_TYPE_POLYGON:
-          typeName = "polygon";
-          break;
-        }
-        value.SetString( typeName );
-      } else {
-        value.SetString( "" );
-      }
-      continue;
-    }//triggerType
-    if( name == "triggerSize" ) {
-      trigger = object->GetTrigger();
-      if( trigger ) {
-        Vec3 size = trigger->GetSize();
-        value.SetVec2( Vec2( size.x, size.y ) );
-      } else {
-        value.SetVec2( Vec2Null );
-      }
-      continue;
-    }//triggerSize
-    if( name == "triggerPolygon" ) {
-      trigger = object->GetTrigger();
-      if( trigger ) {
-        CollisionElementPolygon::PointList pointList;
-        if( trigger->GetPolygon( pointList ) ) {
-          std::string result = "";
-          char temp[ 1024 ];
-          for( auto &point: pointList ) {
-            sprintf_s( temp, sizeof( temp ), "%s%3.3f %3.3f", result.size() ? " " : "", point.x, point.y );
-            result += temp;
-          }
-          value.SetString( result );
-        } else {
-          value.SetString( "" );
-        }
-      } else {
-        value.SetString( "" );
-      }
-      continue;
-    }//triggerPolygon
-    if( name == "z" ) {
-      float z = object->GetPosition().z;
-      value.SetNumber( z );
-      continue;
-    }//z
-
-  }
-}//LUA_ObjectAttr
-
-
-
-
-/*
-=============
-  LUA_ListenCollision
-=============
-*/
-void Game::LUA_ListenCollision( const std::string &objectName, const std::string &funcName ) {
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenCollision => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  Collision *collision = object->GetCollision();
-  if( !collision ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenCollision => object '%s' don't have collision", objectName.c_str() );
-    return;
-  }
-  //__log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ListenCollision => object['%s'] collision[x%p] function['%s']", object->GetNameFull().c_str(), collision, funcName.c_str() );
-
-  luaCollisionListenerStruct listener( collision, funcName );
-
-  game->collisionListeners.push_back( listener );
-  collision->AddHandler( Game::CollisionProc );
-}//LUA_ListenCollision
-
-
-
-
-/*
-=============
-  LUA_ListenTrigger
-=============
-*/
-void Game::LUA_ListenTrigger( const std::string &objectName, const std::string &funcName ) {
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenTrigger => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  ObjectTrigger *trigger = object->GetTrigger();
-  if( !trigger ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ListenTrigger => object '%s' don't have collision", objectName.c_str() );
-    return;
-  }
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ListenTrigger => object['%s'] collision[x%p] function['%s']", object->GetNameFull().c_str(), trigger, funcName.c_str() );
-
-  luaTriggerListenerStruct listener( trigger, funcName );
-
-  game->luaTriggerListeners.push_back( listener );
-  trigger->AddHandler( Game::TriggerProc );
-}//LUA_ListenTrigger
 
 
 
@@ -2385,9 +993,11 @@ void Game::CollisionProc( Collision *a, Collision *b, Byte flags, const Vec3 &ve
   luaCollisionListenersList::iterator iter, iterEnd = game->collisionListeners.end();
   for( iter = game->collisionListeners.begin(); iter != iterEnd; ++iter ) {
     if( iter->object == a ) {
+      /*
       if( !iter->luaHandlerId && !iter->funcName.empty() ) {
         LUACALLBACK_ListenCollision( game->lua, iter->funcName, objectA->GetNameFull(), objectB->GetNameFull(), flags, velocity );
       }
+      */
       if( !objectA->GetLuaObjectId() ) {
         objectA->InitLuaUserData();
       }
@@ -2406,16 +1016,6 @@ void Game::CollisionProc( Collision *a, Collision *b, Byte flags, const Vec3 &ve
           if( luaHandler.referenceId == objectAluaObjectId ) {
             Engine::LuaObject::CallFunction( objectAluaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCOLLISION, &parameters );
           }
-          /*
-          if( luaHandler.referenceId == objectBluaObjectId ) {
-            Engine::LuaObject::FunctionCallParametersList parameters;
-            parameters.push_back( Engine::LuaObject::FunctionCallParameter( Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE, objectAluaObjectId ) );
-            parameters.push_back( Engine::LuaObject::FunctionCallParameter( ( int ) flags ) );
-            parameters.push_back( Engine::LuaObject::FunctionCallParameter( velocity.x ) );
-            parameters.push_back( Engine::LuaObject::FunctionCallParameter( velocity.y ) );
-            Engine::LuaObject::CallFunction( objectBluaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCOLLISION, &parameters );
-          }
-          */
         }
       }
     }
@@ -2460,140 +1060,16 @@ void Game::TriggerProc( ObjectTrigger *trigger, Collision *collision, bool isInT
       break;
     }
   }
-
+  /*
   for( iter = game->luaTriggerListeners.begin(); iter != iterEnd; ++iter ) {
     if( iter->object == trigger ) {
       LUACALLBACK_ListenTrigger( game->lua, iter->funcName, objectA->GetNameFull(), objectB->GetNameFull(), isInTrigger );
     }
   }
+  */
 }//TriggerProc
 
 
-/*
-=============
-  LUA_SetObjectForce
-=============
-*/
-void Game::LUA_SetObjectForce( const std::string &objectName, int num, const Vec2& force )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_SetObjectForce => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  object->SetForce( num, Vec3( force.x, force.y, 0.0f ) );
-}//LUA_SetObjectForce
-
-
-/*
-=============
-  LUA_RemoveObjectForce
-=============
-*/
-void Game::LUA_RemoveObjectForce( const std::string &objectName, int num )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_RemoveObjectForce => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  object->RemoveForce( num );
-}//LUA_RemoveObjectForce
-
-
-/*
-=============
-  LUA_ObjectHasTag
-=============
-*/
-bool Game::LUA_ObjectHasTag( const std::string &objectName, const std::string &tag )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectHasTag => object '%s' not found", objectName.c_str() );
-    return false;
-  }
-  return object->IsHasTag( tag );
-}//LUA_ObjectHasTag
-
-
-/*
-=============
-  LUA_ObjectHasTag
-=============
-*/
-void  Game::LUA_ObjectAddTag( const std::string &objectName, const std::string &tag )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAddTag => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  return object->AddTag( tag );
-}//LUA_ObjectAddTag
-
-
-/*
-=============
-  LUA_ObjectRemoveTag
-=============
-*/
-void  Game::LUA_ObjectRemoveTag( const std::string &objectName, const std::string &tag )
-{
-  Object *object = game->core->GetObject( objectName );
-  if( !object ) {
-    __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectRemoveTag => object '%s' not found", objectName.c_str() );
-    return;
-  }
-  return object->RemoveTag( tag );
-}//LUA_ObjectRemoveTag
-
-
-/*
-=============
-  LUA_SetLightAmbient
-=============
-*/
-void Game::LUA_SetLightAmbient( const Vec4 &color )
-{
-  game->core->GetLightRenderer()->GetLightManager()->lightAmbient = color;
-}//LUA_SetLightAmbient
-
-
-/*
-=============
-  LUA_WorldSave
-=============
-*/
-void Game::LUA_WorldSave( const std::string& fileName )
-{
-  game->world->SaveToFile( fileName );
-  sTimer.Update();
-  //game->core->Update();
-}//LUA_WorldSave
-
-
-/*
-=============
-  LUA_WorldLoad
-=============
-*/
-void Game::LUA_WorldLoad( const std::string& fileName )
-{
-  game->world->ClearWorld();
-  game->core->ClearScene();
-  game->ClearLuaTimers();
-  game->core->Update();
-  game->core->SetCamera( game->core->GetObject( "player" ) ); //!!!
-  game->world->LoadFromFile( fileName );
-  game->core->GetObject( "player" )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->GetCollision()->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );  //!!!
-  //game->SetActive( false );
-
-  sTimer.Update();
-  game->core->Update();
-  game->core->keyboard.ResetState();
-  game->core->mouse.ResetState();
-}//LUA_WorldLoad
 
 
 
@@ -2612,3 +1088,35 @@ void Game::OnCollisionMgrUpdate() {
     }
   }
 }//OnCollisionMgrUpdate
+
+
+void Game::LuaObject_OnTrigger( ObjectTrigger* trigger, Collision* collision, bool isInTrigger ) {
+  Object *objectA = game->core->GetObjectByTrigger( trigger );
+  if( !objectA ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::TriggerProc => object A by trigger x%p not found", trigger );
+    return;
+  }
+
+  Object *objectB = game->core->GetObjectByCollision( collision );
+  if( !objectB ) {
+    __log.PrintInfo( Filelevel_ERROR, "Game::TriggerProc => object B by collision x%p not found", collision );
+    return;
+  }
+
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectA['%s'] GetLuaObjectId[%d]", objectA->GetNameFull().c_str(), objectA->GetLuaObjectId() );
+  __log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectB['%s'] GetLuaObjectId[%d]", objectB->GetNameFull().c_str(), objectB->GetLuaObjectId() );
+  if( !objectA->GetLuaObjectId() ) {
+    objectA->InitLuaUserData();
+    __log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectA initializing userdata" );
+  }
+
+  if( !objectB->GetLuaObjectId() ) {
+    objectB->InitLuaUserData();
+    __log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectB initializing userdata" );
+  }
+
+  Engine::LuaObject::FunctionCallParametersList parameters;
+  parameters.push_back( Engine::LuaObject::FunctionCallParameter( Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE, objectB->GetLuaObjectId() ) );
+  parameters.push_back( Engine::LuaObject::FunctionCallParameter( !isInTrigger ) );
+  Engine::LuaObject::CallFunction( objectA->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONTRIGGER, &parameters );
+}//LuaObject_OnTrigger

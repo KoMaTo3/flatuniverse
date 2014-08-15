@@ -31,18 +31,18 @@ end
 
 --[[ UpdatePlayerAnimation ]]
 function UpdatePlayerAnimation( timerid )
-  local curTime = GetTime()
+  local curTime = Core.GetTime()
   local timer = 0.2
   if curTime - playerState.onGroundTime < 0.1 then  -- on ground
     if playerState.currentAction == 2 then
       playerState.currentAction = 1
-      ObjectSetAnimation( 'player', 'player/mario', ( math.abs( playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
+      Object.Get( 'player' ).api:SetAnimation( 'player/mario', ( math.abs( playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
     end
   else  -- on air
     timer = 0.5
     if playerState.currentAction ~= 2 then
       playerState.currentAction = 2
-      ObjectSetAnimation( 'player', 'player/mario', 'jump-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
+      Object.Get( 'player' ).api:SetAnimation( 'player/mario', 'jump-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
     end
   end
   Core.SetTimer( timer, UpdatePlayerAnimation, true )
@@ -57,8 +57,8 @@ end --)
 
 --[[ Main ]]
 function Main()
-  LoadScript( 'data/scripts/gui.lua' )
-  LoadScript( 'data/scripts/editor.lua' )
+  Core.LoadScript( 'data/scripts/gui.lua' )
+  Core.LoadScript( 'data/scripts/editor.lua' )
   EditorInit()
 
   --[[
@@ -67,7 +67,7 @@ function Main()
 
   -- create temp object
   --[[
-  local cameraX, cameraY = GetCameraPos()
+  local cameraX, cameraY = Camera.GetPos()
   local name = 'wall-new'
   local tileSize = GetTileSize()
   ObjectCreate( name, cameraX, cameraY, -1 )
@@ -82,22 +82,23 @@ function Main()
   -- Debug.Alert( '', r..':'..g..':'..b..':'..a )
   -- Keyboard.Listen( 'PlayerControl' )
   -- ListenCollision( 'player', 'CollisionPlayer' )
-  ObjectAddTag( 'player', 'player' )
-  ObjectSetAnimation( 'player', 'player/mario', 'stay-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
+  Object.Get( 'player' ).api:AddTag( 'player' )
+  Object.Get( 'player' ).api:SetAnimation( 'player/mario', 'stay-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
   Core.SetTimer( 1 / 10, UpdatePlayerAnimation, true )
   Core.SetTimer( 0, UpdateBackGround, true )
-  ObjectAttr( 'player', { collisionAcceleration = '0 1500', lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1', lightPointPenetration = 3 } )
-  SetLightAmbient( settings.ambientLight.R, settings.ambientLight.G, settings.ambientLight.B, settings.ambientLight.A )
+  Object.Get( 'player' ).api:Attr({ collisionAcceleration = '0 1500', lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1', lightPointPenetration = 3 })
+  -- ObjectAttr( 'player', { collisionAcceleration = '0 1500', lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1', lightPointPenetration = 3 } )
+  Scene.SetLightAmbient( settings.ambientLight.R, settings.ambientLight.G, settings.ambientLight.B, settings.ambientLight.A )
   -- ObjectAttr( 'background', { z = 1 } )
   -- ListenTrigger( 'testFunc', 'wall.424.286.4.030000' )
-  -- ObjectRemove( 'camera-mario-style' )
   -- ObjectCreate( 'camera-mario-style', 0, 0, 0 )
-  -- SetCamera( 'camera-mario-style' )
+  -- Camera.Set( 'camera-mario-style' )
   -- Core.SetTimer( 1/60, 'UpdateCamera' )
   -- local dump = serialize( Main )
   -- Debug.Alert( '', dump )
   -- local test = load( dump )()
   -- Debug.Alert('',test('player','player',false))
+  -- Core.SetTimer( 2, function() Debug.Log( 'gettime = '..Core.GetTime() ) end )
 end -- Main
 Main()
 
@@ -108,8 +109,8 @@ end
 
 function DoKill( object, trigger, isInTrigger )
   if isInTrigger == 0 then  -- object in trigger
-    ObjectSetPos( 'player', 0, 0 )
-    ObjectAttr( 'player', { collisionVelocity = '0 0' } )
+    Object.Get( 'player' ).api:SetPos( 0, 0 )
+    Object.Get( 'player' ).api:Attr({ collisionVelocity = '0 0' })
   end
 end
 
@@ -117,7 +118,7 @@ end
 function CoinCollect( trigger, object, isInTrigger )
   if object == 'player' then
     if isInTrigger == 0 then
-      ObjectRemove( trigger )
+      Object.Get( trigger ).api:Destroy()
     end
   end
 end -- CoinCollect
@@ -129,7 +130,7 @@ function CollisionPlayer( player, target, flags, vx, vy )
     ObjectAttr( player, { collisionVelocity = vx..' '..vy } )
   end
   if ObjectHasTag( target, 'mushroom' ) then
-    ObjectRemove( target )
+    Object.Get( target ).api:Destroy()
     return false
     -- local cx, cy, rx, ry = ObjectAttr( player, { 'collisionSize', 'renderableSize' } )
     -- ObjectAttr( player, { collisionSize = string.format( '%f %f', cx * 1.2, cy * 1.2 ), renderableSize = string.format( '%f %f', rx * 1.2, ry * 1.2 ) } )
@@ -137,10 +138,10 @@ function CollisionPlayer( player, target, flags, vx, vy )
   end
   if IsObjectUpperThis( player, target ) then
     playerState.allowDoubleJump = true
-    playerState.onGroundTime = GetTime()
+    playerState.onGroundTime = Core.GetTime()
     if playerState.currentAction == 2 then
       playerState.currentAction = 1
-      ObjectSetAnimation( 'player', 'player/mario', ( math.abs( playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
+      Object.Get( 'player' ).api:SetAnimation( 'player/mario', ( math.abs( playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
     end
   elseif IsObjectUnderThis( player, target ) then
     if ObjectHasTag( target, 'brick-breakable' ) then
@@ -164,7 +165,7 @@ function CollisionPlayer( player, target, flags, vx, vy )
       ObjectAddTag( target, 'push-bottom' )
       ObjectRemoveTag( target, 'brick-breakable' )
       ObjectStopAnimation( target )
-      ObjectSetAnimation( target, 'supermario/brick0', 'do', 'stop' )
+      Object.Get( target ).api:SetAnimation( 'supermario/brick0', 'do', 'stop' )
       ObjectAttr( target, { color = '0 0 0 0' } )
     end
     if ObjectHasTag( target, 'has-mushroom' ) then
@@ -187,7 +188,7 @@ function PlayerControl( id, isPressed )
   else
     if id == 0x26 or id == 0x57 then  -- Up
       if isPressed then --(
-        local curTime = GetTime()
+        local curTime = Core.GetTime()
         if curTime - playerState.onGroundTime < 0.1 or playerState.allowDoubleJump then  -- do jump
           if curTime - playerState.onGroundTime >= 0.1 then -- is a double jump
             playerState.allowDoubleJump = false
@@ -207,7 +208,7 @@ function PlayerControl( id, isPressed )
           playerState.longJumpTimer = Core.SetTimer( 0.1, PlayerDoLongJump )
           playerState.PlayerEndLongJumpTimer = Core.SetTimer( 0.5, PlayerEndLongJump )
           playerState.onGroundTime = 0
-          ObjectSetAnimation( 'player', 'player/mario', 'jump-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
+          Object.Get( 'player' ).api:SetAnimation( 'player/mario', 'jump-'..( playerState.lastDirection > 0 and 'right' or 'left' ) )
           playerState.currentAction = 2
         end
       else --) (
@@ -216,7 +217,7 @@ function PlayerControl( id, isPressed )
     end
 
     if id == 0x25 or id == 0x41 then  -- Left
-      local curTime = GetTime()
+      local curTime = Core.GetTime()
       if isPressed then
         RemoveObjectForce( 'player', 2 )
         SetObjectForce( 'player', 4, -300, 0 )
@@ -224,7 +225,7 @@ function PlayerControl( id, isPressed )
           playerState.currentAction = 1
         end
         if curTime - playerState.onGroundTime < 0.1 then
-          ObjectSetAnimation( 'player', 'player/mario', 'walk-left' )
+          Object.Get( 'player' ).api:SetAnimation( 'player/mario', 'walk-left' )
         end
         playerState.lastDirection = -2
       else
@@ -234,7 +235,7 @@ function PlayerControl( id, isPressed )
             playerState.currentAction = 0
           end
           if curTime - playerState.onGroundTime < 0.1 then
-            ObjectSetAnimation( 'player', 'player/mario', 'stay-left' )
+            Object.Get( 'player' ).api:SetAnimation( 'player/mario', 'stay-left' )
           end
           playerState.lastDirection = -1
         end
@@ -242,7 +243,7 @@ function PlayerControl( id, isPressed )
     end
 
     if id == 0x27 or id == 0x44 then  -- Right
-      local curTime = GetTime()
+      local curTime = Core.GetTime()
       if isPressed then
         RemoveObjectForce( 'player', 4 )
         SetObjectForce( 'player', 2, 300, 0 )
@@ -251,7 +252,7 @@ function PlayerControl( id, isPressed )
           playerState.currentAction = 1
         end
         if curTime - playerState.onGroundTime < 0.1 then
-          ObjectSetAnimation( 'player', 'player/mario', 'walk-right' )
+          Object.Get( 'player' ).api:SetAnimation( 'player/mario', 'walk-right' )
         end
         playerState.lastDirection = 2
       else
@@ -261,7 +262,7 @@ function PlayerControl( id, isPressed )
             playerState.currentAction = 0
           end
           if curTime - playerState.onGroundTime < 0.1 then
-            ObjectSetAnimation( 'player', 'player/mario', 'stay-right' )
+            Object.Get( 'player' ).api:SetAnimation( 'player/mario', 'stay-right' )
           end
           playerState.lastDirection = 1
         end
@@ -279,14 +280,14 @@ function PlayerControl( id, isPressed )
           lightBlockByCollision = true,
           lightPoint = true, lightPointSize = ( math.random( 0, 1000 ) / 1000.0 ) * 300.0 + 30.0, lightPointColor = string.format( '%f %f %f 1', math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2 ), lightPointPenetration = 3
           } )
-        ObjectSetAnimation( object, 'bullet/test000', isRight and 'right' or 'left' )
+        Object.Get( object ).api:SetAnimation( 'bullet/test000', isRight and 'right' or 'left' )
         ListenCollision( object, 'CollisionBullet' )
       end
     end
 
     if id == 0x10 and isPressed then  -- test
       local object = 'wall.161.63.2.010000'
-      ObjectSetAnimation( object, 'lift/small', 'down' )
+      Object.Get( 'object' ).api:SetAnimation( 'lift/small', 'down' )
     end
   end -- !settings.gamePaused
 
@@ -332,8 +333,10 @@ function IsObjectUnderThis( object, target )
   if objectObject ~= nil then
     _, y = objectObject.api:GetPos()
   end
-  local _, tRectY = ObjectAttr( target, { 'collisionSize' } )
-  local _, rectY  = ObjectAttr( object, { 'collisionSize' } )
+  -- local _, tRectY = ObjectAttr( target, { 'collisionSize' } )
+  -- local _, rectY  = ObjectAttr( object, { 'collisionSize' } )
+  local _, tRectY = Object.Get( target ).api:Attr({ 'collisionSize' })
+  local _, rectY  = Object.Get( object ).api:Attr({ 'collisionSize' })
   local tRectYd2 = tRectY / 2
   local rectYd2 = rectY / 2
   --if y + rectYd2 <= ty - tRectYd2 then
@@ -352,8 +355,8 @@ function IsObjectUpperThis( object, target )
   if objectObject ~= nil then
     _, y = objectObject.api:GetPos()
   end
-  local _, tRectY = ObjectAttr( target, { 'collisionSize' } )
-  local _, rectY  = ObjectAttr( object, { 'collisionSize' } )
+  local _, tRectY = Object.Get( target ).api:Attr({ 'collisionSize' })
+  local _, rectY  = Object.Get( object ).api:Attr({ 'collisionSize' })
   local tRectYd2 = tRectY / 2
   local rectYd2 = rectY / 2
   if y + rectYd2 <= ty - tRectYd2 + 1 then return true end
@@ -371,8 +374,8 @@ function IsObjectRightThis( object, target )
   if objectObject ~= nil then
     x, _ = objectObject.api:GetPos()
   end
-  local tRectX, _ = ObjectAttr( target, { 'collisionSize' } )
-  local rectX, _  = ObjectAttr( object, { 'collisionSize' } )
+  local tRectX, _ = Object.Get( target ).api:Attr({ 'collisionSize' })
+  local rectX, _  = Object.Get( object ).api:Attr({ 'collisionSize' })
   local tRectXd2 = tRectX / 2
   local rectXd2 = rectX / 2
   if x + rectXd2 <= tx - tRectXd2 + 1 then return true end
@@ -390,8 +393,8 @@ function IsObjectLeftThis( object, target )
   if objectObject ~= nil then
     x, _ = objectObject.api:GetPos()
   end
-  local tRectX, _ = ObjectAttr( target, { 'collisionSize' } )
-  local rectX, _  = ObjectAttr( object, { 'collisionSize' } )
+  local tRectX, _ = Object.Get( target ).api:Attr({ 'collisionSize' })
+  local rectX, _  = Object.Get( object ).api:Attr({ 'collisionSize' })
   local tRectXd2 = tRectX / 2
   local rectXd2 = rectX / 2
   if x - rectXd2 >= tx + tRectXd2 then return true end
@@ -413,28 +416,35 @@ function pairsByKeys( t, f )
 end -- pairsByKeys
 
 --[[ PushMushroom ]]
+--[[
 function PushMushroom( object )
-  local itemName = object..'-mushroom-'..string.format( '%f', GetTime() )
+  local itemName = object..'-mushroom-'..string.format( '%f', Core.GetTime() )
   local brickX, brickY = Object.Get( object ).api:GetPos()
-  ObjectCreate( itemName, brickX, brickY, -0.1 )
-  ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '32 32', collision = true, collisionSize = '32 32', collisionStatic = true } )
+  Object.New( itemName ).api:SetPos( brickX, brickY, -0.1 )
+  -- ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '32 32', collision = true, collisionSize = '32 32', collisionStatic = true } )
+  Object.Get( itemName ).api:Attr({ renderable = true, textureName = 'textures/items/mushroom.png', renderableSize = '32 32', collision = true, collisionSize = '32 32', collisionStatic = true })
   animation[ 'timer'..Core.SetTimer( 0.1, DoAnimationMushroom ) ] = { step = 1, time = 0, object = itemName, tile = object }
   ObjectRemoveTag( object, 'has-mushroom' )
-  ObjectAttr( object, { renderable = false } )
+  -- ObjectAttr( object, { renderable = false } )
+  Object.Get( object ).api:Attr({ renderable = false })
   ObjectSetAnimation( object, 'supermario/brick2', 'do' )
   animation[ 'timer'..Core.SetTimer( 0.5, DoAnimationBrick ) ] = { step = 1, time = 0, object = itemName, tile = object }
 end -- PushMushroom
+]]
 
 --[[ PushCoin]]
+--[[
 function PushCoin( object )
-  local itemName = object..'-coin-'..string.format( '%f', GetTime() )
+  local itemName = object..'-coin-'..string.format( '%f', Core.GetTime() )
   local brickX, brickY = Object.Get( object ).api:GetPos()
-  ObjectCreate( itemName, brickX, brickY, -1.0, true )
+  -- ObjectCreate( itemName, brickX, brickY, -1.0, true )
+  Object.New( itemName, '', false ).api:SetPos( brickX, brickY, -1.0 )
   -- ObjectAttr( itemName, { renderable = true, textureName = 'textures/items/coin0.png', renderableSize = '32 32' } )
   ObjectSetAnimation( itemName, 'supermario/coin', 'do' )
   animation[ 'timer'..Core.SetTimer( 1.0, DoAnimationCoin ) ] = { step = 1, time = 0, object = itemName, tile = object }
   ObjectRemoveTag( object, 'has-coin' )
-  ObjectAttr( object, { renderable = false, lightPoint = false } )
+  -- ObjectAttr( object, { renderable = false, lightPoint = false } )
+  Object.Get( object ).api:Attr({ renderable = false, lightPoint = false })
   ObjectSetAnimation( object, 'supermario/brick2', 'do' )
   animation[ 'timer'..Core.SetTimer( 0.5, DoAnimationBrick ) ] = { step = 1, time = 0, object = itemName, tile = object }
   -- ObjectAttr( object, { textureName = 'textures/tiles/bricks/brick2.png' } )
@@ -442,8 +452,10 @@ function PushCoin( object )
   -- animation[ 'timer'..Core.SetTimer( 0.1, 'DoAnimationCoin' ) ] = { step = 1, time = 0, object = itemName, tile = object }
   -- ObjectRemoveTag( object, 'has-coin' )
 end -- PushCoin
+]]
 
 --[[ DoAnimationMushroom ]]
+--[[
 function DoAnimationMushroom( timerId )
   local keyByTimer = 'timer'..timerId
   if animation[ keyByTimer ] == nil then
@@ -455,19 +467,21 @@ function DoAnimationMushroom( timerId )
   if anim.step == 1 then
     anim.time = anim.time + 1
     local x, y = Object.Get( anim.object ).api:GetPos()
-    ObjectSetPos( anim.object, x, y - 1 )
+    Object.Get( anim.object ).api:SetPos( x, y - 1 )
     if anim.time < 32 then
       animation[ 'timer'..Core.SetTimer( 1/40, DoAnimationMushroom ) ] = anim
     else
       -- ObjectAddTag( anim.tile, 'has-mushroom' )
       animation[ keyByTimer ] = nil
-      ObjectAttr( anim.object, { collisionVelocity = '150 0', collisionAcceleration = '0 1200', collisionStatic = false } )
+      -- ObjectAttr( anim.object, { collisionVelocity = '150 0', collisionAcceleration = '0 1200', collisionStatic = false } )
+      Object.Get( anim.object ).api:Attr({ collisionVelocity = '150 0', collisionAcceleration = '0 1200', collisionStatic = false })
       ObjectAddTag( anim.object, 'mushroom' )
       ObjectAddTag( anim.object, 'no-reset-player-velocity' )
       ListenCollision( anim.object, 'CollisionMushroom' )
     end
   end
 end -- DoAnimationMushroom
+]]
 
 --[[ DoAnimationCoin ]]
 function DoAnimationCoin( timerId )
@@ -479,7 +493,7 @@ function DoAnimationCoin( timerId )
   local anim = animation[ keyByTimer ]
 
   if anim.step == 1 then
-    ObjectRemove( anim.object )
+    Object.Get( anim.object ).api:Destroy()
     animation[ keyByTimer ] = nil
   end
 end -- DoAnimationCoin
@@ -494,29 +508,28 @@ function DoAnimationBrick( timerId )
   local anim = animation[ keyByTimer ]
 
   if anim.step == 1 then
-    ObjectSetAnimation( anim.tile, 'supermario/brick2', 'default' )
-    ObjectAttr( anim.tile, { renderable = true, textureName = 'textures/tiles/bricks/brick2.png', renderableSize = '32 32' } )
+    Object.Get( anim.tile ).api:SetAnimation( 'supermario/brick2', 'default' )
+    -- ObjectAttr( anim.tile, { renderable = true, textureName = 'textures/tiles/bricks/brick2.png', renderableSize = '32 32' } )
+    Object.Get( anim.tile ).api:Attr({ renderable = true, textureName = 'textures/tiles/bricks/brick2.png', renderableSize = '32 32' })
     -- ObjectRemove( anim.object )
     animation[ keyByTimer ] = nil
   end
 end -- DoAnimationBrick
 
 --[[ CollisionMushroom ]]
+--[[
 function CollisionMushroom( mushroom, target, flags, vx, vy )
   if bit32.band( flags, 2 ) == 2 or bit32.band( flags, 8 ) == 8 then
-    ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
+    -- ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
+    Object.Get( mushroom ).api:Attr({ collisionVelocity = string.format( '%f %f', -vx, vy ) })
   elseif bit32.band( flags, 4 ) == 4 then -- stay on target
     if ObjectHasTag( target, 'push-bottom' ) then
-      ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', vx, -300 ) } )
+      -- ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', vx, -300 ) } )
+      Object.Get( mushroom ).api:Attr({ collisionVelocity = string.format( '%f %f', vx, -300 ) })
     end
   end
-  --[[
-  if IsObjectRightThis( mushroom, target ) or IsObjectLeftThis( mushroom, target ) then
-    local vx, vy = ObjectAttr( mushroom, { 'collisionVelocity' } )
-    ObjectAttr( mushroom, { collisionVelocity = string.format( '%f %f', -vx, vy ) } )
-  end
-  ]]
 end -- CollisionMushroom
+]]
 
 --(
 function CollisionBullet( bullet, target, flags, vx, vy )
@@ -525,7 +538,7 @@ function CollisionBullet( bullet, target, flags, vx, vy )
     vy = -vy * 0.9
     local x, y = Object.Get( bullet ).api:GetPos()
     y = y - 1
-    ObjectSetPos( bullet, x, y )
+    Object.Get( bullet ).api:SetPos( x, y )
     isJumped = true
   end
   if bit32.band( flags, 2 ) == 2 and vx > 0 then
@@ -536,18 +549,19 @@ function CollisionBullet( bullet, target, flags, vx, vy )
     x = x + 1
   end
   if isJumped and math.abs( vy ) < 100 then
-    ObjectRemove( bullet )
+    Object.Get( bullet ).api:Destroy()
   else
-    ObjectAttr( bullet, { collisionVelocity = string.format( '%f %f', vx, vy ) } )
+    -- ObjectAttr( bullet, { collisionVelocity = string.format( '%f %f', vx, vy ) } )
+    Object.Get( bullet ).api:Attr({ collisionVelocity = string.format( '%f %f', vx, vy ) })
   end
 end --)
 
 --[[ UpdateCamera ]]
 function UpdateCamera( timerId )
-  local camera = GetCamera( 'camera-mario-style' )
+  local camera = Camera.Get( 'camera-mario-style' )
   local _, cy = Object.Get( camera ).api:GetPos()
   local px, _ = Object.Get( 'player' ).api:GetPos()
-  ObjectSetPos( camera, math.max( px, 0 ), cy )
+  Object.Get( camera ).api:SetPos( math.max( px, 0 ), cy )
   Core.SetTimer( 0, UpdateCamera, true ) -- стараться избегать 0-таймеров, т.к. они зависят от быстродействия приложения и исполняются каждый тик
 end -- UpdateCamera
 
