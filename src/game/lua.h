@@ -11,6 +11,7 @@ extern "C" {
 #include "core/klib.h"
 #include "core/variable.h"
 #include "core/file.h"
+#include "game/luaobject.h"
 #include <string>
 
 #define DEBU
@@ -55,6 +56,7 @@ public:
   bool  RunFile       ( const std::string &fileName );
   bool  RunScript     ( const std::string &script );
   bool  CallFunction  ( const std::string &funcName );
+  bool  CallFunction  ( const int luaFunctionId, Engine::LuaObject::FunctionCallParametersList *parametersList = NULL );
   bool  CallTableTableFunction    ( const std::string &table, const std::string &key, const std::string &function );
   int   GetStackParmsCount();
   void  Unref         ( const int referenceId );

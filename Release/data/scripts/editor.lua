@@ -144,6 +144,11 @@ GUI = {
         title = 'Разное',
         items = {},
       },
+      {
+        id = 'pc',
+        title = 'PC',
+        items = {},
+      },
     },
     position = {
       x = 0,
@@ -311,7 +316,7 @@ GUI = {
           for num,item in pairs( GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items ) do --(
             if item.isHovered then
               GUI.tabbedTemplates.currentItem = num
-              DoPause( true )
+              Object.Get( 'editor' ):DoPause( true )
               settings.editorType = 0
               break
             end
@@ -530,54 +535,8 @@ function EditorInit()
   Object.Get( 'editor' ):UpdateGuiBySelectedObject()
 
   EditorUpdateDebug( 0 )
-  -- RenderGUI( 0 )
-  UpdateEditorCamera( 0 )
 end --EditorInit
 
-
--- UpdateEditorCamera
-function UpdateEditorCamera( timerId )
-  if settings.gamePaused then
-    Camera.Set( 'defaults/camera' )
-  end
-  -- local x, y = ObjectAttr( 'defaults/camera', { 'position' } )
-  local camera = Object.Get( 'defaults/camera' )
-  local x, y = camera.api:Attr({ 'position' })
-  if bit32.band( settings.cameraDirection, 8 ) == 8 then
-    y = y - 10
-  end
-  if bit32.band( settings.cameraDirection, 2 ) == 2 then
-    y = y + 10
-  end
-  if bit32.band( settings.cameraDirection, 4 ) == 4 then
-    x = x - 10
-  end
-  if bit32.band( settings.cameraDirection, 1 ) == 1 then
-    x = x + 10
-  end
-  camera.api:Attr({ position = x..' '..y  })
-  Core.SetTimer( 0.01, UpdateEditorCamera, true )
-end -- UpdateEditorCamera
-
-
---( Переключение режима паузы(редактора) и игры
-function DoPause( setPause )
-  settings.gamePaused = setPause
-  Scene.SetPause( not settings.gamePaused )
-  if settings.gamePaused then
-    if Camera.Get().api:GetNameFull() ~= 'defaults/camera' then
-      local x, y = Object.Get( 'player' ).api:Attr({ 'position' })
-      Object.Get( 'defaults/camera' ).api:Attr({ position = x..' '..y })
-    end
-    Camera.Set( 'defaults/camera' )
-  else
-    Camera.Set( 'player' )
-    Debug.RenderState( 0 )
-    settings.editorType = 0
-    GUI.elements.layer:SetText( 'default' )
-    -- OnChangeLayer( GUI.elements.layer )
-  end
-end --)
 
 
 -- Возвращает объект под курсором
@@ -955,7 +914,7 @@ function tableLength( T )
 end --tableLength
 
 --[[ EditorInsertItemByTemplate ]]
-function EditorInsertItemByTemplate( px, py )
+function EditorInsertItemByTemplate( px, py ) --(
   if GUI.tabbedTemplates.currentItem == 0 then
     return nil
   end
@@ -965,6 +924,7 @@ function EditorInsertItemByTemplate( px, py )
   local offsetX, offsetY = GetTileOffset()
   local attrs = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].attr
   local tags = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].tags
+  local isActiveObject = GUI.tabbedTemplates.tabsList[ GUI.tabbedTemplates.currentTab ].items[ GUI.tabbedTemplates.currentItem ].isActiveObject
   if attrs.renderable ~= nil and attrs.renderable then
     attrs.renderableSize = tileSize..' '..tileSize
   end
@@ -1034,7 +994,7 @@ function EditorInsertItemByTemplate( px, py )
         animationAfterComplete = currentItem.animation[ 4 ]
       end
     end
-    Object.Get( anim.tile ).api:SetAnimation( currentItem.animation[ 1 ], currentItem.animation[ 2 ], actionAfterComplete, animationAfterComplete )
+    newObject.api:SetAnimation( currentItem.animation[ 1 ], currentItem.animation[ 2 ], actionAfterComplete, animationAfterComplete )
   end
 
   if tags ~= nil then
@@ -1043,8 +1003,12 @@ function EditorInsertItemByTemplate( px, py )
     end
   end
 
+  if isActiveObject ~= nil and isActiveObject == true then
+    Scene.AddActiveObject( newObject )
+  end
+
   return newObject
-end --EditorInsertItemByTemplate
+end --) EditorInsertItemByTemplate
 
 --[[ ToggleGrid ]]
 function ToggleGrid()
@@ -1218,7 +1182,7 @@ end --)
 
 --( Переключение режима редактора на default, renderable, collision, trigger
 function SetEditorMode( setMode )
-  DoPause( true )
+  Object.Get( 'editor' ):DoPause( true )
   -- Debug.RenderState( setMode == 0 and 0 or math.pow( 2, setMode - 1 ) )
   settings.editorType = setMode
   local modeToText = {

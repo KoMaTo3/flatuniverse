@@ -81,32 +81,32 @@ public:
 
     explicit FunctionCallParameter()
       :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_NIL ) {
-        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => nil" );
+        //__log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => nil" );
     }
 
     explicit FunctionCallParameter( char *setString )
       :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_STRING ), valueString( setString ) {
-        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => string '%s'", setString );
+        //__log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => string '%s'", setString );
     }
 
     explicit FunctionCallParameter( double setNumber )
       :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_NUMBER ), valueNumber( setNumber ) {
-        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => number %3.3f", setNumber );
+        //__log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => number %3.3f", setNumber );
     }
 
     explicit FunctionCallParameter( int setInteger )
       :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_INTEGER ), valueInteger( setInteger ) {
-        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => integer %d", setInteger );
+        //__log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => integer %d", setInteger );
     }
 
     explicit FunctionCallParameter( bool setBoolean )
       :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_BOOLEAN ), valueBoolean( setBoolean ) {
-        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => boolean %d", setBoolean );
+        //__log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => boolean %d", setBoolean );
     }
 
     explicit FunctionCallParameter( LUAOBJECT_PARAMETERS_LIST typeInteger, int luaReferenceId )
       :type( LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE ), valueInteger( luaReferenceId ) {
-        __log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => reference %d", luaReferenceId );
+        //__log.PrintInfo( Filelevel_DEBUG, "FunctionCallParameter => reference %d", luaReferenceId );
     }
   };
   typedef std::deque< FunctionCallParameter > FunctionCallParametersList;
@@ -124,7 +124,7 @@ public:
   static bool SaveObjectDataToDump( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, char *&outData, size_t &dataSize );
   static int InitUserData( const LuaObjectType *object, LUAOBJECT_LIBRARIESLIST libraryType, const bool returnLuaObjectToStack = true );
   static void InitUserData( const LuaObjectType *object, const std::string& objectName, LUAOBJECT_LIBRARIESLIST libraryType, const bool returnLuaObjectToStack = true );
-  static void CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName, const FunctionCallParametersList* parametersList = NULL, const int resultsCount = 0 );
+  static bool CallFunction( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName, const FunctionCallParametersList* parametersList = NULL, const int resultsCount = 0 );
   static bool IsFunctionExists( const int luaObjectId, LUAOBJECT_LIBRARIESLIST libraryType, const std::string& functionName );
 
   static bool LuaCheckStackParametersCount( LUAOBJECT_LIBRARIESLIST libraryType, int minCount );

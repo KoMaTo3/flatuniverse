@@ -99,10 +99,25 @@ enum ObjectGuiType {
 };
 */
 
+typedef void (ObjectEvent)( Object* );
+typedef void (ObjectEventBoolean)( Object*, bool );
+
+
+class IActiveObject {
+public:
+  IActiveObject()
+    : _isActiveObject( false )
+    {}
+  inline void SetIsActiveObject( const bool setIsActive ) { this->_isActiveObject = setIsActive; }
+  inline bool GetIsActiveObject() const { return this->_isActiveObject; }
+
+private:
+  bool _isActiveObject;
+};
 
 
 
-class Object: public Entity, public IPointerOwner, public ITags, public Animation::IObject, public ObjectWidget::WidgetOwner
+class Object: public Entity, public IPointerOwner, public ITags, public Animation::IObject, public ObjectWidget::WidgetOwner, public IActiveObject
 {
 public:
   struct ObjectForce  //вектор силы
@@ -113,11 +128,12 @@ public:
     ObjectForce( long newId, const Vec3& newVec ){ this->id = newId; this->vec = newVec; }
   };
   typedef std::deque< ObjectForce > ObjectForceList;
-  typedef void (ObjectEvent)( Object* );
 
   static ObjectEvent *OnLoad;
-  static ObjectEvent *OnUnload;
+  static ObjectEventBoolean *OnUnload;
   static ObjectEvent *OnDestroy;
+  static ObjectEventBoolean *OnIsActiveObject;
+
   /*
   class GuiConstructor { //конструктор создания glui-объектов
   public:
@@ -322,6 +338,7 @@ public:
 
   Object*             GetObject           ( const std::string& name, Object *parent = NULL );
 
+  inline bool         GetLockToDelete     () { return this->_isLockedToDelete; }
   inline Object*      SetLockToDelete     ( bool lock ) { this->_isLockedToDelete = lock; return this; }
   inline Object*      SetSaveable         ( bool saveable ) { this->isSaveable = saveable; return this; }
   inline bool         IsLockedToDelete    () { return this->_isLockedToDelete; }

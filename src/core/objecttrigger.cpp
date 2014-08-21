@@ -83,8 +83,7 @@ bool ObjectTrigger::TestIntersectRect( const Vec2 &leftTop, const Vec2 &rightBot
 */
 void ObjectTrigger::CheckCollision( Collision *collision )
 {
-  if( !collision )
-  {
+  if( !collision ) {
     __log.PrintInfo( Filelevel_ERROR, "ObjectTrigger::CheckCollision => collision is NULL" );
     return;
   }
@@ -92,22 +91,20 @@ void ObjectTrigger::CheckCollision( Collision *collision )
   bool intersect = collision->TestIntersect( *this->triggerRect );
   bool inTrigger = this->IsObjectAlreadyTriggered( collision );
 
-  if( intersect && !inTrigger ) //חאר¸כ ג ענטדדונ
-  {
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::CheckCollision => triggered" );
+  if( intersect && !inTrigger ) { //חאר¸כ ג ענטדדונ
+    //__log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::CheckCollision => triggered" );
     this->collisionsInTrigger.push_back( collision );
     this->_TouchHandlers( collision, inTrigger );
   }
-  else if( !intersect && inTrigger )
-  {
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::CheckCollision => leave from trigger" );
+  else if( !intersect && inTrigger ) {
+    //__log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::CheckCollision => leave from trigger" );
     collisionInTriggerList::iterator iter, iterEnd = this->collisionsInTrigger.end();
-    for( iter = this->collisionsInTrigger.begin(); iter != iterEnd; ++iter )
-      if( *iter == collision )
-      {
+    for( iter = this->collisionsInTrigger.begin(); iter != iterEnd; ++iter ) {
+      if( *iter == collision ) {
         this->collisionsInTrigger.erase( iter );
         break;
       }
+    }
     this->_TouchHandlers( collision, inTrigger );
   }
 }//CheckCollision
@@ -226,7 +223,7 @@ bool ObjectTrigger::IsHandlerExists( ObjectTriggerHandler handler )
 void ObjectTrigger::_TouchHandlers( Collision *collision, bool isInTrigger )
 {
   ObjectTriggerHandlerList::iterator iter, iterEnd = this->handlers.end();
-  __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::_TouchHandlers => count[%d]", this->handlers.size() );
+  //__log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::_TouchHandlers => count[%d]", this->handlers.size() );
   for( iter = this->handlers.begin(); iter != iterEnd; ++iter )
     ( *iter)( this, collision, isInTrigger );
 }//_TouchHandlers
@@ -249,7 +246,7 @@ void ObjectTrigger::AddOnRemoveHandler( ObjectTriggerOnRemoveHandler handler )
 */
 void ObjectTrigger::SaveToBuffer( MemoryWriter &writer )
 {
-  __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::SaveToBuffer..." );
+  //__log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::SaveToBuffer..." );
   writer << this->offset;
   this->triggerRect->SaveToBuffer( writer );
 
@@ -268,7 +265,7 @@ void ObjectTrigger::SaveToBuffer( MemoryWriter &writer )
     }
   }
   */
-  __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::SaveToBuffer done" );
+  //__log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::SaveToBuffer done" );
 }//SaveToBuffer
 
 

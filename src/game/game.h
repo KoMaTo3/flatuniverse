@@ -134,6 +134,7 @@ public:
   void StringToObjectList( const std::string &str, ObjectList &list ) const;
   std::string ObjectListToString( const ObjectList &list ) const;
   void OnRemoveObject( const std::string& objectName );
+  int IsListeningCollision( Object *object );
 
   static void   KeyboardProc          ( Dword keyId, bool isPressed );
   static void   MouseKeyProc          ( Dword keyId, bool isPressed );
@@ -143,8 +144,9 @@ public:
   static void   TriggerProc           ( ObjectTrigger *trigger, Collision *collision, bool isInTrigger );
 
   static void   ObjectOnLoad          ( Object* obj );
-  static void   ObjectOnUnload        ( Object* obj );
+  static void   ObjectOnUnload        ( Object* obj, bool isClean );
   static void   ObjectOnDestroy       ( Object* obj );
+  static void   ObjectOnIsActive      ( Object* obj, bool isActive );
   void          EraseLuaHandler       ( const int luaReferenceId, const std::string &functionName, LuaFunctionHandlersList &handlersList );
   static void   OnCollisionMgrUpdate  ();
 

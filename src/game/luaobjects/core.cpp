@@ -56,7 +56,7 @@ int Engine::LuaCore_SetTimer( lua_State *lua ) {
 
   lua_pushinteger( lua, id );
 
-  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaCore_SetTimer => timer id[%d] function id[%d] name['%s']", id, luaFunctionId, funcName.c_str() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Engine::LuaCore_SetTimer => timer id[%d] time[%3.1f] function id[%d] name['%s']", id, time, luaFunctionId, funcName.c_str() );
 
   return 1;
 }//LuaCore_SetTimer

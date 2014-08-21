@@ -41,8 +41,8 @@ int Engine::LuaScene_SetLightAmbient( lua_State *lua ) {
   int argc = lua_gettop( lua );
 
   if( argc != 4 ) {
-    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaScene_SetPause => use: Scene.LuaScene_SetLightAmbient( R, G, B, A )" );
-    luaL_error( lua, "Engine::LuaScene_SetPause => use: Scene.LuaScene_SetLightAmbient( R, G, B, A )" );
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaScene_SetPause => use: Scene.SetLightAmbient( R, G, B, A )" );
+    luaL_error( lua, "Engine::LuaScene_SetPause => use: Scene.SetLightAmbient( R, G, B, A )" );
     return 0;
   }
 
@@ -103,3 +103,47 @@ int Engine::LuaScene_SaveWorld( lua_State *lua ) {
 
   return 0;
 }//LuaScene_SaveWorld
+
+
+int Engine::LuaScene_AddActiveObject( lua_State *lua ) {
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_SCENE );
+
+  int argc = lua_gettop( lua );
+
+  if( argc != 1 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaScene_AddActiveObject => use: Scene.AddActiveObject( object|objectName )" );
+    luaL_error( lua, "Engine::LuaScene_AddActiveObject => use: Scene.AddActiveObject( object|objectName )" );
+    return 0;
+  }
+
+  Object *object = NULL;
+  if( lua_isstring( lua, 1 ) ) {
+    object = lib->game->core->GetObject( lua_tostring( lua, 1 ) );
+  } else if( lua_istable( lua, 1 ) ) {
+    lua_getfield( lua, 1, "api" );
+    if( lua_isuserdata( lua, -1 ) ) {
+      __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaScene_AddActiveObject => is table" );
+      luaL_checktype( lua, -1, LUA_TUSERDATA );
+      __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaScene_AddActiveObject => is userdata" );
+      object = *static_cast<Object **>( luaL_checkudata( lua, -1, "Object" ) );
+    } else {
+      __log.PrintInfo( Filelevel_ERROR, "Engine::LuaScene_AddActiveObject => use: Scene.AddActiveObject( object|objectName )" );
+      luaL_error( lua, "Engine::LuaScene_AddActiveObject => use: Scene.AddActiveObject( object|objectName )" );
+      return 0;
+    }
+  } else {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaScene_AddActiveObject => use: Scene.AddActiveObject( object|objectName )" );
+    luaL_error( lua, "Engine::LuaScene_AddActiveObject => use: Scene.AddActiveObject( object|objectName )" );
+    return 0;
+  }
+
+  if( object ) {
+    lib->game->world->AddActiveObject( object );
+    object->SetIsActiveObject( true );
+    __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaScene_AddActiveObject => object '%s' now active", object->GetNameFull().c_str() );
+  } else {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaScene_AddActiveObject => object not found" );
+  }
+
+  return 0;
+}//LuaScene_AddActiveObject

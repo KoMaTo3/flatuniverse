@@ -253,9 +253,37 @@ void World::GridManager::AddActiveObject( Object *obj, const bool forceLoadGrid 
   //( *this->activeObjects.rbegin() )->Init( obj );
   ObjectPointerType *pointer = new ObjectPointerType( obj );
   this->activeObjects.push_back( pointer );
+  obj->SetIsActiveObject( true );
 
   //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::AddActiveObject => object '%s' added to list", obj->GetNameFull().c_str() );
 }//AddActiveObject
+
+
+
+/*
+=============
+  RemoveActiveObject
+=============
+*/
+void World::GridManager::RemoveActiveObject( Object *obj )
+{
+  if( !obj ) {
+    __log.PrintInfo( Filelevel_WARNING, "World::GridManager::RemoveActiveObject => object is NULL" );
+    return;
+  }
+
+  World::GridObjectList::iterator iter, iterEnd = this->activeObjects.end();
+
+  for( iter = this->activeObjects.begin(); iter != iterEnd; ++iter ) {
+    if( ( *iter )->GetObject< Object >() == obj ) {
+      delete *iter;
+      this->activeObjects.erase( iter );
+      return;
+    }
+  }
+
+  __log.PrintInfo( Filelevel_ERROR, "World::GridManager::RemoveActiveObject => object '%s' not found in active-list", obj->GetNameFull().c_str() );
+}//RemoveActiveObject
 
 
 

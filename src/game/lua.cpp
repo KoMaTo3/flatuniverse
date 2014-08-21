@@ -165,6 +165,7 @@ bool Lua::Init( Game *game )
   
   //Scene
   static const luaL_Reg scene_library_functions[] = {
+    { "AddActiveObject", &Engine::LuaScene_AddActiveObject },
     { "Clear", &Engine::LuaScene_Clear },
     { "LoadWorld", &Engine::LuaScene_LoadWorld },
     { "SaveWorld", &Engine::LuaScene_SaveWorld },
@@ -536,3 +537,71 @@ int Lua::GetColor( lua_State *lua, int stackIndex, FU_OUT Vec4& color ) {
   __log.PrintInfo( Filelevel_ERROR, "Lua::GetColor => unknown error" );
   return 0;
 }//GetColor
+
+
+
+bool Lua::CallFunction( const int luaFunctionId, Engine::LuaObject::FunctionCallParametersList *parametersList ) {
+  if( !luaFunctionId ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::CallFunction => luaFunctionId is NULL" );
+    return false;
+  }
+
+  lua_rawgeti( this->luaState, LUA_REGISTRYINDEX, luaFunctionId );
+  if( !lua_isfunction( this->luaState, -1 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Lua::CallFunction => luaFunctionId is not a function" );
+    return false;
+  }
+
+  int parametersCount = 0;
+
+  if( parametersList ) {
+    for( auto &parameter: *parametersList ) {
+      switch( parameter.type ) {
+        case Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_NIL: {
+          lua_pushnil( this->luaState );
+          ++parametersCount;
+          //__log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%d', nil", luaFunctionId );
+        } break;
+        case Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_INTEGER: {
+          lua_pushinteger( this->luaState, parameter.valueInteger );
+          ++parametersCount;
+          //__log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%d', integer %d", luaFunctionId, parameter.valueInteger );
+        } break;
+        case Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_NUMBER: {
+          lua_pushnumber( this->luaState, parameter.valueNumber );
+          ++parametersCount;
+          //__log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%d', number %3.3f", luaFunctionId, parameter.valueNumber );
+        } break;
+        case Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_STRING: {
+          lua_pushstring( this->luaState, parameter.valueString );
+          ++parametersCount;
+          //__log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%d', string '%s'", luaFunctionId, parameter.valueString );
+        } break;
+        case Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_BOOLEAN: {
+          lua_pushboolean( this->luaState, parameter.valueBoolean );
+          ++parametersCount;
+          //__log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%d', boolean %d", luaFunctionId, parameter.valueBoolean );
+        } break;
+        case Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE: {
+          lua_rawgeti( this->luaState, LUA_REGISTRYINDEX, parameter.valueInteger );
+          if( lua_istable( this->luaState, -1 ) ) {
+            lua_getfield( this->luaState, -1, "fn" );
+            lua_remove( this->luaState, -2 );
+            //__log.PrintInfo( Filelevel_DEBUG, "LuaObject::CallFunction => function '%d', reference %d", luaFunctionId, parameter.valueInteger );
+          } else {
+            __log.PrintInfo( Filelevel_ERROR, "LuaObject::CallFunction => function '%d', reference %d is not a table", luaFunctionId, parameter.valueInteger );
+          }
+          ++parametersCount;
+        } break;
+      }//switch
+    }//for auto
+  }//parametersList
+
+  if( lua_pcall( this->luaState, parametersCount, 0, 0 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "LuaObject::CallFunction => failed to call function '%d': %s", luaFunctionId, lua_tostring( this->luaState, -1 ) );
+    lua_pop( this->luaState, 1 );
+    return false;
+  }
+
+  return true;
+}//CallFunction

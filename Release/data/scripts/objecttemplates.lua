@@ -44,28 +44,34 @@ function GetObjectsTabbedTemplates()  --(
         name = 'Спавнит грибы',
         icon = 'data/textures/tiles/question0.png',
         attr = {
-          renderable = true, textureName = 'textures/tiles/question0.png',
+          -- renderable = true, textureName = 'textures/tiles/question0.png',
           collision = true, _collisionScale = 1, collisionStatic = true,
           trigger = false,
-          lightBlockByCollision = true,
+          lightPoint = true, lightPointSize = 200, lightPointColor = '1 1 1 1',
+          z = 1,
         },
         tags = {
           'has-mushroom',
         },
+        animation = { 'brick/question/0', 'default', 'repeat' },
+        templateScriptName = 'data/scripts/objects/brick-1.lua',
       },
       -- Question-brick
       {
         name = 'Блок с монетками',
         icon = 'data/textures/tiles/question0.png',
         attr = {
-          renderable = true, textureName = 'textures/tiles/question0.png',
+          -- renderable = true, textureName = 'textures/tiles/question0.png',
           collision = true, _collisionScale = 1, collisionStatic = true,
           trigger = false,
-          lightBlockByCollision = true,
+          lightPoint = true, lightPointSize = 200, lightPointColor = '1 1 1 1',
+          z = 1,
         },
         tags = {
           'has-coin',
         },
+        animation = { 'brick/question/0', 'default', 'repeat' },
+        templateScriptName = 'data/scripts/objects/brick-1.lua',
       },
       -- Tube0
       {
@@ -293,6 +299,9 @@ function GetObjectsTabbedTemplates()  --(
           -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -0.8,-1, 0.8,-1, 0,1 }, _triggerScale = 1,
           lightBlockByCollision = true,
         },
+        tags = {
+          'kill',
+        },
       },
       -- Tile000b
       {
@@ -302,6 +311,9 @@ function GetObjectsTabbedTemplates()  --(
           renderable = true, textureName = 'textures/tiles/tile000b.png',
           -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 0.8,1, -0.8,1, 0,-1 }, _triggerScale = 1,
           lightBlockByCollision = true,
+        },
+        tags = {
+          'kill',
         },
       },
       -- Tile000c
@@ -313,6 +325,9 @@ function GetObjectsTabbedTemplates()  --(
           -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 1,-0.8, 1,0.8, -1,0 }, _triggerScale = 1,
           lightBlockByCollision = true,
         },
+        tags = {
+          'kill',
+        },
       },
       -- Tile000d
       {
@@ -323,6 +338,9 @@ function GetObjectsTabbedTemplates()  --(
           -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -1,-0.8, 1,0, -1,0.8 }, _triggerScale = 1,
           lightBlockByCollision = true,
         },
+        tags = {
+          'kill',
+        },
       },
       -- Coin0
       {
@@ -332,6 +350,7 @@ function GetObjectsTabbedTemplates()  --(
           renderable = true, textureName = 'textures/tiles/coin0.png',
           -- trigger = true, _triggerScale = 1, _triggerFunc = 'CoinCollect',
         },
+		animation = { 'supermario/coin', 'default', 'repeat' },
       },
       -- Mushroom0
       {
@@ -397,14 +416,36 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/textures/editor/respawn.png',
         attr = {
           lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1',
+          trigger = true, _triggerScale = 1,
         },
         animation = { 'editor/respawn', 'default', 'repeat' },
         tags = {
           'respawn',
         },
-        templateScriptName = 'data/scripts/objects/test.lua',
+        templateScriptName = 'data/scripts/objects/respawn.lua',
       },
       --
     },  -- other
+    pc = {
+      --
+      {
+        name = 'Super Mario',
+        icon = 'data/textures/player/mario/mario-icon.png',
+        attr = {
+          lockToDelete = true,
+          collision = true, collisionSize = '14 20', collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '0 0',
+          lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1',
+        },
+        animation = { 'player/mario', 'stay-right', 'repeat' },
+        tags = {
+          'player',
+        },
+        templateScriptName = 'data/scripts/objects/player.lua',
+        isActiveObject = true,
+        creationScript = function( name )
+        end,
+      },
+      --
+    }, -- pc
   }
 end --)

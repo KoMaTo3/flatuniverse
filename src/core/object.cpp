@@ -21,9 +21,10 @@ ObjectByCollisionList *__objectByCollision  = NULL;
 ObjectByTriggerList   *__objectByTrigger    = NULL;
 //ObjectByGuiList       *__objectByGui        = NULL;
 
-Object::ObjectEvent *Object::OnLoad = NULL;
-Object::ObjectEvent *Object::OnUnload = NULL;
-Object::ObjectEvent *Object::OnDestroy = NULL;
+ObjectEvent *Object::OnLoad = NULL;
+ObjectEventBoolean *Object::OnUnload = NULL;
+ObjectEvent *Object::OnDestroy = NULL;
+ObjectEventBoolean *Object::OnIsActiveObject = NULL;
 ObjectsToRemoveList __objectsToRemove;
 
 
@@ -173,19 +174,19 @@ Object::ObjectRenderableInfo::ObjectRenderableInfo( GLushort newNum, RenderableT
 =============
 */
 Object::Object()
-:Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner()
+:Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner(), IActiveObject()
 , name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 , positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 ,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( true ), luaObjectId( 0 )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
-  //__log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%p]", this );
+  __log.PrintInfo( Filelevel_DEBUG, "Object dummy +1 => this[x%p] parent[x%p]", this, this->_parent );
 }//constructor
 
 
 Object::Object( const std::string &objectName, Object* parentObject, bool setIsSaveable, bool setLuaUserdata )
-:Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner()
+:Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner(), IActiveObject()
 ,name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
 ,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( setIsSaveable ), luaObjectId( 0 )
@@ -199,7 +200,7 @@ Object::Object( const std::string &objectName, Object* parentObject, bool setIsS
   }
   else
     this->nameFull = "/" + this->name;
-  //__log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%p] parent[x%p] nameFull['%s']", this, this->_parent, this->nameFull.c_str() );
+  __log.PrintInfo( Filelevel_DEBUG, "Object +1 => this[x%p] parent[x%p] nameFull['%s']", this, this->_parent, this->nameFull.c_str() );
   if( setLuaUserdata ) {
     this->InitLuaUserData();
   }
@@ -210,7 +211,7 @@ Object::Object( const std::string &objectName, Object* parentObject, bool setIsS
 
 Object::~Object()
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%p] name['%s']", this, this->GetNameFull().c_str() );
+  __log.PrintInfo( Filelevel_DEBUG, "Object -1 => this[x%p] parent[x%p] name['%s'] isActiveObject[%d]", this, this->_parent, this->GetNameFull().c_str(), this->GetIsActiveObject() );
   //if( !this->_parent )
   //  __log.PrintInfo( Filelevel_DEBUG, "is a root object" );
 
@@ -218,13 +219,13 @@ Object::~Object()
     this->OnDestroy( this );
   }
 
+  this->ClearChilds();
   this->DisableRenderable();
   this->DisableLightBlockByCollision();
   this->DisableLightPoint();
   this->DisableCollision();
   this->DisableTrigger();
   //this->DisableGui();
-  this->ClearChilds();
   this->UnAttachThisFromParent();
 
   DEF_DELETE( this->tags );
@@ -1324,7 +1325,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 {
   __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => name['%s']", this->GetNameFull().c_str() );
   if( this->OnUnload ) {
-    this->OnUnload( this );
+    this->OnUnload( this, false );
   }
 
   bool isRenderable, isCollision, isTrigger, isAnimation, isLightBlockByCollision, isLightPoint;
@@ -1341,6 +1342,8 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   writer << this->GetName();
   writer << this->GetParentNameFull();
   writer << this->GetPosition();
+
+  writer << this->GetIsActiveObject();
 
   if( isRenderable )
     ( ( RenderableQuad* ) this->GetRenderable() )->SaveToBuffer( writer );
@@ -1366,7 +1369,6 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   }
 
   //file name of object template scripts
-  __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => name '%s'", this->GetNameFull().c_str() );
   writer << this->luaScriptFileName;
   __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => luaScriptFileName '%s'", this->luaScriptFileName.c_str() );
 
@@ -1424,6 +1426,9 @@ void Object::SaveToBuffer( MemoryWriter &writer )
     }
   }
 
+  if( this->OnUnload ) {
+    this->OnUnload( this, true );
+  }
   __log.PrintInfo( Filelevel_DEBUG, "Object::SaveToBuffer => name['%s'] done", this->GetNameFull().c_str() );
 }//SaveToBuffer
 
@@ -1448,6 +1453,14 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
   reader >> tmpName;
   reader >> parentName;
   reader >> newPosition;
+  if( version >= 0x0000000E ) {
+    bool isActiveObject;
+    reader >> isActiveObject;
+    this->SetIsActiveObject( isActiveObject );
+    if( isActiveObject ) {
+      this->OnIsActiveObject( this, isActiveObject );
+    }
+  }
   //__log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => name['%s'] parent['%s']", tmpName.c_str(), parentName.c_str() );
 
   this->name = tmpName;

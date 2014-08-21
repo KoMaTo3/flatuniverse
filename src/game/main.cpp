@@ -81,20 +81,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetSize( Vec2( 100.0f, 100.0f ) );
   */
 
+  /*
   obj = game->core->CreateObject( "player", NULL, true );
   obj->SetLuaScript( "data/scripts/objects/player.lua" );
   obj->SetLockToDelete( true );
   col = obj->EnableCollision();
   col->InitSquare( Vec3( 14.0f, 20.0f, 0.0f ) );
-  /*
-  polyPoints.clear();
-  polyPoints.push_back( Vec2( -8.0f,  10.0f ) );
-  polyPoints.push_back( Vec2( -8.0f, -10.0f ) );
-  polyPoints.push_back( Vec2(  8.0f, -10.0f ) );
-  polyPoints.push_back( Vec2(  8.0f,  10.0f ) );
-  col->InitPolygon( polyPoints );
-  */
-  //col->InitCircle( 20.0f );
   col->SetPosition( Vec3( 65.0f, 30.0f, 5.0f ) );
   col->SetAcceleration( Vec3( 0.0f, 500.0f, 0.0f ) );
   col->SetIsStatic( false );
@@ -111,6 +103,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       game->ObjectOnLoad( obj );
     }
   }
+  */
 
   /*
   quad = ( RenderableQuad* ) obj->EnableRenderable( RENDERABLE_TYPE_QUAD );
@@ -120,8 +113,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   quad->SetTexture( "data/temp/mario.png", Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ) );
   */
   //quad->scale.Set( 0.5f, 1.0f );
-  game->core->SetCamera( obj );
-  obj->__Test();
+  //game->core->SetCamera( obj );
+  //obj->__Test();
   //obj->EnableLightBlockByCollision();
 
 
@@ -133,7 +126,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   render->SetColor( Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
   render->SetSize( Vec2( ( float ) game->core->GetWindowSize().width * 2.0f, ( float ) game->core->GetWindowSize().height ) );
 
-  game->world->AddActiveObject( game->core->GetObject( "player" ), true );
+  //game->world->AddActiveObject( game->core->GetObject( "player" ), true );
 
   __log.PrintInfo( Filelevel_DEBUG, "sizeof( RenderableQuad ) = %d", sizeof( RenderableQuad ) );
 
@@ -223,7 +216,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       game->world->ClearWorld();
       game->core->ClearScene();
       game->core->Update();
-      game->core->SetCamera( game->core->GetObject( "player" ) );
+      game->core->SetCamera( game->core->GetObject( "defaults/camera" ) );
       //game->world->AddActiveObject( game->core->GetObject( "player" ) );
       game->SetActive( false );
     }
@@ -481,6 +474,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   }
   //MessageBox( NULL, "Ok", "Debug", MB_OK );
 
+  /*
   __log.PrintInfo( Filelevel_DEBUG, "Player: x%p", game->core->GetObject( "player" ) );
   __log.PrintInfo( Filelevel_DEBUG, "Player id: %d", game->core->GetObject( "player" )->GetLuaObjectId() );
   Engine::LuaObject::CallFunction( game->core->GetObject( "player" )->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONDESTROY );
@@ -490,6 +484,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   File f( "data/temp/player_data.txt", File_mode_WRITE );
   f.Write( playerSaveData, playerSaveDataSize );
   f.Close();
+  */
 
   game->world->SaveToFile( "data/temp/testworld.fu" );
   __log.PrintInfo( Filelevel_DEBUG, "game->world->SaveToFile() done" );
@@ -511,6 +506,7 @@ Game::Game()
   Object::OnLoad = Game::ObjectOnLoad;
   Object::OnUnload = Game::ObjectOnUnload;
   Object::OnDestroy = Game::ObjectOnDestroy;
+  Object::OnIsActiveObject = Game::ObjectOnIsActive;
 
   //LUAFUNC_RemoveObject      = Game::LUA_RemoveObject;
 
@@ -548,7 +544,9 @@ Game::~Game()
 
 void Game::LuaObject_OnSetScript( Object *object ) {
   __log.PrintInfo( Filelevel_DEBUG, "LuaObject_OnSetScript => %s", object->GetNameFull().c_str() );
-  Engine::LuaObject::CallFunction( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCREATE );
+  if( !Engine::LuaObject::CallFunction( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCREATE ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject::CallFunction => %s:%s failed",  object->GetNameFull().c_str(), GAME_OBJECT_HANDLER_ONCREATE.c_str() );
+  }
   if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONUPDATE ) ) {
     game->luaObjectOnUpdate.push_back( object->GetLuaObjectId() );
   }
@@ -583,7 +581,7 @@ void Game::LuaObject_OnSetScript( Object *object ) {
       game->collisionListeners.push_back( luaCollisionListenerStruct( object->GetCollision(), object->GetLuaObjectId() ) );
       collision->AddHandler( Game::CollisionProc );
     } else {
-      __log.PrintInfo( Filelevel_ERROR, "Game::LuaObject_OnSetScript => object '%s' has OnCollision handler, but don't have collision", object->GetNameFull().c_str() );
+      //__log.PrintInfo( Filelevel_ERROR, "Game::LuaObject_OnSetScript => object '%s' has OnCollision handler, but don't have collision", object->GetNameFull().c_str() );
     }
   }
   if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONTRIGGER ) ) {
@@ -591,7 +589,7 @@ void Game::LuaObject_OnSetScript( Object *object ) {
       game->luaObjectOnTrigger.push_back( object->GetLuaObjectId() );
       object->GetTrigger()->AddHandler( Game::LuaObject_OnTrigger );
     } else {
-      __log.PrintInfo( Filelevel_ERROR, "Game::LuaObject_OnSetScript => function '%s' exists, but object '%s' is not trigger", GAME_OBJECT_HANDLER_ONTRIGGER.c_str(), object->GetNameFull().c_str() );
+      //__log.PrintInfo( Filelevel_ERROR, "Game::LuaObject_OnSetScript => function '%s' exists, but object '%s' is not trigger", GAME_OBJECT_HANDLER_ONTRIGGER.c_str(), object->GetNameFull().c_str() );
     }
   }
 }//LuaObject_OnSetScript
@@ -625,7 +623,7 @@ void Game::ClearLuaTimers() {
 
 void Game::SetActive( bool setActive ) {
   this->isActive = setActive;
-  auto player = this->core->GetObject( "player" );
+  //auto player = this->core->GetObject( "player" );
   //__log.PrintInfo( Filelevel_DEBUG, "Game::SetActive => %d", setActive );
   if( setActive ) {
     this->core->SetState( CORE_STATE_RUN );
@@ -677,6 +675,9 @@ void Game::UpdateLuaTimers()
   for( auto &timer: timerProcs ) {
     //LUACALLBACK_Timer( this->lua, timer.id, timer.funcName, timer.luaFunctionId );
     if( timer.luaFunctionId ) {
+      Engine::LuaObject::FunctionCallParametersList parameters;
+      parameters.push_back( Engine::LuaObject::FunctionCallParameter( ( int ) timer.id ) );
+      game->lua->CallFunction( timer.luaFunctionId, &parameters );
       game->lua->Unref( timer.luaFunctionId );
     }
   }
@@ -743,25 +744,32 @@ void Game::ObjectOnLoad( Object* obj ) {
   ObjectOnUnload
 =============
 */
-void Game::ObjectOnUnload( Object* obj ) {
-  if( obj->GetLuaObjectId() ) {
-    Engine::LuaObject::CallFunction( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONDESTROY );
+void Game::ObjectOnUnload( Object* obj, bool isClean ) {
+  if( isClean ) {
+    if( obj->GetLuaObjectId() ) {
+      //erase lua function references
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONUPDATE, game->luaObjectOnUpdate );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONUPDATECORE, game->luaObjectOnUpdateCore );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONFRAME, game->luaObjectOnFrame );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONFRAMECORE, game->luaObjectOnFrameCore );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONKEYPRESS, game->luaObjectOnKeyPress );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONKEYRELEASE, game->luaObjectOnKeyRelease );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEKEYPRESS, game->luaObjectOnMouseKeyPress );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEKEYRELEASE, game->luaObjectOnMouseKeyRelease );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEMOVE, game->luaObjectOnMouseMove );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONCOLLISION, game->luaObjectOnCollision );
+      game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONTRIGGER, game->luaObjectOnTrigger );
 
-    //erase lua function references
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONUPDATE, game->luaObjectOnUpdate );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONUPDATECORE, game->luaObjectOnUpdateCore );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONFRAME, game->luaObjectOnFrame );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONFRAMECORE, game->luaObjectOnFrameCore );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONKEYPRESS, game->luaObjectOnKeyPress );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONKEYRELEASE, game->luaObjectOnKeyRelease );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEKEYPRESS, game->luaObjectOnMouseKeyPress );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEKEYRELEASE, game->luaObjectOnMouseKeyRelease );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEMOVE, game->luaObjectOnMouseMove );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONCOLLISION, game->luaObjectOnCollision );
-    game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONTRIGGER, game->luaObjectOnTrigger );
-
-    Engine::LuaObject::RemoveFromLuaTable( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
-    obj->SetLuaObjectId( 0 );
+      Engine::LuaObject::RemoveFromLuaTable( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+      obj->SetLuaObjectId( 0 );
+      __log.PrintInfo( Filelevel_DEBUG, "Game::ObjectOnUnload => object '%s' unloaded", obj->GetNameFull().c_str() );
+    }
+  } else {
+    if( obj->GetLuaObjectId() ) {
+      if( !Engine::LuaObject::CallFunction( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONDESTROY ) ) {
+        __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject::CallFunction => %s:%s failed",  obj->GetNameFull().c_str(), GAME_OBJECT_HANDLER_ONDESTROY.c_str() );
+      }
+    }
   }
 }//ObjectOnUnload
 
@@ -769,7 +777,7 @@ void Game::ObjectOnUnload( Object* obj ) {
 
 void Game::ObjectOnDestroy( Object* obj ) {
   if( obj->GetLuaObjectId() ) {
-    Game::ObjectOnUnload( obj );
+    Game::ObjectOnUnload( obj, true );
   }
 }//ObjectOnDestroy
 
@@ -808,7 +816,18 @@ void Game::OnRemoveObject( const std::string& objectName ) {
       }
     }
   }
+
+  this->ObjectOnUnload( object, true );
 }//OnRemoveObject
+
+
+void Game::ObjectOnIsActive( Object* obj, bool isActive ) {
+  if( isActive ) {
+    game->world->AddActiveObject( obj );
+  } else {
+    game->world->RemoveActiveObject( obj );
+  }
+}//ObjectOnIsActive
 
 
 
@@ -989,38 +1008,65 @@ void Game::CollisionProc( Collision *a, Collision *b, Byte flags, const Vec3 &ve
   if( game->collisionListeners.empty() ) {
     return;
   }
-  //__log.PrintInfo( Filelevel_DEBUG, "Game::CollisionProc => a[x%p] b[x%p] objectA['%s'] objectB['%s']", a, b, objectA->GetNameFull().c_str(), objectB->GetNameFull().c_str() );
-  luaCollisionListenersList::iterator iter, iterEnd = game->collisionListeners.end();
-  for( iter = game->collisionListeners.begin(); iter != iterEnd; ++iter ) {
-    if( iter->object == a ) {
+  if( !objectA->GetLuaObjectId() ) {
+    objectA->InitLuaUserData();
+  }
+  if( !objectB->GetLuaObjectId() ) {
+    objectB->InitLuaUserData();
+  }
+  int objectAluaObjectId = objectA->GetLuaObjectId();
+  int objectBluaObjectId = objectB->GetLuaObjectId();
+  bool bIsStatic = b->IsStatic();
+  for( auto &listener: game->luaObjectOnCollision ) {
+    if( listener.referenceId == objectAluaObjectId ) {
       /*
       if( !iter->luaHandlerId && !iter->funcName.empty() ) {
         LUACALLBACK_ListenCollision( game->lua, iter->funcName, objectA->GetNameFull(), objectB->GetNameFull(), flags, velocity );
       }
       */
-      if( !objectA->GetLuaObjectId() ) {
-        objectA->InitLuaUserData();
-      }
-      if( !objectB->GetLuaObjectId() ) {
-        objectB->InitLuaUserData();
-      }
-      int objectAluaObjectId = objectA->GetLuaObjectId();
-      int objectBluaObjectId = objectB->GetLuaObjectId();
-      if( objectAluaObjectId || objectBluaObjectId ) {
-        Engine::LuaObject::FunctionCallParametersList parameters;
-        parameters.push_back( Engine::LuaObject::FunctionCallParameter( Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE, objectBluaObjectId ) );
-        parameters.push_back( Engine::LuaObject::FunctionCallParameter( ( int ) flags ) );
-        parameters.push_back( Engine::LuaObject::FunctionCallParameter( velocity.x ) );
-        parameters.push_back( Engine::LuaObject::FunctionCallParameter( velocity.y ) );
-        for( auto &luaHandler: game->luaObjectOnCollision ) {
-          if( luaHandler.referenceId == objectAluaObjectId ) {
-            Engine::LuaObject::CallFunction( objectAluaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCOLLISION, &parameters );
+      Engine::LuaObject::FunctionCallParametersList parameters;
+      parameters.push_back( Engine::LuaObject::FunctionCallParameter( Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE, objectBluaObjectId ) );
+      parameters.push_back( Engine::LuaObject::FunctionCallParameter( ( int ) flags ) );
+      parameters.push_back( Engine::LuaObject::FunctionCallParameter( velocity.x ) );
+      parameters.push_back( Engine::LuaObject::FunctionCallParameter( velocity.y ) );
+      for( auto &luaHandler: game->luaObjectOnCollision ) {
+        if( luaHandler.referenceId == objectAluaObjectId ) {
+          if( !Engine::LuaObject::CallFunction( objectAluaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCOLLISION, &parameters ) ) {
+            __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject::CallFunction => %s:%s failed",  objectA->GetNameFull().c_str(), GAME_OBJECT_HANDLER_ONCOLLISION.c_str() );
           }
         }
       }
+    }//a
+    if( objectBluaObjectId && bIsStatic ) {
+      int inverseFlags = ( ( flags & (1|4) ) ? flags ^ (1|4) : 0 ) | ( ( flags & (2|8) ) ? flags ^ (2|8) : 0 );
+      //__log.PrintInfo( Filelevel_DEBUG, "OnCollision => static, flags[%d] inverseFlags[%d] script[%s]", flags, inverseFlags, objectB->GetLuaScript().c_str() );
+      Engine::LuaObject::FunctionCallParametersList parameters;
+      parameters.push_back( Engine::LuaObject::FunctionCallParameter( Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE, objectAluaObjectId ) );
+      parameters.push_back( Engine::LuaObject::FunctionCallParameter( inverseFlags ) );
+      parameters.push_back( Engine::LuaObject::FunctionCallParameter( velocity.x ) );
+      parameters.push_back( Engine::LuaObject::FunctionCallParameter( velocity.y ) );
+      if( !Engine::LuaObject::CallFunction( objectBluaObjectId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONCOLLISION, &parameters ) ) {
+        __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject::CallFunction => %s:%s failed",  objectB->GetNameFull().c_str(), GAME_OBJECT_HANDLER_ONCOLLISION.c_str() );
+      }
+    }//b
+  }//for
+}//CollisionProc
+
+
+
+
+int Game::IsListeningCollision( Object *object ) {
+  int luaObjectId = object->GetLuaObjectId();
+  if( !luaObjectId ) {
+    return 0;
+  }
+  for( auto &listener: this->luaObjectOnCollision ) {
+    if( listener.referenceId == luaObjectId ) {
+      return luaObjectId;
     }
   }
-}//CollisionProc
+  return 0;
+}//IsListeningCollision
 
 
 
@@ -1056,7 +1102,9 @@ void Game::TriggerProc( ObjectTrigger *trigger, Collision *collision, bool isInT
   parameters.push_back( Engine::LuaObject::FunctionCallParameter( isInTrigger ) );
   for( auto& luaHandler: game->luaObjectOnTrigger ) {
     if( luaReferenceId == luaHandler.referenceId ) {
-      Engine::LuaObject::CallFunction( luaReferenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONTRIGGER, &parameters );
+      if( !Engine::LuaObject::CallFunction( luaReferenceId, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONTRIGGER, &parameters ) ) {
+        __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject::CallFunction => %s:%s failed",  objectA->GetNameFull().c_str(), GAME_OBJECT_HANDLER_ONTRIGGER.c_str() );
+      }
       break;
     }
   }
@@ -1103,20 +1151,22 @@ void Game::LuaObject_OnTrigger( ObjectTrigger* trigger, Collision* collision, bo
     return;
   }
 
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectA['%s'] GetLuaObjectId[%d]", objectA->GetNameFull().c_str(), objectA->GetLuaObjectId() );
-  __log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectB['%s'] GetLuaObjectId[%d]", objectB->GetNameFull().c_str(), objectB->GetLuaObjectId() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectA['%s'] GetLuaObjectId[%d]", objectA->GetNameFull().c_str(), objectA->GetLuaObjectId() );
+  //__log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectB['%s'] GetLuaObjectId[%d]", objectB->GetNameFull().c_str(), objectB->GetLuaObjectId() );
   if( !objectA->GetLuaObjectId() ) {
     objectA->InitLuaUserData();
-    __log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectA initializing userdata" );
+    //__log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectA initializing userdata" );
   }
 
   if( !objectB->GetLuaObjectId() ) {
     objectB->InitLuaUserData();
-    __log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectB initializing userdata" );
+    //__log.PrintInfo( Filelevel_DEBUG, "Game::LuaObject_OnTrigger => objectB initializing userdata" );
   }
 
   Engine::LuaObject::FunctionCallParametersList parameters;
   parameters.push_back( Engine::LuaObject::FunctionCallParameter( Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE, objectB->GetLuaObjectId() ) );
   parameters.push_back( Engine::LuaObject::FunctionCallParameter( !isInTrigger ) );
-  Engine::LuaObject::CallFunction( objectA->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONTRIGGER, &parameters );
+  if( !Engine::LuaObject::CallFunction( objectA->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONTRIGGER, &parameters ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject::CallFunction => %s:%s failed",  objectA->GetNameFull().c_str(), GAME_OBJECT_HANDLER_ONTRIGGER.c_str() );
+  }
 }//LuaObject_OnTrigger

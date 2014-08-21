@@ -125,7 +125,7 @@ return {
         else
           local num = math.floor( ( mousePos.y - GUI.templates.y - 15 + GUI.templates.scroll * GUI.templates.maxScroll ) / ( GUI.templates.itemSize + 5 ) ) + 1
           if num > 0 and num <= #GUI.templates.items then
-            DoPause( true )
+            self:DoPause( true )
             GUI.templates.currentItem = num
             -- Debug.RenderState( 0 )
             settings.editorType = 0
@@ -266,7 +266,7 @@ return {
 
 
   OnKeyPress = function( self, id ) --(
-    Debug.Log( string.format( 'editor.OnKeyPress => id[%d]', id ) )
+    -- Debug.Log( string.format( 'editor.OnKeyPress => id[%d]', id ) )
     if settings.gamePaused then
       if id == 0x26 or id == 0x57 then  -- Up
         settings.cameraDirection = bit32.bor( settings.cameraDirection, 8 )
@@ -382,7 +382,7 @@ return {
       ToggleGrid()
     end
     if id == 0x0D then    -- Enter
-      DoPause( not settings.gamePaused )
+      self:DoPause( not settings.gamePaused )
     end
     if id == 0x72 then    -- F3
       settings.gamePaused = true
@@ -405,7 +405,7 @@ return {
 
 
   OnKeyRelease = function( self, id ) --(
-    Debug.Log( string.format( 'editor.OnKeyPress => id[%d]', id ) )
+    -- Debug.Log( string.format( 'editor.OnKeyPress => id[%d]', id ) )
     if settings.gamePaused then
       if id == 0x26 or id == 0x57 then  -- Up
         settings.cameraDirection = bit32.band( settings.cameraDirection, bit32.bnot( 8 ) )
@@ -447,19 +447,20 @@ return {
     if self.mode[ settings.editorMode ] ~= nil then
       result = self.mode[ settings.editorMode ]( self, id, isPressed )
     end
+    GUIRenderer.OnMouseKey( id, isPressed )
     return result
   end, --) _OnMouseKey
 
+
   OnMouseMove = function( self, x, y ) --(
-    Debug.Log( string.format( 'editor.OnMouseMove => %d:%d', x, y ) )
-    if GUI.tabbedTemplates.isHovered or GUIRenderer.guiFocused then
+    if GUI.tabbedTemplates.isHovered or GUIRenderer.guiFocused then --(
       if GUIRenderer.guiFocused then
         if settings.editorMode ~= 50 then
           self.lastEditorMode = settings.editorMode
           settings.editorMode = 50
         end
       end
-    else  --(
+    else  --)(
       GUI.tooltip:SetPosition( 0, settings.windowSize.y )
       local mode = {
         [0] = function()
@@ -538,9 +539,12 @@ return {
       end
     end --)
     GUI.tabbedTemplates.OnMouseMove( x, y )
+    GUIRenderer.OnMouseMove( x, y )
     mousePos.x = x
     mousePos.y = y
+
   end, --) OnMouseMove
+
 
   ShowSelectedInterface = function( self ) --(
     self:HideSelectedInterface()
@@ -573,6 +577,7 @@ return {
     Debug.Log( string.format( 'self.selectedInterface = %3.1f:%3.1f', self.selectedInterface.x, self.selectedInterface.y ) )
   end, --)
 
+
   HideSelectedInterface = function( self ) --(
     if self.selectedInterface ~= false then
       self.selectedInterface.arrowUp.api:Destroy()
@@ -580,6 +585,7 @@ return {
       self.selectedInterface = false
     end
   end, --) HideSelectedInterface
+
 
   Render = function( self ) --(
     settings.timer = settings.timer + 0.01
@@ -653,15 +659,33 @@ return {
 
 
   OnUpdateCore = function( self ) --(
-    Debug.Log( 'OnUpdateCore' )
-    Debug.Log( 'editor.OnUpdate' )
     self:Render()
 
     if self.selectedInterface ~= false then
       local objectsList = Object.GetSelected()
       self:UpdateSelectedInterfacePosition( objectsList )
     end
-  end, --) OnUpdate
+
+    if settings.gamePaused then
+      Camera.Set( 'defaults/camera' )
+    end
+    -- local x, y = ObjectAttr( 'defaults/camera', { 'position' } )
+    local camera = Object.Get( 'defaults/camera' )
+    local x, y = camera.api:Attr({ 'position' })
+    if bit32.band( settings.cameraDirection, 8 ) == 8 then
+      y = y - 5
+    end
+    if bit32.band( settings.cameraDirection, 2 ) == 2 then
+      y = y + 5
+    end
+    if bit32.band( settings.cameraDirection, 4 ) == 4 then
+      x = x - 5
+    end
+    if bit32.band( settings.cameraDirection, 1 ) == 1 then
+      x = x + 5
+    end
+    camera.api:Attr({ position = x..' '..y  })
+  end, --) OnUpdateCore
 
 
   UpdateGuiBySelectedObject = function( self ) --(
@@ -765,6 +789,7 @@ return {
     end --)
   end, --) UpdateGuiBySelectedObject
 
+
   UpdateSelectedInterfacePosition = function( self, objectList ) --(
     if self.selectedInterface == false then
       do return end
@@ -783,4 +808,39 @@ return {
     self.selectedInterface.arrowUp:Move( x, y )
     self.selectedInterface.arrowRight:Move( x, y )
   end, --) UpdateSelectedInterfacePosition
+
+
+  FindPlayer = function( self ) --(
+    local objectsList = Object.GetRoot()
+    for _,object in pairs( objectsList ) do
+      if object.api:HasTag( 'player' ) then
+        self.player = object
+        break
+      end
+    end
+    return self.player
+  end, --) FindPlayer
+
+
+  -- Переключение режима паузы (редактора) и игры
+  DoPause = function( self, setPause ) --(
+    local player = Object.Get( 'editor' ):FindPlayer()
+    settings.gamePaused = setPause
+    Scene.SetPause( not settings.gamePaused )
+    if settings.gamePaused then
+      if Camera.Get().api:GetNameFull() ~= 'defaults/camera' then
+        local x, y = player.api:Attr({ 'position' })
+        Object.Get( 'defaults/camera' ).api:Attr({ position = x..' '..y })
+      end
+      Camera.Set( 'defaults/camera' )
+    else
+      if player ~= nil then
+        Camera.Set( player )
+      end
+      Debug.RenderState( 0 )
+      settings.editorType = 0
+      GUI.elements.layer:SetText( 'default' )
+      -- OnChangeLayer( GUI.elements.layer )
+    end
+  end --) DoPause
 }

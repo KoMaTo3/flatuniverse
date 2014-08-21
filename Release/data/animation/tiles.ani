@@ -1,0 +1,51 @@
+template "brick/question/0" {
+  animation "default" 0.8 {
+    sprite "brick" {
+      renderable_texture( "data/textures/tiles/bricks/brick-question.png" )
+      renderable_size( 24, 24 )
+      renderable_rotation( 0 )
+      renderable_texture_coords {
+        0.0( 0,0, 0.333,1 )
+        0.15( 0.333,0, 0.666,1 )
+        0.3( 0.666,0, 1,1 )
+        0.45( 0.333,0, 0.666,1 )
+        0.6( 0,0, 0.333,1 )
+      }
+    }
+  }
+
+  animation "kick" 0.3 {
+    sprite "brick" {
+      renderable_texture( "data/textures/tiles/bricks/brick-question.png", 0,0, 0.333,1 )
+      renderable_size( 24, 24 )
+      renderable_rotation( 0 )
+      position {
+        0.0( 0, 0 )
+        0.15 linear( 0, -10 )
+        0.3 linear( 0, 0 )
+      }
+    }
+  }
+
+  animation "kick-and-freeze" 0.3 {
+    sprite "brick" {
+      renderable_texture( "data/textures/tiles/bricks/brick2.png", 0,0, 1,1 )
+      renderable_size( 24, 24 )
+      renderable_rotation( 0 )
+      position {
+        0.0( 0, 0 )
+        0.15 linear( 0, -10 )
+        0.3 linear( 0, 0 )
+      }
+    }
+  }
+
+  animation "freezed" 0 {
+    sprite "brick" {
+      renderable_texture( "data/textures/tiles/bricks/brick2.png", 0,0, 1,1 )
+      renderable_size( 24, 24 )
+      renderable_rotation( 0 )
+      position( 0,0 )
+    }
+  }
+}//brick/question/0

@@ -67,7 +67,7 @@ void Keyboard::DoPress( Dword keyId )
 
   if( !this->keysOld.getData()[ keyId ] )
     this->keysPressed.getData()[ keyId ] = true;
-  __log.PrintInfo( Filelevel_DEBUG, "Keyboard::DoPress => x%X", keyId );
+  //__log.PrintInfo( Filelevel_DEBUG, "Keyboard::DoPress => x%X", keyId );
 
   if( !this->listeners.empty() )
   {

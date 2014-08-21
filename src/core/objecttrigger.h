@@ -92,6 +92,8 @@ public:
   ObjectTrigger*  SetSize       ( const Vec3 &setSize );
   ObjectTrigger*  SetPolygon    ( const CollisionElementPolygon::PointList &points );
   const Vec3&     GetSize       ( );
+  inline void     SetOffset     ( const Vec3 &setOffset ) { this->offset = setOffset; }
+  const Vec3&     GetOffset     () { return this->offset; }
   inline
   const Vec3&     GetPosition   ( ){ return *this->position; }
   bool            TestInPoint   ( const Vec2 &pos );

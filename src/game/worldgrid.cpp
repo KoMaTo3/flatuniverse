@@ -303,7 +303,9 @@ void World::Grid::Update()
     //this->objects.push_back( ObjectPointerType() );
     //this->objects.rbegin()->Init( object );
 
-    this->AttachObject( object );
+    if( !object->GetIsActiveObject() ) {
+      this->AttachObject( object );
+    }
   }
 }//Update
 

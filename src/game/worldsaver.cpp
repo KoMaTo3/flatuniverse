@@ -23,7 +23,7 @@ World::Saver::Saver()
 */
 void World::Saver::SaveGrid( Short x, Short y, memory& data )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::SaveGrid => pos[%d; %d] dataLength[%d]", x, y, data.getLength() );
+  __log.PrintInfo( Filelevel_DEBUG, "World::Saver::SaveGrid => pos[%d; %d] dataLength[%d]", x, y, data.getLength() );
   if( this->GridExists( x, y ) ) {
     this->FreeGrid( x, y );
   }
@@ -74,7 +74,7 @@ void World::Saver::SaveGrid( Short x, Short y, memory& data )
     bufferSrc += this->blockSize;
   }
 
-  //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::SaveGrid => done" );
+  __log.PrintInfo( Filelevel_DEBUG, "World::Saver::SaveGrid => done" );
 }//SaveGrid
 
 
@@ -120,7 +120,7 @@ void World::Saver::AllocFreeBlocks( Dword blocksCount )
 */
 bool World::Saver::LoadGrid( Short x, Short y, FU_OUT memory& data, FU_OUT Dword &version )
 {
-  //__log.PrintInfo( Filelevel_DEBUG, "World::Saver::LoadGrid => [%d; %d]", x, y );
+  __log.PrintInfo( Filelevel_DEBUG, "World::Saver::LoadGrid => [%d; %d]", x, y );
   data.Free();
   GridInfo *grid = this->GridExists( x, y );
   if( !grid ) {
@@ -140,7 +140,7 @@ bool World::Saver::LoadGrid( Short x, Short y, FU_OUT memory& data, FU_OUT Dword
     bufferDest += this->blockSize;
   }
   version = grid->version;
-  //__log.PrintInfo( Filelevel_DEBUG, ". loaded" );
+  __log.PrintInfo( Filelevel_DEBUG, ". loaded" );
 
   this->FreeGrid( x, y );
 

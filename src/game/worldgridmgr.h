@@ -43,6 +43,7 @@ public:
 
   void        Update                  ( bool forceLoadGrids = false );
   void        AddActiveObject         ( Object *obj, const bool forceLoadGrid = false );
+  void        RemoveActiveObject      ( Object *obj );
   void        AttachObjectToGrid      ( const World::Grid::Position& gridPos, Object *obj );
   void        AttachObjectToGrid      ( Short gridX, Short gridY, Object *obj );
   World::Grid*  IsGridLoaded            ( const World::Grid::Position& gridPos );

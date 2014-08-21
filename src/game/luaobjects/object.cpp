@@ -118,7 +118,7 @@ int Engine::LuaObject_Get( lua_State *lua ) {
       object->InitLuaUserData();
     }
     lua_rawgeti( lua, LUA_REGISTRYINDEX, object->GetLuaObjectId() );
-    __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_Get => id %d", object->GetLuaObjectId() );
+    //__log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_Get => id %d", object->GetLuaObjectId() );
     if( !lua_istable( lua, -1 ) ) {
       __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_Get => %d is not a table", object->GetLuaObjectId() );
     } else {
@@ -368,7 +368,7 @@ int Engine::LuaObject_SetAnimation( lua_State *lua ) {
     }
   }
   */
-  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation => luaFunctionId[%d]", actionAfterAnimation.luaFunctionId );
+  //__log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation => luaFunctionId[%d]", actionAfterAnimation.luaFunctionId );
 
   Animation::AnimationPack *pack = object->ApplyAnimation( actionAfterAnimation, templateName, animation );
   if( pack ) {
@@ -381,8 +381,10 @@ int Engine::LuaObject_SetAnimation( lua_State *lua ) {
 
 void Engine::LuaObject_AnimationCallback( Animation::AnimationSetAction *action ) {
   if( !action->luaFunctionId ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_AnimationCallback => luaFunctionId is NULL" );
     return;
   }
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_AnimationCallback => do, functionId[%d]", action->luaFunctionId );
   Object *object = reinterpret_cast< Object* >( action->userData );
   __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_AnimationCallback => object['%s']", object->GetNameFull().c_str() );
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
@@ -394,9 +396,13 @@ void Engine::LuaObject_AnimationCallback( Animation::AnimationSetAction *action 
   lua_rawgeti( lib->lua, LUA_REGISTRYINDEX, object->GetLuaObjectId() );
   lua_getfield( lib->lua, -1, "fn" );
   lua_remove( lib->lua, -2 );
-  lua_pcall( lib->lua, 1, 0, 0 );
+  if( lua_pcall( lib->lua, 1, 0, 0 ) ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_AnimationCallback => failed to call function %d in object '%s': %s", action->luaFunctionId, object->GetNameFull().c_str(), lua_tostring( lib->lua, -1 ) );
+    lua_pop( lib->lua, 1 );
+  }
   luaL_unref( lib->lua, LUA_REGISTRYINDEX, action->luaFunctionId );
   action->luaFunctionId = 0;
+  action->callback = NULL;
 }//LuaObject_AnimationCallback
 
 
@@ -738,10 +744,11 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
     return 0;
   }
 
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
   VariableAttributesList setAttrs, getAttrs;
   VariableAttribute *attr = NULL;
   int returnValuesCount = 0;
-  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_Attr => is table[%d]", lua_istable( lua, -1 ) );
+  //__log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_Attr => is table[%d]", lua_istable( lua, -1 ) );
   lua_pushnil( lua );
   while( lua_next( lua, -2 ) ) {
     if( lua_isnumber( lua, -2 ) ) { //get: ключ = число == без ключа, возвращаем значения
@@ -823,8 +830,13 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
     }//collision
     if( attr->name == "trigger" ) {
       if( attr->value.GetBoolean() ) {
-        object->EnableTrigger();
+        ObjectTrigger *trigger = object->EnableTrigger();
+        if( Engine::LuaObject::IsFunctionExists( object->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, GAME_OBJECT_HANDLER_ONTRIGGER ) ) {
+          lib->game->luaObjectOnTrigger.push_back( object->GetLuaObjectId() );
+          trigger->AddHandler( Game::LuaObject_OnTrigger );
+        }
       } else {
+        lib->game->EraseLuaHandler( object->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONTRIGGER, lib->game->luaObjectOnTrigger );
         object->DisableTrigger();
       }
       continue;
@@ -1041,6 +1053,17 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
       }
       continue;
     }//triggerPolygon
+    if( attr->name == "triggerOffset" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        Vec3 offset( 0.0f, 0.0f, 0.0f );
+        int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &offset.x, &offset.y );
+        trigger->SetOffset( offset );
+      } else {
+        __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => triggerOffset: object '%s' not triger", object->GetNameFull().c_str() );
+      }
+      continue;
+    }//triggerSize
     if( attr->name == "lightPointSize" ) {
       ObjectWidget::WidgetLightPoint *widget = object->GetLightPoint();
       if( widget ) {
@@ -1085,6 +1108,10 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
     }//lightPointPenetration
     if( attr->name == "z" ) {
       object->SetZ( attr->value.GetNumber() );
+      continue;
+    }//z
+    if( attr->name == "lockToDelete" ) {
+      object->SetLockToDelete( attr->value.GetBoolean() );
       continue;
     }//z
   }//set
@@ -1354,6 +1381,22 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
       }
       continue;
     }//triggerSize
+    if( attr->name == "triggerOffset" ) {
+      trigger = object->GetTrigger();
+      if( trigger ) {
+        Vec3 offset = trigger->GetOffset();
+        //attr->value.SetVec2( Vec2( size.x, size.y ) );
+        lua_pushnumber( lua, offset.x );
+        lua_pushnumber( lua, offset.y );
+        returnValuesCount += 2;
+      } else {
+        //attr->value.SetVec2( Vec2Null );
+        lua_pushnumber( lua, 0.0 );
+        lua_pushnumber( lua, 0.0 );
+        returnValuesCount += 2;
+      }
+      continue;
+    }//triggerOffset
     if( attr->name == "triggerPolygon" ) {
       trigger = object->GetTrigger();
       if( trigger ) {
@@ -1384,6 +1427,11 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
       float z = object->GetPosition().z;
       //attr->value.SetNumber( z );
       lua_pushnumber( lua, z );
+      ++returnValuesCount;
+      continue;
+    }//z
+    if( attr->name == "lockToDelete" ) {
+      lua_pushboolean( lua, object->GetLockToDelete() );
       ++returnValuesCount;
       continue;
     }//z
