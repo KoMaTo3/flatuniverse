@@ -122,6 +122,7 @@ public:
   bool        TestIntersect   ( Collision& item );
   bool        TestIntersect   ( const Vec3 &leftTopPoint, const Vec3 &rightBottomPoint );
   bool        TestInPoint     ( const Vec2 &pos );
+  int         GetFlags        ( const Vec2 &sourceRectLeftTop, const Vec2 &sourceRectRightBottom, const Collision *target ) const;
 
   bool        Update          ( float dt );
   void        ResolveCollision();

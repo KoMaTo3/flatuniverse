@@ -690,7 +690,8 @@ function EditorUpdateDebug( timerId )
     x = cx + mx - width * 0.5,
     y = cy + my - height * 0.5
   }
-  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] pixel[%d; %d] mode[%d] test[%d] gui[%d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), math.floor( pos.x ), math.floor( pos.y ), settings.editorMode, ( GUI.tabbedTemplates.isHovered and '1' or '0' ), ( GUIRenderer.guiFocused and '1' or '0' ) ) )
+  local gbmx, gbmy = GetGridByCoords( pos.x, pos.y )
+  GUI.elements.labelDebug:SetText( string.format( 'grid[%d; %d] gridbymouse[%d; %d] pixel[%d; %d] mode[%d] test[%d] gui[%d]', math.floor( cx / settings.gridSize ), math.floor( cy / settings.gridSize ), gbmx, gbmy, math.floor( pos.x ), math.floor( pos.y ), settings.editorMode, ( GUI.tabbedTemplates.isHovered and '1' or '0' ), ( GUIRenderer.guiFocused and '1' or '0' ) ) )
   -- GuiSetText( 'editor/debug', settings.editorMode..':buffer['..#settings.buffer..']' )
   Core.SetTimer( 0.01, EditorUpdateDebug, true )
 end -- EditorUpdateDebug
@@ -999,8 +1000,8 @@ function EditorInsertItemByTemplate( px, py ) --(
   end
 
   if tags ~= nil then
-    for q = 1,#tags do
-      newObject.api:AddTag( tags[ q ] )
+    for _,tag in pairs( tags ) do
+      newObject.api:AddTag( tag )
     end
   end
 

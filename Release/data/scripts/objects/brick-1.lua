@@ -10,8 +10,12 @@ return {
   OnCreate = function( self ) --(
     if self.data.state == nil then
       self.data = {
+        state = 0,
+        coinsCount = 1,
       }
     end
+
+    -- reset
     self.data.state = 0
     self.data.coinsCount = 3 -- вот этого здесь нельзя писать, только при инициализации
     self.api:SetAnimation( 'brick/question/0', 'default', 'repeat' )
@@ -26,16 +30,15 @@ return {
         x = _x,
         y = _y,
       }
-      self.data.timer = 0
       local vx, vy = target.api:Attr({ 'collisionVelocity' })
       if( vy < 0 ) then
         vy = 50
         target.api:Attr({ collisionVelocity = vx..' '..vy })
       end
-      self.data.state = 1
 
       -- coin
-      if( self.api:HasTag( 'has-coin' ) ) then --(
+      if( self.api:HasTag( 'has-coin' ) and target.api:HasTag( 'player' ) ) then --(
+        self.data.state = 1
         local coin = Object.New( 'coin', self.api:GetNameFull(), false )
         coin.api:SetPos( _x, _y )
         local parent = self

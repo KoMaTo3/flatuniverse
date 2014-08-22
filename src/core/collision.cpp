@@ -587,9 +587,20 @@ void Collision::ResolveCollision()
 
   //call handlers
   if( this->handlers && !this->handlers->empty() ) {
-    CollisionHandlerList::const_iterator iter, iterEnd = this->handlers->end();
-    for( iter = this->handlers->begin(); iter != iterEnd; ++iter ) {
-      ( *iter )( this, result->target, flags, oldVelocity );
+    /*
+    const Vec2 thisSize( this->size.x * 0.5f, this->size.y * 0.5f );
+    const Vec2
+      thisRectLeftTop( this->position->x - thisSize.x, this->position->y - thisSize.y ),
+      thisRectRightBottom( this->position->x + thisSize.x, this->position->y + thisSize.y );
+      */
+    for( auto &handler: *this->handlers ) {
+      /*
+      for( auto &solver: this->resolver ) {
+        int thisFlags = this->GetFlags( thisRectLeftTop, thisRectRightBottom, solver.target );
+        ( *iter )( this, solver.target, thisFlags, solver.resolveVector );
+      }
+      */
+      handler( this, result->target, flags, oldVelocity );
     }
   }
   if( this->newHandlers && !this->newHandlers->empty() ) {
@@ -601,6 +612,26 @@ void Collision::ResolveCollision()
 
   this->Update( 0.0f );
 }//ResolveCollision
+
+
+
+int Collision::GetFlags( const Vec2 &sourceRectLeftTop, const Vec2 &sourceRectRightBottom, const Collision *target ) const {
+  const Vec2 targetSize( target->size.x * 0.5f, target->size.y * 0.5f );
+  const Vec2
+    targetRectLeftTop( target->position->x - targetSize.x, target->position->y - targetSize.y ),
+    targetRectRightBottom( target->position->x + targetSize.x, target->position->y + targetSize.y );
+  return
+    ( sourceRectLeftTop.x >= targetRectRightBottom.x ? 8 :
+    ( sourceRectLeftTop.y >= targetRectRightBottom.y ? 1 :
+    ( sourceRectRightBottom.x <= targetRectLeftTop.x ? 2 :
+    ( sourceRectRightBottom.y <= targetRectLeftTop.y ? 4 :
+      0
+    )
+    )
+    )
+    );
+}//GetFlags
+
 
 
 

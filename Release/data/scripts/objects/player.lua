@@ -296,9 +296,13 @@ return {
         self.api:SetAnimation( 'player/mario', ( math.abs( self.data.playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
       end
     else  -- on air
-      if self.data.playerState.currentAction ~= 2 then
+      if( self.data.playerState.currentAction == 2 ) then
+        local _, vy = self.api:Attr({ 'collisionVelocity' })
+        if( math.abs( vy ) > 100 ) then
+          self.api:SetAnimation( 'player/mario', 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+        end
+      else
         self.data.playerState.currentAction = 2
-        self.api:SetAnimation( 'player/mario', 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
       end
     end
   end, --) OnUpdate
