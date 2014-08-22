@@ -384,6 +384,7 @@ function EditorInit()
   -- GUIRenderer.OnKeyboardDefault = OnEditorKey
 
   local editor = Object.New( 'editor', '', false )
+  editor.api:Attr({ lockToDelete = true })
   editor.api:SetScript( 'data/scripts/objects/editor.lua' )
 
   -- GUI

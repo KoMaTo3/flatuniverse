@@ -1473,7 +1473,6 @@ LRESULT Core::Signal( DWORD code, LPARAM lParam, WPARAM wParam, void *pointer )
 */
 bool Core::Update()
 {
-  __log.PrintInfo( Filelevel_DEBUG, "Core::Update" );
   GL_CHECK_ERROR;
   sTimer.Update();
   this->keyboard.Update();
@@ -1543,11 +1542,8 @@ bool Core::Update()
       __objectsToRemove.pop_front();
     }
   }
-  __log.PrintInfo( Filelevel_DEBUG, "Core::Update => object unloader done" );
 
   __workPipeline->Update();
-
-  __log.PrintInfo( Filelevel_DEBUG, "============" );
   return true;
 }//Update
 

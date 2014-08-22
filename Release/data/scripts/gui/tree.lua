@@ -105,7 +105,6 @@ function GUITree:RecalculateScroll() --(
     maxHeight = maxHeight + self.lineHeight
   end
   self.scrollSize = ( maxHeight > self.rect.height - 10 ) and ( maxHeight - ( self.rect.height - 10 ) ) or 0
-  Debug.Log( 'self.scrollSize = '..self.scrollSize )
 end --) GUITree:RecalculateScroll
 
 

@@ -93,7 +93,6 @@ return {
           settings.editorMode = 2
         else
           local objects = GetObjectUnderCursorByMode()
-          -- Debug.Log( 'GetObjectUnderCursorByMode => '..object )
           Object.Select( objects )
           self:HideSelectedInterface()
           self:UpdateGuiBySelectedObject()
@@ -260,13 +259,11 @@ return {
 
 
   OnCreate = function( self ) --(
-    Debug.Log( 'editor initialized' )
     self.selectedInterface = false
   end, --) OnCreate
 
 
   OnKeyPress = function( self, id ) --(
-    -- Debug.Log( string.format( 'editor.OnKeyPress => id[%d]', id ) )
     if settings.gamePaused then
       if id == 0x26 or id == 0x57 then  -- Up
         settings.cameraDirection = bit32.bor( settings.cameraDirection, 8 )
@@ -307,7 +304,7 @@ return {
     if id == 0x33 then    -- 3
       SetEditorMode( 3 )
     end
-    if id == 0x2E then    -- Del
+    if id == 0x2E then --( Del
       local objectList = Object.GetSelected() -- GuiGetText( 'editor/object.object_name' )
       for _,object in pairs( objectList ) do --(
         -- buffer
@@ -362,14 +359,15 @@ return {
           end
         )
         --
-        Object.Get( name ).api:Destroy()
+        Debug.Log( 'Del object '..( object.api:GetNameFull() ) )
+        object.api:Destroy()
       end --)
       Object.Select( nil )
       if settings.editorMode == 2 then
         settings.editorMode = 0
       end
       self:UpdateGuiBySelectedObject()
-    end
+    end --) Del
     if id == 0x20 then    -- Space
       Object.Select( nil )
       self:UpdateGuiBySelectedObject()
@@ -405,7 +403,6 @@ return {
 
 
   OnKeyRelease = function( self, id ) --(
-    -- Debug.Log( string.format( 'editor.OnKeyPress => id[%d]', id ) )
     if settings.gamePaused then
       if id == 0x26 or id == 0x57 then  -- Up
         settings.cameraDirection = bit32.band( settings.cameraDirection, bit32.bnot( 8 ) )
@@ -497,7 +494,6 @@ return {
           local moveByX, moveByY = -settings.move.lastOffset.x + dx, -settings.move.lastOffset.y + dy
           settings.move.lastOffset.x = settings.move.lastOffset.x + moveByX
           settings.move.lastOffset.y = settings.move.lastOffset.y + moveByY
-          Debug.Log( settings.move.lastOffset.x..':'..settings.move.lastOffset.y..' => '..moveByX..':'..moveByY )
           for _,objectByName in pairs( objectList ) do
             -- local objectByName = Object.Get( name )
             local x, y = objectByName.api:GetPos()
@@ -573,8 +569,6 @@ return {
     self.selectedInterface.arrowUp:Init( self.selectedInterface.x, self.selectedInterface.y )
     self.selectedInterface.arrowRight = self.selectedInterface.arrowRight.api:SetScript( 'data/scripts/objects/editor-selected-object-arrow-right.lua' )
     self.selectedInterface.arrowRight:Init( self.selectedInterface.x, self.selectedInterface.y )
-
-    Debug.Log( string.format( 'self.selectedInterface = %3.1f:%3.1f', self.selectedInterface.x, self.selectedInterface.y ) )
   end, --)
 
 
@@ -649,7 +643,6 @@ return {
 
     if self.selectedInterface ~= false then --(
       local x, y = GetWorldToScreen( self.selectedInterface.x, self.selectedInterface.y )
-      Debug.Log( string.format( '=> %3.1f; %3.1f => %3.1f; %3.1f', self.selectedInterface.x, self.selectedInterface.y, x, y ) )
       Debug.Render( 'rect', x - 1, y, 8.0, x + 1, y - 50, 8.0, '00ff00ff' )
       Debug.Render( 'rect', x, y - 1, 8.0, x + 50, y + 1, 8.0, 'ff0000ff' )
       Debug.Render( 'sprite', x + 50, y - 5, 8.0, x + 60, y + 4, 8.0, 'data/textures/tiles/tile000d.png', 'ff0000ff' )

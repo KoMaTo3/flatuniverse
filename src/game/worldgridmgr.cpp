@@ -446,11 +446,7 @@ void World::GridManager::SaveToFile( const std::string& fileName )
 */
 void World::GridManager::LoadFromFile( const std::string& fileName )
 {
-  World::GridCoreObjectList objectsList;
-  this->version = this->worldSaver.LoadFromFile( &objectsList, fileName, this->rootGridObject );
-  for( auto &object: objectsList ) {
-    this->AddActiveObject( object );
-  }
+  this->version = this->worldSaver.LoadFromFile( fileName, this->rootGridObject );
 }//LoadFromFile
 
 

@@ -49,7 +49,6 @@ return {
   OnCollision = function( self, target, flags, vx, vy ) --(
     local targetName = target.api:GetNameFull()
     local player = self.api:GetNameFull()
-    -- Debug.Log( string.format( 'player OnCollision with "%s": flags[%d] v[%3.1f; %3.1f]', targetName, flags, vx, vy ) )
     if target.api:HasTag( 'no-reset-player-velocity' ) then
       self.api:Attr({ collisionVelocity = vx..' '..vy })
     end

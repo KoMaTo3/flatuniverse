@@ -34,8 +34,6 @@ return {
         target.api:Attr({ collisionVelocity = vx..' '..vy })
       end
       --[[ self.api:SetAnimation( 'supermario/brick0', 'do', function( self )
-          Debug.Log( 'animation callback' )
-          Debug.Log( 'animation callback: '..self.api:GetNameFull() )
           self.data.state = 0
           self.api:SetAnimation( 'supermario/brick0', 'default' )
           self.api:RemoveTag( 'push-bottom' )

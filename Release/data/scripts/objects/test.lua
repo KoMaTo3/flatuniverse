@@ -1,17 +1,14 @@
 return {
   Init = function( self ) --(
-    Debug.Log( 'Init...' )
     self.data = {
       isInitialized = true,
       counter = 0,
       seed = Tools.GetRandomSeed(),
     }
-    Debug.Log( 'Init done' )
   end, --) Init
 
   DoSomething = function( self ) --(
     self.data.counter = self.data.counter + 1
-    Debug.Log( 'test.lua: counter = '..( self.data.counter ) )
   end, --) DoSomething
 
   OnCreate = function( self ) --(

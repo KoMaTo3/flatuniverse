@@ -1,6 +1,5 @@
 return {
   OnCreate = function( self ) --(
-    Debug.Log( 'arrow-up: created' )
     self.api:Attr({
       renderable = true, textureName = 'textures/tiles/tile000b.png', renderableSize = '10 10'
     })
@@ -8,10 +7,6 @@ return {
     self.isFocused = false
     self.state = 0
   end, --) OnCreate
-
-  OnDestroy = function( self )
-    Debug.Log( 'arrow-up: destroyed' )
-  end,
 
   Init = function( self, x, y ) --(
     self:Move( x, y )

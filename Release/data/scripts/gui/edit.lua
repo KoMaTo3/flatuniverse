@@ -184,7 +184,6 @@ function GUIEdit:TestInRect( x, y, dx, dy )
     self.hoverPos.y = y - ( self.rect.top + dy )
     if self.state == 2 then -- select my mouse
       -- calculate cursor position
-      Debug.Log( self.hoverPos.x )
       local x
       local oldX = self.contentRenderOffset
       local oldCursorPos = self.cursorPos

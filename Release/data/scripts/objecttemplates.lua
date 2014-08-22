@@ -432,7 +432,7 @@ function GetObjectsTabbedTemplates()  --(
         name = 'Super Mario',
         icon = 'data/textures/player/mario/mario-icon.png',
         attr = {
-          lockToDelete = true,
+          -- lockToDelete = true,
           collision = true, collisionSize = '14 20', collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '0 0',
           lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1',
         },

@@ -46,7 +46,7 @@ public:
   void  FreeGrid        ( Short x, Short y );
   void  AllocFreeBlocks ( Dword blocksCount );
 
-  Dword LoadFromFile    ( FU_OUT World::GridCoreObjectList *activeObjectsList, const std::string& fileName, Object *rootObject );
+  Dword LoadFromFile    ( const std::string& fileName, Object *rootObject );
   void  SaveToFile      ( FU_IN World::GridObjectList *activeObjectsList, const std::string& fileName );
   inline const std::string& GetFileName() const {
     return this->fileName;

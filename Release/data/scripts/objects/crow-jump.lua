@@ -9,7 +9,6 @@ return {
     if self.data.isInitialized == nil then
       self:Init()
     end
-    Debug.Log( 'OnCreate crow' )
     self.player = Object.Get( 'player' )
     self.data.jumpCooldown = 0
   end, --) OnCreate

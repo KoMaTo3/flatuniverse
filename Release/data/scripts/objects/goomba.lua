@@ -34,7 +34,6 @@ return {
   OnUpdate = function( self ) --(
     local _, y = self.api:GetPos()
     if y > 150 then
-      Debug.Log( 'goobma destroy' )
       self.api:Destroy()
     end
   end, --)

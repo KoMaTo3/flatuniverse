@@ -276,7 +276,7 @@ void World::Saver::SaveToFile( FU_IN World::GridObjectList *activeObjectsList, c
   LoadFromFile
 =============
 */
-Dword World::Saver::LoadFromFile( FU_OUT GridCoreObjectList *activeObjectsList, const std::string& fileName, Object *rootObject )
+Dword World::Saver::LoadFromFile( const std::string& fileName, Object *rootObject )
 {
   memory data;
   if( !__fileManager->GetFile( fileName, data ) ) {
@@ -358,7 +358,6 @@ Dword World::Saver::LoadFromFile( FU_OUT GridCoreObjectList *activeObjectsList, 
       for( size_t q = 0; q < activeObjectsCount; ++q ) {
         Object *object = new Object();
         object->LoadFromBuffer( headerReader, rootObject, version );
-        activeObjectsList->push_back( object );
       }
     }
   }
