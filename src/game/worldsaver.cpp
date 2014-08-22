@@ -1,5 +1,4 @@
 ﻿#include "worldsaver.h"
-#include "worldgrid.h"
 #include "core/file.h"
 #include "core/filemanager.h"
 #include "core/memorywriter.h"
@@ -208,7 +207,7 @@ void World::Saver::FreeGrid( Short x, Short y )
   SaveToFile
 =============
 */
-void World::Saver::SaveToFile( const std::string& fileName )
+void World::Saver::SaveToFile( FU_IN World::GridObjectList *activeObjectsList, const std::string& fileName )
 {
   std::string resultFileName = ( fileName.empty() ? this->fileName : fileName );
   File f;
@@ -247,6 +246,21 @@ void World::Saver::SaveToFile( const std::string& fileName )
     }
   }
 
+  size_t activeObjectsCount = 0;
+  for( auto &object: *activeObjectsList ) {
+    if( object->GetObject< Object >()->IsSaveable() ){
+      ++activeObjectsCount;
+    }
+  }
+  headerWriter << activeObjectsCount;
+  for( auto &object: *activeObjectsList ) {
+    Object *obj = object->GetObject< Object >();
+    if( obj->IsSaveable() ){
+      __log.PrintInfo( Filelevel_DEBUG, "World::Saver::SaveToFile => save active object '%s'", obj->GetNameFull().c_str()  );
+      obj->SaveToBuffer( headerWriter );
+    }
+  }
+
   //заголовок и его длина
   Dword headerLength = header.getLength();
   f.Write( header.getData(), headerLength );
@@ -262,7 +276,7 @@ void World::Saver::SaveToFile( const std::string& fileName )
   LoadFromFile
 =============
 */
-Dword World::Saver::LoadFromFile( const std::string& fileName )
+Dword World::Saver::LoadFromFile( FU_OUT GridCoreObjectList *activeObjectsList, const std::string& fileName, Object *rootObject )
 {
   memory data;
   if( !__fileManager->GetFile( fileName, data ) ) {
@@ -280,7 +294,7 @@ Dword World::Saver::LoadFromFile( const std::string& fileName )
   MemoryReader headerReader( data );
   Dword version;
   headerReader >> version;
-  //__log.PrintInfo( Filelevel_DEBUG, ". version[x%X]", version );
+  __log.PrintInfo( Filelevel_DEBUG, "World version x%X", version );
   if( version != World::VERSION ) {
     //__log.PrintInfo( Filelevel_WARNING, "World::Saver::LoadFromFile => file '%s' has bad version of data (x%X), needed version x%X", fileName.c_str(), version, World::VERSION );
     //return 0;
@@ -335,6 +349,19 @@ Dword World::Saver::LoadFromFile( const std::string& fileName )
     this->grids.push_back( grid );
   }
   this->fileName = fileName;
+
+  if( version >= 0x0000000F ) {
+    size_t activeObjectsCount;
+    headerReader >> activeObjectsCount;
+    __log.PrintInfo( Filelevel_DEBUG, "Active objects %d", activeObjectsCount );
+    if( activeObjectsCount ) {
+      for( size_t q = 0; q < activeObjectsCount; ++q ) {
+        Object *object = new Object();
+        object->LoadFromBuffer( headerReader, rootObject, version );
+        activeObjectsList->push_back( object );
+      }
+    }
+  }
 
   return version;
 }//LoadFromFile

@@ -142,6 +142,7 @@ void World::GridManager::Update( bool forceLoadGrids )
             this->LoadGrid( pos )->AttachObject( object );
             //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::Update => load grid[%d; %d] done", pos.x, pos.y );
           }
+          __log.PrintInfo( Filelevel_DEBUG, "World::GridManager::Update => object '%s' x%p moved to other grid", object->GetNameFull().c_str(), object );
           keepChecking = false;
           break;
         }
@@ -255,6 +256,13 @@ void World::GridManager::AddActiveObject( Object *obj, const bool forceLoadGrid 
   this->activeObjects.push_back( pointer );
   obj->SetIsActiveObject( true );
 
+  for( auto &grid: *__worldGridList ) {
+    if( grid->IsThisObject( obj ) ) {
+      grid->DetachObject( obj );
+      break;
+    }
+  }
+
   //__log.PrintInfo( Filelevel_DEBUG, "WorldGridManager::AddActiveObject => object '%s' added to list", obj->GetNameFull().c_str() );
 }//AddActiveObject
 
@@ -300,6 +308,7 @@ void World::GridManager::AttachObjectToGrid( const World::Grid::Position& gridPo
     return;
   }
 
+  __log.PrintInfo( Filelevel_DEBUG, "World::GridManager::AttachObjectToGrid => object '%s' x%p attaching to grid", obj->GetNameFull().c_str(), obj );
   bool attached = false;
   World::GridList::iterator iterGrid, iterGridEnd = __worldGridList->end();
   for( iterGrid = __worldGridList->begin(); iterGrid != iterGridEnd; ++iterGrid )
@@ -355,8 +364,12 @@ World::Grid* World::GridManager::LoadGrid( const World::Grid::Position& gridPos,
 
   memory gridData;
   Dword gridVersion = 0;
+  World::GridCoreObjectList newActiveObjectsList;
   if( this->worldSaver.LoadGrid( gridPos.x, gridPos.y, gridData, gridVersion ) ) {
     grid->LoadFromDump( gridData, this->rootGridObject, gridVersion, forceLoad );
+    for( auto &object: newActiveObjectsList ) {
+      this->AddActiveObject( object );
+    }
     __log.PrintInfo( Filelevel_DEBUG, "World::GridManager::LoadGrid ok" );
   }
 
@@ -420,7 +433,7 @@ void World::GridManager::SaveToFile( const std::string& fileName )
     this->UnloadGrid( (  *__worldGridList->begin() )->GetPosition(), true );
   }
   __log.PrintInfo( Filelevel_DEBUG, "World::GridManager::SaveToFile => grids unloaded" );
-  this->worldSaver.SaveToFile( fileName );
+  this->worldSaver.SaveToFile( &this->activeObjects, fileName );
   __log.PrintInfo( Filelevel_DEBUG, "World::GridManager::SaveToFile => done" );
 }//SaveToFile
 
@@ -433,7 +446,11 @@ void World::GridManager::SaveToFile( const std::string& fileName )
 */
 void World::GridManager::LoadFromFile( const std::string& fileName )
 {
-  this->version = this->worldSaver.LoadFromFile( fileName );
+  World::GridCoreObjectList objectsList;
+  this->version = this->worldSaver.LoadFromFile( &objectsList, fileName, this->rootGridObject );
+  for( auto &object: objectsList ) {
+    this->AddActiveObject( object );
+  }
 }//LoadFromFile
 
 

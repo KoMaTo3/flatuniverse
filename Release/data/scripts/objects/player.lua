@@ -24,7 +24,9 @@ return {
       self.api:AddTag( 'player' )
       self.api:Attr({ collisionAcceleration = '0 1500', lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1', lightPointPenetration = 3 })
     end
-    Debug.Log( 'currentAction = '..self.data.playerState.currentAction )
+    if( self.data.currentAction == 1 ) then
+      self.data.currentAction = 0
+    end
     if( self.data.playerState.currentAction == 0 ) then
       self.api:SetAnimation( 'player/mario', 'stay-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
     elseif( self.data.playerState.currentAction == 2 ) then

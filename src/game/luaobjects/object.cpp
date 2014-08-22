@@ -77,6 +77,7 @@ int Engine::LuaObject_New( lua_State *lua ) {
       currentPath += ( currentPath.length() ? "/" : "" ) + *iter;
       if( !notInGrid && isSaveable ) {
         lib->game->world->AttachObjectToGrid( lib->game->world->GetGridPositionByObject( *obj ), obj );
+        __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_New => object '%s' x%p attached to grid", obj->GetNameFull().c_str(), obj );
       }
     }
     //std::string nextLevel = &name[ slashPos ];
@@ -90,6 +91,7 @@ int Engine::LuaObject_New( lua_State *lua ) {
     if( !notInGrid && isSaveable ) {
       World::Grid::Position gridPos = lib->game->world->GetGridPositionByObject( *obj );
       lib->game->world->AttachObjectToGrid( gridPos, obj );
+      __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_New => object '%s' %p attached to grid", obj->GetNameFull().c_str(), obj );
     }
   }
 

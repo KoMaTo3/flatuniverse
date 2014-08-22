@@ -46,8 +46,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
   game->world = new World::GridManager( game->core->GetRootObject(), gridsAroundObject );
 
   bool isDebug = __config->GetBoolean( "is_debug" );
-  Object *obj;
-  Collision *col;
   float worldAlpha = ( isDebug ? 0.1f : 1.0f );
   //CollisionElementPolygon::PointList polyPoints;
 
@@ -763,6 +761,20 @@ void Game::ObjectOnUnload( Object* obj, bool isClean ) {
       Engine::LuaObject::RemoveFromLuaTable( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
       obj->SetLuaObjectId( 0 );
       __log.PrintInfo( Filelevel_DEBUG, "Game::ObjectOnUnload => object '%s' unloaded", obj->GetNameFull().c_str() );
+
+      if( obj->IsCollision() ) {
+        Collision *collision = obj->GetCollision();
+        auto
+          iter = game->collisionListeners.begin(),
+          iterEnd = game->collisionListeners.end();
+        while( iter != iterEnd ) {
+          if( iter->object == collision ) {
+            game->collisionListeners.erase( iter );
+            break;
+          }
+          ++iter;
+        }
+      }
     }
   } else {
     if( obj->GetLuaObjectId() ) {

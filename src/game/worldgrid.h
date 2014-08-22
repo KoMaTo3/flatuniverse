@@ -24,6 +24,7 @@ namespace World {
   typedef Pointer ObjectPointerType;
   typedef std::vector< Grid* > GridList;
   typedef std::vector< ObjectPointerType* > GridObjectList;
+  typedef std::vector< Object* > GridCoreObjectList;
   extern GridList *__worldGridList;
 
 

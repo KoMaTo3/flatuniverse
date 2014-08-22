@@ -4,12 +4,18 @@
 #include "core/memory.h"
 #include <deque>
 
+#include "worldgrid.h"
+
+
+class Object;
+
 
 namespace World {
 
 
+
 //Версия файла сохранений
-const Dword VERSION = 0x0000000E;
+const Dword VERSION = 0x0000000F;
 
 
 class Saver
@@ -40,8 +46,8 @@ public:
   void  FreeGrid        ( Short x, Short y );
   void  AllocFreeBlocks ( Dword blocksCount );
 
-  Dword LoadFromFile    ( const std::string& fileName );
-  void  SaveToFile      ( const std::string& fileName = "" );
+  Dword LoadFromFile    ( FU_OUT World::GridCoreObjectList *activeObjectsList, const std::string& fileName, Object *rootObject );
+  void  SaveToFile      ( FU_IN World::GridObjectList *activeObjectsList, const std::string& fileName );
   inline const std::string& GetFileName() const {
     return this->fileName;
   }
