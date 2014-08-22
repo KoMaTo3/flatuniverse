@@ -295,6 +295,17 @@ void World::GridManager::RemoveActiveObject( Object *obj )
 
 
 
+bool World::GridManager::IsActiveObject( Object *obj ) {
+  for( auto &object: this->activeObjects ) {
+    if( object->GetObject< Object >() == obj ){
+      return true;
+    }
+  }
+  return false;
+}//IsActiveObject
+
+
+
 /*
 =============
   AttachObjectToGrid

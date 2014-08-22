@@ -1115,7 +1115,15 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
     if( attr->name == "lockToDelete" ) {
       object->SetLockToDelete( attr->value.GetBoolean() );
       continue;
-    }//z
+    }//lockToDelete
+    if( attr->name == "activeObject" ) {
+      if( attr->value.GetBoolean() ) {
+        lib->game->world->AddActiveObject( object );
+      } else {
+        lib->game->world->RemoveActiveObject( object );
+      }
+      continue;
+    }//activeObject
   }//set
 
   //get
@@ -1436,7 +1444,12 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
       lua_pushboolean( lua, object->GetLockToDelete() );
       ++returnValuesCount;
       continue;
-    }//z
+    }//lockToDelete
+    if( attr->name == "activeObject" ) {
+      lua_pushboolean( lua, lib->game->world->IsActiveObject( object ) );
+      ++returnValuesCount;
+      continue;
+    }//activeObject
   }//get
 
   /*

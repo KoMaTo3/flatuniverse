@@ -186,6 +186,19 @@ return {
         newObject.api:SetScript( 'data/scripts/objects/bullet.lua' )
         -- ListenCollision( object, 'CollisionBullet' )
       end
+
+      if id == 0x59 then  -- Y
+        local object = Object.New( '__tmp', '', false )
+        object.api:Attr({ activeObject = true, position = '0 0' })
+        Debug.Log( 'active object created' )
+        local objectsList = Object.GetRoot()
+        Debug.Log( 'objects = '..TableSize( objectsList ) )
+        Core.SetTimer( 3, function()
+            object.api:Destroy()
+            Debug.Log( 'active object destroyed' )
+          end
+        )
+      end
     end -- !settings.gamePaused
 
     if id == 0x8 then  -- BackSpace
