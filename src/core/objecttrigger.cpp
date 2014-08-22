@@ -285,23 +285,6 @@ void ObjectTrigger::LoadFromBuffer( MemoryReader &reader, const std::string &thi
   DEF_DELETE( this->triggerRect );
   this->triggerRect = new Collision( this->position );
   this->triggerRect->LoadFromBuffer( reader, "", version );
-
-  /*
-  if( version >= 0x00000005 ) {
-    //handlers
-    Dword count;
-    reader >> count;
-    __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::LoadFromBuffer => handlers[%d]", count );
-    std::string s;
-    if( count && this->InitTriggerHandler && ObjectTrigger::triggerLintenersList ) { //something wrong...
-      for( Dword q = 0; q < count; ++q ) {
-        reader >> s;
-        __log.PrintInfo( Filelevel_DEBUG, "ObjectTrigger::LoadFromBuffer => . handler['%s']", s.c_str() );
-        this->InitTriggerHandler( thisObjectName, s );
-      }
-    }
-  }
-  */
 }//LoadFromBuffer
 
 

@@ -73,7 +73,7 @@ int Engine::LuaScene_LoadWorld( lua_State *lua ) {
   lib->game->core->SetCamera( lib->game->core->GetObject( "defaults/camera" ) );
   lib->game->world->LoadFromFile( lua_tostring( lua, 1 ) );
   //lib->game->core->GetObject( "player" )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->GetCollision()->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );  //!!!
-  lib->game->core->GetObject( "defaults/camera" )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) )->GetCollision()->SetVelocity( Vec3( 0.0f, 0.0f, 0.0f ) );
+  lib->game->core->GetObject( "defaults/camera" )->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
 
   sTimer.Update();
   lib->game->core->Update();

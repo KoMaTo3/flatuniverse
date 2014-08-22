@@ -330,11 +330,7 @@ Dword World::Saver::LoadFromFile( const std::string& fileName, Object *rootObjec
   for( Dword q = 0; q < gridsCount; ++q )
   {
     GridInfo *grid = new GridInfo();
-    if( version >= 0x00000004 ) {
-      headerReader >> grid->version;
-    } else {
-      grid->version = version;
-    }
+    headerReader >> grid->version;
     headerReader >> grid->x;
     headerReader >> grid->y;
     Dword blocksCount;
@@ -350,15 +346,12 @@ Dword World::Saver::LoadFromFile( const std::string& fileName, Object *rootObjec
   }
   this->fileName = fileName;
 
-  if( version >= 0x0000000F ) {
-    size_t activeObjectsCount;
-    headerReader >> activeObjectsCount;
-    __log.PrintInfo( Filelevel_DEBUG, "Active objects %d", activeObjectsCount );
-    if( activeObjectsCount ) {
-      for( size_t q = 0; q < activeObjectsCount; ++q ) {
-        Object *object = new Object();
-        object->LoadFromBuffer( headerReader, rootObject, version );
-      }
+  size_t activeObjectsCount;
+  headerReader >> activeObjectsCount;
+  if( activeObjectsCount ) {
+    for( size_t q = 0; q < activeObjectsCount; ++q ) {
+      Object *object = new Object();
+      object->LoadFromBuffer( headerReader, rootObject, version );
     }
   }
 

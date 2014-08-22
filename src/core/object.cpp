@@ -1443,7 +1443,7 @@ void Object::SaveToBuffer( MemoryWriter &writer )
 void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dword version )
 {
   __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => begin" );
-  bool isRenderable, isCollision, isTrigger;
+  bool isRenderable, isCollision, isTrigger, isActiveObject;
   std::string tmpName, parentName;
   Vec3 newPosition;
 
@@ -1453,13 +1453,11 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
   reader >> tmpName;
   reader >> parentName;
   reader >> newPosition;
-  if( version >= 0x0000000E ) {
-    bool isActiveObject;
-    reader >> isActiveObject;
-    this->SetIsActiveObject( isActiveObject );
-    if( isActiveObject ) {
-      this->OnIsActiveObject( this, isActiveObject );
-    }
+  reader >> isActiveObject;
+
+  this->SetIsActiveObject( isActiveObject );
+  if( isActiveObject ) {
+    this->OnIsActiveObject( this, isActiveObject );
   }
   //__log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => name['%s'] parent['%s']", tmpName.c_str(), parentName.c_str() );
 
@@ -1505,101 +1503,80 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     this->tags->LoadFromBuffer( reader );
   }
 
-  if( version >= 0x00000006 ) {
-    //animation
-    __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => animation..." );
-    bool isAnimation;
-    reader >> isAnimation;
-    if( isAnimation ) {
-      std::string templateName = "", animationName = "";
-      float startTime;
-      Animation::AnimationSetAction actionAfterComplete( Animation::ANIMATION_SET_ACTION_REPEAT );
-      Animation::ANIMATION_SET_STATUS status = Animation::ANIMATION_SET_STATUS_PLAYING;
-      reader >> templateName;
-      reader >> animationName;
-      reader >> startTime;
-      if( version >= 0x0000000A ) {
-        reader >> actionAfterComplete.action;
-        reader >> actionAfterComplete.animation;
-
-        if( version >= 0x0000000B ) {
-          reader >> status;
-        }
-      }
-      __log.PrintInfo( Filelevel_DEBUG, "LoadFromBuffer => animationTemplate['%s'] name['%s'] time[%3.3f] status[%d]", templateName.c_str(), animationName.c_str(), startTime, status );
-      if( status != Animation::ANIMATION_SET_STATUS_STOPPED ) {
-        this->ApplyAnimation( actionAfterComplete, templateName, animationName, startTime )->SetEnabled( true );
-      }
+  //animation
+  __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => animation..." );
+  bool isAnimation;
+  reader >> isAnimation;
+  if( isAnimation ) {
+    std::string templateName = "", animationName = "";
+    float startTime;
+    Animation::AnimationSetAction actionAfterComplete( Animation::ANIMATION_SET_ACTION_REPEAT );
+    Animation::ANIMATION_SET_STATUS status = Animation::ANIMATION_SET_STATUS_PLAYING;
+    reader >> templateName;
+    reader >> animationName;
+    reader >> startTime;
+    reader >> actionAfterComplete.action;
+    reader >> actionAfterComplete.animation;
+    reader >> status;
+    __log.PrintInfo( Filelevel_DEBUG, "LoadFromBuffer => animationTemplate['%s'] name['%s'] time[%3.3f] status[%d]", templateName.c_str(), animationName.c_str(), startTime, status );
+    if( status != Animation::ANIMATION_SET_STATUS_STOPPED ) {
+      this->ApplyAnimation( actionAfterComplete, templateName, animationName, startTime )->SetEnabled( true );
     }
+  }
 
-    if( version >= 0x00000007 ) {
-      __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => lua template..." );
-      reader >> this->luaScriptFileName;
-      if( !this->luaScriptFileName.empty() ) {
-        this->InitLuaUserData();
-        memory scriptData;
-        if( __fileManager->GetFile( this->luaScriptFileName, scriptData, true ) ) {
-          __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => Engine::LuaObject::BindTemplateToObject()..." );
-          Engine::LuaObject::BindTemplateToObject( this->GetLuaObjectId(), this, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, scriptData.getData() );
-          __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => Engine::LuaObject::BindTemplateToObject() done" );
-        } else {
-          __log.PrintInfo( Filelevel_ERROR, "Object::LoadFromBuffer => scipt '%s' not found", this->luaScriptFileName.c_str() );
-        }
-      }
+  reader >> this->luaScriptFileName;
+  if( !this->luaScriptFileName.empty() ) {
+    this->InitLuaUserData();
+    memory scriptData;
+    if( __fileManager->GetFile( this->luaScriptFileName, scriptData, true ) ) {
+      __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => Engine::LuaObject::BindTemplateToObject()..." );
+      Engine::LuaObject::BindTemplateToObject( this->GetLuaObjectId(), this, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, scriptData.getData() );
+      __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => Engine::LuaObject::BindTemplateToObject() done" );
+    } else {
+      __log.PrintInfo( Filelevel_ERROR, "Object::LoadFromBuffer => scipt '%s' not found", this->luaScriptFileName.c_str() );
+    }
+  }
 
-      if( version >= 0x0000000C ) {
-        __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => lua userdata..." );
-        bool hasUserData;
-        reader >> hasUserData;
-        __log.PrintInfo( Filelevel_DEBUG, "'%s' hasUserData = %d", this->GetNameFull().c_str(), hasUserData );
-        if( hasUserData ) {
-          memory userData;
-          size_t userDataSize;
-          reader >> userDataSize;
-          __log.PrintInfo( Filelevel_DEBUG, "userDataSize = %d", userDataSize );
-          if( userDataSize ) {
-            userData.Alloc( userDataSize );
-            reader.Read( userData.getData(), userData.getLength() );
-            __log.PrintInfo( Filelevel_DEBUG, "userData readed" );
-            this->InitLuaUserData();
-            __log.PrintInfo( Filelevel_DEBUG, "userData initialized" );
-            Engine::LuaObject::LoadObjectDataFromDump( this->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, reinterpret_cast< const unsigned char* >( userData.getData() ), userData.getLength() );
-            __log.PrintInfo( Filelevel_DEBUG, "userData loaded" );
-          }
-        }
-      }//C
+  bool hasUserData;
+  reader >> hasUserData;
+  __log.PrintInfo( Filelevel_DEBUG, "'%s' hasUserData = %d", this->GetNameFull().c_str(), hasUserData );
+  if( hasUserData ) {
+    memory userData;
+    size_t userDataSize;
+    reader >> userDataSize;
+    __log.PrintInfo( Filelevel_DEBUG, "userDataSize = %d", userDataSize );
+    if( userDataSize ) {
+      userData.Alloc( userDataSize );
+      reader.Read( userData.getData(), userData.getLength() );
+      __log.PrintInfo( Filelevel_DEBUG, "userData readed" );
+      this->InitLuaUserData();
+      __log.PrintInfo( Filelevel_DEBUG, "userData initialized" );
+      Engine::LuaObject::LoadObjectDataFromDump( this->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT, reinterpret_cast< const unsigned char* >( userData.getData() ), userData.getLength() );
+      __log.PrintInfo( Filelevel_DEBUG, "userData loaded" );
+    }
+  }
 
-      if( version >= 0x00000008 ) {
-        __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => light block by collision..." );
-        bool isLightBlockByCollision;
-        reader >> isLightBlockByCollision;
-        if( isLightBlockByCollision ) {
-          this->EnableLightBlockByCollision();
-        }
+  bool isLightBlockByCollision;
+  reader >> isLightBlockByCollision;
+  if( isLightBlockByCollision ) {
+    this->EnableLightBlockByCollision();
+  }
 
-        if( version >= 0x00000009 ) {
-          __log.PrintInfo( Filelevel_DEBUG, "Object::LoadFromBuffer => light point..." );
-          bool isLightPoint;
-          reader >> isLightPoint;
-          if( isLightPoint ) {
-            ObjectWidget::WidgetLightPoint *widget = this->EnableLightPoint();
-            widget->LoadFromBuffer( reader );
-          }
-        }//9
-      }//8
-    }//7
-  }//6
+  bool isLightPoint;
+  reader >> isLightPoint;
+  if( isLightPoint ) {
+    ObjectWidget::WidgetLightPoint *widget = this->EnableLightPoint();
+    widget->LoadFromBuffer( reader );
+  }
 
   //childs
   Dword childsCount;
   reader >> childsCount;
-  if( childsCount ) //TODO: надо допиливать подгрузку дочерних объектов
-  {
+  if( childsCount ) {
     for( Dword num = 0; num < childsCount; ++num ) {
       Object *child = new Object( "", this );
       child->LoadFromBuffer( reader, this, version );
     }
-    //__log.PrintInfo( Filelevel_WARNING, "Object::LoadFromBuffer => childs %d", childsCount );
   }
 
   if( this->OnLoad ) {

@@ -703,26 +703,6 @@ void Collision::LoadFromBuffer( MemoryReader &reader, const std::string &thisObj
     default:
       break;
   }
-
-  /*
-  if( version >= 0x00000003 && version < 0x0000000C ) {
-    //handlers
-    Dword count;
-    reader >> count;
-    //__log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => handlers[%d]", count );
-    std::string s;
-    if( count && this->InitCollisionHandler && Collision::collisionListenersList ) { //something wrong...
-      for( Dword q = 0; q < count; ++q ) {
-        reader >> s;
-        //__log.PrintInfo( Filelevel_DEBUG, "Collision::LoadFromBuffer => . handler['%s']", s.c_str() );
-        //Collision::collisionListenersList->push_back( luaCollisionListenerStruct( this, s ) );
-        this->InitCollisionHandler( s, thisObjectName );
-        //this->AddHandler( Collision::defaultCollisionHandler );
-      }
-      //this->InitCollisionHandler(  );
-    }
-  }
-  */
 }//LoadFromBuffer
 
 
