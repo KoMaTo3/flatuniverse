@@ -347,10 +347,11 @@ function GetObjectsTabbedTemplates()  --(
         name = 'Собираемая монетка',
         icon = 'data/textures/tiles/coin0.png',
         attr = {
-          renderable = true, textureName = 'textures/tiles/coin0.png',
-          -- trigger = true, _triggerScale = 1, _triggerFunc = 'CoinCollect',
+          -- renderable = true, textureName = 'textures/tiles/coin0.png',
+          trigger = true, _triggerScale = 1
         },
-		animation = { 'supermario/coin', 'default', 'repeat' },
+        animation = { 'supermario/coin', 'default', 'repeat' },
+        templateScriptName = 'data/scripts/objects/coin-0.lua',
       },
       -- Mushroom0
       {
@@ -370,14 +371,14 @@ function GetObjectsTabbedTemplates()  --(
         name = 'Моб: Goomba',
         icon = 'data/temp/enemy0.png',
         attr = {
-          renderable = true, textureName = 'temp/enemy0.png',
-          collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '-50 0',
+          -- renderable = true, textureName = 'temp/enemy0.png',
+          collision = true, _collisionScale = 1, collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '0 0',
           trigger = false,
         },
         creationScript = function( name )
         end,
         templateScriptName = 'data/scripts/objects/goomba.lua',
-        animation = { 'goomba/0', 'default', 'repeat' },
+        -- animation = { 'enemy/goomba/0', 'default', 'repeat' },
       },
       --
       {
@@ -436,7 +437,7 @@ function GetObjectsTabbedTemplates()  --(
           collision = true, collisionSize = '14 20', collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '0 0',
           lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1',
         },
-        animation = { 'player/mario', 'stay-right', 'repeat' },
+        -- animation = { 'player/mario', 'stay-right', 'repeat' },
         tags = {
           'player',
         },

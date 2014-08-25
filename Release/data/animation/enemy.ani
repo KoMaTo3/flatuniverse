@@ -1,0 +1,25 @@
+template "enemy/goomba/0" {
+  animation "default" 0.5 {
+    sprite "body" {
+      renderable_texture( "data/textures/npc/crow.png" )
+      renderable_size( 24 )
+      renderable_texture_coords {
+        0.0( 0,0, 0.333,1 )
+        0.25( 0.333,0, 0.666,1 )
+      }
+    }
+  }
+
+  animation "death" 1 {
+    sprite "body" {
+      renderable_texture( "data/textures/npc/crow.png" )
+      renderable_texture_coords( 0.666,0, 1,1 )
+      renderable_size( 24 )
+      color {
+        0.0( 1, 1, 1, 1 )
+        0.9 linear( 1, 1, 1, 1 )
+        1 linear( 1, 1, 1, 0 )
+      }
+    }
+  }
+}//enemy/goomba/0

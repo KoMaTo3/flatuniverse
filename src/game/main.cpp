@@ -775,6 +775,21 @@ void Game::ObjectOnUnload( Object* obj, bool isClean ) {
           ++iter;
         }
       }
+
+      //trigger
+      if( obj->IsTrigger() ) {
+        ObjectTrigger *trigger = obj->GetTrigger();
+        auto
+          iter = game->luaTriggerListeners.begin(),
+          iterEnd = game->luaTriggerListeners.end();
+        while( iter != iterEnd ) {
+          if( iter->object == trigger ) {
+            game->luaTriggerListeners.erase( iter );
+            break;
+          }
+          ++iter;
+        }
+      }
     }
   } else {
     if( obj->GetLuaObjectId() ) {

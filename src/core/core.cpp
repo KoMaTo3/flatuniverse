@@ -1526,6 +1526,10 @@ bool Core::Update()
     if( !__objectsToRemove.empty() ) {
       auto iter = __objectsToRemove.begin();
       __log.PrintInfo( Filelevel_DEBUG, "Core => unload object '%s'[%p] timer[%3.3f]", ( *iter )->GetNameFull().c_str(), *iter, this->objectUnloaderTimer );
+      if( ( *iter )->OnUnload ) {
+        ( *iter )->OnUnload( *iter, false );
+        ( *iter )->OnUnload( *iter, true );
+      }
       delete *iter;
       if( !this->debug.selectedObjects.empty() ) {
         auto

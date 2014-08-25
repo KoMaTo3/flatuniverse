@@ -1,4 +1,7 @@
 return {
+  jumpOnLandDamage = -300,
+  animationTemplateName = 'player/mario',
+
   Reset = function( self ) --(
     -- self.data.savedValue = 0
   end, --)
@@ -7,6 +10,10 @@ return {
     Debug.Log( Tools.GetTimeFormatted( '%Y.%m.%d %H:%M:%S' )..' "'..self.api:GetName()..'" created' )
     if self.data.savedValue == nil then
       self.data.savedValue = 1
+      self.data.coins = 0
+      self.data.damage = {
+        jump = 5,
+      }
       self.data.playerState = {
         onGroundTime = -1,
         isHoldJump = false,
@@ -27,19 +34,41 @@ return {
     if( self.data.currentAction == 1 ) then
       self.data.currentAction = 0
     end
+
+    self.animation = Object.New( 'animation', self.api:GetNameFull(), false )
+
     if( self.data.playerState.currentAction == 0 ) then
-      self.api:SetAnimation( 'player/mario', 'stay-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+      self:SetAnimation( 'stay-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+    elseif( self.data.playerState.currentAction == 1 ) then
+      self:SetAnimation( 'walk-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
     elseif( self.data.playerState.currentAction == 2 ) then
-      self.api:SetAnimation( 'player/mario', 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+      self:SetAnimation( 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
     end
     Debug.Log( 'My name is "'..self.api:GetName()..'" and i\'m borned '..( self.data.savedValue )..' times with memory' )
 
     -- reset
+    self.data.coins = 0
     -- self.data.playerState.jumpPower = -200
     -- self.data.playerState.longJumpPower = 50
     -- local tmp = Object.New( self.api:GetNameFull()..'/tmp', '', false )
-    -- tmp.api:Attr({ renderable = true, renderableSize = '10 10', textureName = 'temp/alik16.bmp', position = '20 0', renderableColor = '1 1 1 1' })
   end, --) OnCreate
+
+  OnCoin = function( self, target ) --(
+    self.data.coins = self.data.coins + 1
+    Debug.Log( 'coins: '..self.data.coins )
+  end, --) OnCoin
+
+  SetAnimation = function( self, nameOrTemplate, name, onComplete ) --(
+    if( type( name ) ~= 'string' ) then
+      name = nameOrTemplate
+      nameOrTemplate = self.animationTemplateName
+    end
+    Debug.Log( 'self.animation.api = '..type( self.animation.api ) )
+    Debug.Log( 'nameOrTemplate = '..nameOrTemplate )
+    Debug.Log( 'name = '..name )
+    Debug.Log( 'nameFull = '..self.animation.api:GetNameFull() )
+    self.animation.api:SetAnimation( nameOrTemplate, name, onComplete )
+  end, --) SetAnimation
 
   OnDestroy = function( self ) --(
     self.data.savedValue = self.data.savedValue + 1
@@ -59,47 +88,21 @@ return {
       -- ObjectAttr( player, { collisionSize = string.format( '%f %f', cx * 1.2, cy * 1.2 ), renderableSize = string.format( '%f %f', rx * 1.2, ry * 1.2 ) } )
       -- do return false end
     end
-    if IsObjectUpperThis( player, targetName ) then
+    if( flags == 4 ) then --( land on mob
       self.data.playerState.allowDoubleJump = true
       self.data.playerState.onGroundTime = Core.GetTime()
-      if self.data.playerState.currentAction == 2 then
+      if self.data.playerState.currentAction == 2 then --(
         self.data.playerState.currentAction = 1
-        self.api:SetAnimation( 'player/mario', ( math.abs( self.data.playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+        self:SetAnimation( ( math.abs( self.data.playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+      end --)
+      if( target.OnDamage ~= nil ) then
+        if( target:OnDamage( self, self.data.damage.jump ) ) then
+          local vx, vy = self.api:Attr({ 'collisionVelocity' })
+          vy = ( vy > 0 and 0 or vy ) + self.jumpOnLandDamage
+          self.api:Attr({ collisionVelocity = vx..' '..vy })
+        end
       end
-    elseif IsObjectUnderThis( player, targetName ) then
-      --[[
-      if ObjectHasTag( targetName, 'brick-breakable' ) then
-        animation[ 'timer'..Core.SetTimer( 0.5, function( timerId ) --(
-            local keyByTimer = 'timer'..timerId
-            if animation[ keyByTimer ] == nil then
-              do return false end
-            end
-
-            local anim = animation[ keyByTimer ]
-
-            if anim.step == 1 then
-              ObjectStopAnimation( anim.object )
-              ObjectRemoveTag( anim.object, 'push-bottom' )
-              ObjectAddTag( anim.object, 'brick-breakable' )
-              ObjectAttr( anim.object, { color = '1 1 1 1', renderableRotation = 0 } )
-              animation[ keyByTimer ] = nil
-            end
-          end --)
-        ) ] = { step = 1, time = 0, timeMax = 8, object = targetName }
-        ObjectAddTag( targetName, 'push-bottom' )
-        ObjectRemoveTag( targetName, 'brick-breakable' )
-        ObjectStopAnimation( targetName )
-        ObjectSetAnimation( targetName, 'supermario/brick0', 'do', 'stop' )
-        ObjectAttr( targetName, { color = '0 0 0 0' } )
-      end
-      if ObjectHasTag( targetName, 'has-mushroom' ) then
-        PushMushroom( targetName )
-      end
-      if ObjectHasTag( targetName, 'has-coin' ) then
-        PushCoin( targetName )
-      end
-      ]]
-    end
+    end --) flags 4
 
     if target.api:HasTag( 'kill' ) then
       self:DoKill( target, flags, vx, vy )
@@ -138,7 +141,7 @@ return {
           ]]
           self.data.playerState.jumpBeginTime = Core.GetTime()
           self.data.playerState.onGroundTime = 0
-          self.api:SetAnimation( 'player/mario', 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+          self:SetAnimation( 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
           self.data.playerState.currentAction = 2
         end
       end
@@ -151,7 +154,7 @@ return {
           self.data.playerState.currentAction = 1
         end
         if curTime - self.data.playerState.onGroundTime < 0.1 then
-          self.api:SetAnimation( 'player/mario', 'walk-left' )
+          self:SetAnimation( 'walk-left' )
         end
         self.data.playerState.lastDirection = -2
       end
@@ -165,7 +168,7 @@ return {
           self.data.playerState.currentAction = 1
         end
         if curTime - self.data.playerState.onGroundTime < 0.1 then
-          self.api:SetAnimation( 'player/mario', 'walk-right' )
+          self:SetAnimation( 'walk-right' )
         end
         self.data.playerState.lastDirection = 2
       end
@@ -225,7 +228,7 @@ return {
             self.data.playerState.currentAction = 0
           end
           if curTime - self.data.playerState.onGroundTime < 0.1 then
-            self.api:SetAnimation( 'player/mario', 'stay-left' )
+            self:SetAnimation( 'stay-left' )
           end
           self.data.playerState.lastDirection = -1
         end
@@ -239,35 +242,13 @@ return {
             self.data.playerState.currentAction = 0
           end
           if curTime - self.data.playerState.onGroundTime < 0.1 then
-            self.api:SetAnimation( 'player/mario', 'stay-right' )
+            self:SetAnimation( 'stay-right' )
           end
           self.data.playerState.lastDirection = 1
         end
       end
     end -- !settings.gamePaused
   end,
-
-  --[[
-  PlayerDoLongJump = function( self, timerId ) --(
-    self.data.playerState.longJumpTimer = -1
-    if self.data.playerState.isHoldJump then
-      local vx, vy = self.api:Attr({ 'collisionVelocity' })
-      self.data.playerState.longJumpStep = self.data.playerState.longJumpStep + 1
-      self.api:Attr({ collisionVelocity = vx..' '..( vy - self.data.playerState.longJumpPower / self.data.playerState.longJumpStep ) })
-      Core.SetTimer( 0.1, function( timerId ) self:PlayerDoLongJump( timerId ) end )
-    end
-  end, --) PlayerDoLongJump
-
-  PlayerEndLongJump = function( self, timerId ) --(
-    self.data.playerState.isHoldJump = false
-    self.data.playerState.PlayerEndLongJumpTimer = -1
-    if self.data.playerState.PlayerEndLongJumpTimer ~= -1 then
-      -- Core.StopTimer( self.data.playerState.PlayerEndLongJumpTimer )
-      -- self.data.playerState.PlayerEndLongJumpTimer = -1
-      self.data.playerState.longJumpTimer = -1
-    end
-  end, --) PlayerEndLongJump
-  ]]
 
   DoKill = function( self, target, flags, vx, vy ) --(
     if self.data.respawn ~= nil then
@@ -293,13 +274,13 @@ return {
     if currentTime - self.data.playerState.onGroundTime < 0.1 then  -- on ground
       if self.data.playerState.currentAction == 2 then
         self.data.playerState.currentAction = 1
-        self.api:SetAnimation( 'player/mario', ( math.abs( self.data.playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+        self:SetAnimation( ( math.abs( self.data.playerState.lastDirection ) > 1 and 'walk' or 'stay' )..'-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
       end
     else  -- on air
       if( self.data.playerState.currentAction == 2 ) then
         local _, vy = self.api:Attr({ 'collisionVelocity' })
         if( math.abs( vy ) > 100 ) then
-          self.api:SetAnimation( 'player/mario', 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
+          self:SetAnimation( 'jump-'..( self.data.playerState.lastDirection > 0 and 'right' or 'left' ) )
         end
       else
         self.data.playerState.currentAction = 2

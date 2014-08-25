@@ -84,7 +84,8 @@ int Engine::LuaObject_New( lua_State *lua ) {
     //std::string currentLevel = name.substr( 0, slashPos );
     //parentObj = game->core->GetObject( currentLevel );
   } else {
-    obj = lib->game->core->CreateObject( name, NULL, true );
+    Object *parent = ( parentName ? lib->game->core->GetObject( parentName ) : NULL );
+    obj = lib->game->core->CreateObject( name, parent, true );
     obj->SetSaveable( isSaveable );
     obj->SetPosition( Vec3Null );
     obj->Update( 0.0f );
@@ -299,11 +300,20 @@ int Engine::LuaObject_Destroy( lua_State *lua ) {
     luaL_error( lua, "error" );
   }
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+  bool isLazyDelete = true;
 
-  lib->game->OnRemoveObject( object->GetNameFull() );
-  lib->game->core->RemoveObject( object->GetNameFull(), true );
-  //delete object;
-  Engine::LuaObject::Destroy( object, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+  if( argc > 1 && lua_isboolean( lua, 2 ) ) {
+    isLazyDelete = lua_toboolean( lua, 2 ) ? false : true;
+  }
+
+  if( isLazyDelete ) {
+    object->SetNeedToUnload( true );
+  } else {
+    lib->game->OnRemoveObject( object->GetNameFull() );
+    lib->game->core->RemoveObject( object->GetNameFull(), true );
+    //delete object;
+    Engine::LuaObject::Destroy( object, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+  }
 
   if( lua_gettop( lua ) != argc ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_GetByRect => stack crashed" );
@@ -314,29 +324,39 @@ int Engine::LuaObject_Destroy( lua_State *lua ) {
 
 
 int Engine::LuaObject_SetAnimation( lua_State *lua ) {
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation" );
+
   luaL_checktype( lua, 1, LUA_TUSERDATA );
   Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation => object x%p", object );
   if( object == NULL ) {
     __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_SetAnimation => object is NULL" );
     luaL_error( lua, "Engine::LuaObject_SetAnimation => object is NULL" );
   }
 
   int argc = lua_gettop( lua );
+  __log.PrintInfo( Filelevel_DEBUG, "argc = %d", argc );
 
-  const char *str;
+  const char *str = 0;
   if( argc < 3 ) {
-    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetAnimation => use: object.api:SetAnimation( animationTemplateName, animationName, animationAfterCompleteName )", argc );
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetAnimation => use: object.api:SetAnimation( animationTemplateName, animationName, animationAfterCompleteName )" );
     return 0;
   }
-  str = lua_tostring( lua, 2 );
+  __log.PrintInfo( Filelevel_DEBUG, ". is string[2] = %d", lua_isstring( lua, 2 ) );
+  str = luaL_checkstring( lua, 2 );
+  __log.PrintInfo( Filelevel_DEBUG, ". string = '%s'", str );
+  __log.PrintInfo( Filelevel_DEBUG, ". strings..." );
   std::string
     templateName = str,
     animation,
     animationAfterAnimationComplete;
   int luaCallbackId = 0;
+  __log.PrintInfo( Filelevel_DEBUG, ". strings done" );
 
   if( argc > 2 ) {
-    str = lua_tostring( lua, 3 );
+    __log.PrintInfo( Filelevel_DEBUG, ". is string[3] = %d", lua_isstring( lua, 3 ) );
+    str = luaL_checkstring( lua, 3 );
+    __log.PrintInfo( Filelevel_DEBUG, ". string[3] = '%s'", str );
     animation = str;
 
     if( argc > 3 ) {
@@ -346,8 +366,10 @@ int Engine::LuaObject_SetAnimation( lua_State *lua ) {
         luaCallbackId = luaL_ref( lua, LUA_REGISTRYINDEX );
         __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation => function[%d]", luaCallbackId );
       } else {
-        str = lua_tostring( lua, 4 );
-        animationAfterAnimationComplete = str;
+        if( lua_isstring( lua, 4 ) ) {
+          str = lua_tostring( lua, 4 );
+          animationAfterAnimationComplete = str;
+        }
       }
     } else {
       animationAfterAnimationComplete = animation;
@@ -372,10 +394,13 @@ int Engine::LuaObject_SetAnimation( lua_State *lua ) {
   */
   //__log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation => luaFunctionId[%d]", actionAfterAnimation.luaFunctionId );
 
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation => template['%s'] animation['%s']", templateName.c_str(), animation.c_str() );
   Animation::AnimationPack *pack = object->ApplyAnimation( actionAfterAnimation, templateName, animation );
   if( pack ) {
     pack->SetEnabled( true );
   }
+
+  __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation done" );
 
   return 0;
 }//Object_SetAnimation
@@ -905,6 +930,16 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
       }
       continue;
     }//renderablePosition
+    if( attr->name == "renderableOffset" ) {
+      Vec3 offset( 0, 0, 0 );
+      int res = sscanf_s( attr->value.GetString().c_str(), "%f %f", &offset.x, &offset.y );
+      if( res < 2 ) {
+        offset.y = offset.x;
+      }
+      __log.PrintInfo( Filelevel_DEBUG, "renderableOffset => object '%s', offset[%3.1f; %3.1f]", object->GetNameFull().c_str(), offset.x, offset.y );
+      object->SetRenderableOffset( offset );
+      continue;
+    }//renderableOffset
     if( attr->name == "color" ) {
       renderable = ( RenderableQuad* ) object->GetRenderable();
       if( renderable ) {
@@ -953,6 +988,7 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
         if( res < 2 ) {
           size.y = size.x;
         }
+        __log.PrintInfo( Filelevel_DEBUG, "Attr:collisionSize => %3.1f; %3.1f", size.x, size.y );
         collision->InitSquare( size );
       } else {
         __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => collisionSize: object '%s' not collision", object->GetNameFull().c_str() );
@@ -1215,6 +1251,13 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
       }
       continue;
     }//renderablePosition
+    if( attr->name == "renderableOffset" ) {
+      const Vec3 &pos = object->GetRenderableOffset();
+      lua_pushnumber( lua, pos.x );
+      lua_pushnumber( lua, pos.y );
+      returnValuesCount += 2;
+      continue;
+    }//renderableOffset
     if( attr->name == "color" ) {
       renderable = ( RenderableQuad* ) object->GetRenderable();
       if( renderable ) {

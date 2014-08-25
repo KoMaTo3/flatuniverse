@@ -51,17 +51,21 @@ end -- IsObjectUnderThis
 
 --[[ IsObjectUpperThis ]]
 function IsObjectUpperThis( object, target )
-  local targetObject = Object.Get( target )
+  if( type( object ) == 'string' ) then
+    object = Object.Get( object )
+  end
+  if( type( target ) == 'string' ) then
+    target = Object.Get( target )
+  end
   local ty, y = 0, 0
-  if targetObject ~= nil then
-    _, ty = targetObject.api:GetPos()
+  if target ~= nil then
+    _, ty = target.api:GetPos()
   end
-  local objectObject = Object.Get( object )
-  if objectObject ~= nil then
-    _, y = objectObject.api:GetPos()
+  if object ~= nil then
+    _, y = object.api:GetPos()
   end
-  local _, tRectY = Object.Get( target ).api:Attr({ 'collisionSize' })
-  local _, rectY  = Object.Get( object ).api:Attr({ 'collisionSize' })
+  local _, tRectY = target.api:Attr({ 'collisionSize' })
+  local _, rectY  = object.api:Attr({ 'collisionSize' })
   local tRectYd2 = tRectY / 2
   local rectYd2 = rectY / 2
   if y + rectYd2 <= ty - tRectYd2 + 1 then return true end

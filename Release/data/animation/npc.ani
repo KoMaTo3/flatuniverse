@@ -10,16 +10,3 @@ template "crow/0" {
     }
   }
 }//crow-0
-
-template "goomba/0" {
-  animation "default" 0.5 {
-    sprite "body" {
-      renderable_texture( "data/textures/npc/crow.png" )
-      renderable_size( 24 )
-      renderable_texture_coords {
-        0.0( 0,0, 0.333,1 )
-        0.25( 0.333,0, 0.666,1 )
-      }
-    }
-  }
-}//goomba-0

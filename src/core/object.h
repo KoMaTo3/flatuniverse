@@ -193,6 +193,7 @@ private:
   Tags            *tags;    //список тегов
   std::string     luaScriptFileName;  //скрипты
   int             luaObjectId; //id объекта в реестре lua
+  Vec3            renderableOffset; //смещение renderable относительно объекта
 
   /*
   struct {
@@ -250,6 +251,8 @@ public:
   Object*             GetObjectInPoint    ( const Vec2& pos );
   void                GetObjectsInRect    ( int type, const Vec2 &leftTop, const Vec2 &rightBottom, ObjectList& result );
   bool                TestInRect          ( int type, const Vec2 &leftTop, const Vec2 &rightBottom, bool recursive );
+  inline void         SetRenderableOffset ( const Vec3 &setOffset ) { this->renderableOffset = setOffset; }
+  inline const Vec3&  GetRenderableOffset () { return this->renderableOffset; }
 
   Renderable*         EnableRenderable    ( RenderableType renderType );
   bool                DisableRenderable   ();

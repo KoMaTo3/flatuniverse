@@ -177,7 +177,7 @@ Object::Object()
 :Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner(), IActiveObject()
 , name( "" ), nameFull( "" ), _parent( NULL ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 , positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
-,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( true ), luaObjectId( 0 )
+,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( true ), luaObjectId( 0 ), renderableOffset( Vec3Null )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
@@ -189,7 +189,7 @@ Object::Object( const std::string &objectName, Object* parentObject, bool setIsS
 :Entity( Vec3Null ), IPointerOwner(), ITags(), IObject(), WidgetOwner(), IActiveObject()
 ,name( objectName ), _parent( parentObject ), _childs( NULL ), renderable( -1, RENDERABLE_TYPE_UNKNOWN ), collision( NULL )
 ,positionSrc( 0.0f, 0.0f, 0.0f ), _renderableList( NULL ), trigger( NULL ), _isLockedToDelete( false )
-,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( setIsSaveable ), luaObjectId( 0 )
+,tags( NULL ), isEnabled( true ), isEnabledPrev( true ), isSaveable( setIsSaveable ), luaObjectId( 0 ), renderableOffset( Vec3Null )
 {
   //this->gui.type = OBJECT_GUI_UNKNOWN;
   this->PointerBind( this );
@@ -1135,7 +1135,7 @@ void Object::Update( float dt )
       if( !renderable ) {
         break;
       }
-      renderable->SetPosition2D( Vec2( Math::Floor( this->position.x ), Math::Floor( this->position.y ) ) );
+      renderable->SetPosition2D( Vec2( Math::Floor( this->position.x + this->renderableOffset.x ), Math::Floor( this->position.y + this->renderableOffset.y ) ) );
       renderable->CheckChanges();
       /*
       if( *renderable->GetEnabledPtr() != *renderable->GetPrevEnabledPtr() ) {
@@ -1342,7 +1342,6 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   writer << this->GetName();
   writer << this->GetParentNameFull();
   writer << this->GetPosition();
-
   writer << this->GetIsActiveObject();
 
   if( isRenderable )
@@ -1401,6 +1400,16 @@ void Object::SaveToBuffer( MemoryWriter &writer )
   writer << isLightPoint;
   if( isLightPoint ) {
     this->widget->GetWidget( ObjectWidget::OBJECT_WIDGET_LIGHTPOINT )->SaveToBuffer( writer );
+  }
+
+  //forces
+  size_t forcesCount = this->forces.size();
+  writer << forcesCount;
+  if( forcesCount ) {
+    for( auto &force: this->forces ) {
+      writer << force.id;
+      writer << force.vec;
+    }
   }
 
   //childs
@@ -1524,6 +1533,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     }
   }
 
+  //lua script
   reader >> this->luaScriptFileName;
   if( !this->luaScriptFileName.empty() ) {
     this->InitLuaUserData();
@@ -1537,6 +1547,7 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     }
   }
 
+  //lua userdata
   bool hasUserData;
   reader >> hasUserData;
   __log.PrintInfo( Filelevel_DEBUG, "'%s' hasUserData = %d", this->GetNameFull().c_str(), hasUserData );
@@ -1556,17 +1567,31 @@ void Object::LoadFromBuffer( MemoryReader &reader, Object *rootObject, const Dwo
     }
   }
 
+  //lightblock by collision
   bool isLightBlockByCollision;
   reader >> isLightBlockByCollision;
   if( isLightBlockByCollision ) {
     this->EnableLightBlockByCollision();
   }
 
+  //lightpoint
   bool isLightPoint;
   reader >> isLightPoint;
   if( isLightPoint ) {
     ObjectWidget::WidgetLightPoint *widget = this->EnableLightPoint();
     widget->LoadFromBuffer( reader );
+  }
+
+  size_t forcesCount;
+  reader >> forcesCount;
+  if( forcesCount ) {
+    long id;
+    Vec3 vec;
+    while( forcesCount-- ) {
+      reader >> id;
+      reader >> vec;
+      this->SetForce( id, vec );
+    }
   }
 
   //childs

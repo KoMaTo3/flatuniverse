@@ -1,11 +1,17 @@
 template "supermario/coin" {
-  animation "default" 0 {
+  animation "default" 0.8 {
     sprite "coin" {
-      renderable_texture( "data/textures/items/coin0.png" )
-      renderable_texture_coords( 0,0, 0.25,1 )
-      renderable_size( 10, 20 )
+      renderable_texture( "data/textures/items/coin0-anim.png" )
+      renderable_size( 16, 16 )
       renderable_rotation( 0 )
-	}
+      renderable_texture_coords {
+        0.0( 0,0, 0.333,1 )
+        0.15( 0.333,0, 0.666,1 )
+        0.3( 0.666,0, 1,1 )
+        0.45( 0.333,0, 0.666,1 )
+        0.6( 0,0, 0.333,1 )
+      }
+    }
   }
   animation "do" 0.5 {
     sprite "coin" {
