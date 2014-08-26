@@ -572,6 +572,7 @@ RenderableQuad* Object::CreateExternalRenderableInList( float zIndex, CoreRender
     //__log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => %3.3f pushed to end index %d", zIndex, index );
   }
   quad->SetIndexInRenderableList( index );
+  quad->SetRotation( 0.0f );
 
   //__log.PrintInfo( Filelevel_DEBUG, "CreateExternalRenderableInList => Done" );
   return ( RenderableQuad* ) result;

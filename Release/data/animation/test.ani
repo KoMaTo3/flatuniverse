@@ -57,4 +57,11 @@ template "player/mario" {
       renderable_size( 24 )
     }
   }//walk-left
+
+  animation "death" 0 {
+    sprite "body" {
+      renderable_texture( "data/textures/player/mario/death.png", 0,0, 1,1 )
+      renderable_size( 24 )
+    }
+  }//jump-right
 }//mario

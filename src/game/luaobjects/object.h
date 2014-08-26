@@ -35,6 +35,7 @@ int LuaObject_RemoveForce( lua_State *lua );
 int LuaObject_RemoveTag( lua_State *lua );
 int LuaObject_Select( lua_State *lua );
 int LuaObject_SetAnimation( lua_State *lua );
+int LuaObject_SetCamera( lua_State *lua );
 int LuaObject_SetForce( lua_State *lua );
 int LuaObject_SetPos( lua_State *lua );
 int LuaObject_SetScript( lua_State *lua );

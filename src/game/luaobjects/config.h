@@ -10,6 +10,7 @@ namespace Engine {
 
   
 int LuaConfig_GetGridSize( lua_State *lua );
+int LuaConfig_GetUpdateInterval( lua_State *lua );
 int LuaConfig_GetWindowSize( lua_State *lua );
 
   

@@ -84,6 +84,7 @@ bool Lua::Init( Game *game )
     { "RemoveForce", &Engine::LuaObject_RemoveForce },
     { "RemoveTag", &Engine::LuaObject_RemoveTag },
     { "SetAnimation", &Engine::LuaObject_SetAnimation },
+    { "SetCamera", &Engine::LuaObject_SetCamera },
     { "SetForce", &Engine::LuaObject_SetForce },
     { "SetPos", &Engine::LuaObject_SetPos },
     { "SetScript", &Engine::LuaObject_SetScript },
@@ -158,6 +159,7 @@ bool Lua::Init( Game *game )
   //Config
   static const luaL_Reg config_library_functions[] = {
     { "GetGridSize", &Engine::LuaConfig_GetGridSize },
+    { "GetUpdateInterval", &Engine::LuaConfig_GetUpdateInterval },
     { "GetWindowSize", &Engine::LuaConfig_GetWindowSize },
     { NULL, NULL }
   };

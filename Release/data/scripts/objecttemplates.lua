@@ -287,6 +287,18 @@ function GetObjectsTabbedTemplates()  --(
       },
     },  -- sky
     light = {
+      --
+      {
+        name = 'Факел',
+        icon = 'data/textures/interior/torch-16.png',
+        attr = {
+          renderable = true, textureName = 'textures/interior/torch-16.png',
+          lightPoint = true, lightPointSize = 10, lightPointColor = '1 1 1 1',
+        },
+        -- animation = { 'editor/respawn', 'default', 'repeat' },
+        templateScriptName = 'data/scripts/objects/torch-0.lua',
+      },
+      --
     },  -- light
     go = {
       -- Tile000a
@@ -295,13 +307,11 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/textures/tiles/tile000a.png',
         attr = {
           renderable = true, textureName = 'textures/tiles/tile000a.png',
-          collision = false,
-          -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -0.8,-1, 0.8,-1, 0,1 }, _triggerScale = 1,
-          lightBlockByCollision = true,
+          -- collision = false,
+          trigger = true, _triggerPolygon = { -0.4,-0.5, 0.4,-0.5, 0,0.5 }, -- _triggerScale = 1,
+          -- lightBlockByCollision = true,
         },
-        tags = {
-          'kill',
-        },
+        templateScriptName = 'data/scripts/objects/thorn-0.lua',
       },
       -- Tile000b
       {
@@ -309,12 +319,10 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/textures/tiles/tile000b.png',
         attr = {
           renderable = true, textureName = 'textures/tiles/tile000b.png',
-          -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 0.8,1, -0.8,1, 0,-1 }, _triggerScale = 1,
-          lightBlockByCollision = true,
+          trigger = true, _triggerPolygon = { 0.4,0.5, -0.4,0.5, 0,-0.5 }, -- _triggerScale = 1,
+          -- lightBlockByCollision = true,
         },
-        tags = {
-          'kill',
-        },
+        templateScriptName = 'data/scripts/objects/thorn-0.lua',
       },
       -- Tile000c
       {
@@ -322,12 +330,10 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/textures/tiles/tile000c.png',
         attr = {
           renderable = true, textureName = 'textures/tiles/tile000c.png',
-          -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { 1,-0.8, 1,0.8, -1,0 }, _triggerScale = 1,
-          lightBlockByCollision = true,
+          trigger = true, _triggerPolygon = { 0.5,-0.4, 0.5,0.4, -0.5,0 }, -- _triggerScale = 1,
+          -- lightBlockByCollision = true,
         },
-        tags = {
-          'kill',
-        },
+        templateScriptName = 'data/scripts/objects/thorn-0.lua',
       },
       -- Tile000d
       {
@@ -335,12 +341,10 @@ function GetObjectsTabbedTemplates()  --(
         icon = 'data/textures/tiles/tile000d.png',
         attr = {
           renderable = true, textureName = 'textures/tiles/tile000d.png',
-          -- trigger = true, _triggerFunc = 'DoKill', _triggerPolygon = { -1,-0.8, 1,0, -1,0.8 }, _triggerScale = 1,
-          lightBlockByCollision = true,
+          trigger = true, _triggerPolygon = { -0.5,-0.4, 0.5,0, -0.5,0.4 }, -- _triggerScale = 1,
+          -- lightBlockByCollision = true,
         },
-        tags = {
-          'kill',
-        },
+        templateScriptName = 'data/scripts/objects/thorn-0.lua',
       },
       -- Coin0
       {
@@ -435,7 +439,7 @@ function GetObjectsTabbedTemplates()  --(
         attr = {
           -- lockToDelete = true,
           collision = true, collisionSize = '14 20', collisionStatic = false, collisionAcceleration = '0 1500', collisionVelocity = '0 0',
-          lightPoint = true, lightPointSize = 400, lightPointColor = '1 1 1 1',
+          lightPoint = true, lightPointSize = 1000, lightPointColor = '1 1 1 0.2', lightPointPenetration = 3,
         },
         -- animation = { 'player/mario', 'stay-right', 'repeat' },
         tags = {

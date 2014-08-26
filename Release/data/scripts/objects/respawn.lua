@@ -6,10 +6,9 @@ return {
   Init = function( self ) --(
   end, --) Init
 
-  OnTrigger = function( self, target ) --(
-    if target.api:HasTag( 'bullet' ) then
-      local player = Object.Get( 'editor' ):FindPlayer()
-      player.data.respawn = self.api:GetNameFull()
+  OnTrigger = function( self, target, isInTrigger ) --(
+    if( isInTrigger and target.OnSetRespawn ~= nil ) then
+      target:OnSetRespawn( self )
     end
   end, --) OnTrigger
 }

@@ -24,3 +24,10 @@ int Engine::LuaConfig_GetWindowSize( lua_State *lua ) {
 
   return 2;
 }//LuaConfig_GetWindowSize
+
+
+int Engine::LuaConfig_GetUpdateInterval( lua_State *lua ) {
+  lua_pushnumber( lua, COLLISION_UPDATE_FREQUENCY );
+
+  return 1;
+}//LuaConfig_GetUpdateInterval

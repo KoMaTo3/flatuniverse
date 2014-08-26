@@ -52,8 +52,6 @@ int Engine::LuaObject_New( lua_State *lua ) {
     }
   }
 
-  //Object *object = new Object( name, parentName, isSaveable, setUserData );
-  //object->SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
   std::string name = nameStr;
   long slashPos = name.find_last_of( "/" );
   Object *parentObj = NULL;
@@ -164,8 +162,6 @@ int Engine::LuaObject_GetByPoint( lua_State *lua ) {
   if( argc >= 4 ) {
     afterObjectName = lua_tostring( lua, 4 );
   }
-  //objectName = LUAFUNC_GetObjectByPoint( type, point, objectName );
-  //lua_pushstring( lua, objectName.c_str() );
 
   Object *object = NULL;
 
@@ -261,8 +257,6 @@ int Engine::LuaObject_GetByRect( lua_State *lua ) {
     leftTop( ( float ) lua_tonumber( lua, 2 ), ( float ) lua_tonumber( lua, 3 ) ),
     rightBottom( ( float ) lua_tonumber( lua, 4 ), ( float ) lua_tonumber( lua, 5 ) );
   std::string objectName;
-  //objectName = LUAFUNC_GetObjectByRect( type, leftTop, rightBottom );
-  //lua_pushstring( lua, objectName.c_str() );
 
   ObjectList objectList;
   lib->game->core->GetObjectsInRect( type, leftTop, rightBottom, objectList );
@@ -297,7 +291,7 @@ int Engine::LuaObject_Destroy( lua_State *lua ) {
   Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
   if( object == NULL ) {
     __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_Destroy => object is NULL" );
-    luaL_error( lua, "error" );
+    luaL_error( lua, "Engine::LuaObject_Destroy => object is NULL" );
   }
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
   bool isLazyDelete = true;
@@ -320,7 +314,7 @@ int Engine::LuaObject_Destroy( lua_State *lua ) {
   }
 
   return 0;
-}//Object_Destroy
+}//LuaObject_Destroy
 
 
 int Engine::LuaObject_SetAnimation( lua_State *lua ) {
@@ -403,7 +397,7 @@ int Engine::LuaObject_SetAnimation( lua_State *lua ) {
   __log.PrintInfo( Filelevel_DEBUG, "Engine::LuaObject_SetAnimation done" );
 
   return 0;
-}//Object_SetAnimation
+}//LuaObject_SetAnimation
 
 
 void Engine::LuaObject_AnimationCallback( Animation::AnimationSetAction *action ) {
@@ -1111,6 +1105,7 @@ int Engine::LuaObject_Attr( lua_State *lua ) {
         if( res < 2 ) {
           size.y = size.x;
         }
+        __log.PrintInfo( Filelevel_DEBUG, "Game::LUA_ObjectAttr => lightPointSize => size[%3.3f; %3.3f]", size.x, size.y );
         widget->SetSize( size );
       } else {
         __log.PrintInfo( Filelevel_ERROR, "Game::LUA_ObjectAttr => lightPointSize: object '%s' not lightPoint", object->GetNameFull().c_str() );
@@ -1702,9 +1697,25 @@ int Engine::LuaObject_StopAnimation( lua_State *lua ) {
 }//LuaObject_StopAnimation
 
 
+int Engine::LuaObject_SetCamera( lua_State *lua ) {
+  int argc = lua_gettop( lua );
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_SetCamera => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_SetCamera => object is NULL" );
+  }
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
+
+  lib->game->core->SetCamera( object );
+
+  return 0;
+}//LuaObject_SetCamera
+
+
 
 /*
-static int Object_gc( lua_State *lua ) {
+static int LuaObject_gc( lua_State *lua ) {
   return Engine::LuaObject::GarbageCollector( lua, Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
-}//Object_gc
+}//LuaObject_gc
 */
