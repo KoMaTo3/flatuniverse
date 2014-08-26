@@ -1,4 +1,4 @@
-#include "core.h"
+п»ї#include "core.h"
 #include "game/game.h"
 
 
@@ -8,7 +8,7 @@ using namespace Engine;
 int Engine::LuaCore_SetTimer( lua_State *lua ) {
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE );
 
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 2 ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaCore_SetTimer => use: Core.SetTimer( seconds, function|functionName )" );
     return 0;
@@ -65,7 +65,7 @@ int Engine::LuaCore_SetTimer( lua_State *lua ) {
 int Engine::LuaCore_StopTimer( lua_State *lua ) {
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE );
 
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount != 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaCore_SetTimer => use: Core.StopTimer( timerId )" );
     return 0;
@@ -96,7 +96,7 @@ int Engine::LuaCore_GameExit( lua_State *lua ) {
 int Engine::LuaCore_LoadScript( lua_State *lua ) {
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE );
 
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount != 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaCore_LoadScript => use: Core.LoadScript( scriptFileName )" );
     return 0;

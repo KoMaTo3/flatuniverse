@@ -1,4 +1,4 @@
-#include "mouse.h"
+п»ї#include "mouse.h"
 #include "game/game.h"
 
 
@@ -8,7 +8,7 @@ using namespace Engine;
 int Engine::LuaMouse_ListenKey( lua_State *lua ) {
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_MOUSE );
 
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaMouse_ListenKey => use: Mouse.ListenKey( functionName )" );
     return 0;
@@ -30,7 +30,7 @@ int Engine::LuaMouse_ListenKey( lua_State *lua ) {
 int Engine::LuaMouse_ListenMove( lua_State *lua ) {
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_MOUSE );
 
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount != 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaMouse_ListenMove => use: Mouse.ListenMove( functionName )" );
     return 0;

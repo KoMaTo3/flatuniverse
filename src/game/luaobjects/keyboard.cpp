@@ -1,4 +1,4 @@
-#include "keyboard.h"
+п»ї#include "keyboard.h"
 #include "game/game.h"
 
 
@@ -8,7 +8,7 @@ using namespace Engine;
 int Engine::LuaKeyboard_Listen( lua_State *lua ) {
   auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE );
 
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaKeyboard_Listen => use: Keyboard.Listen( functionName )" );
     return 0;

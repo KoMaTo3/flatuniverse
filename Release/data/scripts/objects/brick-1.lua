@@ -25,7 +25,7 @@ return {
   OnCollision = function( self, target, flags, vx, vy ) --(
     -- push brick
     if( self.data.state == 0 ) and ( bit32.band( flags, 4 ) == 4 ) and( vy < 10 ) then
-      local _x, _y = self.api:GetPos()
+      local _x, _y = self.api:Attr({ 'position' })
       self.data.position = {
         x = _x,
         y = _y,
@@ -40,7 +40,7 @@ return {
       if( self.api:HasTag( 'has-coin' ) and target.api:HasTag( 'player' ) ) then --(
         self.data.state = 1
         local coin = Object.New( 'coin', self.api:GetNameFull(), false )
-        coin.api:SetPos( _x, _y )
+        coin.api:Attr({ z = -1 })
         local parent = self
         coin.api:SetAnimation( 'supermario/coin', 'do', function( self )
             self.api:Destroy()

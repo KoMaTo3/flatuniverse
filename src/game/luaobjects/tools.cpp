@@ -1,4 +1,4 @@
-#include "tools.h"
+п»ї#include "tools.h"
 #include "game/game.h"
 #include <time.h>
 
@@ -51,7 +51,7 @@ int Engine::LuaTools_GetClipboard( lua_State *lua ) {
 
 
 int Engine::LuaTools_SetClipboard( lua_State *lua ) {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount != 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaTools_SetClipboard => use: Tools.SetClipboard( string )" );
     return 0;
@@ -75,7 +75,7 @@ int Engine::LuaTools_SetClipboard( lua_State *lua ) {
 
 
 int Engine::LuaTools_MakeScreenshot( lua_State *lua ) {
-  int parmsCount = lua_gettop( lua ); //число параметров
+  int parmsCount = lua_gettop( lua ); //С‡РёСЃР»Рѕ РїР°СЂР°РјРµС‚СЂРѕРІ
   if( parmsCount < 1 ) {
     __log.PrintInfo( Filelevel_ERROR, "Engine::LuaTools_MakeScreenshot => use: Tools.MakeScreenshot( fileName )" );
     return 0;

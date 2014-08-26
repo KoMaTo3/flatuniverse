@@ -64,7 +64,8 @@ return {
     Debug.Log( string.format( 'My name is "'..self.api:GetName()..'" and i\'m borned '..( self.data.savedValue )..' times with memory, respawn[ %3.1f; %3.1f ]', self.data.respawn.x, self.data.respawn.y ) )
 
     -- reset
-    self.data.isLive = true
+	self.api:Attr({ lightPoint = true, lightPointSize = 500, lightPointColor = '1 1 1 0.5', lightPointPenetration = 3 })
+    -- self.data.isLive = true
     -- self.data.playerState.jumpPower = -200
     -- self.data.playerState.longJumpPower = 50
     -- local tmp = Object.New( self.api:GetNameFull()..'/tmp', '', false )
@@ -138,10 +139,6 @@ return {
         end
       end
     end --) flags 4
-
-    if target.api:HasTag( 'kill' ) then
-      self:DoKill( target )
-    end
   end, --) OnCollision
 
 
@@ -219,9 +216,9 @@ return {
           local isRight = self.data.playerState.lastDirection > 0 and true or false
           -- ObjectCreate( object, x + ( isRight and 30 or -30 ), y - 10, 0 )
           local newObject = Object.New( objectName )
-          newObject.api:SetPos( x + ( isRight and 30 or -30 ), y - 10, 0 )
+          newObject.api:SetPos( x + ( isRight and 15 or -15 ), y - 10, 0 )
           newObject.api:Attr({
-            collision = true, collisionSize = '12 12', collisionAcceleration = '0 900', collisionVelocity = ( isRight and 150 or -150 )..' -400', collisionStatic = false,
+            collision = true, collisionSize = '12 12', collisionAcceleration = '0 2500', collisionVelocity = ( isRight and 400 or -400 )..' 200', collisionStatic = false,
             -- lightBlockByCollision = true,
             lightPoint = true, lightPointSize = ( math.random( 0, 1000 ) / 1000.0 ) * 300.0 + 30.0, lightPointColor = string.format( '%f %f %f 1', math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2, math.random( 0, 800 ) / 1000.0 + 0.2 ), lightPointPenetration = 3
             })
@@ -303,7 +300,8 @@ return {
 
   -- смерть
   DoKill = function( self, target ) --(
-    if self.data.respawn ~= nil then
+    if( self.data.respawn ~= nil and self.data.isLive ) then
+      Debug.Log( 'DoKill' )
       -- make screenshot of death
       -- local screenShotFileName = 'data/screenshots/'..Tools.GetTimeFormatted( '%Y.%m.%d-%H.%M.%S' )
       -- Tools.MakeScreenshot( screenShotFileName..'.bmp' )
@@ -396,7 +394,8 @@ return {
 
   -- получение урона
   OnDamage = function( self, target, damage ) --(
-    if( not self.data.isLive ) then
+    -- Debug.Log( Core.GetTime()..' OnDamage, self.data.isLive = '..( self.data.isLive == true and 'true' or 'false' )..', health = '..self.data.health )
+    if( not self.data.isLive or self.data.health <= 0 ) then
       do return end
     end
     self.data.health = self.data.health - damage
