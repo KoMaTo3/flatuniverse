@@ -46,6 +46,9 @@ return {
         savedValue = 1,
       }
       self.data.respawn.x, self.data.respawn.y = self.api:Attr({ 'position' })
+      local cx, cy = self.api:Attr({ 'collisionSize' })
+      cx = cx * 0.8
+      self.api:Attr({ collisionSize = cx..' '..cy })
     end
     if( self.data.playerState.currentAction == 1 ) then
       self.data.playerState.currentAction = 0
@@ -229,6 +232,7 @@ return {
       end --) self.data.allowControl
 
       if id == 0x59 then  -- Y
+        --[[
         local object = Object.New( '__tmp', '', false )
         object.api:Attr({ activeObject = true, position = '0 0' })
         Debug.Log( 'active object created' )
@@ -239,6 +243,7 @@ return {
             Debug.Log( 'active object destroyed' )
           end
         )
+        ]]
       end
     end -- !settings.gamePaused
 
@@ -299,6 +304,11 @@ return {
   -- смерть
   DoKill = function( self, target ) --(
     if self.data.respawn ~= nil then
+      -- make screenshot of death
+      -- local screenShotFileName = 'data/screenshots/'..Tools.GetTimeFormatted( '%Y.%m.%d-%H.%M.%S' )
+      -- Tools.MakeScreenshot( screenShotFileName..'.bmp' )
+      -- Tools.MakeScreenshot( screenShotFileName..'-clean.bmp', true )
+
       self.data.health = 0
       self.data.allowControl = false
       self.data.playerState.currentAction = 3
@@ -386,6 +396,9 @@ return {
 
   -- получение урона
   OnDamage = function( self, target, damage ) --(
+    if( not self.data.isLive ) then
+      do return end
+    end
     self.data.health = self.data.health - damage
     if( self.data.health <= 0 ) then
       self.data.health = 0

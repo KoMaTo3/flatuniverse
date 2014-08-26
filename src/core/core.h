@@ -185,6 +185,7 @@ public:
   inline int CollisionManagerIsUpdated() { return this->collisionManagerIsUpdated; }
   inline void SetOnCollisionMgrUpdate( CollisionManager::OnUpdateCallbackProc *callback ) { if( this->collisionManager ) { this->collisionManager->OnUpdateCallback = callback; } }
   void   GetRootObjects       ( ObjectList &result );
+  void   MakeScreenshot       ( const std::string &fileName, const bool beforeLight = false );
   /*
   inline
   void    SetGuiVisibility    ( bool setShow ) { this->gui.show = setShow; }

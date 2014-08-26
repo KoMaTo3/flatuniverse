@@ -182,6 +182,7 @@ bool Lua::Init( Game *game )
     { "GetClipboard", &Engine::LuaTools_GetClipboard },
     { "GetRandomSeed", &Engine::LuaTools_GetRandomSeed },
     { "GetTimeFormatted", &Engine::LuaTools_GetTimeFormatted },
+    { "MakeScreenshot", &Engine::LuaTools_MakeScreenshot },
     { "SetClipboard", &Engine::LuaTools_SetClipboard },
     { NULL, NULL }
   };

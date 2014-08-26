@@ -5,6 +5,7 @@
 class LightMgr;
 class Vec2;
 class VertexArray;
+class memory;
 
 
 #include "lightmgr.h"
@@ -32,6 +33,7 @@ public:
   }
   void Update();
   void SetRect( const Vec2& leftTop, const Vec2& rightBottom );
+  void MakeScreenshot( FU_OUT memory *imageData, const bool beforeLight = false );
 
 private:
   LightMgr    *manager;

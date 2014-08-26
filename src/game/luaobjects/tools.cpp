@@ -72,3 +72,24 @@ int Engine::LuaTools_SetClipboard( lua_State *lua ) {
 
   return 0;
 }//LuaTools_SetClipboard
+
+
+int Engine::LuaTools_MakeScreenshot( lua_State *lua ) {
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 1 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaTools_MakeScreenshot => use: Tools.MakeScreenshot( fileName )" );
+    return 0;
+  }
+
+  std::string fileName = lua_tostring( lua, 1 );
+  bool beforeLight = false;
+  if( parmsCount > 1 ) {
+    beforeLight = lua_toboolean( lua, 2 ) ? true : false;
+  }
+
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_TOOLS );
+
+  lib->game->core->MakeScreenshot( fileName, beforeLight );
+
+  return 0;
+}//LuaTools_MakeScreenshot

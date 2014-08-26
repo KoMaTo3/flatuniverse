@@ -2032,6 +2032,49 @@ void Core::_GluiHoverFunc( int x, int y )
 
 
 
+void Core::MakeScreenshot( const std::string &fileName, const bool beforeLight ) {
+  memory rgbaData;
+  this->lightRenderer->MakeScreenshot( &rgbaData, beforeLight );
+  File f( fileName, File_mode_WRITE );
+
+  BITMAPFILEHEADER fileHeader;
+  BITMAPINFOHEADER infoHeader;
+  memset( &fileHeader, 0, sizeof( fileHeader ) );
+  memset( &infoHeader, 0, sizeof( infoHeader ) );
+
+  infoHeader.biWidth = this->lightRenderer->GetLightManager()->GetFBO()->width;
+  infoHeader.biHeight = this->lightRenderer->GetLightManager()->GetFBO()->height;
+  infoHeader.biBitCount = 24;
+  infoHeader.biPlanes = 1;
+
+  size_t
+    size = infoHeader.biWidth * infoHeader.biHeight,
+    rgbDataSize = size * 3;
+
+  fileHeader.bfType = 0x4d42;
+  fileHeader.bfSize = sizeof( fileHeader ) + sizeof( infoHeader ) + rgbDataSize;
+  fileHeader.bfOffBits = sizeof( fileHeader ) + sizeof( infoHeader );
+
+  f.Write( &fileHeader, sizeof( fileHeader ) );
+  f.Write( &infoHeader, sizeof( infoHeader ) );
+  uint32_t *data = ( uint32_t* ) rgbaData.getData();
+  memory rgbData( rgbDataSize );
+  uint8_t *outData = ( uint8_t* ) rgbData.getData();
+  for( size_t q = 0; q < size; ++q, ++data ) {
+    *outData = ( *data ) & 0xFF;
+    ++outData;
+    *outData = ( ( *data ) >> 8 ) & 0xFF;
+    ++outData;
+    *outData = ( ( *data ) >> 16 ) & 0xFF;
+    ++outData;
+  }
+  f.Write( rgbData.getData(), rgbData.getLength() );
+  //f.Write( data.getData(), data.getLength() );
+  f.Close();
+}//MakeScreenshot
+
+
+
 void Core::__Test() {
 }//__Test
 

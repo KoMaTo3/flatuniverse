@@ -118,3 +118,29 @@ void LightRenderer::Update() {
 void LightRenderer::SetRect( const Vec2& leftTop, const Vec2& rightBottom ) {
   this->manager->SetRect( leftTop, rightBottom );
 }//SetRect
+
+
+void LightRenderer::MakeScreenshot( FU_OUT memory *imageData, const bool beforeLight ) {
+  if( beforeLight ) {
+    this->fbo->Bind();
+  }
+  size_t size = this->fbo->width * this->fbo->height;
+  imageData->Alloc( size * 4 );
+  glReadPixels( 0, 0, this->fbo->width, this->fbo->height, GL_RGBA, GL_UNSIGNED_BYTE, imageData->getData() );
+  DWORD *data = ( DWORD* ) imageData->getData();
+  size_t q = 0;
+  while( q < size ) {
+    uint32_t color = *data;
+    uint32_t
+      r = color & 0xFF,
+      g = ( color >> 8 ) & 0xFF,
+      b = ( color >> 16 ) & 0xFF,
+      a = ( color >> 24 ) & 0xFF;
+    *data = ( b ) | ( g << 8 ) | ( r << 16 ) | ( a << 24 );
+    ++q;
+    ++data;
+  }
+  if( beforeLight ) {
+    this->fbo->Unbind();
+  }
+}//MakeScreenshot

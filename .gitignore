@@ -3,6 +3,7 @@ Backup/
 Debug/
 Release/logs/
 Release/data/temp/
+Release/data/screenshots/
 */*/default.cfg
 Release/flatuniverse.*
 flatuniverse/Debug/
