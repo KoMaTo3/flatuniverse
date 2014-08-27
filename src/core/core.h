@@ -23,6 +23,7 @@
 #include "filemanager.h"
 #include "textureatlas.h"
 #include "lightrenderer.h"
+#include "shaderprogram.h"
 
 //
 extern CoreRenderableList *__coreRenderableList;
@@ -96,10 +97,11 @@ private:
 
   struct shaders
   {
-    GLuint programm;
-    GLuint vertex;
-    GLuint fragment;
-    GLuint geometry;
+    //GLuint programm;
+    //GLuint vertex;
+    //GLuint fragment;
+    //GLuint geometry;
+    Engine::ShaderProgram *program;
 
     GLuint locVertexPos;
     GLuint locColor;
@@ -145,7 +147,6 @@ private:
   void  _InitPalette    ();
   void  _InitViewport   ();
   void  _InitExtensions ();
-  bool  _CheckShaderError( const std::string& text, GLuint shader );
 
 public:
   Core();

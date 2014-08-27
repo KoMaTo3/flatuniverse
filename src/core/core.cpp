@@ -203,13 +203,6 @@ bool Core::Destroy()
   glDeleteBuffers( 1, &this->_buffers.ibo );
   glDeleteBuffers( 1, &this->_buffers.iboGUI );
   glDeleteVertexArrays( 1, &this->_buffers.vao );
-  glDetachShader( this->_shaders.programm, this->_shaders.vertex );
-  glDetachShader( this->_shaders.programm, this->_shaders.fragment );
-  glDetachShader( this->_shaders.programm, this->_shaders.geometry );
-  glDeleteShader( this->_shaders.vertex );
-  glDeleteShader( this->_shaders.fragment );
-  glDeleteShader( this->_shaders.geometry );
-  glDeleteProgram( this->_shaders.programm );
   wglMakeCurrent( NULL, NULL );
   wglDeleteContext( this->_window.glRC );
   this->_window.glRC = NULL;
@@ -465,74 +458,23 @@ bool Core::_InitGraphics()
   this->_InitExtensions();
 
   //shaders
-  this->_shaders.vertex   = glCreateShader( GL_VERTEX_SHADER );
-  this->_shaders.geometry = glCreateShader( GL_GEOMETRY_SHADER );
-  this->_shaders.fragment = glCreateShader( GL_FRAGMENT_SHADER );
   memory
     memShaderVertex,
     memShaderGeometry,
     memShaderFragment;
-  GLint
-    lengthShaderVertex,
-    lengthShaderGeometry,
-    lengthShaderFragment;
   __fileManager->GetFile( __config->GetString( "gl_shader_vertex", "data/shaders/main.vs" ), memShaderVertex );
   __fileManager->GetFile( __config->GetString( "gl_shader_geometry", "data/shaders/main.gs" ), memShaderGeometry );
   __fileManager->GetFile( __config->GetString( "gl_shader_fragment", "data/shaders/main.fs" ), memShaderFragment );
-  lengthShaderVertex    = memShaderVertex.getLength();
-  lengthShaderGeometry  = memShaderGeometry.getLength();
-  lengthShaderFragment  = memShaderFragment.getLength();
-  const GLchar *sourceShaderVertex    = memShaderVertex.getData();
-  const GLchar* sourceShaderGeometry  = memShaderGeometry.getData();
-  const GLchar* sourceShaderFragment  = memShaderFragment.getData();
-  glShaderSource( this->_shaders.vertex,    1, ( const GLchar** ) &sourceShaderVertex, &lengthShaderVertex );
-  glShaderSource( this->_shaders.geometry,  1, ( const GLchar** ) &sourceShaderGeometry, &lengthShaderGeometry );
-  glShaderSource( this->_shaders.fragment,  1, ( const GLchar** ) &sourceShaderFragment, &lengthShaderFragment );
-  glCompileShader( this->_shaders.vertex );
-  glCompileShader( this->_shaders.geometry );
-  glCompileShader( this->_shaders.fragment );
-  if( this->_CheckShaderError( "Vertex shader", this->_shaders.vertex ) ) {
-    this->SetState( CORE_STATE_EXIT );
-  }
-  if( this->_CheckShaderError( "Geometry shader", this->_shaders.geometry ) ) {
-    this->SetState( CORE_STATE_EXIT );
-  }
-  if( this->_CheckShaderError( "Fragment shader", this->_shaders.fragment ) ) {
-    this->SetState( CORE_STATE_EXIT );
-  }
-  this->_shaders.programm = glCreateProgram();
-  glAttachShader( this->_shaders.programm, this->_shaders.vertex );
-  glAttachShader( this->_shaders.programm, this->_shaders.geometry );
-  glAttachShader( this->_shaders.programm, this->_shaders.fragment );
-  glLinkProgram( this->_shaders.programm );
 
-  //this->_shaders.locVertexPos = glGetAttribLocation( this->_shaders.programm, "vertexPosition_local" );
+  this->_shaders.program = new Engine::ShaderProgram();
+  this->_shaders.program->AttachVertexShader( memShaderVertex.getData(), memShaderVertex.getLength() );
+  this->_shaders.program->AttachGeometryShader( memShaderGeometry.getData(), memShaderGeometry.getLength() );
+  this->_shaders.program->AttachFragmentShader( memShaderFragment.getData(), memShaderFragment.getLength() );
 
-  /*
-  this->_shaders.locVertexPos = 0;
-  glBindAttribLocation( this->_shaders.programm, this->_shaders.locVertexPos, "vertexPosition_local" );
-  GL_CHECK_ERROR;
-  //this->_shaders.locColor     = glGetAttribLocation( this->_shaders.programm, "colorLocal" );
-  this->_shaders.locColor = 1;
-  glBindAttribLocation( this->_shaders.programm, this->_shaders.locColor, "colorLocal" );
-  GL_CHECK_ERROR;
-  //this->_shaders.locSize      = glGetAttribLocation( this->_shaders.programm, "size_local" );
-  this->_shaders.locSize = 2;
-  glBindAttribLocation( this->_shaders.programm, this->_shaders.locSize, "size_local" );
-  GL_CHECK_ERROR;
-  //this->_shaders.locTexCoords = glGetAttribLocation( this->_shaders.programm, "texcoordLocal" );
-  this->_shaders.locTexCoords = 3;
-  glBindAttribLocation( this->_shaders.programm, this->_shaders.locTexCoords, "texcoordLocal" );
-  GL_CHECK_ERROR;
-  __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => locVertexPos[ %d ]", this->_shaders.locVertexPos );
-  __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => locColor[ %d ]", this->_shaders.locColor );
-  __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => locSize[ %d ]", this->_shaders.locSize );
-  __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => locTexCoords[ %d ]", this->_shaders.locTexCoords );
-  */
 
-  this->_shaders.matrModelLoc = glGetUniformLocation( this->_shaders.programm, "matModel" );
+  this->_shaders.matrModelLoc = this->_shaders.program->GetUniformLocation( "matModel" );
   __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => matrModelLoc[ %d ]", this->_shaders.matrModelLoc );
-  this->_shaders.matrProjectionLoc = glGetUniformLocation( this->_shaders.programm, "matProj" );
+  this->_shaders.matrProjectionLoc = this->_shaders.program->GetUniformLocation( "matProj" );
   __log.PrintInfo( Filelevel_DEBUG, "Core::_InitGraphics => matrProjectionLoc[ %d ]", this->_shaders.matrProjectionLoc );
 
   glGenBuffers( 1, &this->_buffers.vbo );
@@ -550,42 +492,6 @@ bool Core::_InitGraphics()
 
   return true;
 }//_InitGraphics
-
-
-
-
-/*
-=============
-  _CheckShaderError
-=============
-*/
-bool Core::_CheckShaderError( const std::string& text, GLuint shader )
-{
-  bool result = false;
-  if( !glIsShader( shader ) )
-    return true;
-  Int maxLength, logLength = 0;
-  glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &maxLength );
-  GL_CHECK_ERROR;
-  char *log = new Char[ maxLength + 1 ];
-  log[ maxLength ] = 0;
-  glGetShaderInfoLog( shader, maxLength, &logLength, log );
-  if( log[ 0 ] && this->CheckGLError( __LINE__, __FILE__ ) )
-  {
-    std::string tmpLog = log;
-    BYTE errorType = Filelevel_INFO;
-    if( tmpLog.find_first_of( "warning" ) >= 0 )
-      errorType = Filelevel_WARNING;
-    else
-      errorType = Filelevel_CRITICALERROR;
-    __log.PrintInfo( errorType, "Core::_CheckShaderError => %s: %s", text.c_str(), log );
-    //MessageBox(0,log,text.c_str(),0);
-    result = true;
-  }
-  //__log.PrintInfo( Filelevel_DEBUG, "%s: %s", text.c_str(), log );
-  delete [] log;
-  return result;
-}//_CheckShaderError
 
 
 
@@ -1085,7 +991,7 @@ bool Core::Redraw()
   if( !__coreRenderableList->empty() || !__coreGUI->empty() )
   {
     //__log.PrintInfo( Filelevel_DEBUG, "this->_shaders.programm = x%X", this->_shaders.programm );
-    glUseProgram( this->_shaders.programm );
+    this->_shaders.program->UseProgram();
     glEnableClientState( GL_VERTEX_ARRAY );
 
     //std::deque< CoreRenderableList* > renderableLists;
@@ -1209,7 +1115,7 @@ bool Core::Redraw()
   this->lightRenderer->EndScene();
 
   if( !__coreRenderableList->empty() || !__coreGUI->empty() ) {
-    glUseProgram( this->_shaders.programm );
+    this->_shaders.program->UseProgram();
     glEnableClientState( GL_VERTEX_ARRAY );
     glEnable( GL_BLEND );
     glEnable(GL_DEPTH_TEST);
@@ -1361,7 +1267,7 @@ bool Core::Redraw()
     //__log.PrintInfo( Filelevel_DEBUG, "test gui: __coreGUI[x%X] size[%d]", __coreGUI, __coreGUI->size() );
     if( !__coreGUI->empty() )
     {
-      glUseProgram( this->_shaders.programm );
+      this->_shaders.program->UseProgram();
       //glLoadIdentity();
       Mat4 matrix;
       matrix.Identity();
