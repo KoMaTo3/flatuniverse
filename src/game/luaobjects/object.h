@@ -39,6 +39,7 @@ int LuaObject_SetCamera( lua_State *lua );
 int LuaObject_SetForce( lua_State *lua );
 int LuaObject_SetPos( lua_State *lua );
 int LuaObject_SetScript( lua_State *lua );
+int LuaObject_SetTimer( lua_State *lua );
 int LuaObject_StopAnimation( lua_State *lua );
 
 typedef void LuaObject_Callback( Object *object );

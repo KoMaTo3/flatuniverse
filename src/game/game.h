@@ -48,10 +48,11 @@ public:
     bool dontPause; //не паузится от Game::SetActive
     Dword id;
     int luaFunctionId;
+    Object *object;
 
     GameLuaTimer(){}
     GameLuaTimer( const GameLuaTimer& from )
-    :active( from.active ), time( from.time ), funcName( from.funcName ), dontPause( from.dontPause ), id( from.id ), luaFunctionId( from.luaFunctionId )
+    :active( from.active ), time( from.time ), funcName( from.funcName ), dontPause( from.dontPause ), id( from.id ), luaFunctionId( from.luaFunctionId ), object( from.object )
     { }
     GameLuaTimer& operator=( const GameLuaTimer& from ) {
       this->active = from.active;
@@ -60,10 +61,11 @@ public:
       this->id = from.id;
       this->time = from.time;
       this->luaFunctionId = from.luaFunctionId;
+      this->object = from.object;
       return *this;
     }
-    GameLuaTimer( int setId, const std::string& setFuncName, const int setLuaFunctionId )
-    :id( setId ), funcName( setFuncName ), luaFunctionId( setLuaFunctionId )
+    GameLuaTimer( int setId, const std::string& setFuncName, const int setLuaFunctionId, Object *setObject )
+    :id( setId ), funcName( setFuncName ), luaFunctionId( setLuaFunctionId ), object( setObject )
     { }
   };
   std::vector< GameLuaTimer > luaTimers;

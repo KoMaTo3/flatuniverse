@@ -88,6 +88,7 @@ bool Lua::Init( Game *game )
     { "SetForce", &Engine::LuaObject_SetForce },
     { "SetPos", &Engine::LuaObject_SetPos },
     { "SetScript", &Engine::LuaObject_SetScript },
+    { "SetTimer", &Engine::LuaObject_SetTimer },
     { "StopAnimation", &Engine::LuaObject_StopAnimation },
     { NULL, NULL }
   };

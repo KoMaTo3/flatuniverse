@@ -665,7 +665,7 @@ void Game::UpdateLuaTimers()
       if( timer.time <= 0.0f ) {
         timer.active = false;
         if( !timer.funcName.empty() || timer.luaFunctionId ) {
-          timerProcs.push_back( GameLuaTimer( timer.id, timer.funcName, timer.luaFunctionId ) );
+          timerProcs.push_back( GameLuaTimer( timer.id, timer.funcName, timer.luaFunctionId, timer.object ) );
         }
       }
     }
@@ -674,6 +674,9 @@ void Game::UpdateLuaTimers()
     //LUACALLBACK_Timer( this->lua, timer.id, timer.funcName, timer.luaFunctionId );
     if( timer.luaFunctionId ) {
       Engine::LuaObject::FunctionCallParametersList parameters;
+      if( timer.object && timer.object->GetLuaObjectId() ) {
+        parameters.push_back( Engine::LuaObject::FunctionCallParameter( Engine::LUAOBJECT_PARAMETERS_LIST::LUAOBJECT_PARAMETER_REFERENCE, timer.object->GetLuaObjectId() ) );
+      }
       parameters.push_back( Engine::LuaObject::FunctionCallParameter( ( int ) timer.id ) );
       game->lua->CallFunction( timer.luaFunctionId, &parameters );
       game->lua->Unref( timer.luaFunctionId );
@@ -757,6 +760,13 @@ void Game::ObjectOnUnload( Object* obj, bool isClean ) {
       game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONMOUSEMOVE, game->luaObjectOnMouseMove );
       game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONCOLLISION, game->luaObjectOnCollision );
       game->EraseLuaHandler( obj->GetLuaObjectId(), GAME_OBJECT_HANDLER_ONTRIGGER, game->luaObjectOnTrigger );
+
+      for( auto &timer: game->luaTimers ) {
+        if( timer.object == obj ) {
+          timer.active = false;
+          timer.object = NULL;
+        }
+      }
 
       Engine::LuaObject::RemoveFromLuaTable( obj->GetLuaObjectId(), Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_OBJECT );
       obj->SetLuaObjectId( 0 );

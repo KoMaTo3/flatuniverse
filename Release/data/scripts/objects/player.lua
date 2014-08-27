@@ -168,10 +168,10 @@ return {
               self.data.playerState.PlayerEndLongJumpTimer = -1
             end
             --[[
-            self.data.playerState.longJumpTimer = Core.SetTimer( 0.1, function( timerId )
+            self.data.playerState.longJumpTimer = self.api:SetTimer( 0.1, function( timerId )
                 self.PlayerDoLongJump( self, timerId )
               end )
-            self.data.playerState.PlayerEndLongJumpTimer = Core.SetTimer( 0.5, function( timerId ) self:PlayerEndLongJump( timerId ) end )
+            self.data.playerState.PlayerEndLongJumpTimer = self.api:SetTimer( 0.5, function( timerId ) self:PlayerEndLongJump( timerId ) end )
             ]]
             self.data.playerState.jumpBeginTime = Core.GetTime()
             self.data.playerState.onGroundTime = 0
@@ -235,7 +235,7 @@ return {
         Debug.Log( 'active object created' )
         local objectsList = Object.GetRoot()
         Debug.Log( 'objects = '..TableSize( objectsList ) )
-        Core.SetTimer( 3, function()
+        object.api:SetTimer( 3, function()
             object.api:Destroy()
             Debug.Log( 'active object destroyed' )
           end

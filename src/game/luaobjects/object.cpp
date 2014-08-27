@@ -1713,6 +1713,64 @@ int Engine::LuaObject_SetCamera( lua_State *lua ) {
 }//LuaObject_SetCamera
 
 
+int Engine::LuaObject_SetTimer( lua_State *lua ) {
+  auto lib = Engine::LuaObject::GetLibrary( Engine::LUAOBJECT_LIBRARIESLIST::LUAOBJECT_LIBRARY_CORE );
+
+  luaL_checktype( lua, 1, LUA_TUSERDATA );
+  Object *object = *static_cast<Object **>( luaL_checkudata( lua, 1, "Object" ) );
+  if( object == NULL ) {
+    __log.PrintInfo( Filelevel_WARNING, "Engine::LuaObject_SetTimer => object is NULL" );
+    luaL_error( lua, "Engine::LuaObject_SetTimer => object is NULL" );
+  }
+
+  int parmsCount = lua_gettop( lua ); //число параметров
+  if( parmsCount < 3 ) {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetTimer => use: object.api:SetTimer( seconds, function [ ,dontPause ] )" );
+    return 0;
+  }
+
+  float time            = ( float ) lua_tonumber( lua, 2 );
+  int luaFunctionId     = 0;
+  if( lua_isfunction( lua, 3 ) ) {
+    lua_pushvalue( lua, 3 );
+    luaFunctionId = luaL_ref( lua, LUA_REGISTRYINDEX );
+  } else {
+    __log.PrintInfo( Filelevel_ERROR, "Engine::LuaObject_SetTimer => bad 2nd parameter: must be function" );
+    return 0;
+  }
+  int dontPause = false;
+
+  if( parmsCount >= 4 ) {
+    dontPause = lua_toboolean( lua, 4 );
+  }
+
+  Dword id, count = lib->game->luaTimers.size();
+  bool setted = false;
+  for( Dword q = 0; q < count; ++q ) {
+    if( !lib->game->luaTimers[ q ].active ) {
+      id = q;
+      setted = true;
+      break;
+    }
+  }
+  if( !setted ) {
+    lib->game->luaTimers.push_back( Game::GameLuaTimer() );
+    id = lib->game->luaTimers.size() - 1;
+  }
+  lib->game->luaTimers[ id ].active    = 1;
+  lib->game->luaTimers[ id ].time      = time;
+  lib->game->luaTimers[ id ].funcName  = "";
+  lib->game->luaTimers[ id ].dontPause = dontPause ? true : false;
+  lib->game->luaTimers[ id ].id = id;
+  lib->game->luaTimers[ id ].luaFunctionId = luaFunctionId;
+  lib->game->luaTimers[ id ].object    = object;
+
+  lua_pushinteger( lua, id );
+
+  return 1;
+}//LuaObject_SetTimer
+
+
 
 /*
 static int LuaObject_gc( lua_State *lua ) {

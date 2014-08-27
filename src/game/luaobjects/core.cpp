@@ -53,6 +53,7 @@ int Engine::LuaCore_SetTimer( lua_State *lua ) {
   lib->game->luaTimers[ id ].dontPause = dontPause ? true : false;
   lib->game->luaTimers[ id ].id = id;
   lib->game->luaTimers[ id ].luaFunctionId = luaFunctionId;
+  lib->game->luaTimers[ id ].object    = NULL;
 
   lua_pushinteger( lua, id );
 
