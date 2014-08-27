@@ -1,45 +1,72 @@
 #include "shaderprogram.h"
+#include "tools.h"
+#include "memory.h"
+#include "file.h"
 #include "filemanager.h"
 #include "interngl.h"
 
+using namespace Engine;
+
+ShaderProgram::ShaderProgram()
+: program( 0 ) {
+  this->program = glCreateProgram();
+}
+
 
 ShaderProgram::ShaderProgram( const std::string& vertexShaderFileName, const std::string& fragmentShaderFileName ) {
+  this->program = glCreateProgram();
   memory vertexData, fragmentData;
   __fileManager->GetFile( vertexShaderFileName, vertexData, true );
   __fileManager->GetFile( fragmentShaderFileName, fragmentData, true );
-  this->vertex = glCreateShader( GL_VERTEX_SHADER );
-  this->fragment = glCreateShader( GL_FRAGMENT_SHADER );
-  GLint
-    lengthShaderVertex = vertexData.getLength(),
-    lengthShaderFragment = fragmentData.getLength();
-  const GLchar* srcVertex = vertexData.getData();
-  const GLchar* srcFragment = fragmentData.getData();
-  glShaderSource( this->vertex, 1, &srcVertex, &lengthShaderVertex );
-  glShaderSource( this->fragment, 1, &srcFragment, &lengthShaderFragment );
-  glCompileShader( this->vertex );
-  glCompileShader( this->fragment );
-  this->program = glCreateProgram();
-  glAttachShader( this->program, this->vertex );
-  glAttachShader( this->program, this->fragment );
-  glLinkProgram( this->program );
-  this->_CheckShaderError( "ShaderProgram::vertexShader", this->vertex );
-  this->_CheckShaderError( "ShaderProgram::fragmentShader", this->fragment );
+  this->AttachVertexShader( vertexData.getData(), vertexData.getLength() );
+  this->AttachFragmentShader( fragmentData.getData(), fragmentData.getLength() );
 }
+
+
+bool ShaderProgram::_AttachShader( const GLchar *content, const GLint length, GLenum shaderType ) {
+  if( !content ) {
+    __log.PrintInfo( Filelevel_ERROR, "ShaderProgram::_AttachShader => content is NULL, shaderType[x%X]", ( int ) shaderType );
+    return false;
+  }
+
+  GLuint shader = glCreateShader( shaderType );
+  glShaderSource( shader, 1, &content, &length );
+  glCompileShader( shader );
+  glAttachShader( this->program, shader );
+  glLinkProgram( this->program );
+  this->_CheckShaderError( "ShaderProgram::_AttachShader", shader );
+  this->shadersList.push_back( shader );
+
+  return true;
+}//_AttachShader
+
+
+bool ShaderProgram::AttachVertexShader( const char *content, const size_t length ) {
+  return this->_AttachShader( content, length, GL_VERTEX_SHADER );
+}//AttachVertexShader
+
+bool ShaderProgram::AttachFragmentShader( const char *content, const size_t length ) {
+  return this->_AttachShader( content, length, GL_FRAGMENT_SHADER );
+}//AttachFragmentShader
+
+bool ShaderProgram::AttachGeometryShader( const char *content, const size_t length ) {
+  return this->_AttachShader( content, length, GL_GEOMETRY_SHADER );
+}//AttachGeometryShader
 
 
 bool ShaderProgram::_CheckShaderError( const std::string& text, GLuint shader ) {
   bool result = false;
   if( !glIsShader( shader ) ) {
-    __log.PrintInfo( Filelevel_ERROR, "[ERROR] %d is not a shader (%s)\n", shader, text.c_str() );
+    __log.PrintInfo( Filelevel_ERROR, "%d is not a shader (%s)\n", shader, text.c_str() );
     return true;
   }
-  Int maxLength, logLength = 0;
+  int maxLength, logLength = 0;
   glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &maxLength );
-  char *log = new Char[ maxLength + 1 ];
+  char *log = new char[ maxLength + 1 ];
   log[ maxLength ] = 0;
   glGetShaderInfoLog( shader, maxLength, &logLength, log );
   if( log[ 0 ] ) {
-    __log.PrintInfo( Filelevel_ERROR, "[ERROR] LightMgr::_CheckShaderError => %s: %s\n", text.c_str(), log );
+    __log.PrintInfo( Filelevel_ERROR, "LightMgr::_CheckShaderError => %s: %s\n", text.c_str(), log );
     result = true;
   }
   delete [] log;
@@ -48,20 +75,28 @@ bool ShaderProgram::_CheckShaderError( const std::string& text, GLuint shader ) 
 
 
 ShaderProgram::~ShaderProgram() {
-  glDetachShader( this->program, this->vertex );
-  glDetachShader( this->program, this->fragment );
-  glDeleteShader( this->vertex );
-  glDeleteShader( this->fragment );
+  for( auto &shader: this->shadersList ) {
+    glDetachShader( this->program, shader );
+    glDeleteShader( shader );
+  }
   glDeleteProgram( this->program );
 }
 
 
-GLint ShaderProgram::GetUniformLocation( const std::string& uniformName ) {
-  return glGetUniformLocation( this->program, uniformName.c_str() );
+GLint ShaderProgram::GetUniformLocation( const std::string& uniformName ) const {
+  GLint result = glGetUniformLocation( this->program, uniformName.c_str() );
+  if( result == -1 ) {
+    __log.PrintInfo( Filelevel_WARNING, "ShaderProgram::GetUniformLocation => %s == -1, program[%u]", uniformName.c_str(), this->program );
+  }
+  return result;
 }//GetUniformLocation
 
-GLint ShaderProgram::GetAttribLocation( const std::string& attribName ) {
-  return glGetAttribLocation( this->program, attribName.c_str() );
+GLint ShaderProgram::GetAttribLocation( const std::string& attribName ) const {
+  GLint result = glGetAttribLocation( this->program, attribName.c_str() );
+  if( result == -1 ) {
+    __log.PrintInfo( Filelevel_WARNING, "ShaderProgram::GetAttribLocation => %s == -1, program[%u]", attribName.c_str(), this->program );
+  }
+  return result;
 }//GetAttribLocation
 
 void ShaderProgram::UseProgram() {

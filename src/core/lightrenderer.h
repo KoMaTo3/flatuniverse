@@ -40,7 +40,7 @@ private:
   Fbo         *fbo;
   VertexArray *vao;
   struct {
-    ShaderProgram *shaderProgram;
+    Engine::ShaderProgram *shaderProgram;
     GLint
       uniformTextureScene,
       uniformTextureLight,

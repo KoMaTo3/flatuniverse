@@ -23,7 +23,7 @@ class LightMgr
 public:
   LightMgr();
   virtual ~LightMgr();
-  void Init( const Vec2& setTextureSize, ShaderProgram *setShader, LightsListPtr setLightList );
+  void Init( const Vec2& setTextureSize, Engine::ShaderProgram *setShader, LightsListPtr setLightList );
   void Update();
   void Render();
   void BindColorTexture();
@@ -44,7 +44,7 @@ public:
 private:
   Fbo *fboLight;
   Vec2 oneByWindowSize;
-  ShaderProgram *shader;
+  Engine::ShaderProgram *shader;
   struct {
     Vec2
       leftTop,

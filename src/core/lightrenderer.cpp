@@ -17,14 +17,14 @@ LightRenderer::LightRenderer(
   LightsListPtr setLightList
   )
 :manager( new LightMgr() ), fbo( new Fbo( int( setTextureSize.x ), int( setTextureSize.y ) ) ) {
-  this->manager->Init( setTextureSize, new ShaderProgram( vertexShaderLightFileName, fragmentShaderLightFileName ), setLightList );
+  this->manager->Init( setTextureSize, new Engine::ShaderProgram( vertexShaderLightFileName, fragmentShaderLightFileName ), setLightList );
   this->fbo->AddTexture( GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE );
 
-  this->shader.shaderProgram = new ShaderProgram( vertexShaderResultFileName, fragmentShaderResultFileName );
+  this->shader.shaderProgram = new Engine::ShaderProgram( vertexShaderResultFileName, fragmentShaderResultFileName );
 
   this->shader.uniformTextureScene = this->shader.shaderProgram->GetUniformLocation( "texture0" );
   this->shader.uniformTextureLight = this->shader.shaderProgram->GetUniformLocation( "texture1" );
-  this->shader.uniformTextureBrightness = this->shader.shaderProgram->GetUniformLocation( "texture2" );
+  //this->shader.uniformTextureBrightness = this->shader.shaderProgram->GetUniformLocation( "texture2" );
   this->shader.uniformOneByWindowSize = this->shader.shaderProgram->GetUniformLocation( "oneByWindowCoeff" );
 
   glGenBuffers( 1, &this->sceneVertexBuffer );

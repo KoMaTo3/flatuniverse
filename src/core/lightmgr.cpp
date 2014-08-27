@@ -40,7 +40,7 @@ LightMgr::~LightMgr() {
 }
 
 
-void LightMgr::Init( const Vec2& setTextureSize, ShaderProgram *setShader, LightsListPtr setLightList ) {
+void LightMgr::Init( const Vec2& setTextureSize, Engine::ShaderProgram *setShader, LightsListPtr setLightList ) {
   if( this->fboLight ) {
     return;
   }
@@ -56,8 +56,8 @@ void LightMgr::Init( const Vec2& setTextureSize, ShaderProgram *setShader, Light
   //this->fboLight->AddTexture( GL_R16F, GL_RED, GL_UNSIGNED_BYTE );
   this->shader = setShader;
 
-  this->_shaderUniforms.textureColor = this->shader->GetUniformLocation( "texture0" );
-  this->_shaderUniforms.textureBrightness = this->shader->GetUniformLocation( "texture1" );
+  //this->_shaderUniforms.textureColor = this->shader->GetUniformLocation( "texture0" );
+  //this->_shaderUniforms.textureBrightness = this->shader->GetUniformLocation( "texture1" );
 
   this->vao.push_back( new VertexArray() );
 }//Init
@@ -104,8 +104,8 @@ void LightMgr::Render() {
 
   //glEnable( GL_TEXTURE_2D );
   //glActiveTexture( GL_TEXTURE0 + 0 );
-  this->BindColorTexture();
-  glUniform1i( this->_shaderUniforms.textureColor, 0 );
+  //this->BindColorTexture();
+  //glUniform1i( this->_shaderUniforms.textureColor, 0 );
   //glActiveTexture( GL_TEXTURE0 + 1 );
   //this->BindBrightnessTexture();
   //glUniform1i( this->_shaderUniforms.textureBrightness, 1 );
