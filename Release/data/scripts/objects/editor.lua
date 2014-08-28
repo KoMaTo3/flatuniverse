@@ -456,6 +456,10 @@ return {
           self.lastEditorMode = settings.editorMode
           settings.editorMode = 50
         end
+      elseif GUI.tabbedTemplates.isHovered then
+        if settings.editorMode ~= 30 then
+          settings.editorMode = 30
+        end
       end
     else  --)(
       GUI.tooltip:SetPosition( 0, settings.windowSize.y )
