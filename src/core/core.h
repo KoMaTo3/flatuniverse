@@ -72,6 +72,7 @@ private:
     Vec3                      windowToWorld;  //коэффициенты пересчета оконных координат (0-100) в мировые (пиксельные)
     Vec2                      windowCenter; //центр окна, в пикселях
     Size                      windowSize;   //размеры окна
+    Vec2                      invWindowSize; //1.0f / размеры окна
   } _window;                //всё, что относится к окну
 
   struct                    //время и дата билда

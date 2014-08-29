@@ -17,6 +17,7 @@
 #include "objectwidget.h"
 #include "thread.h"
 #include "lightrenderer.h"
+#include "camera2d.h"
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -316,6 +317,7 @@ bool Core::Init( WORD screenWidth, WORD screenHeight, bool isFullScreen, const s
 
   this->_window.windowSize.width  = screenWidth;
   this->_window.windowSize.height = screenHeight;
+  this->_window.invWindowSize.Set( 1.0f / float( screenWidth ), 1.0f / float( screenHeight ) );
 
   this->_window.hwnd = CreateWindowEx(
     styleEx,
@@ -1025,17 +1027,21 @@ bool Core::Redraw()
       {
         Object *objCamera = this->camera->GetObject< Object >();
         objCamera->Update( 0.0f );
-        Mat4 matrScale, matrTranslate, matrix;
-        matrScale.Identity();
-        matrTranslate.Identity();
-        matrScale[ 0 ][ 0 ] = 1.0f;
-        matrScale[ 1 ][ 1 ] = 1.0f;
-        matrTranslate[ 3 ][ 0 ] = float( long( -objCamera->GetPosition().x + this->_window.windowCenter.x ) );
-        matrTranslate[ 3 ][ 1 ] = float( long( -objCamera->GetPosition().y + this->_window.windowCenter.y ) );
-        matrTranslate[ 3 ][ 2 ] = -objCamera->GetPosition().z;
-        matrix = matrScale * matrTranslate;
-        glUniformMatrix4fv( this->_shaders.matrModelLoc, 1, false, &matrix[ 0 ][ 0 ] );
 
+        Engine::Camera2d cam;
+        cam.SetPosition( Vec3(
+          float( long( -objCamera->GetPosition().x ) ),
+          float( long( -objCamera->GetPosition().y ) ),
+          -objCamera->GetPosition().z
+        ) );
+        cam.SetScale( Vec2( 2.0f * this->_window.invWindowSize.x, -2.0f * this->_window.invWindowSize.y ) );
+        cam.Update();
+        Mat4 matrix = cam.GetMatrix().Transpose();
+
+        glUniformMatrix4fv( this->_shaders.matrModelLoc, 1, false, &matrix[ 0 ][ 0 ] );
+        //glUniformMatrix4fv( this->_shaders.matrModelLoc, 1, false, &matrix[ 0 ][ 0 ] );
+
+        /*
         float left = 0.0f;
         float right = this->_window.windowCenter.x * 2.0f;
         float top = 0.0f;
@@ -1055,7 +1061,11 @@ bool Core::Redraw()
         matrix[ 3 ][ 1 ] = ty;
         matrix[ 2 ][ 2 ] = 2.0f / f_n;
         matrix[ 3 ][ 2 ] = tz;
-        glUniformMatrix4fv( this->_shaders.matrProjectionLoc, 1, false, &matrix[ 0 ][ 0 ] );
+        */
+
+
+        //glUniformMatrix4fv( this->_shaders.matrProjectionLoc, 1, false, &matrix[ 0 ][ 0 ] );
+        //glUniformMatrix4fv( this->_shaders.matrProjectionLoc, 1, false, &mat4_identity[ 0 ][ 0 ] );
 
         //glTranslatef( -this->camera->GetPosition().x + this->_window.windowCenter.x, -this->camera->GetPosition().y + this->_window.windowCenter.y, -this->camera->GetPosition().z );
       }

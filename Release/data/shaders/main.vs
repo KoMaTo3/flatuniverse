@@ -1,7 +1,7 @@
 #version 150
 #extension GL_ARB_explicit_attrib_location : enable
 
-uniform mat4 matProj, matModel;
+uniform mat4 /* matProj, */ matModel;
 
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec4 color;
@@ -17,7 +17,7 @@ out VertexData
   vec4 colorV;
   vec4 texcoord;
   mat4 matrixModel;
-  mat4 matrixProjection;
+  //mat4 matrixProjection;
 } outData;
 
 void main( void )
@@ -31,5 +31,5 @@ void main( void )
   outData.colorV = color;
   outData.texcoord = texcoordLocal2;
   outData.matrixModel = matModel;
-  outData.matrixProjection = matProj;
+  //outData.matrixProjection = matProj;
 }

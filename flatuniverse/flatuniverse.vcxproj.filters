@@ -681,6 +681,18 @@
     <ClCompile Include="..\src\game\luaobjects\tools.cpp">
       <Filter>game\luaobjects</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\camera.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\camera2d.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\camera3d.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\kquat.cpp">
+      <Filter>core\math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\collision.h">
@@ -1078,6 +1090,18 @@
     </ClInclude>
     <ClInclude Include="..\src\game\luaobjects\tools.h">
       <Filter>game\luaobjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\camera.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\camera2d.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\camera3d.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\kquat.h">
+      <Filter>core\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

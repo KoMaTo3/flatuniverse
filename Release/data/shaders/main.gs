@@ -13,7 +13,7 @@ in VertexData
   vec4 colorV;
   vec4 texcoord;
   mat4 matrixModel;
-  mat4 matrixProjection;
+  //mat4 matrixProjection;
 } vert[];
 
 out FragData
@@ -28,7 +28,7 @@ void main()
   float sina = sin( vert[ 0 ].alpha );
 
   mat4 matrix =
-  vert[ 0 ].matrixProjection * vert[ 0 ].matrixModel * mat4(  //translate
+  /* vert[ 0 ].matrixProjection * */ vert[ 0 ].matrixModel * mat4(  //translate
     vec4(1,0,0,0),
     vec4(0,1,0,0),
     vec4(0,0,1,0),

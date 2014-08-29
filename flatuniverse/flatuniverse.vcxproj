@@ -100,6 +100,9 @@
     <ClCompile Include="..\src\core\animationparameter.cpp" />
     <ClCompile Include="..\src\core\animationset.cpp" />
     <ClCompile Include="..\src\core\animationtemplate.cpp" />
+    <ClCompile Include="..\src\core\camera.cpp" />
+    <ClCompile Include="..\src\core\camera2d.cpp" />
+    <ClCompile Include="..\src\core\camera3d.cpp" />
     <ClCompile Include="..\src\core\collision.cpp" />
     <ClCompile Include="..\src\core\collisionelement.cpp" />
     <ClCompile Include="..\src\core\collisionmgr.cpp" />
@@ -115,6 +118,7 @@
     <ClCompile Include="..\src\core\imageloader.cpp" />
     <ClCompile Include="..\src\core\interpolation.cpp" />
     <ClCompile Include="..\src\core\keyboard.cpp" />
+    <ClCompile Include="..\src\core\kquat.cpp" />
     <ClCompile Include="..\src\core\lbuffer.cpp" />
     <ClCompile Include="..\src\core\lbuffercache.cpp" />
     <ClCompile Include="..\src\core\lightmap.cpp" />
@@ -341,6 +345,9 @@
     <ClInclude Include="..\src\core\animationparameter.h" />
     <ClInclude Include="..\src\core\animationset.h" />
     <ClInclude Include="..\src\core\animationtemplate.h" />
+    <ClInclude Include="..\src\core\camera.h" />
+    <ClInclude Include="..\src\core\camera2d.h" />
+    <ClInclude Include="..\src\core\camera3d.h" />
     <ClInclude Include="..\src\core\collision.h" />
     <ClInclude Include="..\src\core\collisionelement.h" />
     <ClInclude Include="..\src\core\collisionmgr.h" />
@@ -357,6 +364,7 @@
     <ClInclude Include="..\src\core\interngl.h" />
     <ClInclude Include="..\src\core\interpolation.h" />
     <ClInclude Include="..\src\core\keyboard.h" />
+    <ClInclude Include="..\src\core\kquat.h" />
     <ClInclude Include="..\src\core\lbuffer.h" />
     <ClInclude Include="..\src\core\lbuffercache.h" />
     <ClInclude Include="..\src\core\lightmap.h" />
