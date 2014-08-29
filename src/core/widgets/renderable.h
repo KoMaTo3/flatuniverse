@@ -8,9 +8,26 @@
 
 class Entity;
 
+namespace Engine {
+  class ShaderProgram;
+};
+
 
 namespace ObjectWidget {
   
+
+class RenderablePipeline {
+public:
+  RenderablePipeline();
+  ~RenderablePipeline();
+
+private:
+  struct  {
+  }
+};
+
+extern RenderablePipeline *__widgetRenderablePipeline;
+
 
 class WidgetRenderable: public Widget {
 public:

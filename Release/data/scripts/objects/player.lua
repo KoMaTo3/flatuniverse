@@ -315,7 +315,8 @@ return {
       local camera = Object.Get( 'defaults/camera' )
       local x, y = self.api:GetPos()
       camera.api:SetPos( x, y )
-      camera.api:SetCamera()
+      ShakeCamera( camera )
+      -- camera.api:SetCamera()
       self.data.deathTimer = 0
       self.data.isLive = false
       self:SetAnimation( 'death' )

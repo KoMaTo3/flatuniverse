@@ -28,6 +28,6 @@ void main()
   ) / ( 5 + 4 * 0.7 );
 
   //lightness
-  float lightness = 0.7;
+  float lightness = 0.8;
   fragData0 = fragData0 * ( 1.0 - lightness ) + vec4( 1.0, 1.0, 1.0, 1.0 ) * lightness;
 }

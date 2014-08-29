@@ -123,3 +123,25 @@ function pairsByKeys( t, f )
   end
   return iter
 end -- pairsByKeys
+
+function ShakeCamera( cameraAfter ) --(
+  local oldCamera = Camera.Get()
+  local camera = Object.Get( 'defaults/camera' )
+  local range = 20
+  local maxCount = 10
+  local counter = maxCount
+  camera.api:SetCamera()
+  local doShake = function( doShake )
+    local x, y = oldCamera.api:GetPos()
+    x = x + math.random() * ( counter / maxCount - 0.5 ) * range
+    y = y + math.random() * ( counter / maxCount - 0.5 ) * range
+    camera.api:SetPos( x, y )
+    counter = counter - 1
+    if( counter > 0 ) then
+      Core.SetTimer( 0.01, function() doShake( doShake ) end )
+    else
+      cameraAfter.api:SetCamera()
+    end
+  end
+  doShake( doShake )
+end --)
